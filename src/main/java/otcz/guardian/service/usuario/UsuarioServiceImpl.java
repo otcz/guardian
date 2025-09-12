@@ -1,10 +1,14 @@
 package otcz.guardian.service.usuario;
 
-import otcz.guardian.entity.usuario.Usuario;
+import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.repository.usuario.UsuarioRepository;
 import otcz.guardian.utils.Rol;
 import otcz.guardian.utils.EstadoUsuario;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import otcz.guardian.entity.usuario.UsuarioDetails;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -18,13 +22,13 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public Usuario crearUsuario(Usuario usuario) {
-        return usuarioRepository.save(usuario);
+    public UsuarioEntity crearUsuario(UsuarioEntity usuarioEntity) {
+        return usuarioRepository.save(usuarioEntity);
     }
 
     @Override
-    public Usuario actualizarUsuario(Usuario usuario) {
-        return usuarioRepository.save(usuario);
+    public UsuarioEntity actualizarUsuario(UsuarioEntity usuarioEntity) {
+        return usuarioRepository.save(usuarioEntity);
     }
 
     @Override
@@ -33,27 +37,34 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
-    public Optional<Usuario> obtenerUsuarioPorId(Long id) {
+    public Optional<UsuarioEntity> obtenerUsuarioPorId(Long id) {
         return usuarioRepository.findById(id);
     }
 
     @Override
-    public Optional<Usuario> obtenerUsuarioPorCorreo(String correo) {
+    public Optional<UsuarioEntity> obtenerUsuarioPorCorreo(String correo) {
         return usuarioRepository.findByCorreo(correo);
     }
 
     @Override
-    public Optional<Usuario> obtenerUsuarioPorDocumento(String documentoNumero) {
+    public Optional<UsuarioEntity> obtenerUsuarioPorDocumento(String documentoNumero) {
         return usuarioRepository.findByDocumentoNumero(documentoNumero);
     }
 
     @Override
-    public List<Usuario> listarUsuariosPorRol(Rol rol) {
+    public List<UsuarioEntity> listarUsuariosPorRol(Rol rol) {
         return usuarioRepository.findByRol(rol);
     }
 
     @Override
-    public List<Usuario> listarUsuariosPorEstado(EstadoUsuario estado) {
+    public List<UsuarioEntity> listarUsuariosPorEstado(EstadoUsuario estado) {
         return usuarioRepository.findByEstado(estado);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return usuarioRepository.findByCorreo(username)
+                .map(UsuarioDetails::new)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con correo: " + username));
     }
 }

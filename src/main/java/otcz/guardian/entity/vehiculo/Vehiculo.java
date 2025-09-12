@@ -1,10 +1,11 @@
 package otcz.guardian.entity.vehiculo;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import javax.validation.constraints.NotNull;
 import lombok.*;
-import otcz.guardian.entity.usuario.Usuario;
+import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.utils.TipoVehiculo;
+
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -24,7 +25,7 @@ public class Vehiculo {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USUARIO_ID", nullable = false)
     @NotNull
-    private Usuario usuario;
+    private UsuarioEntity usuarioEntity;
 
     @Column(name = "PLACA", nullable = false, unique = true, length = 20)
     @NotNull

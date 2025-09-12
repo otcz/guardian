@@ -1,7 +1,8 @@
 package otcz.guardian.service.usuario.invitado;
 
 import otcz.guardian.entity.usuario.invitado.Invitado;
-import otcz.guardian.entity.usuario.Usuario;
+import otcz.guardian.entity.usuario.UsuarioEntity;
+import otcz.guardian.repository.usuario.invitado.InvitadoRepository;
 import otcz.guardian.utils.EstadoInvitacion;
 import org.springframework.stereotype.Service;
 
@@ -39,13 +40,13 @@ public class InvitadoServiceImpl implements InvitadoService {
     }
 
     @Override
-    public List<Invitado> listarInvitadosPorUsuario(Usuario usuario) {
-        return invitadoRepository.findByUsuario(usuario);
+    public List<Invitado> listarInvitadosPorUsuario(UsuarioEntity usuarioEntity) {
+        return invitadoRepository.findByUsuarioEntity(usuarioEntity);
     }
 
     @Override
-    public List<Invitado> listarInvitadosActivosPorUsuario(Usuario usuario) {
-        return invitadoRepository.findByUsuarioAndEstado(usuario, EstadoInvitacion.ACTIVA);
+    public List<Invitado> listarInvitadosActivosPorUsuario(UsuarioEntity usuarioEntity) {
+        return invitadoRepository.findByUsuarioEntityAndEstado(usuarioEntity, EstadoInvitacion.ACTIVA);
     }
 
     @Override

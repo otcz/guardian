@@ -1,7 +1,7 @@
 package otcz.guardian.service.vehiculo;
 
+import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.entity.vehiculo.Vehiculo;
-import otcz.guardian.entity.usuario.Usuario;
 import otcz.guardian.repository.vehiculo.VehiculoRepository;
 import otcz.guardian.utils.TipoVehiculo;
 import org.springframework.stereotype.Service;
@@ -38,8 +38,8 @@ public class VehiculoServiceImpl implements VehiculoService {
     }
 
     @Override
-    public List<Vehiculo> listarVehiculosPorUsuario(Usuario usuario) {
-        return vehiculoRepository.findByUsuario(usuario);
+    public List<Vehiculo> listarVehiculosPorUsuario(UsuarioEntity usuarioEntity) {
+        return vehiculoRepository.findByUsuarioEntity(usuarioEntity);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class VehiculoServiceImpl implements VehiculoService {
     }
 
     @Override
-    public List<Vehiculo> listarVehiculosActivosPorUsuario(Usuario usuario) {
-        return vehiculoRepository.findByUsuarioAndActivoTrue(usuario);
+    public List<Vehiculo> listarVehiculosActivosPorUsuario(UsuarioEntity usuarioEntity) {
+        return vehiculoRepository.findByUsuarioEntity(usuarioEntity);
     }
 }

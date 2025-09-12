@@ -1,7 +1,7 @@
 package otcz.guardian.service.registroAcceso;
 
 import otcz.guardian.entity.registroAcceso.RegistroAcceso;
-import otcz.guardian.entity.usuario.Usuario;
+import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.entity.usuario.invitado.Invitado;
 import otcz.guardian.entity.vehiculo.Vehiculo;
 import otcz.guardian.utils.ResultadoAcceso;
@@ -12,7 +12,7 @@ public interface RegistroAccesoService {
 
     RegistroAcceso registrarAcceso(RegistroAcceso registroAcceso);
 
-    List<RegistroAcceso> historialPorUsuario(Usuario usuario);
+    List<RegistroAcceso> historialPorUsuario(UsuarioEntity usuarioEntity);
 
     List<RegistroAcceso> historialPorInvitado(Invitado invitado);
 

@@ -1,26 +1,27 @@
 package otcz.guardian.service.usuario;
 
-import otcz.guardian.entity.usuario.Usuario;
+import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.utils.Rol;
 import otcz.guardian.utils.EstadoUsuario;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
-public interface UsuarioService {
+public interface UsuarioService extends UserDetailsService {
 
-    Usuario crearUsuario(Usuario usuario);
+    UsuarioEntity crearUsuario(UsuarioEntity usuarioEntity);
 
-    Usuario actualizarUsuario(Usuario usuario);
+    UsuarioEntity actualizarUsuario(UsuarioEntity usuarioEntity);
 
     void eliminarUsuario(Long id);
 
-    Optional<Usuario> obtenerUsuarioPorId(Long id);
+    Optional<UsuarioEntity> obtenerUsuarioPorId(Long id);
 
-    Optional<Usuario> obtenerUsuarioPorCorreo(String correo);
+    Optional<UsuarioEntity> obtenerUsuarioPorCorreo(String correo);
 
-    Optional<Usuario> obtenerUsuarioPorDocumento(String documentoNumero);
+    Optional<UsuarioEntity> obtenerUsuarioPorDocumento(String documentoNumero);
 
-    List<Usuario> listarUsuariosPorRol(Rol rol);
+    List<UsuarioEntity> listarUsuariosPorRol(Rol rol);
 
-    List<Usuario> listarUsuariosPorEstado(EstadoUsuario estado);
+    List<UsuarioEntity> listarUsuariosPorEstado(EstadoUsuario estado);
 }

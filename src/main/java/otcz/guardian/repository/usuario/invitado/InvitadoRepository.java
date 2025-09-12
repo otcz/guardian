@@ -1,7 +1,7 @@
 package otcz.guardian.repository.usuario.invitado;
 
+import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.entity.usuario.invitado.Invitado;
-import otcz.guardian.entity.usuario.Usuario;
 import otcz.guardian.utils.EstadoInvitacion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -17,7 +17,7 @@ public interface InvitadoRepository extends JpaRepository<Invitado, Long> {
     Optional<Invitado> findByCodigoQR(String codigoQR);
 
     // Listar invitados activos de un usuario
-    List<Invitado> findByUsuarioAndEstado(Usuario usuario, EstadoInvitacion estado);
+    List<Invitado> findByUsuarioEntityAndEstado(UsuarioEntity usuarioEntity, EstadoInvitacion estado);
 
     // Listar invitados válidos en una fecha concreta
     List<Invitado> findByEstadoAndFechaInicioBeforeAndFechaFinAfter(EstadoInvitacion estado,
@@ -25,5 +25,5 @@ public interface InvitadoRepository extends JpaRepository<Invitado, Long> {
                                                                     LocalDateTime fechaFin);
 
     // Listar invitados por usuario
-    List<Invitado> findByUsuario(Usuario usuario);
+    List<Invitado> findByUsuarioEntity(UsuarioEntity usuarioEntity);
 }

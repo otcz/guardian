@@ -1,7 +1,7 @@
 package otcz.guardian.service.registroAcceso;
 
 import otcz.guardian.entity.registroAcceso.RegistroAcceso;
-import otcz.guardian.entity.usuario.Usuario;
+import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.entity.usuario.invitado.Invitado;
 import otcz.guardian.entity.vehiculo.Vehiculo;
 import otcz.guardian.repository.registroAcceso.RegistroAccesoRepository;
@@ -25,8 +25,8 @@ public class RegistroAccesoServiceImpl implements RegistroAccesoService {
     }
 
     @Override
-    public List<RegistroAcceso> historialPorUsuario(Usuario usuario) {
-        return registroAccesoRepository.findByUsuarioOrderByFechaHoraDesc(usuario);
+    public List<RegistroAcceso> historialPorUsuario(UsuarioEntity usuarioEntity) {
+        return registroAccesoRepository.findByUsuarioEntityOrderByFechaHoraDesc(usuarioEntity);
     }
 
     @Override

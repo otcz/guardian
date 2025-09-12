@@ -1,10 +1,10 @@
 package otcz.guardian.entity.registroAcceso;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import lombok.*;
+import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.entity.usuario.invitado.Invitado;
-import otcz.guardian.entity.usuario.Usuario;
 import otcz.guardian.entity.vehiculo.Vehiculo;
 import otcz.guardian.utils.ResultadoAcceso;
 import otcz.guardian.utils.TipoAcceso;
@@ -26,7 +26,7 @@ public class RegistroAcceso {
     // Usuario que ingresa, opcional si es invitado
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USUARIO_ID")
-    private Usuario usuario;
+    private UsuarioEntity usuarioEntity;
 
     // Invitado que ingresa, opcional si es usuario
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,7 +42,7 @@ public class RegistroAcceso {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "GUARDIA_ID", nullable = false)
     @NotNull
-    private Usuario guardia;
+    private UsuarioEntity guardia;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "TIPO", nullable = false, length = 20)
@@ -65,10 +65,10 @@ public class RegistroAcceso {
     @PrePersist
     @PreUpdate
     private void validarAcceso() {
-        if (usuario == null && invitado == null) {
+        if (usuarioEntity == null && invitado == null) {
             throw new IllegalStateException("Debe existir un USUARIO o un INVITADO para el registro de acceso.");
         }
-        if (usuario != null && invitado != null) {
+        if (usuarioEntity != null && invitado != null) {
             throw new IllegalStateException("No se puede tener USUARIO e INVITADO al mismo tiempo.");
         }
     }

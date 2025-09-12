@@ -1,13 +1,13 @@
 package otcz.guardian.entity.usuario;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import javax.validation.constraints.NotNull;
 import otcz.guardian.entity.usuario.invitado.Invitado;
 import otcz.guardian.entity.vehiculo.Vehiculo;
 import otcz.guardian.utils.DocumentoTipo;
 import otcz.guardian.utils.EstadoUsuario;
 import otcz.guardian.utils.Rol;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Usuario {
+public class UsuarioEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,9 +66,9 @@ public class Usuario {
     private LocalDateTime ultimaConexion;
 
     // Relaciones
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "usuarioEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Vehiculo> vehiculos;
 
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "usuarioEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Invitado> invitados;
 }

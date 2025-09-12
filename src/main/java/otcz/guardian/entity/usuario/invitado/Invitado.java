@@ -1,12 +1,12 @@
 package otcz.guardian.entity.usuario.invitado;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import javax.validation.constraints.NotNull;
 import lombok.*;
-import otcz.guardian.entity.usuario.Usuario;
+import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.entity.vehiculo.Vehiculo;
 import otcz.guardian.utils.DocumentoTipo;
 import otcz.guardian.utils.EstadoInvitacion;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -26,7 +26,7 @@ public class Invitado {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USUARIO_ID", nullable = false)
     @NotNull
-    private Usuario usuario;
+    private UsuarioEntity usuarioEntity;
 
     @Column(name = "NOMBRE_COMPLETO", nullable = false, length = 100)
     @NotNull
