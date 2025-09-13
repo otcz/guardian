@@ -83,5 +83,14 @@ public class UsuarioController {
         return ResponseEntity.ok(dtos);
     }
 
+    @GetMapping(ApiEndpoints.Usuario.POR_DOCUMENTO)
+    @PreAuthorize("hasAnyRole('ADMIN','GUARDIA')")
+    public ResponseEntity<?> obtenerUsuarioPorDocumento(@PathVariable String documentoNumero) {
+        return usuarioService.obtenerUsuarioPorDocumento(documentoNumero)
+                .map(usuarioService::mapToResponseDTO)
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(404).body(new MensajeResponse(MensajeResponse.USUARIO_NO_ENCONTRADO.getMensaje())));
+    }
+
 
 }

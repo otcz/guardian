@@ -17,6 +17,7 @@ public final class ApiEndpoints {
         public static final String POR_CORREO =  "/correo/{correo}";
         public static final String POR_ROL =  "/rol/{rol}";
         public static final String POR_ESTADO =  "/estado/{estado}";
+        public static final String POR_DOCUMENTO = "/documento/{documentoNumero}";
     }
 
     /** Endpoints para gestión de vehículos */

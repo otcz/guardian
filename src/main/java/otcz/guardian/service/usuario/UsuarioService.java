@@ -11,10 +11,6 @@ import org.springframework.http.ResponseEntity;
 
 public interface UsuarioService extends UserDetailsService {
 
-    UsuarioEntity crearUsuario(UsuarioEntity usuarioEntity);
-
-    UsuarioEntity actualizarUsuario(UsuarioEntity usuarioEntity);
-
     void eliminarUsuario(Long id);
 
     Optional<UsuarioEntity> obtenerUsuarioPorId(Long id);
@@ -30,6 +26,6 @@ public interface UsuarioService extends UserDetailsService {
     UsuarioResponseDTO mapToResponseDTO(UsuarioEntity entity);
 
     ResponseEntity<?> crearUsuarioDesdeDTO(otcz.guardian.DTO.usuario.UsuarioRequestDTO usuarioDTO);
-    
+
     ResponseEntity<?> actualizarUsuarioDesdeDTO(Long id, otcz.guardian.DTO.usuario.UsuarioRequestDTO usuarioDTO);
 }

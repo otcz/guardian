@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.util.List;
+import otcz.guardian.DTO.vehiculo.VehiculoResponseDTO;
 
 @Getter
 @Setter
@@ -24,4 +26,5 @@ public class UsuarioResponseDTO {
     private EstadoUsuario estado;
     private LocalDateTime fechaRegistro;
     private LocalDateTime ultimaConexion;
+    private List<VehiculoResponseDTO> vehiculos;
 }

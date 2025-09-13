@@ -5,6 +5,8 @@ import otcz.guardian.utils.Rol;
 import otcz.guardian.utils.EstadoUsuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,4 +28,7 @@ public interface UsuarioRepository extends JpaRepository<UsuarioEntity, Long> {
 
     // Buscar por rol y estado
     List<UsuarioEntity> findByRolAndEstado(Rol rol, EstadoUsuario estado);
+
+    @Query("SELECT u FROM UsuarioEntity u LEFT JOIN FETCH u.vehiculos WHERE u.id = :id")
+    Optional<UsuarioEntity> findByIdWithVehiculos(@Param("id") Long id);
 }
