@@ -1,9 +1,7 @@
 package otcz.guardian.DTO.usuario;
 
-import otcz.guardian.utils.DocumentoTipo;
-import otcz.guardian.utils.EstadoUsuario;
 import otcz.guardian.utils.Rol;
-import java.time.LocalDateTime;
+import otcz.guardian.utils.EstadoUsuario;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -13,15 +11,13 @@ import lombok.AllArgsConstructor;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UsuarioResponseDTO {
-    private Long id;
+public class UsuarioRequestDTO {
     private String nombreCompleto;
     private String correo;
     private String telefono;
-    private DocumentoTipo documentoTipo;
+    private String documentoTipo;
     private String documentoNumero;
+    private String password;
     private Rol rol;
     private EstadoUsuario estado;
-    private LocalDateTime fechaRegistro;
-    private LocalDateTime ultimaConexion;
 }

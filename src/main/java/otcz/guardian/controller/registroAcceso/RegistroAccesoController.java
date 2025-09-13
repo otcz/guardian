@@ -7,12 +7,13 @@ import otcz.guardian.service.registroAcceso.RegistroAccesoService;
 import otcz.guardian.service.usuario.UsuarioService;
 import otcz.guardian.service.usuario.invitado.InvitadoService;
 import otcz.guardian.service.vehiculo.VehiculoService;
+import otcz.guardian.utils.ApiEndpoints;
 import otcz.guardian.utils.ResultadoAcceso;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/registros")
+@RequestMapping(ApiEndpoints.RegistroAcceso.BASE)
 public class RegistroAccesoController {
 
     private final RegistroAccesoService registroAccesoService;

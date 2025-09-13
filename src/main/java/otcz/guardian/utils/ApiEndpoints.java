@@ -23,11 +23,11 @@ public final class ApiEndpoints {
     public static final class Vehiculo {
         private Vehiculo() {}
         public static final String BASE = "/api/vehiculos";
-        public static final String POR_ID = BASE + "/{id}";
-        public static final String POR_PLACA = BASE + "/{placa}";
-        public static final String POR_USUARIO = BASE + "/usuario/{usuarioId}";
-        public static final String POR_TIPO = BASE + "/tipo/{tipo}";
-        public static final String ACTIVOS_POR_USUARIO = BASE + "/usuario/{usuarioId}/activos";
+        public static final String POR_ID =  "/{id}";
+        public static final String POR_PLACA = "/{placa}";
+        public static final String POR_USUARIO = "/usuario/{usuarioId}";
+        public static final String POR_TIPO =  "/tipo/{tipo}";
+        public static final String ACTIVOS_POR_USUARIO =  "/usuario/{usuarioId}/activos";
     }
 
     /** Endpoints para gestión de invitados */
@@ -45,11 +45,11 @@ public final class ApiEndpoints {
     public static final class RegistroAcceso {
         private RegistroAcceso() {}
         public static final String BASE = "/api/registros";
-        public static final String POR_USUARIO = BASE + "/usuario/{usuarioId}";
-        public static final String POR_INVITADO = BASE + "/invitado/{invitadoId}";
-        public static final String POR_VEHICULO = BASE + "/vehiculo/{vehiculoId}";
-        public static final String POR_RESULTADO = BASE + "/resultado/{resultado}";
-        public static final String ENTRE_FECHAS = BASE + "/fechas";
+        public static final String POR_USUARIO =  "/usuario/{usuarioId}";
+        public static final String POR_INVITADO =  "/invitado/{invitadoId}";
+        public static final String POR_VEHICULO = "/vehiculo/{vehiculoId}";
+        public static final String POR_RESULTADO =  "/resultado/{resultado}";
+        public static final String ENTRE_FECHAS =  "/fechas";
     }
 
     /** Endpoints para autenticación y perfil */

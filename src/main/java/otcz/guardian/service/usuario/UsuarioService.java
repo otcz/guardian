@@ -6,6 +6,8 @@ import otcz.guardian.utils.EstadoUsuario;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import otcz.guardian.DTO.usuario.UsuarioResponseDTO;
+import org.springframework.http.ResponseEntity;
 
 public interface UsuarioService extends UserDetailsService {
 
@@ -24,4 +26,10 @@ public interface UsuarioService extends UserDetailsService {
     List<UsuarioEntity> listarUsuariosPorRol(Rol rol);
 
     List<UsuarioEntity> listarUsuariosPorEstado(EstadoUsuario estado);
+
+    UsuarioResponseDTO mapToResponseDTO(UsuarioEntity entity);
+
+    ResponseEntity<?> crearUsuarioDesdeDTO(otcz.guardian.DTO.usuario.UsuarioRequestDTO usuarioDTO);
+    
+    ResponseEntity<?> actualizarUsuarioDesdeDTO(Long id, otcz.guardian.DTO.usuario.UsuarioRequestDTO usuarioDTO);
 }
