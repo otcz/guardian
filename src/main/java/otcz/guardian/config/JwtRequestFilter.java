@@ -6,6 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,18 +15,24 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import otcz.guardian.service.usuario.UsuarioService;
 import otcz.guardian.utils.JwtUtil;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.io.IOException;
+import java.util.Collections;
 
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Autowired
+    private JwtUtil jwtUtil;
+
     private UsuarioService usuarioService;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    public void setUsuarioService(@Lazy UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
+    }
 
 
     @Override
@@ -43,8 +50,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = usuarioService.loadUserByUsername(username);
             if (jwtUtil.validateToken(jwt, userDetails.getUsername())) {
+                // Extraer el rol del JWT y agregarlo como autoridad
+                String rol = jwtUtil.extractRol(jwt);
+                SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + rol);
                 UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        new UsernamePasswordAuthenticationToken(userDetails, null, Collections.singletonList(authority));
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }

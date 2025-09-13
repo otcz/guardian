@@ -13,10 +13,10 @@ public final class ApiEndpoints {
     public static final class Usuario {
         private Usuario() {}
         public static final String BASE = "/api/usuarios";
-        public static final String POR_ID = BASE + "/{id}";
-        public static final String POR_CORREO = BASE + "/correo/{correo}";
-        public static final String POR_ROL = BASE + "/rol/{rol}";
-        public static final String POR_ESTADO = BASE + "/estado/{estado}";
+        public static final String POR_ID =  "/{id}";
+        public static final String POR_CORREO =  "/correo/{correo}";
+        public static final String POR_ROL =  "/rol/{rol}";
+        public static final String POR_ESTADO =  "/estado/{estado}";
     }
 
     /** Endpoints para gestión de vehículos */
