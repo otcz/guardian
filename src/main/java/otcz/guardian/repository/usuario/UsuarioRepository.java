@@ -29,6 +29,6 @@ public interface UsuarioRepository extends JpaRepository<UsuarioEntity, Long> {
     // Buscar por rol y estado
     List<UsuarioEntity> findByRolAndEstado(Rol rol, EstadoUsuario estado);
 
-    @Query("SELECT u FROM UsuarioEntity u LEFT JOIN FETCH u.vehiculos WHERE u.id = :id")
+    @Query("SELECT u FROM UsuarioEntity u LEFT JOIN FETCH u.vehiculoEntities WHERE u.id = :id")
     Optional<UsuarioEntity> findByIdWithVehiculos(@Param("id") Long id);
 }

@@ -1,24 +1,24 @@
 package otcz.guardian.service.vehiculo;
 
 import otcz.guardian.entity.usuario.UsuarioEntity;
-import otcz.guardian.entity.vehiculo.Vehiculo;
+import otcz.guardian.entity.vehiculo.VehiculoEntity;
 import otcz.guardian.utils.TipoVehiculo;
 import java.util.List;
 import java.util.Optional;
 
 public interface VehiculoService {
 
-    Vehiculo registrarVehiculo(Vehiculo vehiculo);
+    VehiculoEntity registrarVehiculo(VehiculoEntity vehiculoEntity);
 
-    Vehiculo actualizarVehiculo(Vehiculo vehiculo);
+    VehiculoEntity actualizarVehiculo(VehiculoEntity vehiculoEntity);
 
     void eliminarVehiculo(Long id);
 
-    Optional<Vehiculo> obtenerPorPlaca(String placa);
+    Optional<VehiculoEntity> obtenerPorPlaca(String placa);
 
-    List<Vehiculo> listarVehiculosPorUsuario(UsuarioEntity usuarioEntity);
+    List<VehiculoEntity> listarVehiculosPorUsuario(UsuarioEntity usuarioEntity);
 
-    List<Vehiculo> listarVehiculosPorTipo(TipoVehiculo tipo);
+    List<VehiculoEntity> listarVehiculosPorTipo(TipoVehiculo tipo);
 
-    List<Vehiculo> listarVehiculosActivosPorUsuario(UsuarioEntity usuarioEntity);
+    List<VehiculoEntity> listarVehiculosActivosPorUsuario(UsuarioEntity usuarioEntity);
 }

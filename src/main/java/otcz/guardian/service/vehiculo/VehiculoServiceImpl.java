@@ -1,7 +1,7 @@
 package otcz.guardian.service.vehiculo;
 
 import otcz.guardian.entity.usuario.UsuarioEntity;
-import otcz.guardian.entity.vehiculo.Vehiculo;
+import otcz.guardian.entity.vehiculo.VehiculoEntity;
 import otcz.guardian.repository.vehiculo.VehiculoRepository;
 import otcz.guardian.utils.TipoVehiculo;
 import org.springframework.stereotype.Service;
@@ -18,13 +18,13 @@ public class VehiculoServiceImpl implements VehiculoService {
     }
 
     @Override
-    public Vehiculo registrarVehiculo(Vehiculo vehiculo) {
-        return vehiculoRepository.save(vehiculo);
+    public VehiculoEntity registrarVehiculo(VehiculoEntity vehiculoEntity) {
+        return vehiculoRepository.save(vehiculoEntity);
     }
 
     @Override
-    public Vehiculo actualizarVehiculo(Vehiculo vehiculo) {
-        return vehiculoRepository.save(vehiculo);
+    public VehiculoEntity actualizarVehiculo(VehiculoEntity vehiculoEntity) {
+        return vehiculoRepository.save(vehiculoEntity);
     }
 
     @Override
@@ -33,22 +33,22 @@ public class VehiculoServiceImpl implements VehiculoService {
     }
 
     @Override
-    public Optional<Vehiculo> obtenerPorPlaca(String placa) {
+    public Optional<VehiculoEntity> obtenerPorPlaca(String placa) {
         return vehiculoRepository.findByPlaca(placa);
     }
 
     @Override
-    public List<Vehiculo> listarVehiculosPorUsuario(UsuarioEntity usuarioEntity) {
+    public List<VehiculoEntity> listarVehiculosPorUsuario(UsuarioEntity usuarioEntity) {
         return vehiculoRepository.findByUsuarioEntity(usuarioEntity);
     }
 
     @Override
-    public List<Vehiculo> listarVehiculosPorTipo(TipoVehiculo tipo) {
+    public List<VehiculoEntity> listarVehiculosPorTipo(TipoVehiculo tipo) {
         return vehiculoRepository.findByTipo(tipo);
     }
 
     @Override
-    public List<Vehiculo> listarVehiculosActivosPorUsuario(UsuarioEntity usuarioEntity) {
+    public List<VehiculoEntity> listarVehiculosActivosPorUsuario(UsuarioEntity usuarioEntity) {
         return vehiculoRepository.findByUsuarioEntity(usuarioEntity);
     }
 }

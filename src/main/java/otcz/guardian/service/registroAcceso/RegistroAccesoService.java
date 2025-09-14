@@ -3,7 +3,7 @@ package otcz.guardian.service.registroAcceso;
 import otcz.guardian.entity.registroAcceso.RegistroAcceso;
 import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.entity.usuario.invitado.Invitado;
-import otcz.guardian.entity.vehiculo.Vehiculo;
+import otcz.guardian.entity.vehiculo.VehiculoEntity;
 import otcz.guardian.utils.ResultadoAcceso;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,7 +16,7 @@ public interface RegistroAccesoService {
 
     List<RegistroAcceso> historialPorInvitado(Invitado invitado);
 
-    List<RegistroAcceso> historialPorVehiculo(Vehiculo vehiculo);
+    List<RegistroAcceso> historialPorVehiculo(VehiculoEntity vehiculoEntity);
 
     List<RegistroAcceso> historialPorResultado(ResultadoAcceso resultado);
 

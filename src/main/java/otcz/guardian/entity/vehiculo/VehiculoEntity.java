@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @ToString
 @Getter
 @Setter
-public class Vehiculo {
+public class VehiculoEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -5,21 +5,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
 import otcz.guardian.utils.ApiEndpoints;
 import otcz.guardian.DTO.MensajeResponse;
-import otcz.guardian.DTO.qr.ValidacionQrResponse;
-import otcz.guardian.DTO.qr.ValidacionQrDetalleResponse;
 import otcz.guardian.DTO.qr.QrTokenRequest;
 import otcz.guardian.entity.usuario.UsuarioEntity;
-import otcz.guardian.entity.vehiculo.Vehiculo;
 import otcz.guardian.repository.usuario.UsuarioRepository;
 import otcz.guardian.repository.vehiculo.VehiculoRepository;
 import otcz.guardian.service.qr.QrService;
-import otcz.guardian.utils.EstadoVehiculo;
 import otcz.guardian.utils.JwtUtil;
-import io.jsonwebtoken.Claims;
 
 import java.util.Optional;
-import java.util.Date;
-import java.util.List;
 
 @RestController
 @RequestMapping(ApiEndpoints.Qr.BASE)

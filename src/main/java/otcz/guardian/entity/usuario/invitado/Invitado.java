@@ -3,7 +3,7 @@ package otcz.guardian.entity.usuario.invitado;
 import javax.validation.constraints.NotNull;
 import lombok.*;
 import otcz.guardian.entity.usuario.UsuarioEntity;
-import otcz.guardian.entity.vehiculo.Vehiculo;
+import otcz.guardian.entity.vehiculo.VehiculoEntity;
 import otcz.guardian.utils.DocumentoTipo;
 import otcz.guardian.utils.EstadoInvitacion;
 import javax.persistence.*;
@@ -61,7 +61,7 @@ public class Invitado {
     // Vehículo opcional
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "VEHICULO_ID", nullable = true)
-    private Vehiculo vehiculo;
+    private VehiculoEntity vehiculoEntity;
 
     @Column(name = "FECHA_CREACION", nullable = false)
     @NotNull

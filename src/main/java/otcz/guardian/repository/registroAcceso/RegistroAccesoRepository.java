@@ -3,7 +3,7 @@ package otcz.guardian.repository.registroAcceso;
 import otcz.guardian.entity.registroAcceso.RegistroAcceso;
 import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.entity.usuario.invitado.Invitado;
-import otcz.guardian.entity.vehiculo.Vehiculo;
+import otcz.guardian.entity.vehiculo.VehiculoEntity;
 import otcz.guardian.utils.ResultadoAcceso;
 import otcz.guardian.utils.TipoAcceso;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,7 +23,7 @@ public interface RegistroAccesoRepository extends JpaRepository<RegistroAcceso, 
     List<RegistroAcceso> findByInvitadoOrderByFechaHoraDesc(Invitado invitado);
 
     // Historial de acceso por vehículo
-    List<RegistroAcceso> findByVehiculoOrderByFechaHoraDesc(Vehiculo vehiculo);
+    List<RegistroAcceso> findByVehiculoEntityOrderByFechaHoraDesc(VehiculoEntity vehiculoEntity);
 
     // Historial de accesos por resultado
     List<RegistroAcceso> findByResultado(ResultadoAcceso resultado);

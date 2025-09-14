@@ -16,7 +16,7 @@ import otcz.guardian.DTO.usuario.UsuarioResponseDTO;
 import otcz.guardian.utils.DocumentoTipo;
 import org.springframework.http.ResponseEntity;
 import otcz.guardian.DTO.vehiculo.VehiculoResponseDTO;
-import otcz.guardian.entity.vehiculo.Vehiculo;
+import otcz.guardian.entity.vehiculo.VehiculoEntity;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -177,8 +177,8 @@ public class UsuarioServiceImpl implements UsuarioService {
         dto.setEstado(entity.getEstado());
         dto.setFechaRegistro(entity.getFechaRegistro());
         dto.setUltimaConexion(entity.getUltimaConexion());
-        if (entity.getVehiculos() != null) {
-            dto.setVehiculos(entity.getVehiculos().stream()
+        if (entity.getVehiculoEntities() != null) {
+            dto.setVehiculos(entity.getVehiculoEntities().stream()
                     .map(this::mapVehiculoToDTO)
                     .collect(Collectors.toList()));
         }
@@ -186,16 +186,16 @@ public class UsuarioServiceImpl implements UsuarioService {
         return dto;
     }
 
-    private VehiculoResponseDTO mapVehiculoToDTO(Vehiculo vehiculo) {
+    private VehiculoResponseDTO mapVehiculoToDTO(VehiculoEntity vehiculoEntity) {
         return new VehiculoResponseDTO(
-                vehiculo.getId(),
-                vehiculo.getPlaca(),
-                vehiculo.getTipo(),
-                vehiculo.getColor(),
-                vehiculo.getMarca(),
-                vehiculo.getModelo(),
-                vehiculo.getActivo(),
-                vehiculo.getFechaRegistro()
+                vehiculoEntity.getId(),
+                vehiculoEntity.getPlaca(),
+                vehiculoEntity.getTipo(),
+                vehiculoEntity.getColor(),
+                vehiculoEntity.getMarca(),
+                vehiculoEntity.getModelo(),
+                vehiculoEntity.getActivo(),
+                vehiculoEntity.getFechaRegistro()
         );
     }
 

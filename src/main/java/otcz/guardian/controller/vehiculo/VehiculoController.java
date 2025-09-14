@@ -1,6 +1,6 @@
 package otcz.guardian.controller.vehiculo;
 
-import otcz.guardian.entity.vehiculo.Vehiculo;
+import otcz.guardian.entity.vehiculo.VehiculoEntity;
 import otcz.guardian.service.usuario.UsuarioService;
 import otcz.guardian.service.vehiculo.VehiculoService;
 import otcz.guardian.utils.TipoVehiculo;
@@ -22,14 +22,14 @@ public class VehiculoController {
     }
 
     @PostMapping
-    public ResponseEntity<Vehiculo> registrarVehiculo(@RequestBody Vehiculo vehiculo) {
-        return ResponseEntity.ok(vehiculoService.registrarVehiculo(vehiculo));
+    public ResponseEntity<VehiculoEntity> registrarVehiculo(@RequestBody VehiculoEntity vehiculoEntity) {
+        return ResponseEntity.ok(vehiculoService.registrarVehiculo(vehiculoEntity));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Vehiculo> actualizarVehiculo(@PathVariable Long id, @RequestBody Vehiculo vehiculo) {
-        vehiculo.setId(id);
-        return ResponseEntity.ok(vehiculoService.actualizarVehiculo(vehiculo));
+    public ResponseEntity<VehiculoEntity> actualizarVehiculo(@PathVariable Long id, @RequestBody VehiculoEntity vehiculoEntity) {
+        vehiculoEntity.setId(id);
+        return ResponseEntity.ok(vehiculoService.actualizarVehiculo(vehiculoEntity));
     }
 
     @DeleteMapping("/{id}")
@@ -39,26 +39,26 @@ public class VehiculoController {
     }
 
     @GetMapping("/{placa}")
-    public ResponseEntity<Vehiculo> obtenerPorPlaca(@PathVariable String placa) {
+    public ResponseEntity<VehiculoEntity> obtenerPorPlaca(@PathVariable String placa) {
         return vehiculoService.obtenerPorPlaca(placa)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<Vehiculo>> listarVehiculosPorUsuario(@PathVariable Long usuarioId) {
+    public ResponseEntity<List<VehiculoEntity>> listarVehiculosPorUsuario(@PathVariable Long usuarioId) {
         return usuarioService.obtenerUsuarioPorId(usuarioId)
                 .map(u -> ResponseEntity.ok(vehiculoService.listarVehiculosPorUsuario(u)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/tipo/{tipo}")
-    public ResponseEntity<List<Vehiculo>> listarVehiculosPorTipo(@PathVariable TipoVehiculo tipo) {
+    public ResponseEntity<List<VehiculoEntity>> listarVehiculosPorTipo(@PathVariable TipoVehiculo tipo) {
         return ResponseEntity.ok(vehiculoService.listarVehiculosPorTipo(tipo));
     }
 
     @GetMapping("/usuario/{usuarioId}/activos")
-    public ResponseEntity<List<Vehiculo>> listarVehiculosActivosPorUsuario(@PathVariable Long usuarioId) {
+    public ResponseEntity<List<VehiculoEntity>> listarVehiculosActivosPorUsuario(@PathVariable Long usuarioId) {
         return usuarioService.obtenerUsuarioPorId(usuarioId)
                 .map(u -> ResponseEntity.ok(vehiculoService.listarVehiculosActivosPorUsuario(u)))
                 .orElse(ResponseEntity.notFound().build());

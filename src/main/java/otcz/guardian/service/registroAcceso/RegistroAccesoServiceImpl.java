@@ -3,7 +3,7 @@ package otcz.guardian.service.registroAcceso;
 import otcz.guardian.entity.registroAcceso.RegistroAcceso;
 import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.entity.usuario.invitado.Invitado;
-import otcz.guardian.entity.vehiculo.Vehiculo;
+import otcz.guardian.entity.vehiculo.VehiculoEntity;
 import otcz.guardian.repository.registroAcceso.RegistroAccesoRepository;
 import otcz.guardian.utils.ResultadoAcceso;
 import org.springframework.stereotype.Service;
@@ -35,8 +35,8 @@ public class RegistroAccesoServiceImpl implements RegistroAccesoService {
     }
 
     @Override
-    public List<RegistroAcceso> historialPorVehiculo(Vehiculo vehiculo) {
-        return registroAccesoRepository.findByVehiculoOrderByFechaHoraDesc(vehiculo);
+    public List<RegistroAcceso> historialPorVehiculo(VehiculoEntity vehiculoEntity) {
+        return registroAccesoRepository.findByVehiculoEntityOrderByFechaHoraDesc(vehiculoEntity);
     }
 
     @Override

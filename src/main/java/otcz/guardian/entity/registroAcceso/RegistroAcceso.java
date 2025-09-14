@@ -5,7 +5,7 @@ import javax.validation.constraints.NotNull;
 import lombok.*;
 import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.entity.usuario.invitado.Invitado;
-import otcz.guardian.entity.vehiculo.Vehiculo;
+import otcz.guardian.entity.vehiculo.VehiculoEntity;
 import otcz.guardian.utils.ResultadoAcceso;
 import otcz.guardian.utils.TipoAcceso;
 import java.time.LocalDateTime;
@@ -36,7 +36,7 @@ public class RegistroAcceso {
     // Vehículo asociado, opcional
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "VEHICULO_ID")
-    private Vehiculo vehiculo;
+    private VehiculoEntity vehiculoEntity;
 
     // Guardia que valida el acceso, obligatorio
     @ManyToOne(fetch = FetchType.LAZY)

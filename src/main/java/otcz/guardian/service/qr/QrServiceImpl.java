@@ -6,7 +6,6 @@ import otcz.guardian.DTO.qr.*;
 import org.springframework.stereotype.Service;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 import javax.imageio.ImageIO;
@@ -18,7 +17,7 @@ import com.google.zxing.common.BitMatrix;
 import otcz.guardian.repository.usuario.UsuarioRepository;
 import otcz.guardian.repository.vehiculo.VehiculoRepository;
 import otcz.guardian.entity.usuario.UsuarioEntity;
-import otcz.guardian.entity.vehiculo.Vehiculo;
+import otcz.guardian.entity.vehiculo.VehiculoEntity;
 import otcz.guardian.utils.EstadoUsuario;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,17 +85,17 @@ public class QrServiceImpl implements QrService {
             response.setQrBase64(null);
             return ResponseEntity.badRequest().body(response);
         }
-        Vehiculo vehiculo = null;
+        VehiculoEntity vehiculoEntity = null;
         String vehiculoEstado = "NO TIENE VEHICULO AUTORIZADO";
         Long vehiculoId = null;
         if (placa != null && !placa.trim().isEmpty()) {
-            Optional<Vehiculo> vehiculoOpt = vehiculoRepository.findByPlaca(placa);
+            Optional<VehiculoEntity> vehiculoOpt = vehiculoRepository.findByPlaca(placa);
             if (vehiculoOpt.isPresent()) {
-                vehiculo = vehiculoOpt.get();
-                vehiculoId = vehiculo.getId();
-                if (!vehiculo.getActivo()) {
+                vehiculoEntity = vehiculoOpt.get();
+                vehiculoId = vehiculoEntity.getId();
+                if (!vehiculoEntity.getActivo()) {
                     vehiculoEstado = "INACTIVO";
-                } else if (!vehiculo.getUsuarioEntity().getId().equals(usuario.getId())) {
+                } else if (!vehiculoEntity.getUsuarioEntity().getId().equals(usuario.getId())) {
                     vehiculoEstado = "NO ASIGNADO AL USUARIO";
                 } else {
                     vehiculoEstado = "ACTIVO";
@@ -186,10 +185,10 @@ public class QrServiceImpl implements QrService {
             response.setCasa(usuario.getCasa());
 
             if (vehiculoId != null) {
-                Optional<Vehiculo> vehiculoOpt = vehiculoRepository.findById(vehiculoId);
+                Optional<VehiculoEntity> vehiculoOpt = vehiculoRepository.findById(vehiculoId);
                 if (!vehiculoOpt.isPresent()) {
                     // Buscar si el usuario tiene algún vehículo registrado
-                    List<Vehiculo> vehiculosUsuario = usuario.getVehiculos();
+                    List<VehiculoEntity> vehiculosUsuario = usuario.getVehiculoEntities();
                     if (vehiculosUsuario == null || vehiculosUsuario.isEmpty()) {
                         response.setTipoVehiculo(MensajeResponse.NO_VEHICULO);
                         response.setPlaca(MensajeResponse.NO_VEHICULO);
@@ -201,18 +200,18 @@ public class QrServiceImpl implements QrService {
                     }
                     return ResponseEntity.ok(response);
                 }
-                Vehiculo vehiculo = vehiculoOpt.get();
-                response.setTipoVehiculo(vehiculo.getTipo() != null ? vehiculo.getTipo().name() : MensajeResponse.NO_VEHICULO);
-                response.setPlaca(vehiculo.getPlaca() != null ? vehiculo.getPlaca() : MensajeResponse.NO_VEHICULO);
+                VehiculoEntity vehiculoEntity = vehiculoOpt.get();
+                response.setTipoVehiculo(vehiculoEntity.getTipo() != null ? vehiculoEntity.getTipo().name() : MensajeResponse.NO_VEHICULO);
+                response.setPlaca(vehiculoEntity.getPlaca() != null ? vehiculoEntity.getPlaca() : MensajeResponse.NO_VEHICULO);
                 response.setEstadoVehiculo(
-                    vehiculo.getActivo() != null ?
-                        (vehiculo.getActivo() ? otcz.guardian.utils.EstadoVehiculo.ACTIVO.name() : otcz.guardian.utils.EstadoVehiculo.INACTIVO.name())
+                    vehiculoEntity.getActivo() != null ?
+                        (vehiculoEntity.getActivo() ? otcz.guardian.utils.EstadoVehiculo.ACTIVO.name() : otcz.guardian.utils.EstadoVehiculo.INACTIVO.name())
                         : null
                 );
                 return ResponseEntity.ok(response);
             } else {
                 // Si no hay vehiculoId, buscar si el usuario tiene algún vehículo registrado
-                List<Vehiculo> vehiculosUsuario = usuario.getVehiculos();
+                List<VehiculoEntity> vehiculosUsuario = usuario.getVehiculoEntities();
                 if (vehiculosUsuario == null || vehiculosUsuario.isEmpty()) {
                     response.setTipoVehiculo(MensajeResponse.NO_VEHICULO);
                     response.setPlaca(MensajeResponse.NO_VEHICULO);

@@ -3,7 +3,7 @@ package otcz.guardian.entity.usuario;
 import lombok.*;
 import javax.validation.constraints.NotNull;
 import otcz.guardian.entity.usuario.invitado.Invitado;
-import otcz.guardian.entity.vehiculo.Vehiculo;
+import otcz.guardian.entity.vehiculo.VehiculoEntity;
 import otcz.guardian.utils.DocumentoTipo;
 import otcz.guardian.utils.EstadoUsuario;
 import otcz.guardian.utils.Rol;
@@ -73,7 +73,7 @@ public class UsuarioEntity {
 
     // Relaciones
     @OneToMany(mappedBy = "usuarioEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Vehiculo> vehiculos;
+    private List<VehiculoEntity> vehiculoEntities;
 
     @OneToMany(mappedBy = "usuarioEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Invitado> invitados;
