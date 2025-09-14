@@ -2,16 +2,13 @@ package otcz.guardian.service.qr;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import otcz.guardian.DTO.qr.QrPayloadDTO;
-import otcz.guardian.DTO.qr.QrTokenDTO;
+import otcz.guardian.DTO.qr.*;
 import org.springframework.stereotype.Service;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import javax.imageio.ImageIO;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
@@ -25,11 +22,10 @@ import otcz.guardian.entity.vehiculo.Vehiculo;
 import otcz.guardian.utils.EstadoUsuario;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import java.util.Optional;
 import otcz.guardian.DTO.MensajeResponse;
-import otcz.guardian.DTO.qr.ValidacionQrResponse;
 import otcz.guardian.utils.JwtUtil;
-import java.util.Date;
+import io.jsonwebtoken.Claims;
+import org.springframework.security.core.Authentication;
 
 @Service
 public class QrServiceImpl implements QrService {
@@ -153,5 +149,83 @@ public class QrServiceImpl implements QrService {
             }
         }
         return image;
+    }
+
+    @Override
+    public ResponseEntity<?> validarQr(QrTokenRequest request, Authentication authentication) {
+        // Validación de autenticación del guardia
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).body(MensajeResponse.GUARDIA_NO_AUTENTICADO);
+        }
+        String username = authentication.getName();
+        Optional<UsuarioEntity> guardiaOpt = usuarioRepository.findByCorreo(username);
+        if (!guardiaOpt.isPresent()) {
+            return ResponseEntity.status(401).body(MensajeResponse.GUARDIA_NO_ENCONTRADO);
+        }
+        try {
+            String token = request.getToken();
+            Claims claims = jwtUtil.decodeQrToken(token);
+            Long usuarioId = claims.get("usuarioId", Long.class);
+            Long vehiculoId = claims.get("vehiculoId", Long.class);
+            Date expiracion = claims.getExpiration();
+
+            // Validación de expiración del QR
+            if (expiracion == null || expiracion.before(new Date())) {
+                return ResponseEntity.badRequest().body(MensajeResponse.QR_EXPIRADO);
+            }
+
+            Optional<UsuarioEntity> usuarioOpt = usuarioRepository.findById(usuarioId);
+            if (!usuarioOpt.isPresent()) {
+                return ResponseEntity.badRequest().body(MensajeResponse.USUARIO_NO_ENCONTRADO);
+            }
+            UsuarioEntity usuario = usuarioOpt.get();
+            ValidacionQrDetalleResponse response = new ValidacionQrDetalleResponse();
+            response.setUsuario(usuario.getNombreCompleto());
+            response.setDocumento(usuario.getDocumentoNumero());
+            response.setEstadoUsuario(usuario.getEstado() != null ? usuario.getEstado().name() : null);
+            response.setCasa(usuario.getCasa());
+
+            if (vehiculoId != null) {
+                Optional<Vehiculo> vehiculoOpt = vehiculoRepository.findById(vehiculoId);
+                if (!vehiculoOpt.isPresent()) {
+                    // Buscar si el usuario tiene algún vehículo registrado
+                    List<Vehiculo> vehiculosUsuario = usuario.getVehiculos();
+                    if (vehiculosUsuario == null || vehiculosUsuario.isEmpty()) {
+                        response.setTipoVehiculo(MensajeResponse.NO_VEHICULO);
+                        response.setPlaca(MensajeResponse.NO_VEHICULO);
+                        response.setEstadoVehiculo(MensajeResponse.NO_VEHICULO);
+                    } else {
+                        response.setTipoVehiculo(MensajeResponse.VEHICULO_NO_ENCONTRADO);
+                        response.setPlaca(MensajeResponse.VEHICULO_NO_ENCONTRADO);
+                        response.setEstadoVehiculo(MensajeResponse.VEHICULO_NO_ENCONTRADO);
+                    }
+                    return ResponseEntity.ok(response);
+                }
+                Vehiculo vehiculo = vehiculoOpt.get();
+                response.setTipoVehiculo(vehiculo.getTipo() != null ? vehiculo.getTipo().name() : MensajeResponse.NO_VEHICULO);
+                response.setPlaca(vehiculo.getPlaca() != null ? vehiculo.getPlaca() : MensajeResponse.NO_VEHICULO);
+                response.setEstadoVehiculo(
+                    vehiculo.getActivo() != null ?
+                        (vehiculo.getActivo() ? otcz.guardian.utils.EstadoVehiculo.ACTIVO.name() : otcz.guardian.utils.EstadoVehiculo.INACTIVO.name())
+                        : null
+                );
+                return ResponseEntity.ok(response);
+            } else {
+                // Si no hay vehiculoId, buscar si el usuario tiene algún vehículo registrado
+                List<Vehiculo> vehiculosUsuario = usuario.getVehiculos();
+                if (vehiculosUsuario == null || vehiculosUsuario.isEmpty()) {
+                    response.setTipoVehiculo(MensajeResponse.NO_VEHICULO);
+                    response.setPlaca(MensajeResponse.NO_VEHICULO);
+                    response.setEstadoVehiculo(MensajeResponse.NO_VEHICULO);
+                } else {
+                    response.setTipoVehiculo(MensajeResponse.VEHICULO_NO_ENCONTRADO);
+                    response.setPlaca(MensajeResponse.VEHICULO_NO_ENCONTRADO);
+                    response.setEstadoVehiculo(MensajeResponse.VEHICULO_NO_ENCONTRADO);
+                }
+                return ResponseEntity.ok(response);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(MensajeResponse.TOKEN_QR_INVALIDO);
+        }
     }
 }
