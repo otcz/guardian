@@ -19,6 +19,11 @@ public class MensajeResponse {
     public static final MensajeResponse USUARIO_NO_TIENE_DOCUMENTO = new MensajeResponse("EL USUARIO NO TIENE DOCUMENTO REGISTRADO");
     public static final MensajeResponse QR_EXPIRADO = new MensajeResponse("QR EXPIRADO");
     public static final MensajeResponse TOKEN_QR_INVALIDO = new MensajeResponse("TOKEN QR INVALIDO");
+    public static final MensajeResponse VEHICULO_ASIGNADO_A_USUARIO = new MensajeResponse("Vehículo asignado correctamente al usuario.");
+    public static final MensajeResponse VEHICULO_CREADO = new MensajeResponse("Vehículo creado correctamente.");
+    public static final MensajeResponse VEHICULO_MODIFICADO = new MensajeResponse("Vehículo modificado correctamente.");
+    public static final MensajeResponse VEHICULO_ELIMINADO = new MensajeResponse("Vehículo eliminado correctamente.");
+    public static final MensajeResponse VEHICULO_NO_ENCONTRADO = new MensajeResponse("Vehículo no encontrado.");
 
     // Mensajes de error específicos para campos obligatorios
     public static final String ERROR_CORREO_OBLIGATORIO = "EL CORREO ES OBLIGATORIO.";
@@ -31,7 +36,6 @@ public class MensajeResponse {
 
     // Mensajes relacionados con vehículos
     public static final String NO_VEHICULO = "NO VEHICULO";
-    public static final String VEHICULO_NO_ENCONTRADO = "NO ENCONTRADO";
     public static final String VEHICULO_ACTIVO = "ACTIVO";
     public static final String VEHICULO_INACTIVO = "INACTIVO";
 

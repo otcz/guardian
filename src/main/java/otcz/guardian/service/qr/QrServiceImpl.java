@@ -194,9 +194,9 @@ public class QrServiceImpl implements QrService {
                         response.setPlaca(MensajeResponse.NO_VEHICULO);
                         response.setEstadoVehiculo(MensajeResponse.NO_VEHICULO);
                     } else {
-                        response.setTipoVehiculo(MensajeResponse.VEHICULO_NO_ENCONTRADO);
-                        response.setPlaca(MensajeResponse.VEHICULO_NO_ENCONTRADO);
-                        response.setEstadoVehiculo(MensajeResponse.VEHICULO_NO_ENCONTRADO);
+                        response.setTipoVehiculo(MensajeResponse.VEHICULO_NO_ENCONTRADO.getMensaje());
+                        response.setPlaca(MensajeResponse.VEHICULO_NO_ENCONTRADO.getMensaje());
+                        response.setEstadoVehiculo(MensajeResponse.VEHICULO_NO_ENCONTRADO.getMensaje());
                     }
                     return ResponseEntity.ok(response);
                 }
@@ -217,9 +217,9 @@ public class QrServiceImpl implements QrService {
                     response.setPlaca(MensajeResponse.NO_VEHICULO);
                     response.setEstadoVehiculo(MensajeResponse.NO_VEHICULO);
                 } else {
-                    response.setTipoVehiculo(MensajeResponse.VEHICULO_NO_ENCONTRADO);
-                    response.setPlaca(MensajeResponse.VEHICULO_NO_ENCONTRADO);
-                    response.setEstadoVehiculo(MensajeResponse.VEHICULO_NO_ENCONTRADO);
+                    response.setTipoVehiculo(MensajeResponse.VEHICULO_NO_ENCONTRADO.getMensaje());
+                    response.setPlaca(MensajeResponse.VEHICULO_NO_ENCONTRADO.getMensaje());
+                    response.setEstadoVehiculo(MensajeResponse.VEHICULO_NO_ENCONTRADO.getMensaje());
                 }
                 return ResponseEntity.ok(response);
             }

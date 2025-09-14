@@ -16,9 +16,13 @@ public interface VehiculoService {
 
     Optional<VehiculoEntity> obtenerPorPlaca(String placa);
 
+    Optional<VehiculoEntity> obtenerPorId(Long id);
+
     List<VehiculoEntity> listarVehiculosPorUsuario(UsuarioEntity usuarioEntity);
 
     List<VehiculoEntity> listarVehiculosPorTipo(TipoVehiculo tipo);
 
     List<VehiculoEntity> listarVehiculosActivosPorUsuario(UsuarioEntity usuarioEntity);
+
+    VehiculoEntity asignarUsuario(Long vehiculoId, Long usuarioId);
 }

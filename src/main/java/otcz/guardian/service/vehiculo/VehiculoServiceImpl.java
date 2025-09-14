@@ -3,6 +3,7 @@ package otcz.guardian.service.vehiculo;
 import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.entity.vehiculo.VehiculoEntity;
 import otcz.guardian.repository.vehiculo.VehiculoRepository;
+import otcz.guardian.repository.usuario.UsuarioRepository;
 import otcz.guardian.utils.TipoVehiculo;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.Optional;
 public class VehiculoServiceImpl implements VehiculoService {
 
     private final VehiculoRepository vehiculoRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public VehiculoServiceImpl(VehiculoRepository vehiculoRepository) {
+    public VehiculoServiceImpl(VehiculoRepository vehiculoRepository, UsuarioRepository usuarioRepository) {
         this.vehiculoRepository = vehiculoRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Override
@@ -49,6 +52,23 @@ public class VehiculoServiceImpl implements VehiculoService {
 
     @Override
     public List<VehiculoEntity> listarVehiculosActivosPorUsuario(UsuarioEntity usuarioEntity) {
-        return vehiculoRepository.findByUsuarioEntity(usuarioEntity);
+        return vehiculoRepository.findByUsuarioEntityAndActivoTrue(usuarioEntity);
+    }
+
+    @Override
+    public VehiculoEntity asignarUsuario(Long vehiculoId, Long usuarioId) {
+        Optional<VehiculoEntity> vehiculoOpt = vehiculoRepository.findById(vehiculoId);
+        Optional<UsuarioEntity> usuarioOpt = usuarioRepository.findById(usuarioId);
+        if (!vehiculoOpt.isPresent() || !usuarioOpt.isPresent()) {
+            throw new IllegalArgumentException("Vehículo o usuario no encontrado");
+        }
+        VehiculoEntity vehiculo = vehiculoOpt.get();
+        vehiculo.setUsuarioEntity(usuarioOpt.get());
+        return vehiculoRepository.save(vehiculo);
+    }
+
+    @Override
+    public Optional<VehiculoEntity> obtenerPorId(Long id) {
+        return vehiculoRepository.findById(id);
     }
 }

@@ -10,6 +10,9 @@ import otcz.guardian.DTO.MensajeResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
 import otcz.guardian.DTO.usuario.UsuarioResponseDTO;
 import otcz.guardian.DTO.usuario.UsuarioRequestDTO;
+import otcz.guardian.DTO.vehiculo.VehiculoAsignarUsuarioRequestDTO;
+import otcz.guardian.service.vehiculo.VehiculoService;
+
 import java.util.List;
 
 @RestController
@@ -17,9 +20,11 @@ import java.util.List;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final VehiculoService vehiculoService;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, VehiculoService vehiculoService) {
         this.usuarioService = usuarioService;
+        this.vehiculoService = vehiculoService;
     }
 
     @PostMapping
@@ -90,6 +95,17 @@ public class UsuarioController {
                 .map(usuarioService::mapToResponseDTO)
                 .<ResponseEntity<?>>map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(404).body(new MensajeResponse(MensajeResponse.USUARIO_NO_ENCONTRADO.getMensaje())));
+    }
+
+    @PostMapping(ApiEndpoints.Usuario.ASIGNAR_VEHICULO)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> asignarVehiculoAUsuario(@PathVariable Long usuarioId, @RequestBody VehiculoAsignarUsuarioRequestDTO request) {
+        try {
+            vehiculoService.asignarUsuario(request.getVehiculoId(), usuarioId);
+            return ResponseEntity.ok(MensajeResponse.VEHICULO_ASIGNADO_A_USUARIO);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(new MensajeResponse(ex.getMessage()));
+        }
     }
 
 

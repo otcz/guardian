@@ -1,5 +1,6 @@
 package otcz.guardian.entity.usuario;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 import javax.validation.constraints.NotNull;
 import otcz.guardian.entity.usuario.invitado.Invitado;
@@ -73,6 +74,7 @@ public class UsuarioEntity {
 
     // Relaciones
     @OneToMany(mappedBy = "usuarioEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonBackReference
     private List<VehiculoEntity> vehiculoEntities;
 
     @OneToMany(mappedBy = "usuarioEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

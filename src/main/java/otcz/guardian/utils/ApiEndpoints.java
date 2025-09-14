@@ -18,6 +18,7 @@ public final class ApiEndpoints {
         public static final String POR_ROL =  "/rol/{rol}";
         public static final String POR_ESTADO =  "/estado/{estado}";
         public static final String POR_DOCUMENTO = "/documento/{documentoNumero}";
+        public static final String ASIGNAR_VEHICULO = "/{usuarioId}/asignar-vehiculo";
     }
 
     /** Endpoints para gestión de vehículos */
@@ -29,6 +30,9 @@ public final class ApiEndpoints {
         public static final String POR_USUARIO = "/usuario/{usuarioId}";
         public static final String POR_TIPO =  "/tipo/{tipo}";
         public static final String ACTIVOS_POR_USUARIO =  "/usuario/{usuarioId}/activos";
+        public static final String CREAR = "/crear"; // POST /api/vehiculos/crear
+        public static final String MODIFICAR = "/{id}"; // PUT /api/vehiculos/{id}
+        public static final String ELIMINAR = "/{id}"; // DELETE /api/vehiculos/{id}
     }
 
     /** Endpoints para gestión de invitados */
