@@ -13,6 +13,12 @@ public class MensajeResponse {
     public static final MensajeResponse DOCUMENTO_YA_EXISTE = new MensajeResponse("LA IDENTIFICACIÓN YA EXISTE");
     public static final MensajeResponse USUARIO_NO_ENCONTRADO = new MensajeResponse("USUARIO NO ENCONTRADO");
     public static final MensajeResponse USUARIO_ELIMINADO = new MensajeResponse("USUARIO ELIMINADO CORRECTAMENTE");
+    public static final MensajeResponse USUARIO_NO_AUTENTICADO = new MensajeResponse("USUARIO NO AUTENTICADO");
+    public static final MensajeResponse GUARDIA_NO_AUTENTICADO = new MensajeResponse("GUARDIA NO AUTENTICADO");
+    public static final MensajeResponse GUARDIA_NO_ENCONTRADO = new MensajeResponse("GUARDIA NO ENCONTRADO");
+    public static final MensajeResponse USUARIO_NO_TIENE_DOCUMENTO = new MensajeResponse("EL USUARIO NO TIENE DOCUMENTO REGISTRADO");
+    public static final MensajeResponse QR_EXPIRADO = new MensajeResponse("QR EXPIRADO");
+    public static final MensajeResponse TOKEN_QR_INVALIDO = new MensajeResponse("TOKEN QR INVALIDO");
 
     // Mensajes de error específicos para campos obligatorios
     public static final String ERROR_CORREO_OBLIGATORIO = "EL CORREO ES OBLIGATORIO.";
@@ -22,6 +28,12 @@ public class MensajeResponse {
     public static final String ERROR_NUMERO_DOCUMENTO_OBLIGATORIO = "EL NÚMERO DE DOCUMENTO ES OBLIGATORIO.";
     public static final String ERROR_ROL_OBLIGATORIO = "EL ROL ES OBLIGATORIO.";
     public static final String ERROR_ESTADO_OBLIGATORIO = "EL ESTADO ES OBLIGATORIO.";
+
+    // Mensajes relacionados con vehículos
+    public static final String NO_VEHICULO = "NO VEHICULO";
+    public static final String VEHICULO_NO_ENCONTRADO = "NO ENCONTRADO";
+    public static final String VEHICULO_ACTIVO = "ACTIVO";
+    public static final String VEHICULO_INACTIVO = "INACTIVO";
 
     public MensajeResponse(String mensaje) {
         this.mensaje = mensaje;

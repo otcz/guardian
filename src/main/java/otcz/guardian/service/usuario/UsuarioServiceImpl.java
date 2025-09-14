@@ -153,6 +153,9 @@ public class UsuarioServiceImpl implements UsuarioService {
             if (usuarioDTO.getTelefono() != null) {
                 existente.setTelefono(usuarioDTO.getTelefono());
             }
+            if (usuarioDTO.getCasa() != null) {
+                existente.setCasa(usuarioDTO.getCasa());
+            }
             UsuarioEntity actualizado = usuarioRepository.save(existente);
             UsuarioResponseDTO responseDTO = mapToResponseDTO(actualizado);
             return ResponseEntity.ok(responseDTO);
@@ -179,9 +182,9 @@ public class UsuarioServiceImpl implements UsuarioService {
                     .map(this::mapVehiculoToDTO)
                     .collect(Collectors.toList()));
         }
+        dto.setCasa(entity.getCasa());
         return dto;
     }
-
 
     private VehiculoResponseDTO mapVehiculoToDTO(Vehiculo vehiculo) {
         return new VehiculoResponseDTO(
@@ -207,6 +210,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuarioEntity.setDocumentoNumero(dto.getDocumentoNumero());
         usuarioEntity.setRol(dto.getRol());
         usuarioEntity.setEstado(dto.getEstado());
+        usuarioEntity.setCasa(dto.getCasa());
         // El passwordHash y fechas se asignan en la lógica de negocio
         return usuarioEntity;
     }

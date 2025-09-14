@@ -17,6 +17,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Getter
+@Setter
 public class UsuarioEntity {
 
     @Id
@@ -64,6 +66,10 @@ public class UsuarioEntity {
 
     @Column(name = "ULTIMA_CONEXION", nullable = true)
     private LocalDateTime ultimaConexion;
+
+    @Column(name = "CASA", nullable = false, length = 20)
+    @NotNull
+    private String casa;
 
     // Relaciones
     @OneToMany(mappedBy = "usuarioEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

@@ -27,4 +27,5 @@ public class UsuarioResponseDTO {
     private LocalDateTime fechaRegistro;
     private LocalDateTime ultimaConexion;
     private List<VehiculoResponseDTO> vehiculos;
+    private String casa;
 }

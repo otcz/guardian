@@ -61,5 +61,23 @@ public class JwtUtil {
         final String usernameExtracted = extractUsername(token);
         return (usernameExtracted.equals(username) && !isTokenExpired(token));
     }
-}
 
+    // Genera un JWT para el QR con claims personalizados
+    public String generateQrToken(Long usuarioId, String usuarioEstado, Long vehiculoId, String vehiculoEstado, Date expiracion) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("usuarioId", usuarioId);
+        claims.put("usuarioEstado", usuarioEstado);
+        claims.put("vehiculoId", vehiculoId);
+        claims.put("vehiculoEstado", vehiculoEstado);
+        return Jwts.builder()
+                .setClaims(claims)
+                .setExpiration(expiracion)
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .compact();
+    }
+
+    // Decodifica y valida el JWT del QR, devolviendo los claims
+    public Claims decodeQrToken(String token) {
+        return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+    }
+}

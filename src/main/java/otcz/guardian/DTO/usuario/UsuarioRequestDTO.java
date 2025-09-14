@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -20,4 +21,6 @@ public class UsuarioRequestDTO {
     private String password;
     private Rol rol;
     private EstadoUsuario estado;
+    @NotNull
+    private String casa;
 }

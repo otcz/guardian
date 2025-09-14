@@ -61,4 +61,12 @@ public final class ApiEndpoints {
         public static final String CAMBIO_PASSWORD = "/cambio-password";
         public static final String PERFIL = "/perfil";
     }
+
+    /** Endpoints para gestión de QR */
+    public static final class Qr {
+        private Qr() {}
+        public static final String BASE = "/api/qr";
+        public static final String GENERAR = "/generar";
+        public static final String VALIDAR = "/validar";
+    }
 }
