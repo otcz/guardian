@@ -30,7 +30,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
+            .cors() // Habilita CORS
+            .and()
             .authorizeRequests()
+            .antMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // Permite OPTIONS para CORS
             .antMatchers("/api/auth/login").permitAll()
             .anyRequest().authenticated()
             .and()

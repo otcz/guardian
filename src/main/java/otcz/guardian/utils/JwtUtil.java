@@ -13,7 +13,7 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
     private final String SECRET_KEY = "clave_secreta_super_segura";
-    private final long EXPIRATION_TIME = 1000 * 60 * 60 * 10; // 10 horas
+    private final long EXPIRATION_TIME = 1000 * 60 * 60*3; // 1 hora
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -48,6 +48,7 @@ public class JwtUtil {
     }
 
     private String createToken(Map<String, Object> claims, String subject) {
+        System.out.println("Fecha de expiración del token: " + new Date(System.currentTimeMillis() + EXPIRATION_TIME));
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
