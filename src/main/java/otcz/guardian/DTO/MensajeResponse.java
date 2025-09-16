@@ -2,6 +2,7 @@ package otcz.guardian.DTO;
 
 public class MensajeResponse {
     private String mensaje;
+    private Object data;
 
     // Constantes de mensajes genéricos reutilizables
     public static final MensajeResponse CREDENCIALES_INVALIDAS = new MensajeResponse("CREDENCIALES INVÁLIDAS");
@@ -24,6 +25,8 @@ public class MensajeResponse {
     public static final MensajeResponse VEHICULO_MODIFICADO = new MensajeResponse("Vehículo modificado correctamente.");
     public static final MensajeResponse VEHICULO_ELIMINADO = new MensajeResponse("Vehículo eliminado correctamente.");
     public static final MensajeResponse VEHICULO_NO_ENCONTRADO = new MensajeResponse("Vehículo no encontrado.");
+    public static final MensajeResponse USUARIO_CREADO = new MensajeResponse("USUARIO CREADO EXITOSAMENTE");
+    public static final MensajeResponse USUARIO_ACTUALIZADO = new MensajeResponse("USUARIO ACTUALIZADO EXITOSAMENTE");
 
     // Mensajes de error específicos para campos obligatorios
     public static final String ERROR_CORREO_OBLIGATORIO = "EL CORREO ES OBLIGATORIO.";
@@ -33,6 +36,7 @@ public class MensajeResponse {
     public static final String ERROR_NUMERO_DOCUMENTO_OBLIGATORIO = "EL NÚMERO DE DOCUMENTO ES OBLIGATORIO.";
     public static final String ERROR_ROL_OBLIGATORIO = "EL ROL ES OBLIGATORIO.";
     public static final String ERROR_ESTADO_OBLIGATORIO = "EL ESTADO ES OBLIGATORIO.";
+    public static final String ERROR_CASA_OBLIGATORIA = "LA CASA ES OBLIGATORIA.";
 
     // Mensajes relacionados con vehículos
     public static final String NO_VEHICULO = "NO VEHICULO";
@@ -43,11 +47,24 @@ public class MensajeResponse {
         this.mensaje = mensaje;
     }
 
+    public MensajeResponse(String mensaje, Object data) {
+        this.mensaje = mensaje;
+        this.data = data;
+    }
+
     public String getMensaje() {
         return mensaje;
     }
 
     public void setMensaje(String mensaje) {
         this.mensaje = mensaje;
+    }
+
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(Object data) {
+        this.data = data;
     }
 }

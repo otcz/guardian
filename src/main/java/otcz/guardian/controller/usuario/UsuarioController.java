@@ -33,23 +33,6 @@ public class UsuarioController {
         return usuarioService.crearUsuarioDesdeDTO(usuarioDTO);
     }
 
-    @PutMapping(ApiEndpoints.Usuario.POR_ID)
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> actualizarUsuario(@PathVariable Long id, @RequestBody UsuarioRequestDTO usuarioDTO) {
-        return usuarioService.actualizarUsuarioDesdeDTO(id, usuarioDTO);
-    }
-
-    @DeleteMapping(ApiEndpoints.Usuario.POR_ID)
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> eliminarUsuario(@PathVariable Long id) {
-        try {
-            usuarioService.eliminarUsuario(id);
-            return ResponseEntity.ok(MensajeResponse.USUARIO_ELIMINADO);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(new MensajeResponse(ex.getMessage()));
-        }
-    }
-
     @GetMapping(ApiEndpoints.Usuario.POR_ID)
     @PreAuthorize("hasAnyRole('ADMIN','GUARDIA')")
     public ResponseEntity<?> obtenerUsuarioPorId(@PathVariable Long id) {
@@ -66,6 +49,52 @@ public class UsuarioController {
                 .map(usuarioService::mapToResponseDTO)
                 .<ResponseEntity<?>>map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(404).body(new MensajeResponse(MensajeResponse.USUARIO_NO_ENCONTRADO.getMensaje())));
+    }
+
+    @GetMapping(ApiEndpoints.Usuario.POR_DOCUMENTO)
+    @PreAuthorize("hasAnyRole('ADMIN','GUARDIA')")
+    public ResponseEntity<?> obtenerUsuarioPorDocumento(@PathVariable String documentoNumero) {
+        return usuarioService.obtenerUsuarioPorDocumento(documentoNumero)
+                .map(usuarioService::mapToResponseDTO)
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(404).body(new MensajeResponse(MensajeResponse.USUARIO_NO_ENCONTRADO.getMensaje())));
+    }
+
+    @GetMapping(ApiEndpoints.Usuario.POR_CASA)
+    @PreAuthorize("hasAnyRole('ADMIN','GUARDIA')")
+    public ResponseEntity<?> listarUsuariosPorCasa(@PathVariable String casa) {
+        List<UsuarioResponseDTO> dtos = usuarioService.listarUsuariosPorCasa(casa)
+                .stream()
+                .map(usuarioService::mapToResponseDTO)
+                .collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> listarTodosLosUsuarios() {
+        List<UsuarioResponseDTO> dtos = usuarioService.listarTodosLosUsuarios()
+                .stream()
+                .map(usuarioService::mapToResponseDTO)
+                .collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
+    @PutMapping(ApiEndpoints.Usuario.POR_ID)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> actualizarUsuario(@PathVariable Long id, @RequestBody UsuarioRequestDTO usuarioDTO) {
+        return usuarioService.actualizarUsuarioDesdeDTO(id, usuarioDTO);
+    }
+
+    @DeleteMapping(ApiEndpoints.Usuario.POR_ID)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> eliminarUsuario(@PathVariable Long id) {
+        try {
+            usuarioService.eliminarUsuario(id);
+            return ResponseEntity.ok(MensajeResponse.USUARIO_ELIMINADO);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(new MensajeResponse(ex.getMessage()));
+        }
     }
 
     @GetMapping(ApiEndpoints.Usuario.POR_ROL)
@@ -88,15 +117,6 @@ public class UsuarioController {
         return ResponseEntity.ok(dtos);
     }
 
-    @GetMapping(ApiEndpoints.Usuario.POR_DOCUMENTO)
-    @PreAuthorize("hasAnyRole('ADMIN','GUARDIA')")
-    public ResponseEntity<?> obtenerUsuarioPorDocumento(@PathVariable String documentoNumero) {
-        return usuarioService.obtenerUsuarioPorDocumento(documentoNumero)
-                .map(usuarioService::mapToResponseDTO)
-                .<ResponseEntity<?>>map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(404).body(new MensajeResponse(MensajeResponse.USUARIO_NO_ENCONTRADO.getMensaje())));
-    }
-
     @PostMapping(ApiEndpoints.Usuario.ASIGNAR_VEHICULO)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> asignarVehiculoAUsuario(@PathVariable Long usuarioId, @RequestBody VehiculoAsignarUsuarioRequestDTO request) {
@@ -108,15 +128,6 @@ public class UsuarioController {
         }
     }
 
-    @GetMapping(ApiEndpoints.Usuario.POR_CASA)
-    @PreAuthorize("hasAnyRole('ADMIN','GUARDIA')")
-    public ResponseEntity<?> listarUsuariosPorCasa(@PathVariable String casa) {
-        List<UsuarioResponseDTO> dtos = usuarioService.listarUsuariosPorCasa(casa)
-                .stream()
-                .map(usuarioService::mapToResponseDTO)
-                .collect(java.util.stream.Collectors.toList());
-        return ResponseEntity.ok(dtos);
-    }
 
 
 }

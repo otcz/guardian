@@ -101,6 +101,9 @@ public class UsuarioServiceImpl implements UsuarioService {
             if (usuarioDTO.getEstado() == null) {
                 return ResponseEntity.badRequest().body(new MensajeResponse(MensajeResponse.ERROR_ESTADO_OBLIGATORIO));
             }
+            if (usuarioDTO.getCasa() == null || usuarioDTO.getCasa().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(new MensajeResponse(MensajeResponse.ERROR_CASA_OBLIGATORIA));
+            }
             // Validación de unicidad
             if (usuarioRepository.findByCorreo(usuarioDTO.getCorreo()).isPresent()) {
                 return ResponseEntity.badRequest().body(MensajeResponse.CORREO_YA_EXISTE);
@@ -114,9 +117,9 @@ public class UsuarioServiceImpl implements UsuarioService {
             usuarioEntity.setFechaRegistro(java.time.LocalDateTime.now());
             UsuarioEntity creado = usuarioRepository.save(usuarioEntity);
             UsuarioResponseDTO responseDTO = mapToResponseDTO(creado);
-            return ResponseEntity.ok(responseDTO);
+            return ResponseEntity.ok(new MensajeResponse(MensajeResponse.USUARIO_CREADO.getMensaje(), responseDTO));
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(new MensajeResponse(ex.getMessage()));
+            return ResponseEntity.badRequest().body(new MensajeResponse(MensajeResponse.MENSAJE_GENERICO + " Detalle: " + ex.getMessage()));
         }
     }
 
@@ -131,7 +134,8 @@ public class UsuarioServiceImpl implements UsuarioService {
             if (usuarioDTO.getCorreo() != null) {
                 existente.setCorreo(usuarioDTO.getCorreo());
             }
-            if (usuarioDTO.getPassword() != null && !usuarioDTO.getPassword().isEmpty()) {
+            // Solo actualiza la contraseña si viene un valor no vacío
+            if (usuarioDTO.getPassword() != null && !usuarioDTO.getPassword().trim().isEmpty()) {
                 existente.setPasswordHash(passwordEncoder.encode(usuarioDTO.getPassword()));
             }
             if (usuarioDTO.getNombreCompleto() != null) {
@@ -158,9 +162,9 @@ public class UsuarioServiceImpl implements UsuarioService {
             }
             UsuarioEntity actualizado = usuarioRepository.save(existente);
             UsuarioResponseDTO responseDTO = mapToResponseDTO(actualizado);
-            return ResponseEntity.ok(responseDTO);
+            return ResponseEntity.ok(new MensajeResponse(MensajeResponse.USUARIO_ACTUALIZADO.getMensaje(), responseDTO));
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(new MensajeResponse(ex.getMessage()));
+            return ResponseEntity.badRequest().body(new MensajeResponse(MensajeResponse.MENSAJE_GENERICO + " Detalle: " + ex.getMessage()));
         }
     }
 
@@ -218,6 +222,11 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public List<UsuarioEntity> listarUsuariosPorCasa(String casa) {
         return usuarioRepository.findByCasa(casa);
+    }
+
+    @Override
+    public List<UsuarioEntity> listarTodosLosUsuarios() {
+        return usuarioRepository.findAll();
     }
 
 
