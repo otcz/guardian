@@ -108,5 +108,15 @@ public class UsuarioController {
         }
     }
 
+    @GetMapping(ApiEndpoints.Usuario.POR_CASA)
+    @PreAuthorize("hasAnyRole('ADMIN','GUARDIA')")
+    public ResponseEntity<?> listarUsuariosPorCasa(@PathVariable String casa) {
+        List<UsuarioResponseDTO> dtos = usuarioService.listarUsuariosPorCasa(casa)
+                .stream()
+                .map(usuarioService::mapToResponseDTO)
+                .collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
 
 }

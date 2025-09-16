@@ -215,5 +215,10 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioEntity;
     }
 
+    @Override
+    public List<UsuarioEntity> listarUsuariosPorCasa(String casa) {
+        return usuarioRepository.findByCasa(casa);
+    }
+
 
 }

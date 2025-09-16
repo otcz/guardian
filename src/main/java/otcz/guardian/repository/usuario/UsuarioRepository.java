@@ -29,6 +29,9 @@ public interface UsuarioRepository extends JpaRepository<UsuarioEntity, Long> {
     // Buscar por rol y estado
     List<UsuarioEntity> findByRolAndEstado(Rol rol, EstadoUsuario estado);
 
+    // Buscar usuarios por casa
+    List<UsuarioEntity> findByCasa(String casa);
+
     @Query("SELECT u FROM UsuarioEntity u LEFT JOIN FETCH u.vehiculoEntities WHERE u.id = :id")
     Optional<UsuarioEntity> findByIdWithVehiculos(@Param("id") Long id);
 }

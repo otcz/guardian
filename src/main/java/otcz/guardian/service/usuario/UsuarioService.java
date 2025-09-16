@@ -23,6 +23,8 @@ public interface UsuarioService extends UserDetailsService {
 
     List<UsuarioEntity> listarUsuariosPorEstado(EstadoUsuario estado);
 
+    List<UsuarioEntity> listarUsuariosPorCasa(String casa);
+
     UsuarioResponseDTO mapToResponseDTO(UsuarioEntity entity);
 
     ResponseEntity<?> crearUsuarioDesdeDTO(otcz.guardian.DTO.usuario.UsuarioRequestDTO usuarioDTO);

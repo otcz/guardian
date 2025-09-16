@@ -19,6 +19,7 @@ public final class ApiEndpoints {
         public static final String POR_ESTADO =  "/estado/{estado}";
         public static final String POR_DOCUMENTO = "/documento/{documentoNumero}";
         public static final String ASIGNAR_VEHICULO = "/{usuarioId}/asignar-vehiculo";
+        public static final String POR_CASA = "/casa/{casa}";
     }
 
     /** Endpoints para gestión de vehículos */

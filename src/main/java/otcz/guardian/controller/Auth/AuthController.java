@@ -36,6 +36,7 @@ public class AuthController {
             UsuarioEntity usuarioEntity = usuarioOpt.get();
             if (passwordEncoder.matches(loginRequest.getPassword(), usuarioEntity.getPasswordHash())) {
                 String token = jwtUtil.generateToken(usuarioEntity.getCorreo(), usuarioEntity.getRol().name());
+                System.out.println("Token generado: " + token); // Imprime el token en consola
                 return ResponseEntity.ok(new LoginResponse(token, usuarioEntity.getRol().name(), usuarioEntity.getCorreo()));
             }
         }

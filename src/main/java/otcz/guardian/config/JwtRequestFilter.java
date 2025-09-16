@@ -37,13 +37,23 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        System.out.println("[JwtRequestFilter] Ejecutando filtro para: " + request.getRequestURI()); // Log de entrada
         final String authorizationHeader = request.getHeader("Authorization");
-
+        System.out.println("[JwtRequestFilter] Header Authorization: " + authorizationHeader); // Log del header
         String username = null;
         String jwt = null;
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
+            System.out.println("Token recibido en filtro: " + jwt); // Log del token recibido
+            try {
+                // Imprimir fecha de expiración y fecha actual
+                java.util.Date expDate = jwtUtil.extractExpiration(jwt);
+                System.out.println("Fecha de expiración del token: " + expDate);
+                System.out.println("Fecha actual del sistema: " + new java.util.Date());
+            } catch (Exception e) {
+                System.out.println("No se pudo extraer la fecha de expiración del token: " + e.getMessage());
+            }
             username = jwtUtil.extractUsername(jwt);
         }
 
