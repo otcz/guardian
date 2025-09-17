@@ -229,5 +229,21 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioRepository.findAll();
     }
 
+    @Override
+    public void eliminarUsuarioPorCorreo(String correo) {
+        Optional<UsuarioEntity> usuarioOpt = usuarioRepository.findByCorreo(correo);
+        if (!usuarioOpt.isPresent()) {
+            throw new IllegalArgumentException(MensajeResponse.USUARIO_NO_ENCONTRADO.getMensaje());
+        }
+        usuarioRepository.delete(usuarioOpt.get());
+    }
 
+    @Override
+    public void eliminarUsuarioPorDocumento(String documentoNumero) {
+        Optional<UsuarioEntity> usuarioOpt = usuarioRepository.findByDocumentoNumero(documentoNumero);
+        if (!usuarioOpt.isPresent()) {
+            throw new IllegalArgumentException(MensajeResponse.USUARIO_NO_ENCONTRADO.getMensaje());
+        }
+        usuarioRepository.delete(usuarioOpt.get());
+    }
 }

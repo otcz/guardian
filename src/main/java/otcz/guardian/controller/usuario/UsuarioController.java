@@ -86,17 +86,6 @@ public class UsuarioController {
         return usuarioService.actualizarUsuarioDesdeDTO(id, usuarioDTO);
     }
 
-    @DeleteMapping(ApiEndpoints.Usuario.POR_ID)
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> eliminarUsuario(@PathVariable Long id) {
-        try {
-            usuarioService.eliminarUsuario(id);
-            return ResponseEntity.ok(MensajeResponse.USUARIO_ELIMINADO);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(new MensajeResponse(ex.getMessage()));
-        }
-    }
-
     @GetMapping(ApiEndpoints.Usuario.POR_ROL)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> listarUsuariosPorRol(@PathVariable Rol rol) {
@@ -128,6 +117,41 @@ public class UsuarioController {
         }
     }
 
+    @DeleteMapping(ApiEndpoints.Usuario.POR_CORREO)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> eliminarUsuarioPorCorreo(@PathVariable String correo) {
+        System.out.println("correo");
+        try {
+            usuarioService.eliminarUsuarioPorCorreo(correo);
+            return ResponseEntity.ok(MensajeResponse.USUARIO_ELIMINADO);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(new MensajeResponse(ex.getMessage()));
+        }
+    }
+
+    @DeleteMapping(ApiEndpoints.Usuario.POR_DOCUMENTO)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> eliminarUsuarioPorDocumento(@PathVariable String documentoNumero) {
+        try {
+            System.out.println("numero");
+            usuarioService.eliminarUsuarioPorDocumento(documentoNumero);
+            return ResponseEntity.ok(MensajeResponse.USUARIO_ELIMINADO);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(new MensajeResponse(ex.getMessage()));
+        }
+    }
+
+    @DeleteMapping(ApiEndpoints.Usuario.POR_ID)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> eliminarUsuario(@PathVariable Long id) {
+        try {
+            System.out.println("ID");
+            usuarioService.eliminarUsuario(id);
+            return ResponseEntity.ok(MensajeResponse.USUARIO_ELIMINADO);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(new MensajeResponse(ex.getMessage()));
+        }
+    }
 
 
 }

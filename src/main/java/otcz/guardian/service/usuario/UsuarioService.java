@@ -32,4 +32,8 @@ public interface UsuarioService extends UserDetailsService {
     ResponseEntity<?> crearUsuarioDesdeDTO(otcz.guardian.DTO.usuario.UsuarioRequestDTO usuarioDTO);
 
     ResponseEntity<?> actualizarUsuarioDesdeDTO(Long id, otcz.guardian.DTO.usuario.UsuarioRequestDTO usuarioDTO);
+
+    void eliminarUsuarioPorCorreo(String correo);
+
+    void eliminarUsuarioPorDocumento(String documentoNumero);
 }
