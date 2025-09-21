@@ -27,6 +27,13 @@ public class VehiculoServiceImpl implements VehiculoService {
 
     @Override
     public VehiculoEntity actualizarVehiculo(VehiculoEntity vehiculoEntity) {
+        Optional<VehiculoEntity> existenteOpt = vehiculoRepository.findById(vehiculoEntity.getId());
+        if (!existenteOpt.isPresent()) {
+            throw new IllegalArgumentException("Vehículo no encontrado");
+        }
+        VehiculoEntity existente = existenteOpt.get();
+        // Conservar la fecha de registro original
+        vehiculoEntity.setFechaRegistro(existente.getFechaRegistro());
         return vehiculoRepository.save(vehiculoEntity);
     }
 
@@ -70,5 +77,23 @@ public class VehiculoServiceImpl implements VehiculoService {
     @Override
     public Optional<VehiculoEntity> obtenerPorId(Long id) {
         return vehiculoRepository.findById(id);
+    }
+
+    @Override
+    public List<VehiculoEntity> listarTodos() {
+        return vehiculoRepository.findAll();
+    }
+
+    @Override
+    public void eliminarVehiculoPorPlaca(String placa) {
+        Optional<VehiculoEntity> vehiculoOpt = vehiculoRepository.findByPlaca(placa);
+        if (!vehiculoOpt.isPresent()) {
+            throw new IllegalArgumentException(otcz.guardian.DTO.MensajeResponse.VEHICULO_NO_ENCONTRADO.getMensaje());
+        }
+        try {
+            vehiculoRepository.delete(vehiculoOpt.get());
+        } catch (Exception e) {
+            throw new RuntimeException(otcz.guardian.DTO.MensajeResponse.MENSAJE_GENERICO + " Detalle: " + e.getMessage());
+        }
     }
 }

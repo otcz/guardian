@@ -14,6 +14,8 @@ public interface VehiculoService {
 
     void eliminarVehiculo(Long id);
 
+    void eliminarVehiculoPorPlaca(String placa);
+
     Optional<VehiculoEntity> obtenerPorPlaca(String placa);
 
     Optional<VehiculoEntity> obtenerPorId(Long id);
@@ -25,4 +27,6 @@ public interface VehiculoService {
     List<VehiculoEntity> listarVehiculosActivosPorUsuario(UsuarioEntity usuarioEntity);
 
     VehiculoEntity asignarUsuario(Long vehiculoId, Long usuarioId);
+
+    List<VehiculoEntity> listarTodos();
 }

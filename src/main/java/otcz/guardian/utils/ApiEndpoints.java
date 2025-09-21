@@ -34,6 +34,8 @@ public final class ApiEndpoints {
         public static final String CREAR = "/crear"; // POST /api/vehiculos/crear
         public static final String MODIFICAR = "/{id}"; // PUT /api/vehiculos/{id}
         public static final String ELIMINAR = "/{id}"; // DELETE /api/vehiculos/{id}
+        public static final String ELIMINAR_POR_ID = "/id/{id}";
+        public static final String ELIMINAR_POR_PLACA = "/placa/{placa}";
     }
 
     /** Endpoints para gestión de invitados */

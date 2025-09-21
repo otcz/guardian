@@ -2,7 +2,7 @@ package otcz.guardian.entity.vehiculo;
 
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.utils.TipoVehiculo;
@@ -29,7 +29,7 @@ public class VehiculoEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USUARIO_ID", nullable = false)
     @NotNull
-    @JsonBackReference
+    @JsonIgnoreProperties({"vehiculoEntities", "hibernateLazyInitializer", "handler"})
     private UsuarioEntity usuarioEntity;
 
     @Column(name = "PLACA", nullable = false, unique = true, length = 20)
