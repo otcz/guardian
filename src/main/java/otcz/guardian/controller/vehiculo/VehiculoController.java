@@ -2,6 +2,7 @@ package otcz.guardian.controller.vehiculo;
 
 import otcz.guardian.DTO.MensajeResponse;
 import otcz.guardian.DTO.vehiculo.VehiculoConUsuarioResponseDTO;
+import otcz.guardian.DTO.vehiculo.VehiculoRegistroDTO;
 import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.entity.vehiculo.VehiculoEntity;
 import otcz.guardian.service.usuario.UsuarioService;
@@ -30,8 +31,8 @@ public class VehiculoController {
     }
 
     @PostMapping(ApiEndpoints.Vehiculo.CREAR)
-    public ResponseEntity<?> registrarVehiculo(@RequestBody VehiculoEntity vehiculoEntity) {
-        VehiculoEntity creado = vehiculoService.registrarVehiculo(vehiculoEntity);
+    public ResponseEntity<?> registrarVehiculo(@RequestBody VehiculoRegistroDTO vehiculoRegistroDTO) {
+        vehiculoService.registrarVehiculo(vehiculoRegistroDTO);
         return ResponseEntity.ok(MensajeResponse.VEHICULO_CREADO);
     }
 
@@ -119,16 +120,24 @@ public class VehiculoController {
             dto.setModelo(vehiculo.getModelo());
             dto.setActivo(vehiculo.getActivo());
             dto.setFechaRegistro(vehiculo.getFechaRegistro());
-            if (vehiculo.getUsuarioEntity() != null) {
-                VehiculoConUsuarioResponseDTO.UsuarioSimpleDTO usuarioDto = new VehiculoConUsuarioResponseDTO.UsuarioSimpleDTO();
-                usuarioDto.setId(vehiculo.getUsuarioEntity().getId());
-                usuarioDto.setNombreCompleto(vehiculo.getUsuarioEntity().getNombreCompleto());
-                usuarioDto.setCorreo(vehiculo.getUsuarioEntity().getCorreo());
-                usuarioDto.setTelefono(vehiculo.getUsuarioEntity().getTelefono());
-                usuarioDto.setDocumentoIdentidad(vehiculo.getUsuarioEntity().getDocumentoNumero());
-                usuarioDto.setRol(vehiculo.getUsuarioEntity().getRol() != null ? vehiculo.getUsuarioEntity().getRol().name() : null);
-                dto.setUsuario(usuarioDto);
-            }
+            // Mapear usuarios desde la tabla intermedia
+            List<VehiculoConUsuarioResponseDTO.UsuarioSimpleDTO> usuariosDto = vehiculo.getVehiculoUsuarios().stream()
+                .map(new java.util.function.Function<otcz.guardian.entity.vehiculo.VehiculoUsuarioEntity, VehiculoConUsuarioResponseDTO.UsuarioSimpleDTO>() {
+                    @Override
+                    public VehiculoConUsuarioResponseDTO.UsuarioSimpleDTO apply(otcz.guardian.entity.vehiculo.VehiculoUsuarioEntity rel) {
+                        UsuarioEntity usuario = rel.getUsuario();
+                        VehiculoConUsuarioResponseDTO.UsuarioSimpleDTO usuarioDto = new VehiculoConUsuarioResponseDTO.UsuarioSimpleDTO();
+                        usuarioDto.setId(usuario.getId());
+                        usuarioDto.setNombreCompleto(usuario.getNombreCompleto());
+                        usuarioDto.setCorreo(usuario.getCorreo());
+                        usuarioDto.setTelefono(usuario.getTelefono());
+                        usuarioDto.setDocumentoIdentidad(usuario.getDocumentoNumero());
+                        usuarioDto.setRol(usuario.getRol() != null ? usuario.getRol().name() : null);
+                        return usuarioDto;
+                    }
+                })
+                .collect(Collectors.toList());
+            dto.setUsuarios(usuariosDto);
             return dto;
         }).collect(Collectors.toList());
         return ResponseEntity.ok(respuesta);
@@ -140,5 +149,20 @@ public class VehiculoController {
         String correo = authentication.getName();
         List<VehiculoConUsuarioResponseDTO> vehiculos = vehiculoService.listarVehiculosPorCorreoUsuario(correo);
         return ResponseEntity.ok(vehiculos);
+    }
+
+    /**
+     * Asigna un usuario a un vehículo (tabla intermedia).
+     * @param vehiculoId ID del vehículo
+     * @param usuarioId ID del usuario
+     */
+    @PostMapping("/asignar-usuario")
+    public ResponseEntity<?> asignarUsuarioAVehiculo(@RequestParam Long vehiculoId, @RequestParam Long usuarioId) {
+        try {
+            vehiculoService.asignarUsuarioAVehiculo(vehiculoId, usuarioId);
+            return ResponseEntity.ok(MensajeResponse.USUARIO_ASIGNADO_VEHICULO);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
     }
 }

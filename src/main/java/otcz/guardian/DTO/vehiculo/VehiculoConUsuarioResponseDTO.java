@@ -3,6 +3,7 @@ package otcz.guardian.DTO.vehiculo;
 import lombok.Data;
 import otcz.guardian.utils.TipoVehiculo;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class VehiculoConUsuarioResponseDTO {
@@ -14,7 +15,7 @@ public class VehiculoConUsuarioResponseDTO {
     private String modelo;
     private Boolean activo;
     private LocalDateTime fechaRegistro;
-    private UsuarioSimpleDTO usuario;
+    private List<UsuarioSimpleDTO> usuarios;
 
     @Data
     public static class UsuarioSimpleDTO {

@@ -4,11 +4,12 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
-import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.utils.TipoVehiculo;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "VEHICULOS")
@@ -18,19 +19,13 @@ import java.time.LocalDateTime;
 @ToString
 @Getter
 @Setter
+@EqualsAndHashCode(exclude = "vehiculoUsuarios")
 public class VehiculoEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false, updatable = false)
     private Long id;
-
-    // Propietario del vehículo, obligatorio
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USUARIO_ID", nullable = false)
-    @NotNull
-    @JsonIgnoreProperties({"vehiculoEntities", "hibernateLazyInitializer", "handler"})
-    private UsuarioEntity usuarioEntity;
 
     @Column(name = "PLACA", nullable = false, unique = true, length = 20)
     @NotNull
@@ -57,4 +52,8 @@ public class VehiculoEntity {
     @Column(name = "FECHA_REGISTRO", nullable = false)
     @NotNull
     private LocalDateTime fechaRegistro;
+
+    @OneToMany(mappedBy = "vehiculo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private Set<VehiculoUsuarioEntity> vehiculoUsuarios = new HashSet<>();
 }

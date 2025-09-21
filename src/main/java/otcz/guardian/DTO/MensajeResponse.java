@@ -27,6 +27,7 @@ public class MensajeResponse {
     public static final MensajeResponse VEHICULO_NO_ENCONTRADO = new MensajeResponse("Vehículo no encontrado.");
     public static final MensajeResponse USUARIO_CREADO = new MensajeResponse("USUARIO CREADO EXITOSAMENTE");
     public static final MensajeResponse USUARIO_ACTUALIZADO = new MensajeResponse("USUARIO ACTUALIZADO EXITOSAMENTE");
+    public static final String USUARIO_ASIGNADO_VEHICULO = "Usuario asignado al vehículo correctamente";
 
     // Mensajes de error específicos para campos obligatorios
     public static final String ERROR_CORREO_OBLIGATORIO = "EL CORREO ES OBLIGATORIO.";
@@ -66,5 +67,9 @@ public class MensajeResponse {
 
     public void setData(Object data) {
         this.data = data;
+    }
+
+    public static RuntimeException usuarioNoEncontradoException() {
+        return new RuntimeException(USUARIO_NO_ENCONTRADO.getMensaje());
     }
 }

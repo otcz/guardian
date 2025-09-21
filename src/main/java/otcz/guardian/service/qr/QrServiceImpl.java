@@ -95,10 +95,22 @@ public class QrServiceImpl implements QrService {
                 vehiculoId = vehiculoEntity.getId();
                 if (!vehiculoEntity.getActivo()) {
                     vehiculoEstado = "INACTIVO";
-                } else if (!vehiculoEntity.getUsuarioEntity().getId().equals(usuario.getId())) {
-                    vehiculoEstado = "NO ASIGNADO AL USUARIO";
                 } else {
-                    vehiculoEstado = "ACTIVO";
+                    // Verificar si el usuario está asociado al vehículo por la tabla intermedia
+                    boolean asignado = false;
+                    if (vehiculoEntity.getVehiculoUsuarios() != null) {
+                        for (otcz.guardian.entity.vehiculo.VehiculoUsuarioEntity rel : vehiculoEntity.getVehiculoUsuarios()) {
+                            if (rel.getUsuario() != null && rel.getUsuario().getId().equals(usuario.getId())) {
+                                asignado = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!asignado) {
+                        vehiculoEstado = "NO ASIGNADO AL USUARIO";
+                    } else {
+                        vehiculoEstado = "ACTIVO";
+                    }
                 }
             }
         }
@@ -187,8 +199,15 @@ public class QrServiceImpl implements QrService {
             if (vehiculoId != null) {
                 Optional<VehiculoEntity> vehiculoOpt = vehiculoRepository.findById(vehiculoId);
                 if (!vehiculoOpt.isPresent()) {
-                    // Buscar si el usuario tiene algún vehículo registrado
-                    List<VehiculoEntity> vehiculosUsuario = usuario.getVehiculoEntities();
+                    // Buscar si el usuario tiene algún vehículo registrado usando la tabla intermedia
+                    List<VehiculoEntity> vehiculosUsuario = new ArrayList<VehiculoEntity>();
+                    if (usuario.getVehiculoUsuarios() != null) {
+                        for (otcz.guardian.entity.vehiculo.VehiculoUsuarioEntity rel : usuario.getVehiculoUsuarios()) {
+                            if (rel.getVehiculo() != null) {
+                                vehiculosUsuario.add(rel.getVehiculo());
+                            }
+                        }
+                    }
                     if (vehiculosUsuario == null || vehiculosUsuario.isEmpty()) {
                         response.setTipoVehiculo(MensajeResponse.NO_VEHICULO);
                         response.setPlaca(MensajeResponse.NO_VEHICULO);
@@ -211,7 +230,15 @@ public class QrServiceImpl implements QrService {
                 return ResponseEntity.ok(response);
             } else {
                 // Si no hay vehiculoId, buscar si el usuario tiene algún vehículo registrado
-                List<VehiculoEntity> vehiculosUsuario = usuario.getVehiculoEntities();
+                // Buscar si el usuario tiene algún vehículo registrado usando la tabla intermedia
+                List<VehiculoEntity> vehiculosUsuario = new ArrayList<VehiculoEntity>();
+                if (usuario.getVehiculoUsuarios() != null) {
+                    for (otcz.guardian.entity.vehiculo.VehiculoUsuarioEntity rel : usuario.getVehiculoUsuarios()) {
+                        if (rel.getVehiculo() != null) {
+                            vehiculosUsuario.add(rel.getVehiculo());
+                        }
+                    }
+                }
                 if (vehiculosUsuario == null || vehiculosUsuario.isEmpty()) {
                     response.setTipoVehiculo(MensajeResponse.NO_VEHICULO);
                     response.setPlaca(MensajeResponse.NO_VEHICULO);

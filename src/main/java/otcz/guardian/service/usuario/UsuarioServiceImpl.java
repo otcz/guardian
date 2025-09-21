@@ -46,7 +46,8 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public Optional<UsuarioEntity> obtenerUsuarioPorId(Long id) {
-        return usuarioRepository.findByIdWithVehiculos(id);
+        // Ya no existe findByIdWithVehiculos, usar findById estándar
+        return usuarioRepository.findById(id);
     }
 
     @Override
@@ -181,10 +182,19 @@ public class UsuarioServiceImpl implements UsuarioService {
         dto.setEstado(entity.getEstado());
         dto.setFechaRegistro(entity.getFechaRegistro());
         dto.setUltimaConexion(entity.getUltimaConexion());
-        if (entity.getVehiculoEntities() != null) {
-            dto.setVehiculos(entity.getVehiculoEntities().stream()
-                    .map(this::mapVehiculoToDTO)
-                    .collect(Collectors.toList()));
+        // Obtener los vehículos asociados al usuario usando la tabla intermedia muchos a muchos
+        List<VehiculoEntity> vehiculosUsuario = new java.util.ArrayList<VehiculoEntity>();
+        if (entity.getVehiculoUsuarios() != null) {
+            for (otcz.guardian.entity.vehiculo.VehiculoUsuarioEntity rel : entity.getVehiculoUsuarios()) {
+                if (rel.getVehiculo() != null) {
+                    vehiculosUsuario.add(rel.getVehiculo());
+                }
+            }
+        }
+        if (!vehiculosUsuario.isEmpty()) {
+            dto.setVehiculos(vehiculosUsuario.stream()
+                .map(this::mapVehiculoToDTO)
+                .collect(Collectors.toList()));
         }
         dto.setCasa(entity.getCasa());
         return dto;

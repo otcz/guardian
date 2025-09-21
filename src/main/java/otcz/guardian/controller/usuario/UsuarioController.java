@@ -110,7 +110,7 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> asignarVehiculoAUsuario(@PathVariable Long usuarioId, @RequestBody VehiculoAsignarUsuarioRequestDTO request) {
         try {
-            vehiculoService.asignarUsuario(request.getVehiculoId(), usuarioId);
+            vehiculoService.asignarUsuarioAVehiculo(request.getVehiculoId(), usuarioId);
             return ResponseEntity.ok(MensajeResponse.VEHICULO_ASIGNADO_A_USUARIO);
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(new MensajeResponse(ex.getMessage()));

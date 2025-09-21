@@ -31,7 +31,4 @@ public interface UsuarioRepository extends JpaRepository<UsuarioEntity, Long> {
 
     // Buscar usuarios por casa
     List<UsuarioEntity> findByCasa(String casa);
-
-    @Query("SELECT u FROM UsuarioEntity u LEFT JOIN FETCH u.vehiculoEntities WHERE u.id = :id")
-    Optional<UsuarioEntity> findByIdWithVehiculos(@Param("id") Long id);
 }

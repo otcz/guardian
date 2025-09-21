@@ -1,6 +1,7 @@
 package otcz.guardian.service.vehiculo;
 
 import otcz.guardian.DTO.vehiculo.VehiculoConUsuarioResponseDTO;
+import otcz.guardian.DTO.vehiculo.VehiculoRegistroDTO;
 import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.entity.vehiculo.VehiculoEntity;
 import otcz.guardian.utils.TipoVehiculo;
@@ -9,7 +10,7 @@ import java.util.Optional;
 
 public interface VehiculoService {
 
-    VehiculoEntity registrarVehiculo(VehiculoEntity vehiculoEntity);
+    VehiculoEntity registrarVehiculo(VehiculoRegistroDTO vehiculoRegistroDTO);
 
     VehiculoEntity actualizarVehiculo(VehiculoEntity vehiculoEntity);
 
@@ -27,7 +28,11 @@ public interface VehiculoService {
 
     List<VehiculoEntity> listarVehiculosActivosPorUsuario(UsuarioEntity usuarioEntity);
 
-    VehiculoEntity asignarUsuario(Long vehiculoId, Long usuarioId);
+    /**
+     * Asigna un usuario a un vehículo (tabla intermedia).
+     * Lanza excepción si ya existe la relación o si no existen los IDs.
+     */
+    void asignarUsuarioAVehiculo(Long vehiculoId, Long usuarioId);
 
     List<VehiculoEntity> listarTodos();
 

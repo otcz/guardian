@@ -11,6 +11,7 @@ import otcz.guardian.utils.Rol;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "USUARIOS")
@@ -20,6 +21,7 @@ import java.util.List;
 @ToString
 @Getter
 @Setter
+@EqualsAndHashCode(exclude = "vehiculoUsuarios")
 public class UsuarioEntity {
 
     @Id
@@ -74,9 +76,8 @@ public class UsuarioEntity {
 
     // Relaciones
     @OneToMany(mappedBy = "usuarioEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonBackReference
-    private List<VehiculoEntity> vehiculoEntities;
-
-    @OneToMany(mappedBy = "usuarioEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Invitado> invitados;
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<otcz.guardian.entity.vehiculo.VehiculoUsuarioEntity> vehiculoUsuarios = new java.util.HashSet<>();
 }
