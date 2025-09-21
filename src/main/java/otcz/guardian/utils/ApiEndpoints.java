@@ -76,4 +76,10 @@ public final class ApiEndpoints {
         public static final String GENERAR = "/generar";
         public static final String VALIDAR = "/validar";
     }
+
+    /** Endpoints para gestión de catálogo */
+    public static final class Catalogo {
+        private Catalogo() {}
+        public static final String BASE = "/api/catalogo";
+    }
 }
