@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 @Service
 public class VehiculoServiceImpl implements VehiculoService {
 
+
     private final VehiculoRepository vehiculoRepository;
     private final UsuarioRepository usuarioRepository;
     private final VehiculoUsuarioRepository vehiculoUsuarioRepository;
@@ -62,15 +63,43 @@ public class VehiculoServiceImpl implements VehiculoService {
     }
 
     @Override
-    public VehiculoEntity actualizarVehiculo(VehiculoEntity vehiculoEntity) {
-        Optional<VehiculoEntity> existenteOpt = vehiculoRepository.findById(vehiculoEntity.getId());
+    public VehiculoEntity actualizarVehiculo(Long id, VehiculoRegistroDTO vehiculoRegistroDTO) {
+        Optional<VehiculoEntity> existenteOpt = vehiculoRepository.findById(id);
         if (!existenteOpt.isPresent()) {
             throw new IllegalArgumentException("Vehículo no encontrado");
         }
         VehiculoEntity existente = existenteOpt.get();
+        // Actualizar campos básicos
+        existente.setPlaca(vehiculoRegistroDTO.getPlaca());
+        existente.setTipo(vehiculoRegistroDTO.getTipo());
+        existente.setColor(vehiculoRegistroDTO.getColor());
+        existente.setMarca(vehiculoRegistroDTO.getMarca());
+        existente.setModelo(vehiculoRegistroDTO.getModelo());
+        existente.setActivo(vehiculoRegistroDTO.getActivo());
         // Conservar la fecha de registro original
-        vehiculoEntity.setFechaRegistro(existente.getFechaRegistro());
-        return vehiculoRepository.save(vehiculoEntity);
+        // Actualizar relación usuario-vehículo si es necesario
+        Long nuevoUsuarioId = vehiculoRegistroDTO.getUsuarioId();
+        if (nuevoUsuarioId == null) {
+            throw MensajeResponse.usuarioNoEncontradoException();
+        }
+        // Buscar usuario actual asociado
+        List<VehiculoUsuarioEntity> relaciones = vehiculoUsuarioRepository.findByVehiculo_Id(id);
+        Long usuarioActualId = relaciones.isEmpty() ? null : relaciones.get(0).getUsuario().getId();
+        if (!nuevoUsuarioId.equals(usuarioActualId)) {
+            // Eliminar relación anterior
+            for (VehiculoUsuarioEntity rel : relaciones) {
+                vehiculoUsuarioRepository.delete(rel);
+            }
+            // Crear nueva relación
+            UsuarioEntity nuevoUsuario = usuarioRepository.findById(nuevoUsuarioId)
+                    .orElseThrow(MensajeResponse::usuarioNoEncontradoException);
+            VehiculoUsuarioEntity nuevaRelacion = new VehiculoUsuarioEntity();
+            nuevaRelacion.setVehiculo(existente);
+            nuevaRelacion.setUsuario(nuevoUsuario);
+            nuevaRelacion.setFechaAsignacion(LocalDateTime.now());
+            vehiculoUsuarioRepository.save(nuevaRelacion);
+        }
+        return vehiculoRepository.save(existente);
     }
 
     @Override

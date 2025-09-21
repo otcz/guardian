@@ -5,10 +5,12 @@ import otcz.guardian.DTO.vehiculo.VehiculoConUsuarioResponseDTO;
 import otcz.guardian.DTO.vehiculo.VehiculoRegistroDTO;
 import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.entity.vehiculo.VehiculoEntity;
+import otcz.guardian.repository.vehiculo.VehiculoUsuarioRepository;
 import otcz.guardian.service.usuario.UsuarioService;
 import otcz.guardian.service.vehiculo.VehiculoService;
 import otcz.guardian.utils.ApiEndpoints;
 import otcz.guardian.utils.TipoVehiculo;
+import org.hibernate.Hibernate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -24,10 +26,12 @@ public class VehiculoController {
 
     private final VehiculoService vehiculoService;
     private final UsuarioService usuarioService;
+    private final VehiculoUsuarioRepository vehiculoUsuarioRepository;
 
-    public VehiculoController(VehiculoService vehiculoService, UsuarioService usuarioService) {
+    public VehiculoController(VehiculoService vehiculoService, UsuarioService usuarioService, VehiculoUsuarioRepository vehiculoUsuarioRepository) {
         this.vehiculoService = vehiculoService;
         this.usuarioService = usuarioService;
+        this.vehiculoUsuarioRepository = vehiculoUsuarioRepository;
     }
 
     @PostMapping(ApiEndpoints.Vehiculo.CREAR)
@@ -37,13 +41,17 @@ public class VehiculoController {
     }
 
     @PutMapping(ApiEndpoints.Vehiculo.MODIFICAR)
-    public ResponseEntity<?> actualizarVehiculo(@PathVariable Long id, @RequestBody VehiculoEntity vehiculoEntity) {
-        if (!vehiculoService.obtenerPorId(id).isPresent()) {
+    public ResponseEntity<?> actualizarVehiculo(@PathVariable Long id, @RequestBody VehiculoRegistroDTO vehiculoRegistroDTO) {
+        Optional<VehiculoEntity> vehiculoOpt = vehiculoService.obtenerPorId(id);
+        if (!vehiculoOpt.isPresent()) {
             return ResponseEntity.status(404).body(MensajeResponse.VEHICULO_NO_ENCONTRADO);
         }
-        vehiculoEntity.setId(id);
-        vehiculoService.actualizarVehiculo(vehiculoEntity);
-        return ResponseEntity.ok(MensajeResponse.VEHICULO_MODIFICADO);
+        try {
+            vehiculoService.actualizarVehiculo(id, vehiculoRegistroDTO);
+            return ResponseEntity.ok(MensajeResponse.VEHICULO_MODIFICADO);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(new MensajeResponse(ex.getMessage()));
+        }
     }
 
     // Eliminar vehículo por ID (ruta clara y sin ambigüedad)
@@ -73,8 +81,37 @@ public class VehiculoController {
     @GetMapping(ApiEndpoints.Vehiculo.POR_PLACA)
     public ResponseEntity<?> obtenerPorPlaca(@PathVariable String placa) {
         final ResponseEntity<?> notFound = ResponseEntity.status(404).body(MensajeResponse.VEHICULO_NO_ENCONTRADO);
-        java.util.Optional<VehiculoEntity> vehiculoOpt = vehiculoService.obtenerPorPlaca(placa);
-        return vehiculoOpt.isPresent() ? ResponseEntity.ok(vehiculoOpt.get()) : notFound;
+        Optional<VehiculoEntity> vehiculoOpt = vehiculoService.obtenerPorPlaca(placa);
+        if (!vehiculoOpt.isPresent()) {
+            return notFound;
+        }
+        VehiculoEntity vehiculo = vehiculoOpt.get();
+        VehiculoConUsuarioResponseDTO dto = new VehiculoConUsuarioResponseDTO();
+        dto.setId(vehiculo.getId());
+        dto.setPlaca(vehiculo.getPlaca());
+        dto.setTipo(vehiculo.getTipo());
+        dto.setColor(vehiculo.getColor());
+        dto.setMarca(vehiculo.getMarca());
+        dto.setModelo(vehiculo.getModelo());
+        dto.setActivo(vehiculo.getActivo());
+        dto.setFechaRegistro(vehiculo.getFechaRegistro());
+        // Consultar usuarios asociados directamente del repositorio
+        List<VehiculoConUsuarioResponseDTO.UsuarioSimpleDTO> usuariosDto = vehiculoUsuarioRepository.findByVehiculo_Id(vehiculo.getId())
+            .stream()
+            .map(rel -> {
+                UsuarioEntity usuario = rel.getUsuario();
+                VehiculoConUsuarioResponseDTO.UsuarioSimpleDTO usuarioDto = new VehiculoConUsuarioResponseDTO.UsuarioSimpleDTO();
+                usuarioDto.setId(usuario.getId());
+                usuarioDto.setNombreCompleto(usuario.getNombreCompleto());
+                usuarioDto.setCorreo(usuario.getCorreo());
+                usuarioDto.setTelefono(usuario.getTelefono());
+                usuarioDto.setDocumentoIdentidad(usuario.getDocumentoNumero());
+                usuarioDto.setRol(usuario.getRol() != null ? usuario.getRol().name() : null);
+                return usuarioDto;
+            })
+            .collect(Collectors.toList());
+        dto.setUsuarios(usuariosDto);
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping(ApiEndpoints.Vehiculo.POR_USUARIO)
@@ -143,7 +180,7 @@ public class VehiculoController {
         return ResponseEntity.ok(respuesta);
     }
 
-    @GetMapping("/mis-vehiculos")
+    @GetMapping(ApiEndpoints.Vehiculo.MIS_VEHICULOS)
     @PreAuthorize("hasRole('USUARIO')")
     public ResponseEntity<List<VehiculoConUsuarioResponseDTO>> listarVehiculosDelUsuarioAutenticado(Authentication authentication) {
         String correo = authentication.getName();
@@ -151,12 +188,7 @@ public class VehiculoController {
         return ResponseEntity.ok(vehiculos);
     }
 
-    /**
-     * Asigna un usuario a un vehículo (tabla intermedia).
-     * @param vehiculoId ID del vehículo
-     * @param usuarioId ID del usuario
-     */
-    @PostMapping("/asignar-usuario")
+    @PostMapping(ApiEndpoints.Vehiculo.ASIGNAR_USUARIO)
     public ResponseEntity<?> asignarUsuarioAVehiculo(@RequestParam Long vehiculoId, @RequestParam Long usuarioId) {
         try {
             vehiculoService.asignarUsuarioAVehiculo(vehiculoId, usuarioId);

@@ -12,8 +12,6 @@ public interface VehiculoService {
 
     VehiculoEntity registrarVehiculo(VehiculoRegistroDTO vehiculoRegistroDTO);
 
-    VehiculoEntity actualizarVehiculo(VehiculoEntity vehiculoEntity);
-
     void eliminarVehiculo(Long id);
 
     void eliminarVehiculoPorPlaca(String placa);
@@ -37,4 +35,6 @@ public interface VehiculoService {
     List<VehiculoEntity> listarTodos();
 
     List<VehiculoConUsuarioResponseDTO> listarVehiculosPorCorreoUsuario(String correo);
+
+    VehiculoEntity actualizarVehiculo(Long id, VehiculoRegistroDTO vehiculoRegistroDTO);
 }

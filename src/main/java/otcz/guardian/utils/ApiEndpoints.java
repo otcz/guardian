@@ -36,6 +36,8 @@ public final class ApiEndpoints {
         public static final String ELIMINAR = "/{id}"; // DELETE /api/vehiculos/{id}
         public static final String ELIMINAR_POR_ID = "/id/{id}";
         public static final String ELIMINAR_POR_PLACA = "/placa/{placa}";
+        public static final String ASIGNAR_USUARIO = "/asignar-usuario";
+        public static final String MIS_VEHICULOS = "/mis-vehiculos";
     }
 
     /** Endpoints para gestión de invitados */
