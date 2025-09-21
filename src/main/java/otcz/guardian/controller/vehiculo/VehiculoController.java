@@ -9,6 +9,8 @@ import otcz.guardian.service.vehiculo.VehiculoService;
 import otcz.guardian.utils.ApiEndpoints;
 import otcz.guardian.utils.TipoVehiculo;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -123,11 +125,20 @@ public class VehiculoController {
                 usuarioDto.setNombreCompleto(vehiculo.getUsuarioEntity().getNombreCompleto());
                 usuarioDto.setCorreo(vehiculo.getUsuarioEntity().getCorreo());
                 usuarioDto.setTelefono(vehiculo.getUsuarioEntity().getTelefono());
+                usuarioDto.setDocumentoIdentidad(vehiculo.getUsuarioEntity().getDocumentoNumero());
                 usuarioDto.setRol(vehiculo.getUsuarioEntity().getRol() != null ? vehiculo.getUsuarioEntity().getRol().name() : null);
                 dto.setUsuario(usuarioDto);
             }
             return dto;
         }).collect(Collectors.toList());
         return ResponseEntity.ok(respuesta);
+    }
+
+    @GetMapping("/mis-vehiculos")
+    @PreAuthorize("hasRole('USUARIO')")
+    public ResponseEntity<List<VehiculoConUsuarioResponseDTO>> listarVehiculosDelUsuarioAutenticado(Authentication authentication) {
+        String correo = authentication.getName();
+        List<VehiculoConUsuarioResponseDTO> vehiculos = vehiculoService.listarVehiculosPorCorreoUsuario(correo);
+        return ResponseEntity.ok(vehiculos);
     }
 }

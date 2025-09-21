@@ -23,5 +23,6 @@ public class VehiculoConUsuarioResponseDTO {
         private String correo;
         private String telefono;
         private String rol;
+        private String documentoIdentidad;
     }
 }

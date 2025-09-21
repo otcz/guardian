@@ -1,5 +1,6 @@
 package otcz.guardian.service.vehiculo;
 
+import otcz.guardian.DTO.vehiculo.VehiculoConUsuarioResponseDTO;
 import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.entity.vehiculo.VehiculoEntity;
 import otcz.guardian.utils.TipoVehiculo;
@@ -29,4 +30,6 @@ public interface VehiculoService {
     VehiculoEntity asignarUsuario(Long vehiculoId, Long usuarioId);
 
     List<VehiculoEntity> listarTodos();
+
+    List<VehiculoConUsuarioResponseDTO> listarVehiculosPorCorreoUsuario(String correo);
 }

@@ -1,13 +1,17 @@
 package otcz.guardian.service.vehiculo;
 
+import otcz.guardian.DTO.vehiculo.VehiculoConUsuarioResponseDTO;
 import otcz.guardian.entity.usuario.UsuarioEntity;
 import otcz.guardian.entity.vehiculo.VehiculoEntity;
 import otcz.guardian.repository.vehiculo.VehiculoRepository;
 import otcz.guardian.repository.usuario.UsuarioRepository;
 import otcz.guardian.utils.TipoVehiculo;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class VehiculoServiceImpl implements VehiculoService {
@@ -95,5 +99,36 @@ public class VehiculoServiceImpl implements VehiculoService {
         } catch (Exception e) {
             throw new RuntimeException(otcz.guardian.DTO.MensajeResponse.MENSAJE_GENERICO + " Detalle: " + e.getMessage());
         }
+    }
+
+    @Override
+    public List<VehiculoConUsuarioResponseDTO> listarVehiculosPorCorreoUsuario(String correo) {
+        UsuarioEntity usuario = usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+        return vehiculoRepository.findByUsuarioEntity(usuario)
+                .stream()
+                .map(vehiculo -> {
+                    VehiculoConUsuarioResponseDTO dto = new VehiculoConUsuarioResponseDTO();
+                    dto.setId(vehiculo.getId());
+                    dto.setPlaca(vehiculo.getPlaca());
+                    dto.setTipo(vehiculo.getTipo());
+                    dto.setColor(vehiculo.getColor());
+                    dto.setMarca(vehiculo.getMarca());
+                    dto.setModelo(vehiculo.getModelo());
+                    dto.setActivo(vehiculo.getActivo());
+                    dto.setFechaRegistro(vehiculo.getFechaRegistro());
+                    if (vehiculo.getUsuarioEntity() != null) {
+                        VehiculoConUsuarioResponseDTO.UsuarioSimpleDTO usuarioDto = new VehiculoConUsuarioResponseDTO.UsuarioSimpleDTO();
+                        usuarioDto.setId(vehiculo.getUsuarioEntity().getId());
+                        usuarioDto.setNombreCompleto(vehiculo.getUsuarioEntity().getNombreCompleto());
+                        usuarioDto.setCorreo(vehiculo.getUsuarioEntity().getCorreo());
+                        usuarioDto.setTelefono(vehiculo.getUsuarioEntity().getTelefono());
+                        usuarioDto.setRol(vehiculo.getUsuarioEntity().getRol() != null ? vehiculo.getUsuarioEntity().getRol().name() : null);
+                        usuarioDto.setDocumentoIdentidad(vehiculo.getUsuarioEntity().getDocumentoNumero());
+                        dto.setUsuario(usuarioDto);
+                    }
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 }
