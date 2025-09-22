@@ -12,7 +12,7 @@ public interface QrService {
 
     boolean isQrExpirado(QrPayloadDTO payload);
 
-    ResponseEntity<?> generarQr(String documentoNumero, String placa);
+    ResponseEntity<?> generarQr(String documentoNumero, String placa, String estadoUsuario);
 
     ResponseEntity<?> validarQr(QrTokenRequest request, org.springframework.security.core.Authentication authentication);
 }

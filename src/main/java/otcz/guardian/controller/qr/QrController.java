@@ -11,6 +11,7 @@ import otcz.guardian.repository.usuario.UsuarioRepository;
 import otcz.guardian.repository.vehiculo.VehiculoRepository;
 import otcz.guardian.service.qr.QrService;
 import otcz.guardian.utils.JwtUtil;
+import otcz.guardian.utils.EstadoUsuario;
 
 import java.util.Optional;
 
@@ -46,7 +47,11 @@ public class QrController {
         if (documentoNumero == null) {
             return ResponseEntity.badRequest().body(MensajeResponse.USUARIO_NO_TIENE_DOCUMENTO);
         }
-        return qrService.generarQr(documentoNumero, placa);
+        String estadoUsuario = usuario.getEstado() != null ? usuario.getEstado().name() : EstadoUsuario.INACTIVO.name();
+        if (EstadoUsuario.INACTIVO.name().equals(estadoUsuario)) {
+            return ResponseEntity.ok("INACTIVO");
+        }
+        return qrService.generarQr(documentoNumero, placa, estadoUsuario);
     }
 
     @PostMapping(ApiEndpoints.Qr.VALIDAR)

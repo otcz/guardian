@@ -66,7 +66,7 @@ public class QrServiceImpl implements QrService {
     }
 
     @Override
-    public ResponseEntity<?> generarQr(String documentoNumero, String placa) {
+    public ResponseEntity<?> generarQr(String documentoNumero, String placa, String estadoUsuario) {
         Optional<UsuarioEntity> usuarioOpt = usuarioRepository.findByDocumentoNumero(documentoNumero);
         ValidacionQrResponse response = new ValidacionQrResponse();
         if (!usuarioOpt.isPresent()) {
@@ -77,7 +77,7 @@ public class QrServiceImpl implements QrService {
             return ResponseEntity.badRequest().body(response);
         }
         UsuarioEntity usuario = usuarioOpt.get();
-        response.setUsuario("ENCONTRADO");
+        response.setUsuario(estadoUsuario); // Aquí se envía 'Usuario. Activo' o 'Usuario. Inactivo'
         String usuarioEstado = usuario.getEstado() != null ? usuario.getEstado().name() : "DESCONOCIDO";
         if (!EstadoUsuario.ACTIVO.equals(usuario.getEstado())) {
             response.setVehiculo("NO_VALIDADO");
