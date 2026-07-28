@@ -13,7 +13,7 @@ Monolito, a propósito. Un backend y un frontend:
 
 | Componente | Stack | Puerto |
 |---|---|---|
-| `guardian-api` | Java 8 · Spring Boot 2.7 · PostgreSQL 14 | `8080` |
+| `guardian-api` | Java 8 · Spring Boot 2.7 · PostgreSQL 14 | `8088` |
 | `guardian-ui` | Angular 18 · PrimeNG · PWA | `4200` |
 
 El razonamiento de por qué NO son microservicios está en
