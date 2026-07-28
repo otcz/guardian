@@ -8,6 +8,7 @@ import guardian.service.admin.VehiculoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,5 +61,12 @@ public class VehiculoController {
     @PatchMapping(ApiEndpoint.DESACTIVAR)
     public ResponseEntity<VehiculoResponse> desactivar(@PathVariable Long id) {
         return ResponseEntity.ok(vehiculoService.cambiarEstado(id, false, usuarioActual.obtener()));
+    }
+
+    /** Eliminacion fisica. Los residentes solo inactivan; esto es exclusivo del admin. */
+    @DeleteMapping(ApiEndpoint.POR_ID)
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        vehiculoService.eliminar(id, usuarioActual.obtener());
+        return ResponseEntity.noContent().build();
     }
 }

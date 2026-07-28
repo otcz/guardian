@@ -14,6 +14,9 @@ public interface GdUsuarioRepository extends JpaRepository<GdUsuario, Long> {
 
     boolean existsByPersonaId(Long personaId);
 
+    /** Solo para la eliminacion fisica de la persona (exclusiva del admin). */
+    void deleteByPersonaId(Long personaId);
+
     List<GdUsuario> findByRol(String rol);
 
     /**

@@ -3,9 +3,11 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Html5Qrcode } from 'html5-qrcode';
 
 import { AccesoService } from '../../../core/services/acceso.service';
+import { FotoService } from '../../../core/services/foto.service';
 import {
   FichaVerificacion,
   Modo,
+  Presencia,
   Sentido,
   VehiculoResumen
 } from '../../../core/models/acceso.model';
@@ -33,6 +35,9 @@ export class EscanerComponent implements OnInit, OnDestroy {
   ficha: FichaVerificacion | null = null;
   error: string | null = null;
 
+  /** Contadores del encabezado. Se refrescan tras cada registro. */
+  presencia: Presencia | null = null;
+
   /** Alternativa cuando la cámara falla o la tablet no tiene uno decente. */
   modoManual = false;
   payloadManual = '';
@@ -40,10 +45,21 @@ export class EscanerComponent implements OnInit, OnDestroy {
   private lector: Html5Qrcode | null = null;
   private procesando = false;
 
-  constructor(private readonly acceso: AccesoService) {}
+  constructor(
+    private readonly acceso: AccesoService,
+    private readonly fotoService: FotoService
+  ) {}
 
   ngOnInit(): void {
+    this.cargarPresencia();
     this.iniciarCamara();
+  }
+
+  private cargarPresencia(): void {
+    this.acceso.presencia().subscribe({
+      next: presencia => (this.presencia = presencia),
+      error: () => undefined
+    });
   }
 
   ngOnDestroy(): void {
@@ -131,6 +147,7 @@ export class EscanerComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.etapa = 'registrado';
+          this.cargarPresencia();
           // Vuelve solo a escanear: en hora pico nadie va a tocar "siguiente".
           setTimeout(() => this.reiniciar(), 2000);
         },
@@ -171,5 +188,9 @@ export class EscanerComponent implements OnInit, OnDestroy {
 
   get tieneVehiculos(): boolean {
     return (this.ficha?.vehiculos?.length ?? 0) > 0;
+  }
+
+  get fotoFicha(): string | null {
+    return this.fotoService.urlAbsoluta(this.ficha?.fotoUrl ?? null);
   }
 }

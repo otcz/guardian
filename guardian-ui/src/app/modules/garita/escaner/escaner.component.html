@@ -1,5 +1,17 @@
 <div class="garita">
 
+  <!-- PRESENCIA -->
+  <div class="presencia" *ngIf="presencia">
+    <div class="kpi adentro">
+      <span class="valor">{{ presencia.adentro }}</span>
+      <span class="titulo">ADENTRO</span>
+    </div>
+    <div class="kpi afuera">
+      <span class="valor">{{ presencia.afuera }}</span>
+      <span class="titulo">AFUERA</span>
+    </div>
+  </div>
+
   <!-- ESCANEO -->
   <section class="escaneo" *ngIf="etapa === 'escaneando' || etapa === 'verificando'">
     <div id="gd-lector" class="lector" [class.oculto]="modoManual"></div>
@@ -25,9 +37,18 @@
 
     <div class="aviso-error" *ngIf="error">{{ error }}</div>
 
-    <button type="button" class="alterno" (click)="alternarManual()">
-      {{ modoManual ? 'Usar la cámara' : 'Escribir el código' }}
-    </button>
+    <div class="alternos">
+      <button type="button" class="alterno" (click)="alternarManual()">
+        {{ modoManual ? 'Usar la cámara' : 'Escribir el código' }}
+      </button>
+      <button type="button"
+              class="alterno"
+              disabled
+              pTooltip="Requiere lector biométrico"
+              tooltipPosition="top">
+        <i class="pi pi-stop-circle"></i> Huella
+      </button>
+    </div>
   </section>
 
   <!-- FICHA -->
@@ -45,8 +66,8 @@
 
     <!-- La foto es el control real: el guardia compara cara contra pantalla. -->
     <div class="foto">
-      <img *ngIf="ficha.fotoUrl" [src]="ficha.fotoUrl" [alt]="ficha.nombreCompleto || 'Residente'">
-      <div class="sin-foto" *ngIf="!ficha.fotoUrl">
+      <img *ngIf="fotoFicha" [src]="fotoFicha" [alt]="ficha.nombreCompleto || 'Residente'">
+      <div class="sin-foto" *ngIf="!fotoFicha">
         <i class="pi pi-user"></i>
         <span>Sin foto</span>
       </div>

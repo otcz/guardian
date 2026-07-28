@@ -11,6 +11,7 @@ import guardian.entity.persona.GdPersona;
 import guardian.entity.persona.GdResidenteCasa;
 import guardian.entity.persona.GdUsuario;
 import guardian.exception.GuardianException;
+import guardian.repository.GdAccesoEventoRepository;
 import guardian.repository.GdCasaRepository;
 import guardian.repository.GdConjuntoRepository;
 import guardian.repository.GdCredencialQrRepository;
@@ -28,6 +29,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,8 +46,10 @@ public class PersonaServiceImpl implements PersonaService {
     private final GdResidenteCasaRepository residenteCasaRepository;
     private final GdCredencialQrRepository credencialRepository;
     private final GdUsuarioRepository usuarioRepository;
+    private final GdAccesoEventoRepository eventoRepository;
     private final CredencialQrService credencialQrService;
     private final ParametroService parametroService;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional(readOnly = true)
@@ -93,6 +97,7 @@ public class PersonaServiceImpl implements PersonaService {
 
         GdPersona guardada = personaRepository.save(persona);
         vincularCasa(guardada, request, ejecutor);
+        crearCuentaSiCorresponde(guardada, request, ejecutor);
 
         // La credencial se emite sola cuando ya hay foto. Si falta, no se
         // interrumpe el alta: la persona queda registrada y el administrador
@@ -104,10 +109,32 @@ public class PersonaServiceImpl implements PersonaService {
                     credencialQrService.emitirPermanente(guardada, ejecutor.getDocumento()));
         }
 
-        log.info("[admin] persona creada id={} documento={} conFoto={}",
-                guardada.getId(), documento, payload != null);
+        log.info("[admin] persona creada id={} documento={} conFoto={} conCuenta={}",
+                guardada.getId(), documento, payload != null, request.getRolUsuario() != null);
 
         return new PersonaRegistrada(mapear(guardada), payload);
+    }
+
+    /**
+     * La "tarjeta completa": si el alta trae rol, la cuenta se crea en el
+     * mismo paso. Nace INACTIVA y con clave = documento + cambio forzado,
+     * igual que cualquier cuenta creada desde el panel de usuarios.
+     */
+    private void crearCuentaSiCorresponde(GdPersona persona, PersonaRequest request,
+                                          UsuarioAutenticado ejecutor) {
+        if (request.getRolUsuario() == null || request.getRolUsuario().trim().isEmpty()) {
+            return;
+        }
+        parametroService.exigirCodigoValido(Codigos.GRUPO_ROL, request.getRolUsuario());
+
+        GdUsuario usuario = new GdUsuario();
+        usuario.setPersona(persona);
+        usuario.setRol(request.getRolUsuario());
+        usuario.setClaveHash(passwordEncoder.encode(persona.getDocumento()));
+        usuario.setRequiereCambioClave(Codigos.SI);
+        usuario.setActivo(Codigos.NO);
+        usuario.setUsuarioCreador(ejecutor.getDocumento());
+        usuarioRepository.save(usuario);
     }
 
     @Override
@@ -165,6 +192,32 @@ public class PersonaServiceImpl implements PersonaService {
 
         return credencialQrService.renderizarPng(
                 credencialQrService.construirPayload(credencial), tamanoPx);
+    }
+
+    @Override
+    @Transactional
+    public void eliminar(Long id, UsuarioAutenticado ejecutor) {
+        GdPersona persona = obtenerEntidad(id, ejecutor.getConjuntoId());
+
+        // Eliminar la propia persona dejaria al admin con una sesion valida
+        // apuntando a un usuario inexistente, y potencialmente sin ningun
+        // administrador en el conjunto.
+        if (persona.getId().equals(ejecutor.getPersonaId())) {
+            throw GuardianException.solicitudInvalida(MensajesGlobales.NO_ELIMINARSE_A_SI_MISMO);
+        }
+
+        // Orden importa: primero se anulan las FK de la bitacora (que nunca se
+        // borra), despues las filas dependientes, al final la persona.
+        eventoRepository.desvincularCredencialesDe(id);
+        eventoRepository.desvincularPersona(id);
+        eventoRepository.desvincularGuardia(id);
+        credencialRepository.deleteByPersonaId(id);
+        residenteCasaRepository.deleteByPersonaId(id);
+        usuarioRepository.deleteByPersonaId(id);
+        personaRepository.delete(persona);
+
+        log.warn("[admin] persona ELIMINADA id={} documento={} por={}",
+                id, persona.getDocumento(), ejecutor.getDocumento());
     }
 
     // ─────────────────────────────────────────────────────────────────────────

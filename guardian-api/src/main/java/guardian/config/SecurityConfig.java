@@ -53,6 +53,9 @@ public class SecurityConfig {
 
                 .antMatchers(ApiEndpoint.AUTH + ApiEndpoint.AUTH_LOGIN).permitAll()
                 .antMatchers("/actuator/health").permitAll()
+                // Las fotos se leen sin sesion: una etiqueta <img> no puede
+                // mandar Authorization. La proteccion es el nombre UUID.
+                .antMatchers(ApiEndpoint.PUBLICO_FOTOS + "/**").permitAll()
 
                 .antMatchers(ApiEndpoint.ACCESO + "/**")
                 .hasAnyRole(Codigos.ROL_GUARDIA, Codigos.ROL_ADMIN)

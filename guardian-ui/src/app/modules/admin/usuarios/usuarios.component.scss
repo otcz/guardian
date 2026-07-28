@@ -1,0 +1,11 @@
+@use '../../../styles/paneles';
+
+.aviso-ok {
+  margin-bottom: 1rem;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.85rem;
+  color: var(--ok);
+  background: var(--ok-soft);
+  border: 1px solid var(--ok);
+  border-radius: 8px;
+}

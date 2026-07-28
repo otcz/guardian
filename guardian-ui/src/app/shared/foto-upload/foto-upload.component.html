@@ -1,0 +1,28 @@
+<div class="cuadro">
+  <div class="marco" [class.vacio]="!vistaPrevia">
+    <img *ngIf="vistaPrevia" [src]="vistaPrevia" alt="Foto">
+    <i class="pi pi-user" *ngIf="!vistaPrevia && !cargando"></i>
+    <i class="pi pi-spinner pi-spin" *ngIf="cargando"></i>
+  </div>
+
+  <div class="acciones">
+    <label class="boton">
+      <i class="pi pi-camera"></i>
+      {{ vistaPrevia ? 'Cambiar' : 'Subir foto' }}
+      <input type="file"
+             accept="image/jpeg,image/png,image/webp"
+             (change)="alSeleccionar($event)">
+    </label>
+
+    <button type="button"
+            class="quitar"
+            *ngIf="vistaPrevia"
+            (click)="quitar()"
+            pTooltip="Quitar foto"
+            tooltipPosition="top">
+      <i class="pi pi-times"></i>
+    </button>
+  </div>
+
+  <small class="error" *ngIf="error">{{ error }}</small>
+</div>

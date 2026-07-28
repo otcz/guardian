@@ -13,6 +13,7 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -73,6 +74,13 @@ public class PersonaController {
     @PatchMapping(ApiEndpoint.DESACTIVAR)
     public ResponseEntity<PersonaResponse> desactivar(@PathVariable Long id) {
         return ResponseEntity.ok(personaService.cambiarEstado(id, false, usuarioActual.obtener()));
+    }
+
+    /** Eliminacion fisica. Los residentes solo inactivan; esto es exclusivo del admin. */
+    @DeleteMapping(ApiEndpoint.POR_ID)
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        personaService.eliminar(id, usuarioActual.obtener());
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping(ApiEndpoint.CREDENCIAL)

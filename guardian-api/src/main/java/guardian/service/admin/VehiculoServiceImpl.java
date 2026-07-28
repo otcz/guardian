@@ -7,6 +7,7 @@ import guardian.dto.admin.VehiculoResponse;
 import guardian.entity.conjunto.GdCasa;
 import guardian.entity.vehiculo.GdVehiculo;
 import guardian.exception.GuardianException;
+import guardian.repository.GdAccesoEventoRepository;
 import guardian.repository.GdCasaRepository;
 import guardian.repository.GdVehiculoRepository;
 import guardian.security.UsuarioAutenticado;
@@ -25,6 +26,7 @@ public class VehiculoServiceImpl implements VehiculoService {
 
     private final GdVehiculoRepository vehiculoRepository;
     private final GdCasaRepository casaRepository;
+    private final GdAccesoEventoRepository eventoRepository;
     private final ParametroService parametroService;
 
     @Override
@@ -41,6 +43,16 @@ public class VehiculoServiceImpl implements VehiculoService {
     public List<VehiculoResponse> listarPorCasa(Long casaId, Long conjuntoId) {
         obtenerCasa(casaId, conjuntoId);
         return vehiculoRepository.findByCasaIdAndActivoOrderByPlacaAsc(casaId, Codigos.SI)
+                .stream()
+                .map(this::mapear)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<VehiculoResponse> listarPorCasaIncluyendoInactivos(Long casaId, Long conjuntoId) {
+        obtenerCasa(casaId, conjuntoId);
+        return vehiculoRepository.findByCasaIdOrderByPlacaAsc(casaId)
                 .stream()
                 .map(this::mapear)
                 .collect(Collectors.toList());
@@ -103,6 +115,18 @@ public class VehiculoServiceImpl implements VehiculoService {
         log.info("[admin] vehiculo id={} activo={} por={}", id, vehiculo.getActivo(),
                 ejecutor.getDocumento());
         return mapear(vehiculoRepository.save(vehiculo));
+    }
+
+    @Override
+    @Transactional
+    public void eliminar(Long id, UsuarioAutenticado ejecutor) {
+        GdVehiculo vehiculo = obtener(id, ejecutor.getConjuntoId());
+
+        eventoRepository.desvincularVehiculo(id);
+        vehiculoRepository.delete(vehiculo);
+
+        log.warn("[admin] vehiculo ELIMINADO id={} placa={} por={}",
+                id, vehiculo.getPlaca(), ejecutor.getDocumento());
     }
 
     // ─────────────────────────────────────────────────────────────────────────

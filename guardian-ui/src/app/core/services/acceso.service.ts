@@ -8,6 +8,7 @@ import {
   FichaVerificacion,
   MiQr,
   Pagina,
+  Presencia,
   RegistrarAccesoRequest,
   Resultado
 } from '../models/acceso.model';
@@ -18,6 +19,10 @@ export class AccesoService {
   private readonly base = `${environment.apiUrl}/acceso`;
 
   constructor(private readonly http: HttpClient) {}
+
+  presencia(): Observable<Presencia> {
+    return this.http.get<Presencia>(`${this.base}/presencia`);
+  }
 
   verificar(payload: string): Observable<FichaVerificacion> {
     return this.http.post<FichaVerificacion>(`${this.base}/verificar`, { payload });

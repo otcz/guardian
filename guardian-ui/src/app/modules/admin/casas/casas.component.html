@@ -3,8 +3,13 @@
 
   <form class="alta gd-card" [formGroup]="formulario" (ngSubmit)="crear()">
     <div class="campo">
-      <label for="torre">Torre</label>
-      <input id="torre" type="text" formControlName="torre" placeholder="Ej: A">
+      <label for="torre">
+        Edificio
+        <i class="pi pi-info-circle ayuda"
+           pTooltip="Vacío si no hay torres"
+           tooltipPosition="top"></i>
+      </label>
+      <input id="torre" type="text" formControlName="torre" placeholder="Ej: Torre A">
     </div>
 
     <div class="campo">

@@ -1,0 +1,188 @@
+<div class="gd-page">
+
+  <div class="sin-casa gd-card" *ngIf="sinCasa">
+    <i class="pi pi-home"></i>
+    <p>Tu usuario no tiene una casa asignada.</p>
+    <small>Comunícate con la administración del conjunto.</small>
+  </div>
+
+  <ng-container *ngIf="!sinCasa">
+
+    <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+    <!-- ── FAMILIA ─────────────────────────────────────────────────────── -->
+    <section>
+      <div class="encabezado">
+        <h1><i class="pi pi-users"></i> Mi familia e invitados</h1>
+        <button type="button" class="principal"
+                (click)="mostrarAltaFamiliar = !mostrarAltaFamiliar">
+          <i class="pi" [ngClass]="mostrarAltaFamiliar ? 'pi-times' : 'pi-user-plus'"></i>
+          {{ mostrarAltaFamiliar ? 'Cancelar' : 'Agregar' }}
+        </button>
+      </div>
+
+      <form class="alta gd-card" *ngIf="mostrarAltaFamiliar"
+            [formGroup]="formularioFamiliar" (ngSubmit)="agregarFamiliar()">
+
+        <gd-foto-upload
+            [fotoUrl]="formularioFamiliar.controls.fotoUrl.value"
+            (fotoUrlChange)="formularioFamiliar.controls.fotoUrl.setValue($event)">
+        </gd-foto-upload>
+
+        <div class="campos">
+          <div class="campo">
+            <label for="f-documento">Documento</label>
+            <input id="f-documento" type="text" formControlName="documento"
+                   placeholder="Ej: 1020304050">
+          </div>
+          <div class="campo">
+            <label for="f-nombres">Nombres</label>
+            <input id="f-nombres" type="text" formControlName="nombres">
+          </div>
+          <div class="campo">
+            <label for="f-apellidos">Apellidos</label>
+            <input id="f-apellidos" type="text" formControlName="apellidos">
+          </div>
+          <div class="campo">
+            <label for="f-nacimiento">Nacimiento</label>
+            <input id="f-nacimiento" type="date" formControlName="fechaNacimiento">
+          </div>
+          <div class="campo">
+            <label for="f-parentesco">Parentesco</label>
+            <select id="f-parentesco" formControlName="parentesco">
+              <option value="">Selecciona…</option>
+              <option *ngFor="let p of parentescos" [value]="p.codigo">{{ p.valor }}</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="f-telefono">Teléfono</label>
+            <input id="f-telefono" type="tel" formControlName="telefono">
+          </div>
+        </div>
+
+        <button type="submit" class="principal" [disabled]="guardando">
+          <i class="pi pi-check"></i> Guardar
+        </button>
+      </form>
+
+      <p class="gd-muted" *ngIf="cargando">Cargando…</p>
+
+      <div class="tarjetas" *ngIf="!cargando">
+        <article class="miembro gd-card"
+                 *ngFor="let familiar of familia"
+                 [class.inactivo]="!activo(familiar.activo)">
+          <div class="avatar">
+            <img *ngIf="familiar.fotoUrl" [src]="familiar.fotoUrl | foto" [alt]="familiar.nombreCompleto">
+            <i class="pi pi-user" *ngIf="!familiar.fotoUrl"></i>
+          </div>
+
+          <div class="datos">
+            <strong>{{ familiar.nombreCompleto }}</strong>
+            <span class="detalle">
+              {{ etiquetaParentesco(familiar.parentesco) }}
+              <ng-container *ngIf="familiar.edad !== null"> · {{ familiar.edad }} años</ng-container>
+            </span>
+            <span class="detalle tenue">{{ familiar.documento }}</span>
+          </div>
+
+          <div class="acciones">
+            <i class="pi pi-qrcode" *ngIf="familiar.tieneCredencial"
+               pTooltip="Tiene credencial QR" tooltipPosition="top"></i>
+            <span class="pastilla" [class.si]="activo(familiar.activo)"
+                  [class.no]="!activo(familiar.activo)">
+              {{ activo(familiar.activo) ? 'Activo' : 'Inactivo' }}
+            </span>
+            <button type="button" class="accion"
+                    *ngIf="!familiar.esUsuarioActual"
+                    (click)="alternarEstadoFamiliar(familiar)"
+                    [pTooltip]="activo(familiar.activo) ? 'Inactivar' : 'Activar'"
+                    tooltipPosition="left">
+              <i class="pi" [ngClass]="activo(familiar.activo) ? 'pi-ban' : 'pi-check'"></i>
+            </button>
+          </div>
+        </article>
+
+        <p class="gd-muted" *ngIf="familia.length === 0">
+          Todavía no has registrado a nadie en tu casa.
+        </p>
+      </div>
+    </section>
+
+    <!-- ── VEHÍCULOS ───────────────────────────────────────────────────── -->
+    <section>
+      <div class="encabezado">
+        <h1><i class="pi pi-car"></i> Mis vehículos</h1>
+        <button type="button" class="principal"
+                (click)="mostrarAltaVehiculo = !mostrarAltaVehiculo">
+          <i class="pi" [ngClass]="mostrarAltaVehiculo ? 'pi-times' : 'pi-plus'"></i>
+          {{ mostrarAltaVehiculo ? 'Cancelar' : 'Agregar' }}
+        </button>
+      </div>
+
+      <form class="alta gd-card" *ngIf="mostrarAltaVehiculo"
+            [formGroup]="formularioVehiculo" (ngSubmit)="agregarVehiculo()">
+        <div class="campos">
+          <div class="campo">
+            <label for="v-placa">Placa</label>
+            <input id="v-placa" type="text" formControlName="placa" placeholder="Ej: ABC123">
+          </div>
+          <div class="campo">
+            <label for="v-tipo">Tipo</label>
+            <select id="v-tipo" formControlName="tipo">
+              <option value="">Selecciona…</option>
+              <option *ngFor="let t of tiposVehiculo" [value]="t.codigo">{{ t.valor }}</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="v-marca">Marca</label>
+            <input id="v-marca" type="text" formControlName="marca">
+          </div>
+          <div class="campo">
+            <label for="v-color">Color</label>
+            <input id="v-color" type="text" formControlName="color">
+          </div>
+        </div>
+
+        <button type="submit" class="principal" [disabled]="guardando">
+          <i class="pi pi-check"></i> Guardar
+        </button>
+      </form>
+
+      <div class="tarjetas">
+        <article class="miembro gd-card"
+                 *ngFor="let vehiculo of vehiculos"
+                 [class.inactivo]="!activo(vehiculo.activo)">
+          <div class="avatar vehiculo">
+            <i class="pi pi-car"></i>
+          </div>
+
+          <div class="datos">
+            <strong>{{ vehiculo.placa }}</strong>
+            <span class="detalle">
+              {{ vehiculo.marca || '—' }}
+              <ng-container *ngIf="vehiculo.color"> · {{ vehiculo.color }}</ng-container>
+            </span>
+          </div>
+
+          <div class="acciones">
+            <span class="pastilla" [class.si]="activo(vehiculo.activo)"
+                  [class.no]="!activo(vehiculo.activo)">
+              {{ activo(vehiculo.activo) ? 'Habilitado' : 'Inhabilitado' }}
+            </span>
+            <button type="button" class="accion"
+                    (click)="alternarEstadoVehiculo(vehiculo)"
+                    [pTooltip]="activo(vehiculo.activo) ? 'Inhabilitar' : 'Habilitar'"
+                    tooltipPosition="left">
+              <i class="pi" [ngClass]="activo(vehiculo.activo) ? 'pi-ban' : 'pi-check'"></i>
+            </button>
+          </div>
+        </article>
+
+        <p class="gd-muted" *ngIf="vehiculos.length === 0 && !cargando">
+          Todavía no has registrado vehículos.
+        </p>
+      </div>
+    </section>
+
+  </ng-container>
+</div>

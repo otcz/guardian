@@ -25,4 +25,7 @@ public interface GdCredencialQrRepository extends JpaRepository<GdCredencialQr, 
 
     Optional<GdCredencialQr> findFirstByPersonaIdAndTipoAndActivoOrderByIdDesc(
             Long personaId, String tipo, String activo);
+
+    /** Solo para la eliminacion fisica de la persona (exclusiva del admin). */
+    void deleteByPersonaId(Long personaId);
 }

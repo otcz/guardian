@@ -19,6 +19,7 @@ export class PersonasComponent implements OnInit {
   personas: Persona[] = [];
   casas: Casa[] = [];
   parentescos: Parametro[] = [];
+  roles: Parametro[] = [];
 
   cargando = true;
   guardando = false;
@@ -33,10 +34,11 @@ export class PersonasComponent implements OnInit {
     nombres: ['', [Validators.required]],
     apellidos: ['', [Validators.required]],
     fechaNacimiento: [''],
-    fotoUrl: [''],
+    fotoUrl: [null as string | null],
     telefono: [''],
     casaId: [null as number | null],
-    parentesco: ['']
+    parentesco: [''],
+    rolUsuario: ['']
   });
 
   constructor(private readonly admin: AdminService) {}
@@ -46,6 +48,7 @@ export class PersonasComponent implements OnInit {
 
     this.admin.casas().subscribe(casas => (this.casas = casas));
     this.admin.parametros('PARENTESCO').subscribe(p => (this.parentescos = p));
+    this.admin.parametros('ROL').subscribe(r => (this.roles = r));
 
     // debounce para no disparar una consulta por cada tecla.
     this.busqueda$
@@ -87,16 +90,16 @@ export class PersonasComponent implements OnInit {
       .crearPersona({
         ...datos,
         fechaNacimiento: datos.fechaNacimiento || null,
-        fotoUrl: datos.fotoUrl || null,
         telefono: datos.telefono || null,
         casaId: datos.casaId || null,
-        parentesco: datos.casaId ? datos.parentesco : null
+        parentesco: datos.casaId ? datos.parentesco : null,
+        rolUsuario: datos.rolUsuario || null
       })
       .subscribe({
         next: () => {
           this.guardando = false;
           this.mostrarAlta = false;
-          this.formulario.reset();
+          this.formulario.reset({ fotoUrl: null });
           this.cargar(this.texto);
         },
         error: (fallo: HttpErrorResponse) => {
@@ -107,6 +110,7 @@ export class PersonasComponent implements OnInit {
   }
 
   alternarEstado(persona: Persona): void {
+    this.error = null;
     this.admin.cambiarEstadoPersona(persona.id, persona.activo !== 'S').subscribe({
       next: actualizada => {
         this.personas = this.personas.map(p => (p.id === actualizada.id ? actualizada : p));
@@ -119,11 +123,28 @@ export class PersonasComponent implements OnInit {
 
   emitirCredencial(persona: Persona): void {
     this.error = null;
-
     this.admin.emitirCredencial(persona.id).subscribe({
       next: () => this.cargar(this.texto),
       error: (fallo: HttpErrorResponse) => {
         this.error = fallo.error?.mensaje ?? 'No pudimos emitir la credencial.';
+      }
+    });
+  }
+
+  eliminar(persona: Persona): void {
+    const seguro = window.confirm(
+      `¿Eliminar definitivamente a ${persona.nombreCompleto}? ` +
+      'Se borran su cuenta, sus credenciales y su vínculo con la casa. ' +
+      'La bitácora conservará sus registros de acceso.');
+    if (!seguro) {
+      return;
+    }
+
+    this.error = null;
+    this.admin.eliminarPersona(persona.id).subscribe({
+      next: () => this.cargar(this.texto),
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos eliminar a la persona.';
       }
     });
   }

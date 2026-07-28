@@ -43,4 +43,11 @@ public class PersonaRequest {
 
     /** Codigo del grupo PARENTESCO. Obligatorio cuando se envia casaId. */
     private String parentesco;
+
+    /**
+     * Codigo del grupo ROL. Si viene, el alta tambien crea la cuenta de acceso
+     * (clave inicial = documento, inactiva hasta que el admin la habilite).
+     * Null = persona sin cuenta, p. ej. un menor que solo necesita QR.
+     */
+    private String rolUsuario;
 }

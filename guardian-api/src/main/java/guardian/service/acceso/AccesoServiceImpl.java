@@ -45,7 +45,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AccesoServiceImpl implements AccesoService {
 
-    private static final long MILIS_POR_HORA = 3_600_000L;
     private static final long MILIS_POR_SEGUNDO = 1_000L;
 
     private final CredencialQrService credencialQrService;
@@ -55,9 +54,7 @@ public class AccesoServiceImpl implements AccesoService {
     private final GdVehiculoRepository vehiculoRepository;
     private final GdPuntoAccesoRepository puntoAccesoRepository;
     private final GdPersonaRepository personaRepository;
-
-    @Value("${guardian.acceso.ventana-inferencia-horas}")
-    private long ventanaInferenciaHoras;
+    private final PresenciaService presenciaService;
 
     @Value("${guardian.acceso.segundos-anti-rebote}")
     private long segundosAntiRebote;
@@ -102,7 +99,7 @@ public class AccesoServiceImpl implements AccesoService {
                 .documento(persona.getDocumento())
                 .casaIdentificador(casa.map(GdCasa::getIdentificador).orElse(null))
                 .edad(EdadUtil.calcular(persona.getFechaNacimiento()))
-                .sentidoSugerido(inferirSentido(persona.getId()))
+                .sentidoSugerido(sentidoPorPresencia(persona.getId()))
                 .vehiculos(vehiculosDe(casa.orElse(null)))
                 .payload(request.getPayload())
                 .build();
@@ -148,9 +145,17 @@ public class AccesoServiceImpl implements AccesoService {
 
         String modo = request.getModo();
         GdVehiculo vehiculo = resolverVehiculo(request, casa.orElse(null), modo);
-        String sentido = request.getSentido() != null
-                ? request.getSentido()
-                : inferirSentido(persona.getId());
+
+        // El sentido lo decide el SISTEMA por presencia: quien ya entro no
+        // puede volver a entrar, quien ya salio no puede volver a salir. Si el
+        // cliente manda un sentido y contradice la presencia real, es una
+        // pantalla desactualizada — se rechaza en vez de corromper el conteo.
+        String sentido = sentidoPorPresencia(persona.getId());
+        if (request.getSentido() != null && !request.getSentido().equals(sentido)) {
+            throw GuardianException.conflicto(Codigos.ENTRADA.equals(request.getSentido())
+                    ? MensajesGlobales.YA_ADENTRO
+                    : MensajesGlobales.YA_AFUERA);
+        }
 
         GdAccesoEvento evento = nuevoEvento(guardia, request.getPuntoAccesoId());
         evento.setSentido(sentido);
@@ -242,22 +247,9 @@ public class AccesoServiceImpl implements AccesoService {
         return null;
     }
 
-    /**
-     * Sentido del proximo movimiento a partir del ultimo permitido. Si la
-     * persona no aparece desde hace mas que la ventana configurada se asume
-     * ENTRADA: alguien que lleva medio dia sin registrarse casi seguro esta
-     * llegando, no saliendo.
-     */
-    private String inferirSentido(Long personaId) {
-        Date desde = new Date(System.currentTimeMillis() - ventanaInferenciaHoras * MILIS_POR_HORA);
-
-        return eventoRepository
-                .findFirstByPersonaIdAndResultadoAndFechaEventoAfterOrderByFechaEventoDesc(
-                        personaId, Codigos.RESULTADO_PERMITIDO, desde)
-                .map(ultimo -> Codigos.ENTRADA.equals(ultimo.getSentido())
-                        ? Codigos.SALIDA
-                        : Codigos.ENTRADA)
-                .orElse(Codigos.ENTRADA);
+    /** Adentro → lo unico registrable es SALIDA; afuera → ENTRADA. */
+    private String sentidoPorPresencia(Long personaId) {
+        return presenciaService.estaAdentro(personaId) ? Codigos.SALIDA : Codigos.ENTRADA;
     }
 
     private Optional<GdAccesoEvento> buscarLecturaReciente(Long credencialId) {

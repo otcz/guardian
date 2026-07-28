@@ -1,0 +1,95 @@
+<div class="gd-page">
+  <div class="encabezado">
+    <h1>Vehículos</h1>
+    <button type="button" class="principal" (click)="mostrarAlta = !mostrarAlta">
+      <i class="pi" [ngClass]="mostrarAlta ? 'pi-times' : 'pi-plus'"></i>
+      {{ mostrarAlta ? 'Cancelar' : 'Registrar' }}
+    </button>
+  </div>
+
+  <form class="alta gd-card" *ngIf="mostrarAlta" [formGroup]="formulario" (ngSubmit)="crear()">
+    <div class="campo">
+      <label for="casa">Casa</label>
+      <select id="casa" formControlName="casaId">
+        <option [ngValue]="null">Selecciona…</option>
+        <option *ngFor="let casa of casas" [ngValue]="casa.id">{{ casa.identificador }}</option>
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="placa">Placa</label>
+      <input id="placa" type="text" formControlName="placa" placeholder="Ej: ABC123">
+    </div>
+
+    <div class="campo">
+      <label for="tipo">Tipo</label>
+      <select id="tipo" formControlName="tipo">
+        <option value="">Selecciona…</option>
+        <option *ngFor="let t of tipos" [value]="t.codigo">{{ t.valor }}</option>
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="marca">Marca</label>
+      <input id="marca" type="text" formControlName="marca">
+    </div>
+
+    <div class="campo">
+      <label for="color">Color</label>
+      <input id="color" type="text" formControlName="color">
+    </div>
+
+    <button type="submit" class="principal" [disabled]="guardando">
+      <i class="pi pi-check"></i> Guardar
+    </button>
+  </form>
+
+  <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+  <p class="gd-muted" *ngIf="cargando">Cargando…</p>
+
+  <table class="tabla gd-card" *ngIf="!cargando">
+    <thead>
+      <tr>
+        <th>Placa</th>
+        <th>Casa</th>
+        <th>Tipo</th>
+        <th>Marca</th>
+        <th>Color</th>
+        <th>Estado</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let vehiculo of vehiculos" [class.inactiva]="!activo(vehiculo)">
+        <td class="fuerte">{{ vehiculo.placa }}</td>
+        <td>{{ vehiculo.casaIdentificador }}</td>
+        <td>{{ vehiculo.tipo }}</td>
+        <td>{{ vehiculo.marca ?? '—' }}</td>
+        <td>{{ vehiculo.color ?? '—' }}</td>
+        <td>
+          <span class="pastilla" [class.si]="activo(vehiculo)" [class.no]="!activo(vehiculo)">
+            {{ activo(vehiculo) ? 'Habilitado' : 'Inhabilitado' }}
+          </span>
+        </td>
+        <td class="derecha acciones">
+          <button type="button" class="accion"
+                  (click)="alternarEstado(vehiculo)"
+                  [pTooltip]="activo(vehiculo) ? 'Inhabilitar' : 'Habilitar'"
+                  tooltipPosition="left">
+            <i class="pi" [ngClass]="activo(vehiculo) ? 'pi-ban' : 'pi-check'"></i>
+          </button>
+          <button type="button" class="accion peligro"
+                  (click)="eliminar(vehiculo)"
+                  pTooltip="Eliminar" tooltipPosition="left">
+            <i class="pi pi-trash"></i>
+          </button>
+        </td>
+      </tr>
+
+      <tr *ngIf="vehiculos.length === 0">
+        <td colspan="7" class="vacio">Todavía no hay vehículos registrados.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

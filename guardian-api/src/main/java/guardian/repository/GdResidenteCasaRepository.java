@@ -24,4 +24,7 @@ public interface GdResidenteCasaRepository extends JpaRepository<GdResidenteCasa
      */
     Optional<GdResidenteCasa> findFirstByPersonaIdAndActivoOrderByIdAsc(
             Long personaId, String activo);
+
+    /** Solo para la eliminacion fisica de la persona (exclusiva del admin). */
+    void deleteByPersonaId(Long personaId);
 }

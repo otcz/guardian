@@ -56,6 +56,13 @@ export interface MiQr {
   fotoUrl: string | null;
 }
 
+/** Contadores que encabezan la portería. */
+export interface Presencia {
+  adentro: number;
+  afuera: number;
+  totalActivos: number;
+}
+
 /** Envelope de paginacion de Spring Data. */
 export interface Pagina<T> {
   content: T[];

@@ -55,6 +55,30 @@ public final class MensajesGlobales {
     public static final String TITULAR_YA_EXISTE =
             "Esa casa ya tiene un titular asignado.";
 
+    // ── Presencia ────────────────────────────────────────────────────────────
+    public static final String YA_ADENTRO =
+            "Esta persona ya registro su entrada y aun no ha salido.";
+    public static final String YA_AFUERA =
+            "Esta persona ya registro su salida.";
+
+    // ── Autogestion del residente ────────────────────────────────────────────
+    public static final String SIN_CASA =
+            "Tu usuario no tiene una casa asignada. Comunicate con la administracion.";
+    public static final String FAMILIAR_AJENO =
+            "Esa persona no pertenece a tu casa.";
+    public static final String NO_INACTIVARSE_A_SI_MISMO =
+            "No puedes inactivarte a ti mismo.";
+    public static final String TITULAR_SOLO_ADMIN =
+            "El titular de la casa solo lo asigna la administracion.";
+
+    // ── Fotos ────────────────────────────────────────────────────────────────
+    public static final String FOTO_INVALIDA =
+            "La foto debe ser JPG, PNG o WEBP y pesar menos de 5 MB.";
+
+    // ── Eliminacion (solo administrador) ─────────────────────────────────────
+    public static final String NO_ELIMINARSE_A_SI_MISMO =
+            "No puedes eliminar tu propia persona.";
+
     // ── Genericos ────────────────────────────────────────────────────────────
     public static final String NO_ENCONTRADO = "No encontramos lo que buscabas.";
     public static final String ERROR_INESPERADO =

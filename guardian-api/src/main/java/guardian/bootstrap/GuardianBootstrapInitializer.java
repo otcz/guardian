@@ -95,6 +95,7 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
                 new Opcion("ESPOSO", "Esposo"),
                 new Opcion("ESPOSA", "Esposa"),
                 new Opcion("HIJO", "Hijo"),
+                new Opcion("INVITADO", "Invitado"),
                 new Opcion("OTRO", "Otro")));
 
         creados += sembrarGrupo(Codigos.GRUPO_TIPO_VEHICULO, false, Arrays.asList(

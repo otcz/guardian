@@ -1,0 +1,233 @@
+section {
+  margin-bottom: 1.75rem;
+}
+
+.encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.85rem;
+
+  h1 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.15rem;
+
+    i {
+      color: var(--accent);
+    }
+  }
+}
+
+.sin-casa {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 2.5rem 1rem;
+  text-align: center;
+
+  i {
+    font-size: 2rem;
+    color: var(--text-muted);
+  }
+
+  p {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  small {
+    color: var(--text-muted);
+  }
+}
+
+/* Alta con foto a la izquierda y campos fluidos a la derecha. */
+.alta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.campos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  flex: 1 1 300px;
+  min-width: 0;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1 1 150px;
+  min-width: 0;
+
+  label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-default);
+  }
+
+  input,
+  select {
+    padding: 0.55rem 0.7rem;
+    font-size: 0.95rem;
+    color: var(--text-strong);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    outline: none;
+    min-width: 0;
+
+    &:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+  }
+}
+
+.principal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-inverse);
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+/* Tarjetas de miembro / vehículo. */
+.tarjetas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.miembro {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 1rem;
+
+  &.inactivo {
+    opacity: 0.6;
+  }
+}
+
+.avatar {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border-default);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  i {
+    font-size: 1.3rem;
+    color: var(--text-muted);
+  }
+
+  &.vehiculo i {
+    color: var(--accent);
+  }
+}
+
+.datos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex: 1 1 auto;
+  min-width: 0;
+
+  strong {
+    color: var(--text-strong);
+  }
+
+  .detalle {
+    font-size: 0.82rem;
+    color: var(--text-default);
+  }
+
+  .tenue {
+    color: var(--text-muted);
+  }
+}
+
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  > i {
+    color: var(--ok);
+  }
+}
+
+.pastilla {
+  padding: 0.15rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 999px;
+  white-space: nowrap;
+
+  &.si {
+    color: var(--ok);
+    background: var(--ok-soft);
+  }
+
+  &.no {
+    color: var(--deny);
+    background: var(--deny-soft);
+  }
+}
+
+.accion {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--text-default);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bg-soft);
+  }
+}
+
+.aviso-error {
+  margin-bottom: 1rem;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.85rem;
+  color: var(--deny);
+  background: var(--deny-soft);
+  border: 1px solid var(--deny);
+  border-radius: 8px;
+}

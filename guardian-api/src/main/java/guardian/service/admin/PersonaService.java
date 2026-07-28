@@ -22,4 +22,11 @@ public interface PersonaService {
     String emitirCredencial(Long id, UsuarioAutenticado ejecutor);
 
     byte[] credencialPng(Long id, Long conjuntoId, int tamanoPx);
+
+    /**
+     * Eliminacion FISICA — exclusiva del administrador; los residentes solo
+     * inactivan. La bitacora sobrevive: los eventos conservan nombre y
+     * documento copiados y solo se anula la FK.
+     */
+    void eliminar(Long id, UsuarioAutenticado ejecutor);
 }

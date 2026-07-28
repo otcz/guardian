@@ -46,6 +46,49 @@ export interface PersonaRequest {
   email?: string | null;
   casaId?: number | null;
   parentesco?: string | null;
+  /** Si viene, el alta también crea la cuenta de acceso (inactiva). */
+  rolUsuario?: string | null;
+}
+
+export interface Usuario {
+  id: number;
+  personaId: number;
+  documento: string;
+  nombreCompleto: string;
+  rol: string;
+  activo: string;
+  requiereCambioClave: boolean;
+  fechaUltimoIngreso: string | null;
+}
+
+/** Miembro de la casa en "Mi hogar". */
+export interface Familiar {
+  personaId: number;
+  documento: string;
+  nombreCompleto: string;
+  parentesco: string;
+  fotoUrl: string | null;
+  edad: number | null;
+  activo: string;
+  tieneCredencial: boolean;
+  esUsuarioActual: boolean;
+}
+
+export interface FamiliarRequest {
+  documento: string;
+  nombres: string;
+  apellidos: string;
+  fechaNacimiento?: string | null;
+  fotoUrl?: string | null;
+  telefono?: string | null;
+  parentesco: string;
+}
+
+export interface VehiculoResidenteRequest {
+  placa: string;
+  tipo: string;
+  marca?: string | null;
+  color?: string | null;
 }
 
 /** Respuesta del alta: incluye el QR para poder imprimir el carnet en el momento. */

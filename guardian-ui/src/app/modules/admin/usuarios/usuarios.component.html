@@ -1,0 +1,86 @@
+<div class="gd-page">
+  <div class="encabezado">
+    <h1>Usuarios</h1>
+    <button type="button" class="principal" (click)="mostrarAlta = !mostrarAlta">
+      <i class="pi" [ngClass]="mostrarAlta ? 'pi-times' : 'pi-plus'"></i>
+      {{ mostrarAlta ? 'Cancelar' : 'Crear cuenta' }}
+    </button>
+  </div>
+
+  <form class="alta gd-card" *ngIf="mostrarAlta" [formGroup]="formulario" (ngSubmit)="crear()">
+    <div class="campo">
+      <label for="persona">
+        Persona
+        <i class="pi pi-info-circle ayuda"
+           pTooltip="Solo personas sin cuenta"
+           tooltipPosition="top"></i>
+      </label>
+      <select id="persona" formControlName="personaId">
+        <option [ngValue]="null">Selecciona…</option>
+        <option *ngFor="let persona of personasSinCuenta" [ngValue]="persona.id">
+          {{ persona.nombreCompleto }} · {{ persona.documento }}
+        </option>
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="rol">Rol</label>
+      <select id="rol" formControlName="rol">
+        <option value="">Selecciona…</option>
+        <option *ngFor="let rol of roles" [value]="rol.codigo">{{ rol.valor }}</option>
+      </select>
+    </div>
+
+    <button type="submit" class="principal" [disabled]="guardando">
+      <i class="pi pi-check"></i> Crear
+    </button>
+  </form>
+
+  <div class="aviso-ok" *ngIf="aviso">{{ aviso }}</div>
+  <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+  <p class="gd-muted" *ngIf="cargando">Cargando…</p>
+
+  <table class="tabla gd-card" *ngIf="!cargando">
+    <thead>
+      <tr>
+        <th>Persona</th>
+        <th>Usuario</th>
+        <th>Rol</th>
+        <th>Último ingreso</th>
+        <th>Estado</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let usuario of usuarios" [class.inactiva]="!activo(usuario)">
+        <td class="fuerte">{{ usuario.nombreCompleto }}</td>
+        <td>{{ usuario.documento }}</td>
+        <td>{{ usuario.rol }}</td>
+        <td>{{ (usuario.fechaUltimoIngreso | date:'dd/MM/yyyy HH:mm') ?? 'Nunca' }}</td>
+        <td>
+          <span class="pastilla" [class.si]="activo(usuario)" [class.no]="!activo(usuario)">
+            {{ activo(usuario) ? 'Habilitado' : 'Inhabilitado' }}
+          </span>
+        </td>
+        <td class="derecha acciones">
+          <button type="button" class="accion"
+                  (click)="restablecerClave(usuario)"
+                  pTooltip="Restablecer contraseña" tooltipPosition="left">
+            <i class="pi pi-refresh"></i>
+          </button>
+          <button type="button" class="accion"
+                  (click)="alternarEstado(usuario)"
+                  [pTooltip]="activo(usuario) ? 'Inhabilitar' : 'Habilitar'"
+                  tooltipPosition="left">
+            <i class="pi" [ngClass]="activo(usuario) ? 'pi-ban' : 'pi-check'"></i>
+          </button>
+        </td>
+      </tr>
+
+      <tr *ngIf="usuarios.length === 0">
+        <td colspan="6" class="vacio">Todavía no hay cuentas creadas.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

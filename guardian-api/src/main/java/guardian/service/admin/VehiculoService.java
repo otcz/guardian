@@ -10,11 +10,21 @@ public interface VehiculoService {
 
     List<VehiculoResponse> listar(Long conjuntoId);
 
+    /** Solo activos: es lo que consume la porteria para los botones de placa. */
     List<VehiculoResponse> listarPorCasa(Long casaId, Long conjuntoId);
+
+    /** Todos, activos e inactivos: el residente necesita ver el inactivo para reactivarlo. */
+    List<VehiculoResponse> listarPorCasaIncluyendoInactivos(Long casaId, Long conjuntoId);
 
     VehiculoResponse crear(VehiculoRequest request, UsuarioAutenticado ejecutor);
 
     VehiculoResponse actualizar(Long id, VehiculoRequest request, UsuarioAutenticado ejecutor);
 
     VehiculoResponse cambiarEstado(Long id, boolean activo, UsuarioAutenticado ejecutor);
+
+    /**
+     * Eliminacion FISICA — exclusiva del administrador; los residentes solo
+     * inactivan. La bitacora conserva la placa copiada en cada evento.
+     */
+    void eliminar(Long id, UsuarioAutenticado ejecutor);
 }

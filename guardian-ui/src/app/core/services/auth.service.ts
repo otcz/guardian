@@ -76,9 +76,9 @@ export class AuthService {
   rutaInicial(): string {
     switch (this.sesion?.rol) {
       case 'GUARDIA':
-        return '/garita';
+        return '/porteria';
       case 'ADMIN':
-        return '/admin/casas';
+        return '/admin';
       default:
         return '/mi-qr';
     }

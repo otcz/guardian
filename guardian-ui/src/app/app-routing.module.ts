@@ -28,10 +28,18 @@ const routes: Routes = [
         canActivate: [sesionGuard]
       },
       {
-        path: 'garita',
+        path: 'mi-hogar',
+        loadChildren: () =>
+          import('./modules/mi-hogar/mi-hogar.module').then(m => m.MiHogarModule),
+        canActivate: [sesionGuard]
+      },
+      {
+        path: 'porteria',
         loadChildren: () => import('./modules/garita/garita.module').then(m => m.GaritaModule),
         canActivate: [rolGuard('GUARDIA', 'ADMIN')]
       },
+      // Ruta historica de la porteria; se conserva para marcadores viejos.
+      { path: 'garita', redirectTo: 'porteria' },
       {
         path: 'admin',
         loadChildren: () => import('./modules/admin/admin.module').then(m => m.AdminModule),

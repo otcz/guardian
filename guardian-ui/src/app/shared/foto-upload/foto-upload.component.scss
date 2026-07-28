@@ -1,0 +1,73 @@
+.cuadro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.marco {
+  width: 86px;
+  height: 86px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border-default);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  i {
+    font-size: 1.6rem;
+    color: var(--text-muted);
+  }
+}
+
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 8px;
+  cursor: pointer;
+
+  input {
+    display: none;
+  }
+}
+
+.quitar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--deny);
+  }
+}
+
+.error {
+  color: var(--deny);
+  font-size: 0.75rem;
+  text-align: center;
+}

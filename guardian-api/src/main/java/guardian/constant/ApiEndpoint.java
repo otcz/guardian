@@ -23,11 +23,16 @@ public final class ApiEndpoint {
     public static final String ACCESO_REGISTRAR = "/registrar";
     public static final String ACCESO_EVENTOS = "/eventos";
 
-    /** Autogestion del residente — rol RESIDENTE. */
+    /** Autogestion del residente — cualquier usuario autenticado sobre SU casa. */
     public static final String RESIDENTE = API + "/residente";
     public static final String RESIDENTE_MI_QR = "/mi-qr";
     public static final String RESIDENTE_MI_QR_PNG = "/mi-qr.png";
-    public static final String RESIDENTE_MI_CASA = "/mi-casa";
+    public static final String RESIDENTE_FAMILIA = "/familia";
+    public static final String RESIDENTE_VEHICULOS = "/vehiculos";
+
+    /** Fotos: subida autenticada, lectura publica por nombre UUID. */
+    public static final String FOTOS = API + "/fotos";
+    public static final String PUBLICO_FOTOS = API + "/publico/fotos";
 
     /** Administracion del conjunto — rol ADMIN. */
     public static final String ADMIN = API + "/admin";

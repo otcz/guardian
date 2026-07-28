@@ -36,11 +36,18 @@
   min-width: 0;
 
   a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     padding: 0.4rem 0.75rem;
     border-radius: 8px;
     color: var(--text-default);
     font-size: 0.9rem;
     white-space: nowrap;
+
+    i {
+      font-size: 0.85rem;
+    }
 
     &:hover {
       background: var(--bg-soft);

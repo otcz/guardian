@@ -11,6 +11,7 @@ import {
   Persona,
   PersonaRegistrada,
   PersonaRequest,
+  Usuario,
   Vehiculo,
   VehiculoRequest
 } from '../models/admin.model';
@@ -71,6 +72,11 @@ export class AdminService {
     return this.http.post<{ payload: string }>(`${this.base}/personas/${id}/credencial`, {});
   }
 
+  /** Eliminación física — exclusiva del administrador. */
+  eliminarPersona(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/personas/${id}`);
+  }
+
   // ── Vehículos ────────────────────────────────────────────────────────────
 
   vehiculos(casaId?: number): Observable<Vehiculo[]> {
@@ -85,6 +91,30 @@ export class AdminService {
   cambiarEstadoVehiculo(id: number, activar: boolean): Observable<Vehiculo> {
     const accion = activar ? 'activar' : 'desactivar';
     return this.http.patch<Vehiculo>(`${this.base}/vehiculos/${id}/${accion}`, {});
+  }
+
+  /** Eliminación física — exclusiva del administrador. */
+  eliminarVehiculo(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/vehiculos/${id}`);
+  }
+
+  // ── Usuarios (cuentas de acceso) ─────────────────────────────────────────
+
+  usuarios(): Observable<Usuario[]> {
+    return this.http.get<Usuario[]>(`${this.base}/usuarios`);
+  }
+
+  crearUsuario(personaId: number, rol: string): Observable<Usuario> {
+    return this.http.post<Usuario>(`${this.base}/usuarios`, { personaId, rol });
+  }
+
+  cambiarEstadoUsuario(id: number, activar: boolean): Observable<Usuario> {
+    const accion = activar ? 'activar' : 'desactivar';
+    return this.http.patch<Usuario>(`${this.base}/usuarios/${id}/${accion}`, {});
+  }
+
+  restablecerClave(id: number): Observable<Usuario> {
+    return this.http.patch<Usuario>(`${this.base}/usuarios/${id}/restablecer-clave`, {});
   }
 
   // ── Catálogo ─────────────────────────────────────────────────────────────

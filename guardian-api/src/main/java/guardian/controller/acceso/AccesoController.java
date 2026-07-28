@@ -3,10 +3,12 @@ package guardian.controller.acceso;
 import guardian.constant.ApiEndpoint;
 import guardian.dto.acceso.AccesoEventoResponse;
 import guardian.dto.acceso.FichaVerificacionResponse;
+import guardian.dto.acceso.PresenciaResponse;
 import guardian.dto.acceso.RegistrarAccesoRequest;
 import guardian.dto.acceso.VerificarQrRequest;
 import guardian.security.UsuarioActual;
 import guardian.service.acceso.AccesoService;
+import guardian.service.acceso.PresenciaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,7 +34,14 @@ import java.util.Date;
 public class AccesoController {
 
     private final AccesoService accesoService;
+    private final PresenciaService presenciaService;
     private final UsuarioActual usuarioActual;
+
+    /** Contadores ADENTRO / AFUERA que encabezan la pantalla de la porteria. */
+    @GetMapping("/presencia")
+    public ResponseEntity<PresenciaResponse> presencia() {
+        return ResponseEntity.ok(presenciaService.conteo(usuarioActual.conjuntoId()));
+    }
 
     /** Paso 1: el guardia escanea y ve la ficha con la foto. */
     @PostMapping(ApiEndpoint.ACCESO_VERIFICAR)

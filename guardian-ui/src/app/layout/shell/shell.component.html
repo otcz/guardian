@@ -5,10 +5,18 @@
   </div>
 
   <nav class="menu">
-    <a routerLink="/mi-qr" routerLinkActive="activo">Mi QR</a>
-    <a *ngIf="esGuardia" routerLink="/garita" routerLinkActive="activo">Portería</a>
-    <a *ngIf="esAdmin" routerLink="/admin/casas" routerLinkActive="activo">Casas</a>
-    <a *ngIf="esAdmin" routerLink="/admin/personas" routerLinkActive="activo">Personas</a>
+    <a routerLink="/mi-qr" routerLinkActive="activo">
+      <i class="pi pi-qrcode"></i> Mi QR
+    </a>
+    <a routerLink="/mi-hogar" routerLinkActive="activo">
+      <i class="pi pi-home"></i> Mi hogar
+    </a>
+    <a *ngIf="esGuardia" routerLink="/porteria" routerLinkActive="activo">
+      <i class="pi pi-shield"></i> Portería
+    </a>
+    <a *ngIf="esAdmin" routerLink="/admin" routerLinkActive="activo">
+      <i class="pi pi-cog"></i> Administración
+    </a>
   </nav>
 
   <div class="usuario">

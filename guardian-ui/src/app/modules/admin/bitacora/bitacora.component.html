@@ -1,0 +1,71 @@
+<div class="gd-page">
+  <div class="encabezado">
+    <h1>Bitácora de accesos</h1>
+
+    <div class="segmentado">
+      <button type="button"
+              [class.activo]="filtroResultado === ''"
+              (click)="filtrar('')">Todos</button>
+      <button type="button"
+              [class.activo]="filtroResultado === 'PERMITIDO'"
+              (click)="filtrar('PERMITIDO')">Permitidos</button>
+      <button type="button"
+              [class.activo]="filtroResultado === 'DENEGADO'"
+              (click)="filtrar('DENEGADO')">Denegados</button>
+    </div>
+  </div>
+
+  <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+  <p class="gd-muted" *ngIf="cargando">Cargando…</p>
+
+  <table class="tabla gd-card" *ngIf="!cargando">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Persona</th>
+        <th>Casa</th>
+        <th>Movimiento</th>
+        <th>Vehículo</th>
+        <th>Resultado</th>
+        <th>Guardia</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let evento of eventos">
+        <td>{{ evento.fechaEvento | date:'dd/MM HH:mm:ss' }}</td>
+        <td class="fuerte">{{ evento.personaNombre ?? 'Desconocido' }}</td>
+        <td>{{ evento.casaIdentificador ?? '—' }}</td>
+        <td>
+          <span class="movimiento" [class.entrada]="evento.sentido === 'E'"
+                [class.salida]="evento.sentido === 'S'">
+            <i class="pi" [ngClass]="evento.sentido === 'E' ? 'pi-sign-in' : 'pi-sign-out'"></i>
+            {{ evento.sentido === 'E' ? 'Entrada' : 'Salida' }}
+            · {{ evento.modo === 'VEHICULO' ? 'Vehículo' : 'A pie' }}
+          </span>
+        </td>
+        <td>{{ evento.vehiculoPlaca ?? '—' }}</td>
+        <td>
+          <span class="pastilla" [class.si]="permitido(evento)" [class.no]="!permitido(evento)">
+            {{ permitido(evento) ? 'Permitido' : (evento.motivoDenegacion ?? 'Denegado') }}
+          </span>
+        </td>
+        <td>{{ evento.guardiaNombre ?? '—' }}</td>
+      </tr>
+
+      <tr *ngIf="eventos.length === 0">
+        <td colspan="7" class="vacio">No hay movimientos con ese filtro.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="paginacion" *ngIf="totalPaginas > 1">
+    <button type="button" [disabled]="pagina === 0" (click)="irA(pagina - 1)">
+      <i class="pi pi-chevron-left"></i>
+    </button>
+    <span>Página {{ pagina + 1 }} de {{ totalPaginas }}</span>
+    <button type="button" [disabled]="pagina >= totalPaginas - 1" (click)="irA(pagina + 1)">
+      <i class="pi pi-chevron-right"></i>
+    </button>
+  </div>
+</div>
