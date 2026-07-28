@@ -126,7 +126,14 @@ sentido nuevo, y no puede. Viven en `Codigos.java`.
 ## 7. Autenticación
 
 Usuario = documento de identidad. Clave inicial = el mismo documento, con
-`requiereCambioClave = 'S'` forzado hasta que el residente la cambia.
+`requiereCambioClave = 'S'` forzado hasta que el residente la cambia. El login
+compara el usuario sin distinguir mayúsculas.
+
+**Excepción: el administrador sembrado.** Su usuario y clave vienen de
+configuración (`GUARDIAN_ADMIN_DOCUMENTO` / `GUARDIAN_ADMIN_CLAVE`, default
+`ADMIN` / `230614` en dev). Como la clave la definió quien instaló el sistema
+y no es derivable del usuario, entra directo sin cambio forzado; si alguien
+configura usuario=clave, el cambio forzado aplica igual que a un residente.
 
 > **Riesgo conocido.** Cualquiera que sepa la cédula de un vecino puede tomar la
 > cuenta antes que él. La mitigación en F1 es que **el usuario nace inactivo**:

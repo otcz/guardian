@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 
 import { LoginComponent } from './login/login.component';
@@ -12,6 +12,8 @@ const routes: Routes = [
 
 @NgModule({
   declarations: [LoginComponent],
-  imports: [CommonModule, ReactiveFormsModule, RouterModule.forChild(routes)]
+  // FormsModule ademas del reactivo: el checkbox "Recordar mi usuario" usa
+  // ngModel standalone porque no pertenece al contrato del formulario.
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule.forChild(routes)]
 })
 export class AuthModule { }

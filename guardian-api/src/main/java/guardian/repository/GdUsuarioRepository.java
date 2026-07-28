@@ -20,10 +20,14 @@ public interface GdUsuarioRepository extends JpaRepository<GdUsuario, Long> {
      * Login. Trae la persona y el conjunto en el mismo query porque el token se
      * arma con datos de las tres entidades y con open-in-view=false una relacion
      * LAZY reventaria al salir de la transaccion.
+     *
+     * <p>La comparacion ignora mayusculas: los documentos numericos no cambian,
+     * y un usuario alfabetico como ADMIN debe entrar aunque lo escriban
+     * "admin".</p>
      */
     @Query("SELECT u FROM GdUsuario u "
             + "JOIN FETCH u.persona p "
             + "JOIN FETCH p.conjunto "
-            + "WHERE p.documento = :documento")
+            + "WHERE UPPER(p.documento) = UPPER(:documento)")
     Optional<GdUsuario> buscarPorDocumento(@Param("documento") String documento);
 }

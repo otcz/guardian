@@ -11,8 +11,17 @@
 
     <div class="campo">
       <label for="actual">Contraseña actual</label>
-      <input id="actual" type="password" autocomplete="current-password"
-             formControlName="claveActual">
+      <div class="clave-envoltura">
+        <input id="actual" [type]="verActual ? 'text' : 'password'"
+               autocomplete="current-password"
+               formControlName="claveActual">
+        <button type="button"
+                class="ver-clave"
+                (click)="verActual = !verActual"
+                [attr.aria-label]="verActual ? 'Ocultar contraseña' : 'Ver contraseña'">
+          <i class="pi" [ngClass]="verActual ? 'pi-eye-slash' : 'pi-eye'"></i>
+        </button>
+      </div>
       <small class="error" *ngIf="campoInvalido('claveActual')">
         Escribe tu contraseña actual
       </small>
@@ -25,8 +34,17 @@
            pTooltip="Mínimo 8 caracteres"
            tooltipPosition="top"></i>
       </label>
-      <input id="nueva" type="password" autocomplete="new-password"
-             formControlName="claveNueva">
+      <div class="clave-envoltura">
+        <input id="nueva" [type]="verNueva ? 'text' : 'password'"
+               autocomplete="new-password"
+               formControlName="claveNueva">
+        <button type="button"
+                class="ver-clave"
+                (click)="verNueva = !verNueva"
+                [attr.aria-label]="verNueva ? 'Ocultar contraseña' : 'Ver contraseña'">
+          <i class="pi" [ngClass]="verNueva ? 'pi-eye-slash' : 'pi-eye'"></i>
+        </button>
+      </div>
       <small class="error" *ngIf="campoInvalido('claveNueva')">
         Mínimo 8 caracteres
       </small>
@@ -34,8 +52,17 @@
 
     <div class="campo">
       <label for="confirmacion">Repite la nueva</label>
-      <input id="confirmacion" type="password" autocomplete="new-password"
-             formControlName="confirmacion">
+      <div class="clave-envoltura">
+        <input id="confirmacion" [type]="verConfirmacion ? 'text' : 'password'"
+               autocomplete="new-password"
+               formControlName="confirmacion">
+        <button type="button"
+                class="ver-clave"
+                (click)="verConfirmacion = !verConfirmacion"
+                [attr.aria-label]="verConfirmacion ? 'Ocultar contraseña' : 'Ver contraseña'">
+          <i class="pi" [ngClass]="verConfirmacion ? 'pi-eye-slash' : 'pi-eye'"></i>
+        </button>
+      </div>
       <small class="error" *ngIf="noCoinciden">Las contraseñas no coinciden</small>
     </div>
 

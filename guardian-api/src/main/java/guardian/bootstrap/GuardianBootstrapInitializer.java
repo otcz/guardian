@@ -49,6 +49,9 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
     @Value("${guardian.bootstrap.admin-documento}")
     private String adminDocumento;
 
+    @Value("${guardian.bootstrap.admin-clave}")
+    private String adminClave;
+
     @Value("${guardian.bootstrap.conjunto-nombre}")
     private String conjuntoNombre;
 
@@ -161,9 +164,10 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
      * recien instalado.
      *
      * <p>Es la unica cuenta que nace <b>activa</b>: el resto nace inactiva y la
-     * habilita un administrador, pero aca no hay ninguno todavia. La proteccion
-     * es que arranca con {@code requiereCambioClave = 'S'}, asi que la clave
-     * igual al documento solo sirve para el primer ingreso.</p>
+     * habilita un administrador, pero aca no hay ninguno todavia. Solo se
+     * fuerza el cambio de clave cuando la clave configurada es igual al
+     * usuario — el caso degenerado que cualquiera adivina. Una clave propia
+     * definida por configuracion entra directo.</p>
      */
     private void sembrarAdministrador(GdConjunto conjunto) {
         if (personaRepository.existsByConjuntoIdAndDocumento(conjunto.getId(), adminDocumento)) {
@@ -180,19 +184,25 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
 
         GdPersona guardada = personaRepository.save(persona);
 
+        boolean claveDegenerada = adminClave.equals(adminDocumento);
+
         GdUsuario usuario = new GdUsuario();
         usuario.setPersona(guardada);
         usuario.setRol(Codigos.ROL_ADMIN);
-        usuario.setClaveHash(passwordEncoder.encode(adminDocumento));
-        usuario.setRequiereCambioClave(Codigos.SI);
+        usuario.setClaveHash(passwordEncoder.encode(adminClave));
+        usuario.setRequiereCambioClave(claveDegenerada ? Codigos.SI : Codigos.NO);
         usuario.setActivo(Codigos.SI);
         usuario.setUsuarioCreador(EJECUTOR);
 
         usuarioRepository.save(usuario);
 
-        log.warn("[bootstrap] administrador inicial creado documento={} "
-                + "— la clave es igual al documento y debe cambiarse en el primer ingreso",
-                adminDocumento);
+        if (claveDegenerada) {
+            log.warn("[bootstrap] administrador inicial creado usuario={} "
+                    + "— la clave es igual al usuario y debe cambiarse en el primer ingreso",
+                    adminDocumento);
+        } else {
+            log.info("[bootstrap] administrador inicial creado usuario={}", adminDocumento);
+        }
     }
 
     /** Par codigo/valor para sembrar el catalogo sin repetir estructura. */

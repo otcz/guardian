@@ -43,8 +43,9 @@ Hibernate crea el esquema solo (`ddl-auto=update`) y el
 `GuardianBootstrapInitializer` siembra el conjunto, los parámetros y el usuario
 administrador. No hay scripts SQL de datos.
 
-Credenciales del admin inicial: documento `1000000000`, clave `1000000000`.
-Pide cambio de clave en el primer ingreso.
+Credenciales del admin inicial: usuario `ADMIN`, clave `230614` (configurables
+con `GUARDIAN_ADMIN_DOCUMENTO` / `GUARDIAN_ADMIN_CLAVE`). Los residentes entran
+con su documento como usuario y clave inicial, con cambio obligatorio.
 
 ### 3. Frontend
 

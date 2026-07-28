@@ -8,28 +8,41 @@
     </div>
 
     <div class="campo">
-      <label for="documento">Documento</label>
+      <label for="documento">Usuario</label>
       <input id="documento"
+             #campoDocumento
              type="text"
-             inputmode="numeric"
              autocomplete="username"
              formControlName="documento"
              placeholder="Ej: 1020304050">
       <small class="error" *ngIf="campoInvalido('documento')">
-        Escribe tu número de documento
+        Escribe tu usuario
       </small>
     </div>
 
     <div class="campo">
       <label for="clave">Contraseña</label>
-      <input id="clave"
-             type="password"
-             autocomplete="current-password"
-             formControlName="clave">
+      <div class="clave-envoltura">
+        <input id="clave"
+               [type]="verClave ? 'text' : 'password'"
+               autocomplete="current-password"
+               formControlName="clave">
+        <button type="button"
+                class="ver-clave"
+                (click)="verClave = !verClave"
+                [attr.aria-label]="verClave ? 'Ocultar contraseña' : 'Ver contraseña'">
+          <i class="pi" [ngClass]="verClave ? 'pi-eye-slash' : 'pi-eye'"></i>
+        </button>
+      </div>
       <small class="error" *ngIf="campoInvalido('clave')">
         Escribe tu contraseña
       </small>
     </div>
+
+    <label class="recordar">
+      <input type="checkbox" [(ngModel)]="recordar" [ngModelOptions]="{ standalone: true }">
+      <span>Recordar mi usuario</span>
+    </label>
 
     <div class="aviso" *ngIf="error">{{ error }}</div>
 
@@ -39,7 +52,8 @@
     </button>
 
     <p class="pie">
-      ¿Primera vez? Tu usuario y tu contraseña son tu número de documento.
+      ¿Primera vez? Tu usuario y tu contraseña son tu número de documento.<br>
+      ¿Olvidaste tu contraseña? La administración puede restablecerla.
     </p>
   </form>
 </div>

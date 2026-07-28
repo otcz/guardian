@@ -68,6 +68,55 @@
   }
 }
 
+.clave-envoltura {
+  position: relative;
+  display: flex;
+
+  input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-right: 2.6rem;
+  }
+}
+
+.ver-clave {
+  position: absolute;
+  top: 50%;
+  right: 0.35rem;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--text-default);
+    background: var(--bg-soft);
+  }
+}
+
+.recordar {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  color: var(--text-default);
+  cursor: pointer;
+  user-select: none;
+
+  input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+}
+
 .error {
   color: var(--deny);
   font-size: 0.78rem;

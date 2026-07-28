@@ -27,6 +27,11 @@ export class CambiarClaveComponent implements OnInit {
   cargando = false;
   error: string | null = null;
 
+  /** Un toggle por campo: ver la actual no debe destapar la nueva. */
+  verActual = false;
+  verNueva = false;
+  verConfirmacion = false;
+
   constructor(
     private readonly auth: AuthService,
     private readonly router: Router
