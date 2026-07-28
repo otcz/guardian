@@ -1,0 +1,35 @@
+<div class="pantalla">
+
+  <div class="cargando" *ngIf="cargando && !credencial">
+    <i class="pi pi-spinner pi-spin"></i>
+    <span>Cargando tu código…</span>
+  </div>
+
+  <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+  <div class="credencial" *ngIf="credencial">
+    <div class="qr">
+      <qrcode [qrdata]="credencial.payload"
+              [width]="260"
+              [margin]="1"
+              errorCorrectionLevel="H"
+              elementType="canvas"></qrcode>
+    </div>
+
+    <h1>{{ credencial.nombreCompleto }}</h1>
+
+    <div class="datos">
+      <span class="casa" *ngIf="credencial.casaIdentificador">
+        <i class="pi pi-home"></i> {{ credencial.casaIdentificador }}
+      </span>
+      <span class="doc">{{ credencial.documento }}</span>
+    </div>
+
+    <p class="instruccion">Muestra este código en la portería.</p>
+
+    <div class="sin-conexion" *ngIf="desdeCache">
+      <i class="pi pi-wifi"></i>
+      Sin conexión. Tu código sigue siendo válido.
+    </div>
+  </div>
+</div>

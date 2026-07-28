@@ -1,0 +1,45 @@
+<div class="pantalla">
+  <form class="tarjeta" [formGroup]="formulario" (ngSubmit)="entrar()">
+
+    <div class="marca">
+      <i class="pi pi-shield"></i>
+      <h1>GUARDIAN</h1>
+      <p>Control de acceso del conjunto</p>
+    </div>
+
+    <div class="campo">
+      <label for="documento">Documento</label>
+      <input id="documento"
+             type="text"
+             inputmode="numeric"
+             autocomplete="username"
+             formControlName="documento"
+             placeholder="Ej: 1020304050">
+      <small class="error" *ngIf="campoInvalido('documento')">
+        Escribe tu número de documento
+      </small>
+    </div>
+
+    <div class="campo">
+      <label for="clave">Contraseña</label>
+      <input id="clave"
+             type="password"
+             autocomplete="current-password"
+             formControlName="clave">
+      <small class="error" *ngIf="campoInvalido('clave')">
+        Escribe tu contraseña
+      </small>
+    </div>
+
+    <div class="aviso" *ngIf="error">{{ error }}</div>
+
+    <button type="submit" class="principal" [disabled]="cargando">
+      <i class="pi" [ngClass]="cargando ? 'pi-spinner pi-spin' : 'pi-sign-in'"></i>
+      {{ cargando ? 'Entrando…' : 'Entrar' }}
+    </button>
+
+    <p class="pie">
+      ¿Primera vez? Tu usuario y tu contraseña son tu número de documento.
+    </p>
+  </form>
+</div>

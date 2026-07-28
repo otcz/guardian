@@ -1,0 +1,92 @@
+.pantalla {
+  display: grid;
+  place-items: center;
+  padding: 1.5rem 1.25rem 2.5rem;
+}
+
+.cargando {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+}
+
+.aviso-error {
+  padding: 0.75rem 1rem;
+  color: var(--deny);
+  background: var(--deny-soft);
+  border: 1px solid var(--deny);
+  border-radius: 10px;
+}
+
+.credencial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 340px;
+  padding: 1.5rem;
+  text-align: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+/* El QR va sobre blanco SIEMPRE, también en modo oscuro: los lectores
+   necesitan el contraste claro-oscuro y un QR invertido no escanea. */
+.qr {
+  padding: 0.75rem;
+  background: #ffffff;
+  border-radius: 12px;
+  line-height: 0;
+}
+
+h1 {
+  margin: 0.25rem 0 0;
+  font-size: 1.15rem;
+}
+
+.datos {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: var(--text-default);
+
+  .casa {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.6rem;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 999px;
+    font-weight: 600;
+  }
+
+  .doc {
+    color: var(--text-muted);
+  }
+}
+
+.instruccion {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.sin-conexion {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.78rem;
+  color: var(--warn);
+  background: var(--warn-soft);
+  border-radius: 8px;
+}

@@ -1,0 +1,106 @@
+name: guardian
+
+# ============================================================================
+# GUARDIAN — stack de desarrollo local
+# ============================================================================
+# Para trabajar solo la base (backend y frontend corriendo en tu maquina):
+#   docker compose -f infra/docker-compose.yml up -d postgres
+#
+# Para levantar todo:
+#   docker compose -f infra/docker-compose.yml up -d --build
+# ============================================================================
+
+services:
+
+  postgres:
+    image: postgres:14
+    container_name: guardian_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: guardian_user
+      POSTGRES_PASSWORD: guardian_pass
+      POSTGRES_DB: guardian
+    # 5434 en el host y no 5432: la maquina de desarrollo ya corre otros
+    # proyectos con Postgres — 5432 y 5433 estan tomados — y el choque solo se
+    # descubre cuando el contenedor arranca contra la base equivocada.
+    ports:
+      - "5434:5432"
+    volumes:
+      - guardian_postgres_data:/var/lib/postgresql/data
+    networks:
+      - guardian-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U guardian_user -d guardian"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  guardian-api:
+    build:
+      context: ../guardian-api
+      dockerfile: Dockerfile
+    container_name: guardian_api
+    restart: on-failure
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/guardian
+      SPRING_DATASOURCE_USERNAME: guardian_user
+      SPRING_DATASOURCE_PASSWORD: guardian_pass
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+      GUARDIAN_ALLOWED_ORIGINS: ${GUARDIAN_ALLOWED_ORIGINS:-http://localhost:4200}
+
+      # Secretos de desarrollo. En produccion van por Secret Manager.
+      # El del QR es independiente del de sesion a proposito: comprometer la
+      # sesion de un usuario no debe permitir fabricar credenciales de acceso.
+      #
+      # OJO: si GUARDIAN_QR_HMAC_SECRET cambia, TODOS los QR emitidos dejan de
+      # validar y hay que reemitirlos.
+      GUARDIAN_JWT_SECRET: ${GUARDIAN_JWT_SECRET:-guardian-local-dev-secret-change-me-32b!}
+      GUARDIAN_QR_HMAC_SECRET: ${GUARDIAN_QR_HMAC_SECRET:-guardian-local-qr-hmac-change-me-32bytes!}
+
+      GUARDIAN_ADMIN_DOCUMENTO: ${GUARDIAN_ADMIN_DOCUMENTO:-1000000000}
+      GUARDIAN_CONJUNTO_NOMBRE: ${GUARDIAN_CONJUNTO_NOMBRE:-Conjunto Residencial}
+
+      STORAGE_TYPE: ${STORAGE_TYPE:-local}
+      STORAGE_LOCAL_PATH: /data/fotos
+    ports:
+      - "8080:8080"
+    volumes:
+      - guardian_fotos:/data/fotos
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+    networks:
+      - guardian-net
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: guardian_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@guardian.local
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5051:80"
+    volumes:
+      - guardian_pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - guardian-net
+
+volumes:
+  guardian_postgres_data:
+  guardian_pgadmin_data:
+  guardian_fotos:
+
+networks:
+  guardian-net:
+    driver: bridge

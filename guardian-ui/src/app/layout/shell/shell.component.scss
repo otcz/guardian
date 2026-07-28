@@ -1,0 +1,97 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.barra {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 1rem;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
+  box-shadow: var(--shadow-card);
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+
+  i {
+    font-size: 1.15rem;
+  }
+}
+
+.menu {
+  display: flex;
+  gap: 0.25rem;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  min-width: 0;
+
+  a {
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+    color: var(--text-default);
+    font-size: 0.9rem;
+    white-space: nowrap;
+
+    &:hover {
+      background: var(--bg-soft);
+    }
+
+    &.activo {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+    }
+  }
+}
+
+.usuario {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nombre {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  font-size: 0.85rem;
+  color: var(--text-strong);
+  text-align: right;
+
+  small {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+  }
+}
+
+.icono {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-default);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bg-soft);
+  }
+}
+
+main {
+  flex: 1 1 auto;
+  min-width: 0;
+}

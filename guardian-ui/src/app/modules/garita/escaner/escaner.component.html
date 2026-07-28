@@ -1,0 +1,97 @@
+<div class="garita">
+
+  <!-- ESCANEO -->
+  <section class="escaneo" *ngIf="etapa === 'escaneando' || etapa === 'verificando'">
+    <div id="gd-lector" class="lector" [class.oculto]="modoManual"></div>
+
+    <div class="manual" *ngIf="modoManual">
+      <label for="codigo">Código</label>
+      <input id="codigo"
+             type="text"
+             [(ngModel)]="payloadManual"
+             (keyup.enter)="verificarManual()"
+             placeholder="Pega o escribe el código del QR"
+             autocomplete="off">
+      <button type="button" class="principal" (click)="verificarManual()">Verificar</button>
+    </div>
+
+    <p class="pista" *ngIf="!modoManual && etapa === 'escaneando'">
+      Apunta la cámara al código del residente
+    </p>
+
+    <p class="pista" *ngIf="etapa === 'verificando'">
+      <i class="pi pi-spinner pi-spin"></i> Verificando…
+    </p>
+
+    <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+    <button type="button" class="alterno" (click)="alternarManual()">
+      {{ modoManual ? 'Usar la cámara' : 'Escribir el código' }}
+    </button>
+  </section>
+
+  <!-- FICHA -->
+  <section class="ficha"
+           *ngIf="etapa === 'ficha' && ficha"
+           [class.ok]="ficha.permitido"
+           [class.deny]="!ficha.permitido">
+
+    <div class="veredicto">
+      <i class="pi" [ngClass]="ficha.permitido ? 'pi-check-circle' : 'pi-times-circle'"></i>
+      <span>{{ ficha.permitido ? 'PUEDE PASAR' : 'NO PUEDE PASAR' }}</span>
+    </div>
+
+    <p class="motivo" *ngIf="!ficha.permitido && ficha.mensaje">{{ ficha.mensaje }}</p>
+
+    <!-- La foto es el control real: el guardia compara cara contra pantalla. -->
+    <div class="foto">
+      <img *ngIf="ficha.fotoUrl" [src]="ficha.fotoUrl" [alt]="ficha.nombreCompleto || 'Residente'">
+      <div class="sin-foto" *ngIf="!ficha.fotoUrl">
+        <i class="pi pi-user"></i>
+        <span>Sin foto</span>
+      </div>
+    </div>
+
+    <h1>{{ ficha.nombreCompleto || 'Desconocido' }}</h1>
+
+    <div class="datos">
+      <span class="casa" *ngIf="ficha.casaIdentificador">
+        <i class="pi pi-home"></i> {{ ficha.casaIdentificador }}
+      </span>
+      <span *ngIf="ficha.edad !== null">{{ ficha.edad }} años</span>
+      <span *ngIf="ficha.documento">{{ ficha.documento }}</span>
+    </div>
+
+    <!-- Un solo toque: el sentido ya viene inferido -->
+    <div class="acciones" *ngIf="ficha.permitido">
+      <p class="sentido">Registrar {{ textoSentido }}</p>
+
+      <button type="button" class="opcion" (click)="registrar('PEATON')">
+        <i class="pi pi-user"></i> A pie
+      </button>
+
+      <button type="button"
+              class="opcion"
+              *ngFor="let vehiculo of ficha.vehiculos"
+              (click)="registrar('VEHICULO', vehiculo)">
+        <i class="pi pi-car"></i>
+        {{ vehiculo.placa }}
+        <small *ngIf="vehiculo.marca || vehiculo.color">
+          {{ vehiculo.marca }} {{ vehiculo.color }}
+        </small>
+      </button>
+    </div>
+
+    <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+    <button type="button" class="alterno" (click)="reiniciar()">
+      {{ ficha.permitido ? 'Cancelar' : 'Siguiente' }}
+    </button>
+  </section>
+
+  <!-- CONFIRMACION -->
+  <section class="listo" *ngIf="etapa === 'registrado'">
+    <i class="pi pi-check-circle"></i>
+    <span>Registrado</span>
+  </section>
+</div>

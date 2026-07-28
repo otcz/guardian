@@ -1,0 +1,214 @@
+package guardian.bootstrap;
+
+import guardian.constant.Codigos;
+import guardian.entity.conjunto.GdConjunto;
+import guardian.entity.conjunto.GdPuntoAcceso;
+import guardian.entity.parametro.GdParametro;
+import guardian.entity.persona.GdPersona;
+import guardian.entity.persona.GdUsuario;
+import guardian.repository.GdConjuntoRepository;
+import guardian.repository.GdParametroRepository;
+import guardian.repository.GdPersonaRepository;
+import guardian.repository.GdPuntoAccesoRepository;
+import guardian.repository.GdUsuarioRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Siembra los datos que el sistema necesita para arrancar. Es la unica fuente
+ * de inicializacion: <b>no hay scripts SQL de datos</b> en este proyecto.
+ *
+ * <p><b>Solo inserta, nunca borra.</b> Cada elemento se crea si no existe, asi
+ * que reiniciar la aplicacion es seguro y no pisa cambios del administrador. La
+ * contrapartida es que quitar un valor de este archivo no lo borra de la base:
+ * eso hay que hacerlo a mano.</p>
+ */
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class GuardianBootstrapInitializer implements ApplicationRunner {
+
+    private final GdConjuntoRepository conjuntoRepository;
+    private final GdParametroRepository parametroRepository;
+    private final GdPuntoAccesoRepository puntoAccesoRepository;
+    private final GdPersonaRepository personaRepository;
+    private final GdUsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    private static final String EJECUTOR = "SYSTEM";
+
+    @Value("${guardian.bootstrap.admin-documento}")
+    private String adminDocumento;
+
+    @Value("${guardian.bootstrap.conjunto-nombre}")
+    private String conjuntoNombre;
+
+    @Override
+    @Transactional
+    public void run(ApplicationArguments args) {
+        GdConjunto conjunto = sembrarConjunto();
+        sembrarParametros();
+        sembrarPuntoAcceso(conjunto);
+        sembrarAdministrador(conjunto);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private GdConjunto sembrarConjunto() {
+        return conjuntoRepository.findFirstByOrderByIdAsc().orElseGet(() -> {
+            GdConjunto conjunto = new GdConjunto();
+            conjunto.setNombre(conjuntoNombre);
+            conjunto.setActivo(Codigos.SI);
+            conjunto.setUsuarioCreador(EJECUTOR);
+
+            GdConjunto guardado = conjuntoRepository.save(conjunto);
+            log.info("[bootstrap] conjunto creado id={} nombre={}",
+                    guardado.getId(), conjuntoNombre);
+            return guardado;
+        });
+    }
+
+    private void sembrarParametros() {
+        int creados = 0;
+
+        creados += sembrarGrupo(Codigos.GRUPO_ROL, true, Arrays.asList(
+                new Opcion(Codigos.ROL_ADMIN, "Administrador"),
+                new Opcion(Codigos.ROL_GUARDIA, "Guardia"),
+                new Opcion(Codigos.ROL_RESIDENTE, "Residente")));
+
+        creados += sembrarGrupo(Codigos.GRUPO_PARENTESCO, false, Arrays.asList(
+                // TITULAR va protegido: la validacion de titular unico por casa
+                // lo referencia por codigo y quedaria sin sentido si desaparece.
+                new Opcion(Codigos.PARENTESCO_TITULAR, "Titular", true),
+                new Opcion("ESPOSO", "Esposo"),
+                new Opcion("ESPOSA", "Esposa"),
+                new Opcion("HIJO", "Hijo"),
+                new Opcion("OTRO", "Otro")));
+
+        creados += sembrarGrupo(Codigos.GRUPO_TIPO_VEHICULO, false, Arrays.asList(
+                new Opcion("CARRO", "Carro"),
+                new Opcion("MOTO", "Moto"),
+                new Opcion("BICICLETA", "Bicicleta"),
+                new Opcion("OTRO", "Otro")));
+
+        creados += sembrarGrupo(Codigos.GRUPO_TIPO_CREDENCIAL, true, Arrays.asList(
+                new Opcion(Codigos.CREDENCIAL_PERMANENTE, "Permanente"),
+                new Opcion(Codigos.CREDENCIAL_TEMPORAL, "Temporal")));
+
+        creados += sembrarGrupo(Codigos.GRUPO_MOTIVO_DENEGACION, true, Arrays.asList(
+                new Opcion(Codigos.MOTIVO_FIRMA_INVALIDA, "Codigo no valido"),
+                new Opcion(Codigos.MOTIVO_CREDENCIAL_REVOCADA, "Credencial revocada"),
+                new Opcion(Codigos.MOTIVO_CREDENCIAL_VENCIDA, "Credencial vencida"),
+                new Opcion(Codigos.MOTIVO_PERSONA_INACTIVA, "Persona inactiva"),
+                new Opcion(Codigos.MOTIVO_CASA_INACTIVA, "Casa inactiva")));
+
+        if (creados > 0) {
+            log.info("[bootstrap] parametros sembrados nuevos={}", creados);
+        }
+    }
+
+    private int sembrarGrupo(String grupo, boolean todosProtegidos, List<Opcion> opciones) {
+        int creados = 0;
+        int orden = 1;
+
+        for (Opcion opcion : opciones) {
+            if (!parametroRepository.existsByGrupoAndCodigo(grupo, opcion.codigo)) {
+                GdParametro parametro = new GdParametro();
+                parametro.setGrupo(grupo);
+                parametro.setCodigo(opcion.codigo);
+                parametro.setValor(opcion.valor);
+                parametro.setOrden(orden);
+                parametro.setProtegido(
+                        todosProtegidos || opcion.protegido ? Codigos.SI : Codigos.NO);
+                parametro.setActivo(Codigos.SI);
+                parametro.setUsuarioCreador(EJECUTOR);
+
+                parametroRepository.save(parametro);
+                creados++;
+            }
+            orden++;
+        }
+        return creados;
+    }
+
+    private void sembrarPuntoAcceso(GdConjunto conjunto) {
+        if (puntoAccesoRepository.countByConjuntoId(conjunto.getId()) > 0) {
+            return;
+        }
+
+        GdPuntoAcceso porteria = new GdPuntoAcceso();
+        porteria.setConjunto(conjunto);
+        porteria.setNombre("Porteria principal");
+        porteria.setPermiteVehiculo(Codigos.SI);
+        porteria.setActivo(Codigos.SI);
+        porteria.setUsuarioCreador(EJECUTOR);
+
+        puntoAccesoRepository.save(porteria);
+        log.info("[bootstrap] punto de acceso creado nombre={}", porteria.getNombre());
+    }
+
+    /**
+     * Administrador inicial. Sin el no habria forma de entrar a un sistema
+     * recien instalado.
+     *
+     * <p>Es la unica cuenta que nace <b>activa</b>: el resto nace inactiva y la
+     * habilita un administrador, pero aca no hay ninguno todavia. La proteccion
+     * es que arranca con {@code requiereCambioClave = 'S'}, asi que la clave
+     * igual al documento solo sirve para el primer ingreso.</p>
+     */
+    private void sembrarAdministrador(GdConjunto conjunto) {
+        if (personaRepository.existsByConjuntoIdAndDocumento(conjunto.getId(), adminDocumento)) {
+            return;
+        }
+
+        GdPersona persona = new GdPersona();
+        persona.setConjunto(conjunto);
+        persona.setDocumento(adminDocumento);
+        persona.setNombres("Administrador");
+        persona.setApellidos("del conjunto");
+        persona.setActivo(Codigos.SI);
+        persona.setUsuarioCreador(EJECUTOR);
+
+        GdPersona guardada = personaRepository.save(persona);
+
+        GdUsuario usuario = new GdUsuario();
+        usuario.setPersona(guardada);
+        usuario.setRol(Codigos.ROL_ADMIN);
+        usuario.setClaveHash(passwordEncoder.encode(adminDocumento));
+        usuario.setRequiereCambioClave(Codigos.SI);
+        usuario.setActivo(Codigos.SI);
+        usuario.setUsuarioCreador(EJECUTOR);
+
+        usuarioRepository.save(usuario);
+
+        log.warn("[bootstrap] administrador inicial creado documento={} "
+                + "— la clave es igual al documento y debe cambiarse en el primer ingreso",
+                adminDocumento);
+    }
+
+    /** Par codigo/valor para sembrar el catalogo sin repetir estructura. */
+    private static final class Opcion {
+        private final String codigo;
+        private final String valor;
+        private final boolean protegido;
+
+        private Opcion(String codigo, String valor) {
+            this(codigo, valor, false);
+        }
+
+        private Opcion(String codigo, String valor, boolean protegido) {
+            this.codigo = codigo;
+            this.valor = valor;
+            this.protegido = protegido;
+        }
+    }
+}

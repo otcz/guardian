@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+ http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>guardian</groupId>
+    <artifactId>guardian-api</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>guardian-api</name>
+    <description>GUARDIAN - API de control de acceso residencial</description>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.18</version>
+        <relativePath/>
+    </parent>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <!-- Overrides de CVE. Mantener sincronizado con el pom raiz. -->
+        <!-- Tomcat: CVE-2025-24813 CRITICAL (RCE), CVE-2024-34750 HIGH -->
+        <tomcat.version>9.0.106</tomcat.version>
+        <!-- Spring Framework: CVE-2024-22243/22259/22262 HIGH (SSRF), CVE-2024-38809 HIGH (DoS) -->
+        <spring-framework.version>5.3.39</spring-framework.version>
+        <!-- Spring Security: CVE-2025-22228 HIGH (BCrypt password length bypass) -->
+        <spring-security.version>5.7.14</spring-security.version>
+        <!-- SnakeYAML: CVE-2022-1471 HIGH (RCE deserialization) -->
+        <snakeyaml.version>2.0</snakeyaml.version>
+        <!-- Jackson: CVE-2025-52999 HIGH (StackOverflow DoS) -->
+        <jackson-bom.version>2.17.2</jackson-bom.version>
+        <!-- PostgreSQL: CVE-2024-1597 CRITICAL (SQL Injection via simple query mode) -->
+        <postgresql.version>42.7.2</postgresql.version>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- JWT: emision y verificacion del token de sesion (HS256). -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- ZXing: render del QR como PNG desde el servidor.
+             No es para la app del residente (esa dibuja el QR en el cliente),
+             sino para que el administrador imprima carnets: en un conjunto
+             siempre hay residentes sin smartphone — adultos mayores sobre todo —
+             y sin credencial impresa quedarian fuera del sistema. -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>3.5.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <!-- <release> es estricto: rechaza APIs > Java 8 (ej. String.isBlank).
+                         Asegura paridad con la imagen docker (Temurin 8). -->
+                    <release>8</release>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -1,0 +1,25 @@
+package guardian.service.admin;
+
+import guardian.dto.admin.PersonaRequest;
+import guardian.dto.admin.PersonaResponse;
+import guardian.security.UsuarioAutenticado;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+public interface PersonaService {
+
+    Page<PersonaResponse> buscar(Long conjuntoId, String texto, Pageable pageable);
+
+    PersonaResponse obtener(Long id, Long conjuntoId);
+
+    PersonaRegistrada crear(PersonaRequest request, UsuarioAutenticado ejecutor);
+
+    PersonaResponse actualizar(Long id, PersonaRequest request, UsuarioAutenticado ejecutor);
+
+    PersonaResponse cambiarEstado(Long id, boolean activa, UsuarioAutenticado ejecutor);
+
+    /** Emite (o reemite) la credencial QR. Exige que la persona tenga foto. */
+    String emitirCredencial(Long id, UsuarioAutenticado ejecutor);
+
+    byte[] credencialPng(Long id, Long conjuntoId, int tamanoPx);
+}

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+ http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>guardian</groupId>
+    <artifactId>guardian</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>guardian</name>
+    <description>GUARDIAN - Control de acceso para conjuntos residenciales</description>
+
+    <!--
+        POM raiz del repo. GUARDIAN es un MONOLITO a proposito: un solo backend
+        (guardian-api) + un frontend PWA (guardian-ui). No hay microservicios.
+
+        Razon (ver .claude/CLAUDE.md seccion 8): el dominio es pequeno y
+        transaccional, todo comparte la misma BD y el mismo ciclo de vida.
+        Partirlo en servicios agregaria latencia por hop, cold starts de Java
+        de 5-15 seg en la garita (justo donde NO se puede esperar) y ~30 USD
+        al mes por cada instancia minima. Si algun dia un modulo necesita
+        escalar aparte, se extrae; hoy no hay evidencia que lo justifique.
+
+        Cada modulo hereda de spring-boot-starter-parent directamente porque el
+        plugin de Boot lo exige. Las properties de abajo son la REFERENCIA de
+        versiones: si una cambia, cambia aca y en el pom del modulo.
+    -->
+    <modules>
+        <module>guardian-api</module>
+    </modules>
+
+    <properties>
+        <spring-boot.version>2.7.18</spring-boot.version>
+        <java.version>1.8</java.version>
+        <!-- CVE-2025-24813 CRITICAL (RCE), CVE-2024-34750 HIGH -->
+        <tomcat.version>9.0.106</tomcat.version>
+        <!-- CVE-2024-22243/22259/22262 HIGH (SSRF), CVE-2024-38809 HIGH (DoS) -->
+        <spring-framework.version>5.3.39</spring-framework.version>
+        <!-- CVE-2025-22228 HIGH (BCrypt password length bypass) -->
+        <spring-security.version>5.7.14</spring-security.version>
+        <!-- CVE-2022-1471 HIGH (RCE deserialization) -->
+        <snakeyaml.version>2.0</snakeyaml.version>
+        <!-- CVE-2025-52999 HIGH (StackOverflow DoS) -->
+        <jackson-bom.version>2.17.2</jackson-bom.version>
+        <!-- CVE-2024-1597 CRITICAL (SQL Injection) -->
+        <postgresql.version>42.7.2</postgresql.version>
+    </properties>
+
+</project>

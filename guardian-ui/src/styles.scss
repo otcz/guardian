@@ -1,0 +1,53 @@
+@use 'primeicons/primeicons.css';
+@use './app/styles/tokens';
+
+/* ---------------------------------------------------------------------------
+   Estilos globales de GUARDIAN.
+   Los colores SIEMPRE salen de los tokens de app/styles/_tokens.scss.
+   Nunca escribir un hex aca ni en un componente.
+   --------------------------------------------------------------------------- */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-base);
+  color: var(--text-strong);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* Utilitarias mínimas. Todo lo demás vive en el SCSS del componente. */
+.gd-page {
+  padding: 1.25rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.gd-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.gd-muted {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}

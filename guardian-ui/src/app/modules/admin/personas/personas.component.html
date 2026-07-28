@@ -1,0 +1,131 @@
+<div class="gd-page">
+  <div class="encabezado">
+    <h1>Personas</h1>
+    <button type="button" class="principal" (click)="mostrarAlta = !mostrarAlta">
+      <i class="pi" [ngClass]="mostrarAlta ? 'pi-times' : 'pi-plus'"></i>
+      {{ mostrarAlta ? 'Cancelar' : 'Registrar' }}
+    </button>
+  </div>
+
+  <!-- Alta -->
+  <form class="alta gd-card" *ngIf="mostrarAlta" [formGroup]="formulario" (ngSubmit)="crear()">
+    <div class="campo">
+      <label for="documento">Documento</label>
+      <input id="documento" type="text" inputmode="numeric"
+             formControlName="documento" placeholder="Ej: 1020304050">
+    </div>
+
+    <div class="campo">
+      <label for="nombres">Nombres</label>
+      <input id="nombres" type="text" formControlName="nombres">
+    </div>
+
+    <div class="campo">
+      <label for="apellidos">Apellidos</label>
+      <input id="apellidos" type="text" formControlName="apellidos">
+    </div>
+
+    <div class="campo">
+      <label for="nacimiento">Nacimiento</label>
+      <input id="nacimiento" type="date" formControlName="fechaNacimiento">
+    </div>
+
+    <div class="campo">
+      <label for="foto">
+        Foto
+        <i class="pi pi-info-circle ayuda"
+           pTooltip="Obligatoria para emitir el QR"
+           tooltipPosition="top"></i>
+      </label>
+      <input id="foto" type="text" formControlName="fotoUrl"
+             placeholder="URL de la foto">
+    </div>
+
+    <div class="campo">
+      <label for="telefono">Teléfono</label>
+      <input id="telefono" type="tel" formControlName="telefono">
+    </div>
+
+    <div class="campo">
+      <label for="casa">Casa</label>
+      <select id="casa" formControlName="casaId">
+        <option [ngValue]="null">Sin casa (guardia / externo)</option>
+        <option *ngFor="let casa of casas" [ngValue]="casa.id">{{ casa.identificador }}</option>
+      </select>
+    </div>
+
+    <div class="campo" *ngIf="pideParentesco">
+      <label for="parentesco">Parentesco</label>
+      <select id="parentesco" formControlName="parentesco">
+        <option value="">Selecciona…</option>
+        <option *ngFor="let p of parentescos" [value]="p.codigo">{{ p.valor }}</option>
+      </select>
+    </div>
+
+    <button type="submit" class="principal" [disabled]="guardando">
+      <i class="pi pi-check"></i> Guardar
+    </button>
+  </form>
+
+  <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+  <!-- Búsqueda -->
+  <div class="busqueda">
+    <i class="pi pi-search"></i>
+    <input type="text"
+           [ngModel]="texto"
+           (ngModelChange)="buscar($event)"
+           placeholder="Buscar por nombre o documento">
+  </div>
+
+  <p class="gd-muted" *ngIf="cargando">Cargando…</p>
+
+  <table class="tabla gd-card" *ngIf="!cargando">
+    <thead>
+      <tr>
+        <th>Persona</th>
+        <th>Documento</th>
+        <th>Casa</th>
+        <th>QR</th>
+        <th>Estado</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let persona of personas" [class.inactiva]="!activa(persona)">
+        <td class="fuerte">{{ persona.nombreCompleto }}</td>
+        <td>{{ persona.documento }}</td>
+        <td>{{ persona.casaIdentificador ?? '—' }}</td>
+        <td>
+          <i class="pi"
+             [ngClass]="persona.tieneCredencial ? 'pi-qrcode ok' : 'pi-minus sin'"></i>
+        </td>
+        <td>
+          <span class="pastilla" [class.si]="activa(persona)" [class.no]="!activa(persona)">
+            {{ activa(persona) ? 'Activa' : 'Inactiva' }}
+          </span>
+        </td>
+        <td class="derecha acciones">
+          <button type="button"
+                  class="accion"
+                  (click)="emitirCredencial(persona)"
+                  [pTooltip]="persona.tieneCredencial ? 'Reemitir QR (revoca el anterior)' : 'Emitir QR'"
+                  tooltipPosition="left">
+            <i class="pi pi-qrcode"></i>
+          </button>
+          <button type="button"
+                  class="accion"
+                  (click)="alternarEstado(persona)"
+                  [pTooltip]="activa(persona) ? 'Deshabilitar ingreso' : 'Habilitar ingreso'"
+                  tooltipPosition="left">
+            <i class="pi" [ngClass]="activa(persona) ? 'pi-ban' : 'pi-check'"></i>
+          </button>
+        </td>
+      </tr>
+
+      <tr *ngIf="personas.length === 0">
+        <td colspan="6" class="vacio">No encontramos personas con ese criterio.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

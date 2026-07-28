@@ -1,0 +1,66 @@
+/* ---------------------------------------------------------------------------
+   Tokens de color de GUARDIAN.
+
+   Regla del proyecto: NINGÚN componente escribe un hex. Todo sale de estas
+   variables, y por eso el modo oscuro se resuelve en un solo lugar en vez de
+   en cada archivo .scss.
+
+   El modo oscuro importa más de lo normal acá: la garita se opera de noche,
+   y una pantalla blanca a las 2 de la mañana deslumbra al guardia justo
+   cuando tiene que compararle la cara a alguien.
+   --------------------------------------------------------------------------- */
+
+:root {
+  --bg-base: #f4f6f8;
+  --bg-surface: #ffffff;
+  --bg-soft: #eef1f5;
+  --bg-inverse: #10151c;
+
+  --text-strong: #14181f;
+  --text-default: #39424e;
+  --text-muted: #6b7684;
+  --text-inverse: #ffffff;
+
+  --border-default: #d9dfe6;
+  --border-strong: #b9c2cc;
+
+  --accent: #1f6feb;
+  --accent-soft: #e8f0fe;
+
+  /* Verde y rojo del veredicto de la portería. Se leen a un metro. */
+  --ok: #1a7f52;
+  --ok-soft: #e4f5ec;
+  --deny: #c0362c;
+  --deny-soft: #fdeceb;
+  --warn: #b06f00;
+  --warn-soft: #fdf3e2;
+
+  --shadow-card: 0 1px 2px rgba(16, 21, 28, 0.06), 0 2px 8px rgba(16, 21, 28, 0.04);
+}
+
+html.dark-mode {
+  --bg-base: #0e1420;
+  --bg-surface: #161d2b;
+  --bg-soft: #1e2636;
+  --bg-inverse: #f4f6f8;
+
+  --text-strong: #f2f5f9;
+  --text-default: #c5cedb;
+  --text-muted: #8b97a8;
+  --text-inverse: #10151c;
+
+  --border-default: #2a3446;
+  --border-strong: #3b4761;
+
+  --accent: #5b9bff;
+  --accent-soft: #1b2740;
+
+  --ok: #45c78d;
+  --ok-soft: #12291f;
+  --deny: #ff6b5e;
+  --deny-soft: #2b1614;
+  --warn: #e0a233;
+  --warn-soft: #2a2013;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.3);
+}

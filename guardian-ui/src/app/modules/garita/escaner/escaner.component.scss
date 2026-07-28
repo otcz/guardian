@@ -1,0 +1,290 @@
+/* ---------------------------------------------------------------------------
+   Portería. Se opera de pie, con tablet, de noche y con gente esperando:
+   todo es grande, el veredicto se lee a un metro y no hay scroll para decidir.
+   --------------------------------------------------------------------------- */
+
+.garita {
+  display: grid;
+  place-items: start center;
+  padding: 1.25rem;
+  min-height: calc(100vh - 56px);
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  max-width: 420px;
+}
+
+/* ── Escaneo ─────────────────────────────────────────────────────────────── */
+
+.lector {
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--bg-inverse);
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+
+  &.oculto {
+    display: none;
+  }
+
+  ::ng-deep video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+  }
+}
+
+.manual {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-default);
+  }
+
+  input {
+    padding: 0.7rem 0.75rem;
+    font-size: 1rem;
+    color: var(--text-strong);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    outline: none;
+
+    &:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+  }
+}
+
+.pista {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* ── Ficha ───────────────────────────────────────────────────────────────── */
+
+.ficha {
+  padding: 1.25rem;
+  background: var(--bg-surface);
+  border: 2px solid var(--border-default);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+
+  &.ok {
+    border-color: var(--ok);
+  }
+
+  &.deny {
+    border-color: var(--deny);
+  }
+}
+
+/* Verde o rojo, sin matices: es lo primero que se lee. */
+.veredicto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.7rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  border-radius: 10px;
+
+  i {
+    font-size: 1.4rem;
+  }
+
+  .ok & {
+    color: var(--ok);
+    background: var(--ok-soft);
+  }
+
+  .deny & {
+    color: var(--deny);
+    background: var(--deny-soft);
+  }
+}
+
+.motivo {
+  margin: 0;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--deny);
+}
+
+/* La foto es el elemento más grande de la pantalla, no un avatar decorativo. */
+.foto {
+  width: 190px;
+  height: 190px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border-default);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.sin-foto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  height: 100%;
+  color: var(--text-muted);
+
+  i {
+    font-size: 3rem;
+  }
+
+  span {
+    font-size: 0.8rem;
+  }
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.datos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  font-size: 0.95rem;
+  color: var(--text-default);
+
+  .casa {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.7rem;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 999px;
+  }
+}
+
+/* ── Acciones ────────────────────────────────────────────────────────────── */
+
+.acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 0.35rem;
+}
+
+.sentido {
+  margin: 0 0 0.15rem;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.opcion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.9rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-inverse);
+  background: var(--ok);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+
+  small {
+    font-weight: 400;
+    opacity: 0.85;
+  }
+
+  &:active {
+    transform: scale(0.985);
+  }
+}
+
+/* ── Confirmación ────────────────────────────────────────────────────────── */
+
+.listo {
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: var(--ok);
+
+  i {
+    font-size: 4rem;
+  }
+
+  span {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+}
+
+/* ── Comunes ─────────────────────────────────────────────────────────────── */
+
+.principal {
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-inverse);
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.alterno {
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--text-default);
+    background: var(--bg-soft);
+  }
+}
+
+.aviso-error {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--deny);
+  background: var(--deny-soft);
+  border: 1px solid var(--deny);
+  border-radius: 8px;
+}

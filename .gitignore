@@ -1,0 +1,46 @@
+### Secretos / credenciales (NUNCA subir al repo) ###
+.gcp-keys/
+infra/.env
+*.env.local
+**/application-local.properties
+**/application-local.yml
+
+### Java / Maven ###
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+dependency-tree.txt
+dependency-reduced-pom.xml
+
+### IDEs ###
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+.classpath
+.project
+.settings
+
+### Node / Angular ###
+node_modules/
+dist/
+.angular/
+coverage/
+
+### Logs ###
+*.log
+npm-debug.log*
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Merge artifacts ###
+*.orig
+*.rej
+
+### Claude tooling ###
+.claude/worktrees/

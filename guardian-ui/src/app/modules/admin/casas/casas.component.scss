@@ -1,0 +1,161 @@
+h1 {
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+/* flex-wrap y no grid fijo: este formulario también vive en pantallas
+   angostas y un grid de 4 columnas se desborda. */
+.alta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1 1 130px;
+  min-width: 0;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-default);
+  }
+
+  input {
+    padding: 0.55rem 0.7rem;
+    font-size: 0.95rem;
+    color: var(--text-strong);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    outline: none;
+    min-width: 0;
+
+    &:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+  }
+}
+
+.ayuda {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  cursor: help;
+}
+
+.principal {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-inverse);
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  padding: 0;
+
+  th, td {
+    padding: 0.65rem 0.9rem;
+    text-align: left;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    background: var(--bg-soft);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .inactiva td {
+    color: var(--text-muted);
+  }
+
+  .fuerte {
+    font-weight: 700;
+    color: var(--text-strong);
+  }
+
+  .derecha {
+    text-align: right;
+  }
+
+  .vacio {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 1.5rem;
+  }
+}
+
+.pastilla {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 999px;
+
+  &.si {
+    color: var(--ok);
+    background: var(--ok-soft);
+  }
+
+  &.no {
+    color: var(--deny);
+    background: var(--deny-soft);
+  }
+}
+
+.accion {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--text-default);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bg-soft);
+  }
+}
+
+.aviso-error {
+  margin-bottom: 1rem;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.85rem;
+  color: var(--deny);
+  background: var(--deny-soft);
+  border: 1px solid var(--deny);
+  border-radius: 8px;
+}

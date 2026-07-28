@@ -1,0 +1,20 @@
+package guardian.dto.admin;
+
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class CasaResponse {
+
+    private Long id;
+    private String identificador;
+    private String torre;
+    private String numero;
+    private Integer cuposParqueadero;
+    private String activo;
+
+    /** Cuantas personas viven ahi. Evita que el administrador tenga que abrir la casa para saberlo. */
+    private long residentes;
+    private long vehiculos;
+}

@@ -1,0 +1,72 @@
+<div class="gd-page">
+  <h1>Casas</h1>
+
+  <form class="alta gd-card" [formGroup]="formulario" (ngSubmit)="crear()">
+    <div class="campo">
+      <label for="torre">Torre</label>
+      <input id="torre" type="text" formControlName="torre" placeholder="Ej: A">
+    </div>
+
+    <div class="campo">
+      <label for="numero">Número</label>
+      <input id="numero" type="text" formControlName="numero" placeholder="Ej: 101">
+    </div>
+
+    <div class="campo">
+      <label for="cupos">
+        Cupos
+        <i class="pi pi-info-circle ayuda"
+           pTooltip="Parqueaderos asignados"
+           tooltipPosition="top"></i>
+      </label>
+      <input id="cupos" type="number" min="0" formControlName="cuposParqueadero">
+    </div>
+
+    <button type="submit" class="principal" [disabled]="guardando">
+      <i class="pi pi-plus"></i> Agregar
+    </button>
+  </form>
+
+  <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+  <p class="gd-muted" *ngIf="cargando">Cargando…</p>
+
+  <table class="tabla gd-card" *ngIf="!cargando">
+    <thead>
+      <tr>
+        <th>Casa</th>
+        <th>Residentes</th>
+        <th>Vehículos</th>
+        <th>Cupos</th>
+        <th>Estado</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let casa of casas" [class.inactiva]="!activa(casa)">
+        <td class="fuerte">{{ casa.identificador }}</td>
+        <td>{{ casa.residentes }}</td>
+        <td>{{ casa.vehiculos }}</td>
+        <td>{{ casa.cuposParqueadero ?? '—' }}</td>
+        <td>
+          <span class="pastilla" [class.si]="activa(casa)" [class.no]="!activa(casa)">
+            {{ activa(casa) ? 'Activa' : 'Inactiva' }}
+          </span>
+        </td>
+        <td class="derecha">
+          <button type="button"
+                  class="accion"
+                  (click)="alternarEstado(casa)"
+                  [pTooltip]="activa(casa) ? 'Deshabilitar la casa completa' : 'Habilitar'"
+                  tooltipPosition="left">
+            <i class="pi" [ngClass]="activa(casa) ? 'pi-ban' : 'pi-check'"></i>
+          </button>
+        </td>
+      </tr>
+
+      <tr *ngIf="casas.length === 0">
+        <td colspan="6" class="vacio">Todavía no hay casas registradas.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
