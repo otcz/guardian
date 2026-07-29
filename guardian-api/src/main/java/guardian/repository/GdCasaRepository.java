@@ -13,4 +13,8 @@ public interface GdCasaRepository extends JpaRepository<GdCasa, Long> {
     List<GdCasa> findByConjuntoIdOrderByIdentificadorAsc(Long conjuntoId);
 
     boolean existsByConjuntoIdAndIdentificador(Long conjuntoId, String identificador);
+
+    long countByConjuntoId(Long conjuntoId);
+
+    long countByConjuntoIdAndActivo(Long conjuntoId, String activo);
 }

@@ -15,6 +15,8 @@ public interface GdPersonaRepository
 
     long countByConjuntoIdAndActivo(Long conjuntoId, String activo);
 
+    long countByConjuntoId(Long conjuntoId);
+
     // La busqueda por texto libre vive en
     // guardian.repository.spec.PersonaSpecs — ver ahi por que no es un @Query.
 }

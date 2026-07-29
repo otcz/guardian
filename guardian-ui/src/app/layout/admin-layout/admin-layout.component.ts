@@ -19,6 +19,7 @@ export class AdminLayoutComponent {
   sesion: Sesion | null = null;
 
   readonly secciones = [
+    { ruta: 'resumen', etiqueta: 'Resumen', icono: 'pi-chart-bar' },
     { ruta: 'casas', etiqueta: 'Casas', icono: 'pi-building' },
     { ruta: 'personas', etiqueta: 'Personas', icono: 'pi-users' },
     { ruta: 'vehiculos', etiqueta: 'Vehículos', icono: 'pi-car' },

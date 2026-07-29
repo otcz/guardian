@@ -17,4 +17,8 @@ public interface GdVehiculoRepository extends JpaRepository<GdVehiculo, Long> {
     List<GdVehiculo> findByCasaIdOrderByPlacaAsc(Long casaId);
 
     List<GdVehiculo> findByConjuntoIdOrderByPlacaAsc(Long conjuntoId);
+
+    long countByConjuntoId(Long conjuntoId);
+
+    long countByConjuntoIdAndActivo(Long conjuntoId, String activo);
 }

@@ -17,6 +17,14 @@ public interface GdUsuarioRepository extends JpaRepository<GdUsuario, Long> {
     /** Solo para la eliminacion fisica de la persona (exclusiva del admin). */
     void deleteByPersonaId(Long personaId);
 
+    @Query("SELECT COUNT(u) FROM GdUsuario u WHERE u.persona.conjunto.id = :conjuntoId")
+    long contarPorConjunto(@Param("conjuntoId") Long conjuntoId);
+
+    @Query("SELECT COUNT(u) FROM GdUsuario u "
+            + "WHERE u.persona.conjunto.id = :conjuntoId AND u.activo = :activo")
+    long contarPorConjuntoYActivo(@Param("conjuntoId") Long conjuntoId,
+                                  @Param("activo") String activo);
+
     List<GdUsuario> findByRol(String rol);
 
     /**

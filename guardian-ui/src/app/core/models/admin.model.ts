@@ -50,6 +50,26 @@ export interface PersonaRequest {
   rolUsuario?: string | null;
 }
 
+import { AccesoEvento } from './acceso.model';
+
+/** Estado del conjunto de un vistazo — tablero de aterrizaje del admin. */
+export interface Resumen {
+  adentro: number;
+  afuera: number;
+  casasActivas: number;
+  casasTotal: number;
+  personasActivas: number;
+  personasTotal: number;
+  vehiculosActivos: number;
+  vehiculosTotal: number;
+  usuariosActivos: number;
+  usuariosTotal: number;
+  eventosHoy: number;
+  permitidosHoy: number;
+  denegadosHoy: number;
+  ultimosMovimientos: AccesoEvento[];
+}
+
 export interface Usuario {
   id: number;
   personaId: number;

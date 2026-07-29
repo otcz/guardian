@@ -36,6 +36,7 @@ public final class ApiEndpoint {
 
     /** Administracion del conjunto — rol ADMIN. */
     public static final String ADMIN = API + "/admin";
+    public static final String ADMIN_RESUMEN = ADMIN + "/resumen";
     public static final String ADMIN_CASAS = ADMIN + "/casas";
     public static final String ADMIN_PERSONAS = ADMIN + "/personas";
     public static final String ADMIN_VEHICULOS = ADMIN + "/vehiculos";

@@ -11,6 +11,7 @@ import {
   Persona,
   PersonaRegistrada,
   PersonaRequest,
+  Resumen,
   Usuario,
   Vehiculo,
   VehiculoRequest
@@ -22,6 +23,12 @@ export class AdminService {
   private readonly base = `${environment.apiUrl}/admin`;
 
   constructor(private readonly http: HttpClient) {}
+
+  // ── Resumen ──────────────────────────────────────────────────────────────
+
+  resumen(): Observable<Resumen> {
+    return this.http.get<Resumen>(`${this.base}/resumen`);
+  }
 
   // ── Casas ────────────────────────────────────────────────────────────────
 
