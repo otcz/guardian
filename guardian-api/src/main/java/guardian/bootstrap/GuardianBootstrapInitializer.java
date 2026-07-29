@@ -113,7 +113,9 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
                 new Opcion(Codigos.MOTIVO_CREDENCIAL_REVOCADA, "Credencial revocada"),
                 new Opcion(Codigos.MOTIVO_CREDENCIAL_VENCIDA, "Credencial vencida"),
                 new Opcion(Codigos.MOTIVO_PERSONA_INACTIVA, "Persona inactiva"),
-                new Opcion(Codigos.MOTIVO_CASA_INACTIVA, "Casa inactiva")));
+                new Opcion(Codigos.MOTIVO_CASA_INACTIVA, "Casa inactiva"),
+                new Opcion(Codigos.MOTIVO_INVITACION_NO_VIGENTE, "Invitacion aun no vigente"),
+                new Opcion(Codigos.MOTIVO_INVITACION_AGOTADA, "Invitacion sin ingresos disponibles")));
 
         if (creados > 0) {
             log.info("[bootstrap] parametros sembrados nuevos={}", creados);

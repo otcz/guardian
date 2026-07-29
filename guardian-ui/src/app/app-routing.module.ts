@@ -40,8 +40,21 @@ const routes: Routes = [
         path: 'mi-hogar',
         loadChildren: () =>
           import('./modules/mi-hogar/mi-hogar.module').then(m => m.MiHogarModule)
+      },
+      {
+        path: 'invitados',
+        loadChildren: () =>
+          import('./modules/invitados/invitados.module').then(m => m.InvitadosModule)
       }
     ]
+  },
+
+  // ── Pagina publica del invitado (link compartido, sin sesion) ────────────
+  {
+    path: 'invitado',
+    loadChildren: () =>
+      import('./modules/invitado-publico/invitado-publico.module')
+        .then(m => m.InvitadoPublicoModule)
   },
 
   // ── Consola de portería ──────────────────────────────────────────────────

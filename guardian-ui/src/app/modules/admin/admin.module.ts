@@ -10,6 +10,7 @@ import { CasasComponent } from './casas/casas.component';
 import { PersonasComponent } from './personas/personas.component';
 import { VehiculosComponent } from './vehiculos/vehiculos.component';
 import { UsuariosComponent } from './usuarios/usuarios.component';
+import { InvitacionesComponent } from './invitaciones/invitaciones.component';
 import { BitacoraComponent } from './bitacora/bitacora.component';
 
 // El marco (sidebar) lo pone AdminLayoutComponent a nivel de aplicación;
@@ -21,6 +22,7 @@ const routes: Routes = [
   { path: 'personas', component: PersonasComponent },
   { path: 'vehiculos', component: VehiculosComponent },
   { path: 'usuarios', component: UsuariosComponent },
+  { path: 'invitaciones', component: InvitacionesComponent },
   { path: 'bitacora', component: BitacoraComponent }
 ];
 
@@ -31,6 +33,7 @@ const routes: Routes = [
     PersonasComponent,
     VehiculosComponent,
     UsuariosComponent,
+    InvitacionesComponent,
     BitacoraComponent
   ],
   imports: [

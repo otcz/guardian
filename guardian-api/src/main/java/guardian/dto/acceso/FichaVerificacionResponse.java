@@ -52,6 +52,20 @@ public class FichaVerificacionResponse {
     /** Vacio cuando la persona no tiene vehiculos registrados. */
     private List<VehiculoResumen> vehiculos;
 
+    // ── Invitados ────────────────────────────────────────────────────────────
+
+    /**
+     * El invitado no tiene foto en el sistema: el control de la porteria es
+     * comparar el documento fisico contra el declarado, y la interfaz lo dice.
+     */
+    private boolean esInvitado;
+
+    /** Quien lo invito — el guardia puede confirmar con la casa si duda. */
+    private String anfitrionNombre;
+
+    /** Placa declarada en la invitacion, o null si viene a pie. */
+    private String invitacionPlaca;
+
     /** Token que hay que devolver en el registro. Es el mismo payload escaneado. */
     private String payload;
 }

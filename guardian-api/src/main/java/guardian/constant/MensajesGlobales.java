@@ -71,6 +71,16 @@ public final class MensajesGlobales {
     public static final String TITULAR_SOLO_ADMIN =
             "El titular de la casa solo lo asigna la administracion.";
 
+    // ── Invitaciones ─────────────────────────────────────────────────────────
+    public static final String INVITACION_VIGENCIA_INVALIDA =
+            "La vigencia debe terminar despues de empezar.";
+    public static final String INVITACION_NO_VIGENTE_MSG =
+            "Esta invitacion aun no esta vigente.";
+    public static final String INVITACION_AGOTADA_MSG =
+            "Esta invitacion ya uso todos sus ingresos.";
+    public static final String INVITADO_SIN_VEHICULO =
+            "El invitado no registro vehiculo en la invitacion.";
+
     // ── Fotos ────────────────────────────────────────────────────────────────
     public static final String FOTO_INVALIDA =
             "La foto debe ser JPG, PNG o WEBP y pesar menos de 5 MB.";

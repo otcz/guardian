@@ -56,6 +56,8 @@ public final class Codigos {
     public static final String MOTIVO_CREDENCIAL_VENCIDA = "CREDENCIAL_VENCIDA";
     public static final String MOTIVO_PERSONA_INACTIVA = "PERSONA_INACTIVA";
     public static final String MOTIVO_CASA_INACTIVA = "CASA_INACTIVA";
+    public static final String MOTIVO_INVITACION_NO_VIGENTE = "INVITACION_NO_VIGENTE";
+    public static final String MOTIVO_INVITACION_AGOTADA = "INVITACION_AGOTADA";
 
     /** Parentescos con significado especial en la logica. */
     public static final String PARENTESCO_TITULAR = "TITULAR";

@@ -127,6 +127,11 @@ public class GdAccesoEvento extends BaseEntity {
     @JoinColumn(name = "CREDENCIAL_ID")
     private GdCredencialQr credencial;
 
+    /** Presente cuando quien cruzo fue un INVITADO; persona queda en null. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "INVITACION_ID")
+    private GdInvitacion invitacion;
+
     public boolean fuePermitido() {
         return Codigos.RESULTADO_PERMITIDO.equals(this.resultado);
     }

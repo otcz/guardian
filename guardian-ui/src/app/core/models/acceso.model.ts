@@ -22,6 +22,9 @@ export interface FichaVerificacion {
   edad: number | null;
   sentidoSugerido: Sentido | null;
   vehiculos: VehiculoResumen[];
+  esInvitado: boolean;
+  anfitrionNombre: string | null;
+  invitacionPlaca: string | null;
   payload: string | null;
 }
 
@@ -46,6 +49,47 @@ export interface AccesoEvento {
   vehiculoPlaca: string | null;
   guardiaNombre: string | null;
   puntoAcceso: string | null;
+  invitado: boolean;
+}
+
+export type EstadoInvitacion =
+  'VIGENTE' | 'NO_VIGENTE' | 'AGOTADA' | 'VENCIDA' | 'REVOCADA';
+
+export interface Invitacion {
+  id: number;
+  nombreInvitado: string;
+  documentoInvitado: string;
+  placa: string | null;
+  vigenciaDesde: string;
+  vigenciaHasta: string;
+  usosMaximos: number;
+  usosRealizados: number;
+  estado: EstadoInvitacion;
+  casaIdentificador: string;
+  anfitrionNombre: string;
+  codigoPublico: string;
+  payload: string;
+}
+
+export interface InvitacionRequest {
+  nombreInvitado: string;
+  documentoInvitado: string;
+  placa?: string | null;
+  vigenciaDesde?: string | null;
+  vigenciaHasta?: string | null;
+  usosMaximos?: number | null;
+}
+
+/** Lo que ve el invitado al abrir el link, sin sesión. */
+export interface InvitacionPublica {
+  nombreInvitado: string;
+  casaIdentificador: string;
+  anfitrionNombre: string;
+  vigenciaDesde: string;
+  vigenciaHasta: string;
+  usosRestantes: number;
+  estado: EstadoInvitacion;
+  payload: string;
 }
 
 export interface MiQr {

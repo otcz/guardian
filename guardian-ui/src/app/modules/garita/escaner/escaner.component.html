@@ -64,8 +64,16 @@
 
     <p class="motivo" *ngIf="!ficha.permitido && ficha.mensaje">{{ ficha.mensaje }}</p>
 
+    <!-- INVITADO: sin foto en el sistema; el control es el documento fisico. -->
+    <div class="banda-invitado" *ngIf="ficha.esInvitado">
+      <i class="pi pi-ticket"></i> INVITADO
+      <span class="anfitrion" *ngIf="ficha.anfitrionNombre">
+        · invita {{ ficha.anfitrionNombre }}
+      </span>
+    </div>
+
     <!-- La foto es el control real: el guardia compara cara contra pantalla. -->
-    <div class="foto">
+    <div class="foto" *ngIf="!ficha.esInvitado">
       <img *ngIf="fotoFicha" [src]="fotoFicha" [alt]="ficha.nombreCompleto || 'Residente'">
       <div class="sin-foto" *ngIf="!fotoFicha">
         <i class="pi pi-user"></i>
@@ -81,6 +89,11 @@
       </span>
       <span *ngIf="ficha.edad !== null">{{ ficha.edad }} años</span>
       <span *ngIf="ficha.documento">{{ ficha.documento }}</span>
+    </div>
+
+    <div class="verifica-documento" *ngIf="ficha.esInvitado && ficha.permitido">
+      <i class="pi pi-id-card"></i>
+      Pide la cédula y compárala: <strong>{{ ficha.documento }}</strong>
     </div>
 
     <!-- Un solo toque: el sentido ya viene inferido -->
@@ -100,6 +113,15 @@
         <small *ngIf="vehiculo.marca || vehiculo.color">
           {{ vehiculo.marca }} {{ vehiculo.color }}
         </small>
+      </button>
+
+      <!-- Placa declarada en la invitacion: la unica valida para el invitado. -->
+      <button type="button"
+              class="opcion"
+              *ngIf="ficha.esInvitado && ficha.invitacionPlaca"
+              (click)="registrar('VEHICULO')">
+        <i class="pi pi-car"></i>
+        {{ ficha.invitacionPlaca }}
       </button>
     </div>
 

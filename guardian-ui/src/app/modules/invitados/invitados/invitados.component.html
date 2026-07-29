@@ -1,0 +1,147 @@
+<div class="gd-page">
+
+  <div class="sin-casa gd-card" *ngIf="sinCasa">
+    <i class="pi pi-home"></i>
+    <p>Tu usuario no tiene una casa asignada.</p>
+    <small>Comunícate con la administración del conjunto.</small>
+  </div>
+
+  <ng-container *ngIf="!sinCasa">
+
+    <div class="encabezado">
+      <h1><i class="pi pi-ticket"></i> Invitados</h1>
+      <button type="button" class="principal" (click)="mostrarAlta = !mostrarAlta">
+        <i class="pi" [ngClass]="mostrarAlta ? 'pi-times' : 'pi-user-plus'"></i>
+        {{ mostrarAlta ? 'Cancelar' : 'Invitar' }}
+      </button>
+    </div>
+
+    <!-- Alta -->
+    <form class="alta gd-card" *ngIf="mostrarAlta" [formGroup]="formulario" (ngSubmit)="crear()">
+      <div class="campos">
+        <div class="campo">
+          <label for="i-nombre">Nombre</label>
+          <input id="i-nombre" type="text" formControlName="nombreInvitado"
+                 placeholder="Ej: Carlos Rojas">
+        </div>
+        <div class="campo">
+          <label for="i-documento">
+            Documento
+            <i class="pi pi-info-circle ayuda"
+               pTooltip="La portería lo compara con la cédula"
+               tooltipPosition="top"></i>
+          </label>
+          <input id="i-documento" type="text" inputmode="numeric"
+                 formControlName="documentoInvitado" placeholder="Ej: 1020304050">
+        </div>
+        <div class="campo">
+          <label for="i-fecha">Día de la visita</label>
+          <input id="i-fecha" type="date" formControlName="fechaVisita">
+        </div>
+        <div class="campo">
+          <label for="i-usos">
+            Ingresos
+            <i class="pi pi-info-circle ayuda"
+               pTooltip="Cuántas veces puede entrar"
+               tooltipPosition="top"></i>
+          </label>
+          <input id="i-usos" type="number" min="1" max="20" formControlName="usosMaximos">
+        </div>
+        <div class="campo">
+          <label for="i-placa">Placa</label>
+          <input id="i-placa" type="text" formControlName="placa"
+                 placeholder="Vacío si viene a pie">
+        </div>
+      </div>
+
+      <button type="submit" class="principal" [disabled]="guardando">
+        <i class="pi pi-check"></i> Crear invitación
+      </button>
+    </form>
+
+    <div class="aviso-ok" *ngIf="aviso">{{ aviso }}</div>
+    <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+    <!-- QR desplegado -->
+    <div class="qr-panel gd-card" *ngIf="qrAbierto">
+      <div class="qr-cuadro">
+        <qrcode [qrdata]="qrAbierto.payload" [width]="200" [margin]="1"
+                errorCorrectionLevel="H" elementType="canvas"></qrcode>
+      </div>
+      <div class="qr-datos">
+        <strong>{{ qrAbierto.nombreInvitado }}</strong>
+        <span class="gd-muted">
+          {{ qrAbierto.casaIdentificador }} ·
+          {{ qrAbierto.vigenciaHasta | date:'dd/MM' }} ·
+          {{ qrAbierto.usosMaximos - qrAbierto.usosRealizados }} ingreso(s)
+        </span>
+        <p class="instruccion">
+          Comparte el link: el invitado lo abre en su celular y muestra este
+          código en la portería. No necesita instalar nada.
+        </p>
+        <div class="qr-acciones">
+          <button type="button" class="principal" (click)="compartir(qrAbierto)">
+            <i class="pi pi-share-alt"></i> Compartir link
+          </button>
+          <button type="button" class="alterno" (click)="qrAbierto = null">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="gd-muted" *ngIf="cargando">Cargando…</p>
+
+    <!-- Lista -->
+    <div class="tarjetas" *ngIf="!cargando">
+      <article class="invitacion gd-card"
+               *ngFor="let invitacion of invitaciones"
+               [class.apagada]="!esVigente(invitacion)">
+        <div class="icono-tipo">
+          <i class="pi pi-ticket"></i>
+        </div>
+
+        <div class="datos">
+          <strong>{{ invitacion.nombreInvitado }}</strong>
+          <span class="detalle">
+            {{ invitacion.documentoInvitado }}
+            <ng-container *ngIf="invitacion.placa"> · {{ invitacion.placa }}</ng-container>
+          </span>
+          <span class="detalle tenue">
+            {{ invitacion.vigenciaHasta | date:'dd/MM/yyyy' }} ·
+            {{ invitacion.usosRealizados }}/{{ invitacion.usosMaximos }} ingresos
+          </span>
+        </div>
+
+        <div class="acciones">
+          <span class="pastilla"
+                [class.si]="invitacion.estado === 'VIGENTE'"
+                [class.espera]="invitacion.estado === 'NO_VIGENTE'"
+                [class.no]="invitacion.estado === 'VENCIDA' || invitacion.estado === 'REVOCADA'"
+                [class.uso]="invitacion.estado === 'AGOTADA'">
+            {{ etiquetaEstado(invitacion.estado) }}
+          </span>
+
+          <button type="button" class="accion" *ngIf="esVigente(invitacion)"
+                  (click)="qrAbierto = invitacion"
+                  pTooltip="Ver QR" tooltipPosition="left">
+            <i class="pi pi-qrcode"></i>
+          </button>
+          <button type="button" class="accion" *ngIf="esVigente(invitacion)"
+                  (click)="compartir(invitacion)"
+                  pTooltip="Compartir link" tooltipPosition="left">
+            <i class="pi pi-share-alt"></i>
+          </button>
+          <button type="button" class="accion peligro" *ngIf="esVigente(invitacion)"
+                  (click)="revocar(invitacion)"
+                  pTooltip="Revocar" tooltipPosition="left">
+            <i class="pi pi-ban"></i>
+          </button>
+        </div>
+      </article>
+
+      <p class="gd-muted" *ngIf="invitaciones.length === 0">
+        Todavía no has invitado a nadie.
+      </p>
+    </div>
+
+  </ng-container>
+</div>

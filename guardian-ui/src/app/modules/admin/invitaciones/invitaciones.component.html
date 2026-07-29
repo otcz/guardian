@@ -1,0 +1,58 @@
+<div class="gd-page">
+  <div class="encabezado">
+    <h1>Invitaciones</h1>
+    <button type="button" class="accion" (click)="cargar()"
+            pTooltip="Actualizar" tooltipPosition="left">
+      <i class="pi pi-refresh"></i>
+    </button>
+  </div>
+
+  <div class="aviso-error" *ngIf="error">{{ error }}</div>
+  <p class="gd-muted" *ngIf="cargando">Cargando…</p>
+
+  <table class="tabla gd-card" *ngIf="!cargando">
+    <thead>
+      <tr>
+        <th>Invitado</th>
+        <th>Documento</th>
+        <th>Casa</th>
+        <th>Anfitrión</th>
+        <th>Vigencia</th>
+        <th>Ingresos</th>
+        <th>Placa</th>
+        <th>Estado</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let invitacion of invitaciones"
+          [class.inactiva]="!revocable(invitacion)">
+        <td class="fuerte">{{ invitacion.nombreInvitado }}</td>
+        <td>{{ invitacion.documentoInvitado }}</td>
+        <td>{{ invitacion.casaIdentificador }}</td>
+        <td>{{ invitacion.anfitrionNombre }}</td>
+        <td>{{ invitacion.vigenciaHasta | date:'dd/MM/yyyy' }}</td>
+        <td>{{ invitacion.usosRealizados }}/{{ invitacion.usosMaximos }}</td>
+        <td>{{ invitacion.placa ?? '—' }}</td>
+        <td>
+          <span class="pastilla"
+                [class.si]="invitacion.estado === 'VIGENTE'"
+                [class.no]="!revocable(invitacion)">
+            {{ etiquetaEstado(invitacion.estado) }}
+          </span>
+        </td>
+        <td class="derecha">
+          <button type="button" class="accion peligro" *ngIf="revocable(invitacion)"
+                  (click)="revocar(invitacion)"
+                  pTooltip="Revocar" tooltipPosition="left">
+            <i class="pi pi-ban"></i>
+          </button>
+        </td>
+      </tr>
+
+      <tr *ngIf="invitaciones.length === 0">
+        <td colspan="9" class="vacio">Ningún residente ha creado invitaciones.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

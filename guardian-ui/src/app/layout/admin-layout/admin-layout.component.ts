@@ -24,6 +24,7 @@ export class AdminLayoutComponent {
     { ruta: 'personas', etiqueta: 'Personas', icono: 'pi-users' },
     { ruta: 'vehiculos', etiqueta: 'Vehículos', icono: 'pi-car' },
     { ruta: 'usuarios', etiqueta: 'Usuarios', icono: 'pi-key' },
+    { ruta: 'invitaciones', etiqueta: 'Invitaciones', icono: 'pi-ticket' },
     { ruta: 'bitacora', etiqueta: 'Bitácora', icono: 'pi-history' }
   ];
 

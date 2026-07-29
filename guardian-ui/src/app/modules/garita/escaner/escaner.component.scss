@@ -184,6 +184,44 @@ section {
   color: var(--deny);
 }
 
+/* Banda que distingue al invitado de un residente al primer vistazo. */
+.banda-invitado {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--warn);
+  background: var(--warn-soft);
+  border-radius: 10px;
+
+  .anfitrion {
+    font-weight: 500;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+}
+
+.verifica-documento {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.9rem;
+  color: var(--text-default);
+  background: var(--bg-soft);
+  border: 1px dashed var(--border-strong);
+  border-radius: 10px;
+
+  i {
+    color: var(--accent);
+  }
+}
+
 /* La foto es el elemento más grande de la pantalla, no un avatar decorativo. */
 .foto {
   width: 190px;

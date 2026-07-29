@@ -1,0 +1,134 @@
+.pantalla {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 1.25rem;
+  background: var(--bg-base);
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 360px;
+  padding: 1.75rem 1.5rem;
+  text-align: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+
+  > i {
+    font-size: 1.8rem;
+    color: var(--text-muted);
+  }
+
+  .rojo {
+    color: var(--deny);
+  }
+
+  p {
+    margin: 0;
+    font-weight: 600;
+    color: var(--text-strong);
+  }
+
+  small {
+    color: var(--text-muted);
+  }
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 0.25rem;
+
+  i {
+    font-size: 1.05rem;
+  }
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.sub {
+  font-weight: 400 !important;
+  color: var(--text-muted) !important;
+  font-size: 0.88rem;
+}
+
+.qr {
+  margin-top: 0.6rem;
+  padding: 0.75rem;
+  background: #ffffff;
+  border-radius: 12px;
+  line-height: 0;
+}
+
+.instruccion {
+  font-weight: 400 !important;
+  color: var(--text-default) !important;
+  font-size: 0.9rem;
+  margin-top: 0.4rem !important;
+}
+
+.detalles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  i {
+    color: var(--accent);
+    font-size: 0.8rem;
+  }
+}
+
+.no-vigente {
+  margin-top: 0.6rem;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.82rem;
+  color: var(--warn);
+  background: var(--warn-soft);
+  border-radius: 8px;
+}
+
+.agotada {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+  padding: 1rem;
+  border-radius: 10px;
+  background: var(--deny-soft);
+
+  i {
+    font-size: 1.5rem;
+    color: var(--deny);
+  }
+
+  p {
+    color: var(--deny) !important;
+  }
+
+  small {
+    color: var(--text-muted);
+  }
+}

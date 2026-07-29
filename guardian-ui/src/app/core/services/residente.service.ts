@@ -9,6 +9,7 @@ import {
   Vehiculo,
   VehiculoResidenteRequest
 } from '../models/admin.model';
+import { Invitacion, InvitacionRequest } from '../models/acceso.model';
 
 /**
  * Autogestión de "Mi hogar". Solo activar/inactivar: la eliminación es
@@ -45,5 +46,19 @@ export class ResidenteService {
   cambiarEstadoVehiculo(id: number, activar: boolean): Observable<Vehiculo> {
     const accion = activar ? 'activar' : 'desactivar';
     return this.http.patch<Vehiculo>(`${this.base}/vehiculos/${id}/${accion}`, {});
+  }
+
+  // ── Invitaciones ─────────────────────────────────────────────────────────
+
+  invitaciones(): Observable<Invitacion[]> {
+    return this.http.get<Invitacion[]>(`${this.base}/invitaciones`);
+  }
+
+  crearInvitacion(request: InvitacionRequest): Observable<Invitacion> {
+    return this.http.post<Invitacion>(`${this.base}/invitaciones`, request);
+  }
+
+  revocarInvitacion(id: number): Observable<Invitacion> {
+    return this.http.patch<Invitacion>(`${this.base}/invitaciones/${id}/revocar`, {});
   }
 }

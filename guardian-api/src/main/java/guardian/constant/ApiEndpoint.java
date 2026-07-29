@@ -29,10 +29,14 @@ public final class ApiEndpoint {
     public static final String RESIDENTE_MI_QR_PNG = "/mi-qr.png";
     public static final String RESIDENTE_FAMILIA = "/familia";
     public static final String RESIDENTE_VEHICULOS = "/vehiculos";
+    public static final String RESIDENTE_INVITACIONES = "/invitaciones";
 
     /** Fotos: subida autenticada, lectura publica por nombre UUID. */
     public static final String FOTOS = API + "/fotos";
     public static final String PUBLICO_FOTOS = API + "/publico/fotos";
+
+    /** Pagina del invitado: abre el link sin cuenta, protegido por codigo UUID. */
+    public static final String PUBLICO_INVITACIONES = API + "/publico/invitaciones";
 
     /** Administracion del conjunto — rol ADMIN. */
     public static final String ADMIN = API + "/admin";
@@ -41,6 +45,7 @@ public final class ApiEndpoint {
     public static final String ADMIN_PERSONAS = ADMIN + "/personas";
     public static final String ADMIN_VEHICULOS = ADMIN + "/vehiculos";
     public static final String ADMIN_USUARIOS = ADMIN + "/usuarios";
+    public static final String ADMIN_INVITACIONES = ADMIN + "/invitaciones";
     public static final String ADMIN_PARAMETROS = ADMIN + "/parametros";
 
     /** Sufijos reutilizados. */

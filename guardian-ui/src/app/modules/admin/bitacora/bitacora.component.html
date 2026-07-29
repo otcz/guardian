@@ -34,7 +34,10 @@
     <tbody>
       <tr *ngFor="let evento of eventos">
         <td>{{ evento.fechaEvento | date:'dd/MM HH:mm:ss' }}</td>
-        <td class="fuerte">{{ evento.personaNombre ?? 'Desconocido' }}</td>
+        <td class="fuerte">
+          {{ evento.personaNombre ?? 'Desconocido' }}
+          <span class="marca-invitado" *ngIf="evento.invitado">Invitado</span>
+        </td>
         <td>{{ evento.casaIdentificador ?? '—' }}</td>
         <td>
           <span class="movimiento" [class.entrada]="evento.sentido === 'E'"

@@ -1,0 +1,59 @@
+<div class="pantalla">
+
+  <div class="tarjeta" *ngIf="cargando">
+    <i class="pi pi-spinner pi-spin"></i>
+    <p>Cargando tu invitación…</p>
+  </div>
+
+  <div class="tarjeta" *ngIf="error">
+    <i class="pi pi-exclamation-circle rojo"></i>
+    <p>No encontramos esta invitación.</p>
+    <small>Pide a quien te invitó que la genere de nuevo.</small>
+  </div>
+
+  <div class="tarjeta" *ngIf="invitacion">
+    <div class="marca">
+      <i class="pi pi-shield"></i>
+      <span>GUARDIAN</span>
+    </div>
+
+    <h1>Hola, {{ invitacion.nombreInvitado }}</h1>
+    <p class="sub">
+      {{ invitacion.anfitrionNombre }} te invitó ·
+      casa {{ invitacion.casaIdentificador }}
+    </p>
+
+    <ng-container *ngIf="utilizable">
+      <!-- QR sobre blanco siempre: un QR invertido no escanea. -->
+      <div class="qr">
+        <qrcode [qrdata]="invitacion.payload" [width]="240" [margin]="1"
+                errorCorrectionLevel="H" elementType="canvas"></qrcode>
+      </div>
+
+      <p class="instruccion">
+        Muestra este código en la portería junto con tu documento.
+      </p>
+
+      <div class="detalles">
+        <span>
+          <i class="pi pi-calendar"></i>
+          Válida el {{ invitacion.vigenciaHasta | date:'dd/MM/yyyy' }}
+        </span>
+        <span>
+          <i class="pi pi-sign-in"></i>
+          {{ invitacion.usosRestantes }} ingreso(s) disponible(s)
+        </span>
+      </div>
+
+      <div class="no-vigente" *ngIf="invitacion.estado === 'NO_VIGENTE'">
+        {{ textoEstado }} Empieza el {{ invitacion.vigenciaDesde | date:'dd/MM/yyyy' }}.
+      </div>
+    </ng-container>
+
+    <div class="agotada" *ngIf="!utilizable">
+      <i class="pi pi-ban"></i>
+      <p>{{ textoEstado }}</p>
+      <small>Si necesitas entrar, pide una invitación nueva.</small>
+    </div>
+  </div>
+</div>

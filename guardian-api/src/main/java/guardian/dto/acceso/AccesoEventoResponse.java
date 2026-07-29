@@ -25,4 +25,7 @@ public class AccesoEventoResponse {
     private String vehiculoPlaca;
     private String guardiaNombre;
     private String puntoAcceso;
+
+    /** Marca los cruces de INVITADOS para que la bitacora los distinga. */
+    private boolean invitado;
 }

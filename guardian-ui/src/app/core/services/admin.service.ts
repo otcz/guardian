@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { Pagina } from '../models/acceso.model';
+import { Invitacion, Pagina } from '../models/acceso.model';
 import {
   Casa,
   CasaRequest,
@@ -122,6 +122,16 @@ export class AdminService {
 
   restablecerClave(id: number): Observable<Usuario> {
     return this.http.patch<Usuario>(`${this.base}/usuarios/${id}/restablecer-clave`, {});
+  }
+
+  // ── Invitaciones ─────────────────────────────────────────────────────────
+
+  invitaciones(): Observable<Invitacion[]> {
+    return this.http.get<Invitacion[]>(`${this.base}/invitaciones`);
+  }
+
+  revocarInvitacion(id: number): Observable<Invitacion> {
+    return this.http.patch<Invitacion>(`${this.base}/invitaciones/${id}/revocar`, {});
   }
 
   // ── Catálogo ─────────────────────────────────────────────────────────────

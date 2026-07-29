@@ -31,6 +31,26 @@ public interface GdAccesoEventoRepository
     List<GdAccesoEvento> findByCredencialIdAndFechaEventoAfterOrderByFechaEventoDesc(
             Long credencialId, Date desde);
 
+    // ── Espejo de lo anterior para INVITADOS (evento sin persona). ───────────
+
+    Optional<GdAccesoEvento> findFirstByInvitacionIdAndResultadoOrderByFechaEventoDesc(
+            Long invitacionId, String resultado);
+
+    List<GdAccesoEvento> findByInvitacionIdAndFechaEventoAfterOrderByFechaEventoDesc(
+            Long invitacionId, Date desde);
+
+    /** Invitados cuyo ultimo evento permitido es una entrada: estan adentro. */
+    @Query("SELECT COUNT(DISTINCT e.invitacion.id) FROM GdAccesoEvento e "
+            + "WHERE e.conjuntoId = :conjuntoId "
+            + "AND e.resultado = :permitido "
+            + "AND e.sentido = :entrada "
+            + "AND e.invitacion IS NOT NULL "
+            + "AND e.fechaEvento = (SELECT MAX(e2.fechaEvento) FROM GdAccesoEvento e2 "
+            + "                     WHERE e2.invitacion = e.invitacion AND e2.resultado = :permitido)")
+    long contarInvitadosAdentro(@Param("conjuntoId") Long conjuntoId,
+                                @Param("permitido") String permitido,
+                                @Param("entrada") String entrada);
+
     /**
      * Cuantas personas estan adentro: aquellas cuyo ULTIMO evento permitido es
      * una entrada. La subconsulta correlacionada es aceptable con el volumen de
@@ -68,6 +88,11 @@ public interface GdAccesoEventoRepository
     @Modifying
     @Query("UPDATE GdAccesoEvento e SET e.vehiculo = null WHERE e.vehiculo.id = :vehiculoId")
     int desvincularVehiculo(@Param("vehiculoId") Long vehiculoId);
+
+    @Modifying
+    @Query("UPDATE GdAccesoEvento e SET e.invitacion = null WHERE e.invitacion.id IN "
+            + "(SELECT i.id FROM GdInvitacion i WHERE i.anfitrion.id = :personaId)")
+    int desvincularInvitacionesDeAnfitrion(@Param("personaId") Long personaId);
 
     // La busqueda con filtros opcionales vive en
     // guardian.repository.spec.AccesoEventoSpecs — ver ahi por que no es un @Query.

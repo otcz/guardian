@@ -13,6 +13,7 @@ import guardian.entity.persona.GdUsuario;
 import guardian.exception.GuardianException;
 import guardian.repository.GdAccesoEventoRepository;
 import guardian.repository.GdCasaRepository;
+import guardian.repository.GdInvitacionRepository;
 import guardian.repository.GdConjuntoRepository;
 import guardian.repository.GdCredencialQrRepository;
 import guardian.repository.GdPersonaRepository;
@@ -47,6 +48,7 @@ public class PersonaServiceImpl implements PersonaService {
     private final GdCredencialQrRepository credencialRepository;
     private final GdUsuarioRepository usuarioRepository;
     private final GdAccesoEventoRepository eventoRepository;
+    private final GdInvitacionRepository invitacionRepository;
     private final CredencialQrService credencialQrService;
     private final ParametroService parametroService;
     private final PasswordEncoder passwordEncoder;
@@ -209,9 +211,11 @@ public class PersonaServiceImpl implements PersonaService {
         // Orden importa: primero se anulan las FK de la bitacora (que nunca se
         // borra), despues las filas dependientes, al final la persona.
         eventoRepository.desvincularCredencialesDe(id);
+        eventoRepository.desvincularInvitacionesDeAnfitrion(id);
         eventoRepository.desvincularPersona(id);
         eventoRepository.desvincularGuardia(id);
         credencialRepository.deleteByPersonaId(id);
+        invitacionRepository.deleteByAnfitrionId(id);
         residenteCasaRepository.deleteByPersonaId(id);
         usuarioRepository.deleteByPersonaId(id);
         personaRepository.delete(persona);

@@ -56,6 +56,8 @@ public class SecurityConfig {
                 // Las fotos se leen sin sesion: una etiqueta <img> no puede
                 // mandar Authorization. La proteccion es el nombre UUID.
                 .antMatchers(ApiEndpoint.PUBLICO_FOTOS + "/**").permitAll()
+                // El invitado abre su link sin cuenta; el codigo UUID es la llave.
+                .antMatchers(ApiEndpoint.PUBLICO_INVITACIONES + "/**").permitAll()
 
                 .antMatchers(ApiEndpoint.ACCESO + "/**")
                 .hasAnyRole(Codigos.ROL_GUARDIA, Codigos.ROL_ADMIN)

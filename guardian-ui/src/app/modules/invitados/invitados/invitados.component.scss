@@ -1,0 +1,306 @@
+.encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.85rem;
+
+  h1 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.15rem;
+
+    i {
+      color: var(--accent);
+    }
+  }
+}
+
+.sin-casa {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 2.5rem 1rem;
+  text-align: center;
+
+  i {
+    font-size: 2rem;
+    color: var(--text-muted);
+  }
+
+  p {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  small {
+    color: var(--text-muted);
+  }
+}
+
+.alta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.campos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1 1 150px;
+  min-width: 0;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-default);
+  }
+
+  input {
+    padding: 0.55rem 0.7rem;
+    font-size: 0.95rem;
+    color: var(--text-strong);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    outline: none;
+    min-width: 0;
+
+    &:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+  }
+}
+
+.ayuda {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  cursor: help;
+}
+
+.principal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-inverse);
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+.alterno {
+  padding: 0.55rem 0.9rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--text-default);
+    background: var(--bg-soft);
+  }
+}
+
+/* Panel del QR recién creado o consultado. */
+.qr-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  border: 2px solid var(--accent);
+}
+
+/* El QR siempre sobre blanco: un QR invertido no escanea. */
+.qr-cuadro {
+  padding: 0.6rem;
+  background: #ffffff;
+  border-radius: 12px;
+  line-height: 0;
+}
+
+.qr-datos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1 1 220px;
+  min-width: 0;
+
+  strong {
+    font-size: 1.05rem;
+    color: var(--text-strong);
+  }
+
+  .instruccion {
+    margin: 0.2rem 0 0;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+}
+
+.qr-acciones {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Tarjetas de invitación. */
+.tarjetas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.invitacion {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 1rem;
+
+  &.apagada {
+    opacity: 0.6;
+  }
+}
+
+.icono-tipo {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  background: var(--accent-soft);
+
+  i {
+    font-size: 1.15rem;
+    color: var(--accent);
+  }
+}
+
+.datos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex: 1 1 auto;
+  min-width: 0;
+
+  strong {
+    color: var(--text-strong);
+  }
+
+  .detalle {
+    font-size: 0.82rem;
+    color: var(--text-default);
+  }
+
+  .tenue {
+    color: var(--text-muted);
+  }
+}
+
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.pastilla {
+  padding: 0.15rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 999px;
+  white-space: nowrap;
+
+  &.si {
+    color: var(--ok);
+    background: var(--ok-soft);
+  }
+
+  &.no {
+    color: var(--deny);
+    background: var(--deny-soft);
+  }
+
+  &.espera {
+    color: var(--warn);
+    background: var(--warn-soft);
+  }
+
+  &.uso {
+    color: var(--text-muted);
+    background: var(--bg-soft);
+  }
+}
+
+.accion {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--text-default);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bg-soft);
+  }
+
+  &.peligro:hover {
+    color: var(--deny);
+    border-color: var(--deny);
+    background: var(--deny-soft);
+  }
+}
+
+.aviso-error {
+  margin-bottom: 1rem;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.85rem;
+  color: var(--deny);
+  background: var(--deny-soft);
+  border: 1px solid var(--deny);
+  border-radius: 8px;
+}
+
+.aviso-ok {
+  margin-bottom: 1rem;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.85rem;
+  color: var(--ok);
+  background: var(--ok-soft);
+  border: 1px solid var(--ok);
+  border-radius: 8px;
+}

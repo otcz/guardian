@@ -12,5 +12,8 @@ public interface PresenciaService {
      */
     boolean estaAdentro(Long personaId);
 
+    /** Mismo criterio, para el titular de una invitacion. */
+    boolean estaAdentroInvitado(Long invitacionId);
+
     PresenciaResponse conteo(Long conjuntoId);
 }
