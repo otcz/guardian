@@ -1,0 +1,47 @@
+<div class="panel">
+  <header class="cabecera">
+    <div class="marca">
+      <i class="pi pi-shield"></i>
+      <span>GUARDIAN</span>
+    </div>
+
+    <div class="acciones">
+      <a *ngIf="puedeIrAPorteria" routerLink="/porteria" class="icono"
+         pTooltip="Ir a Portería" tooltipPosition="bottom">
+        <i class="pi pi-shield"></i>
+      </a>
+      <a *ngIf="puedeIrAAdmin" routerLink="/admin" class="icono"
+         pTooltip="Ir a Administración" tooltipPosition="bottom">
+        <i class="pi pi-cog"></i>
+      </a>
+      <button type="button" class="icono" (click)="tema.alternar()"
+              [attr.aria-label]="tema.oscuro ? 'Modo claro' : 'Modo oscuro'">
+        <i class="pi" [ngClass]="tema.oscuro ? 'pi-sun' : 'pi-moon'"></i>
+      </button>
+      <button type="button" class="icono" (click)="salir()" aria-label="Salir"
+              pTooltip="Salir" tooltipPosition="bottom">
+        <i class="pi pi-sign-out"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="identidad" *ngIf="sesion">
+    <span class="nombre">{{ sesion.nombreCompleto }}</span>
+    <span class="casa" *ngIf="sesion.casaIdentificador">
+      <i class="pi pi-home"></i> {{ sesion.casaIdentificador }}
+    </span>
+  </div>
+
+  <nav class="pestanas">
+    <a routerLink="mi-qr" routerLinkActive="activa">
+      <i class="pi pi-qrcode"></i> Mi QR
+    </a>
+    <a routerLink="mi-hogar" routerLinkActive="activa">
+      <i class="pi pi-home"></i> Mi hogar
+    </a>
+  </nav>
+
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+</div>

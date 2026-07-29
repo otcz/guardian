@@ -10,12 +10,16 @@ import Aura from '@primeng/themes/aura';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
-import { ShellComponent } from './layout/shell/shell.component';
+import { ResidenteLayoutComponent } from './layout/residente-layout/residente-layout.component';
+import { PorteriaLayoutComponent } from './layout/porteria-layout/porteria-layout.component';
+import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    ShellComponent
+    ResidenteLayoutComponent,
+    PorteriaLayoutComponent,
+    AdminLayoutComponent
   ],
   imports: [
     BrowserModule,
@@ -33,9 +37,8 @@ import { ShellComponent } from './layout/shell/shell.component';
         preset: Aura,
         options: {
           // GUARDIAN maneja su propio modo oscuro con la clase .dark-mode en
-          // <html>, igual que los tokens de app/styles/_tokens.scss. Si se
-          // dejara el default 'system', PrimeNG y los tokens podrian quedar en
-          // modos distintos y la interfaz saldria a mitad de camino.
+          // <html> (TemaService). Si se dejara el default 'system', PrimeNG y
+          // los tokens podrian quedar en modos distintos.
           darkModeSelector: '.dark-mode'
         }
       }

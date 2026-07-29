@@ -72,7 +72,7 @@ export class AuthService {
     return rol !== undefined && roles.includes(rol);
   }
 
-  /** Pantalla de arranque según el rol. Cada quien entra a lo suyo. */
+  /** Panel de arranque según el rol. Cada quien aterriza en el suyo. */
   rutaInicial(): string {
     switch (this.sesion?.rol) {
       case 'GUARDIA':
@@ -80,7 +80,7 @@ export class AuthService {
       case 'ADMIN':
         return '/admin';
       default:
-        return '/mi-qr';
+        return '/app';
     }
   }
 

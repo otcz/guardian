@@ -1,0 +1,52 @@
+<div class="oficina">
+  <aside class="lateral">
+    <div class="marca">
+      <i class="pi pi-shield"></i>
+      <div class="textos">
+        <strong>GUARDIAN</strong>
+        <small>Administración</small>
+      </div>
+    </div>
+
+    <nav class="secciones">
+      <a *ngFor="let seccion of secciones"
+         [routerLink]="seccion.ruta"
+         routerLinkActive="activa">
+        <i class="pi" [ngClass]="seccion.icono"></i>
+        <span>{{ seccion.etiqueta }}</span>
+      </a>
+    </nav>
+
+    <div class="atajos">
+      <a routerLink="/porteria">
+        <i class="pi pi-shield"></i>
+        <span>Portería</span>
+      </a>
+      <a routerLink="/app">
+        <i class="pi pi-user"></i>
+        <span>Mi cuenta</span>
+      </a>
+    </div>
+
+    <div class="pie" *ngIf="sesion">
+      <div class="quien">
+        <strong>{{ sesion.nombreCompleto }}</strong>
+        <small>{{ sesion.rol }}</small>
+      </div>
+      <div class="botones">
+        <button type="button" (click)="tema.alternar()"
+                [attr.aria-label]="tema.oscuro ? 'Modo claro' : 'Modo oscuro'">
+          <i class="pi" [ngClass]="tema.oscuro ? 'pi-sun' : 'pi-moon'"></i>
+        </button>
+        <button type="button" (click)="salir()" aria-label="Salir"
+                pTooltip="Salir" tooltipPosition="top">
+          <i class="pi pi-sign-out"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+</div>

@@ -1,0 +1,33 @@
+<div class="consola">
+  <header class="cabecera">
+    <div class="titulo">
+      <i class="pi pi-shield"></i>
+      <div class="textos">
+        <strong>PORTERÍA</strong>
+        <small *ngIf="sesion">{{ sesion.nombreCompleto }}</small>
+      </div>
+    </div>
+
+    <div class="acciones">
+      <a routerLink="/app" class="icono" pTooltip="Mi cuenta" tooltipPosition="bottom">
+        <i class="pi pi-user"></i>
+      </a>
+      <a *ngIf="puedeIrAAdmin" routerLink="/admin" class="icono"
+         pTooltip="Administración" tooltipPosition="bottom">
+        <i class="pi pi-cog"></i>
+      </a>
+      <button type="button" class="icono" (click)="tema.alternar()"
+              [attr.aria-label]="tema.oscuro ? 'Modo claro' : 'Modo oscuro'">
+        <i class="pi" [ngClass]="tema.oscuro ? 'pi-sun' : 'pi-moon'"></i>
+      </button>
+      <button type="button" class="icono" (click)="salir()" aria-label="Salir"
+              pTooltip="Salir" tooltipPosition="bottom">
+        <i class="pi pi-sign-out"></i>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+</div>

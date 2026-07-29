@@ -1,9 +1,15 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { ShellComponent } from './layout/shell/shell.component';
+import { ResidenteLayoutComponent } from './layout/residente-layout/residente-layout.component';
+import { PorteriaLayoutComponent } from './layout/porteria-layout/porteria-layout.component';
+import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
 import { invitadoGuard, rolGuard, sesionGuard } from './core/guards/sesion.guard';
 
+/**
+ * Tres paneles, tres layouts. Cada rol aterriza en el suyo y los cruces son
+ * atajos explícitos en el encabezado, no un menú común revuelto.
+ */
 const routes: Routes = [
   {
     path: '',
@@ -11,42 +17,64 @@ const routes: Routes = [
     canActivate: [invitadoGuard]
   },
   {
-    // El cambio de clave queda FUERA del shell y sin el guard de sesión: es la
-    // única pantalla a la que se llega justamente por tener el cambio pendiente.
+    // Fuera de todo layout: es la única pantalla permitida con el cambio de
+    // clave pendiente.
     path: 'cambiar-clave',
     loadChildren: () =>
       import('./modules/auth/cambio-clave.module').then(m => m.CambioClaveModule)
   },
+
+  // ── Panel del usuario ────────────────────────────────────────────────────
   {
-    path: '',
-    component: ShellComponent,
+    path: 'app',
+    component: ResidenteLayoutComponent,
+    canActivate: [sesionGuard],
     children: [
+      { path: '', redirectTo: 'mi-qr', pathMatch: 'full' },
       {
         path: 'mi-qr',
         loadChildren: () =>
-          import('./modules/residente/residente.module').then(m => m.ResidenteModule),
-        canActivate: [sesionGuard]
+          import('./modules/residente/residente.module').then(m => m.ResidenteModule)
       },
       {
         path: 'mi-hogar',
         loadChildren: () =>
-          import('./modules/mi-hogar/mi-hogar.module').then(m => m.MiHogarModule),
-        canActivate: [sesionGuard]
-      },
-      {
-        path: 'porteria',
-        loadChildren: () => import('./modules/garita/garita.module').then(m => m.GaritaModule),
-        canActivate: [rolGuard('GUARDIA', 'ADMIN')]
-      },
-      // Ruta historica de la porteria; se conserva para marcadores viejos.
-      { path: 'garita', redirectTo: 'porteria' },
-      {
-        path: 'admin',
-        loadChildren: () => import('./modules/admin/admin.module').then(m => m.AdminModule),
-        canActivate: [rolGuard('ADMIN')]
+          import('./modules/mi-hogar/mi-hogar.module').then(m => m.MiHogarModule)
       }
     ]
   },
+
+  // ── Consola de portería ──────────────────────────────────────────────────
+  {
+    path: 'porteria',
+    component: PorteriaLayoutComponent,
+    canActivate: [rolGuard('GUARDIA', 'ADMIN')],
+    children: [
+      {
+        path: '',
+        loadChildren: () => import('./modules/garita/garita.module').then(m => m.GaritaModule)
+      }
+    ]
+  },
+
+  // ── Back-office de administración ────────────────────────────────────────
+  {
+    path: 'admin',
+    component: AdminLayoutComponent,
+    canActivate: [rolGuard('ADMIN')],
+    children: [
+      {
+        path: '',
+        loadChildren: () => import('./modules/admin/admin.module').then(m => m.AdminModule)
+      }
+    ]
+  },
+
+  // Rutas históricas.
+  { path: 'mi-qr', redirectTo: 'app/mi-qr' },
+  { path: 'mi-hogar', redirectTo: 'app/mi-hogar' },
+  { path: 'garita', redirectTo: 'porteria' },
+
   { path: '**', redirectTo: '' }
 ];
 

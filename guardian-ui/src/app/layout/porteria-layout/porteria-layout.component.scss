@@ -1,0 +1,77 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.consola {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Franja de identidad de la consola: se distingue de los otros paneles a
+   primera vista, incluso de reojo desde un metro. */
+.cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 1rem;
+  background: var(--bg-inverse);
+  color: var(--text-inverse);
+}
+
+.titulo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  > i {
+    font-size: 1.35rem;
+    color: var(--ok);
+  }
+
+  .textos {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+
+    strong {
+      letter-spacing: 0.14em;
+      font-size: 0.95rem;
+    }
+
+    small {
+      opacity: 0.7;
+      font-size: 0.72rem;
+    }
+  }
+}
+
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.icono {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  color: inherit;
+  opacity: 0.8;
+  background: none;
+  border: 1px solid rgba(128, 140, 160, 0.45);
+  border-radius: 10px;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
