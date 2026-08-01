@@ -284,6 +284,14 @@ public class PersonaServiceImpl implements PersonaService {
                 && !FOTO_URL_VALIDA.matcher(request.getFotoUrl().trim()).matches()) {
             throw GuardianException.solicitudInvalida(MensajesGlobales.FOTO_URL_INVALIDA);
         }
+        // El tipo identifica el documento fisico que la porteria va a comparar:
+        // CC de un adulto, TI de un menor, pasaporte de un extranjero.
+        String tipo = request.getTipoDocumento() == null
+                || request.getTipoDocumento().trim().isEmpty()
+                ? Codigos.TIPO_DOCUMENTO_CC
+                : request.getTipoDocumento().trim().toUpperCase();
+        parametroService.exigirCodigoValido(Codigos.GRUPO_TIPO_DOCUMENTO, tipo);
+        persona.setTipoDocumento(tipo);
         persona.setNombres(request.getNombres().trim());
         persona.setApellidos(request.getApellidos().trim());
         persona.setFechaNacimiento(request.getFechaNacimiento());
@@ -358,6 +366,7 @@ public class PersonaServiceImpl implements PersonaService {
 
         return PersonaResponse.builder()
                 .id(persona.getId())
+                .tipoDocumento(persona.getTipoDocumento())
                 .documento(persona.getDocumento())
                 .nombres(persona.getNombres())
                 .apellidos(persona.getApellidos())

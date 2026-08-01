@@ -1,4 +1,6 @@
-import { NgModule, isDevMode } from '@angular/core';
+import { LOCALE_ID, NgModule, isDevMode } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeEsCO from '@angular/common/locales/es-CO';
 import { BrowserModule } from '@angular/platform-browser';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
@@ -13,6 +15,10 @@ import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { ResidenteLayoutComponent } from './layout/residente-layout/residente-layout.component';
 import { PorteriaLayoutComponent } from './layout/porteria-layout/porteria-layout.component';
 import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
+
+// Sin esto Angular formatea con en-US y una app en español muestra "1 Aug"
+// y "8/1/2026" — el detalle que delata que la interfaz no se cuidó.
+registerLocaleData(localeEsCO);
 
 @NgModule({
   declarations: [
@@ -44,7 +50,8 @@ import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.compone
       }
     }),
     provideHttpClient(withInterceptorsFromDi()),
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    { provide: LOCALE_ID, useValue: 'es-CO' }
   ],
   bootstrap: [AppComponent]
 })

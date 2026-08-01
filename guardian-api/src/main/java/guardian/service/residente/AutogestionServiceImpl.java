@@ -78,6 +78,7 @@ public class AutogestionServiceImpl implements AutogestionService {
         }
 
         PersonaRequest alta = new PersonaRequest();
+        alta.setTipoDocumento(request.getTipoDocumento());
         alta.setDocumento(request.getDocumento());
         alta.setNombres(request.getNombres());
         alta.setApellidos(request.getApellidos());
@@ -209,6 +210,7 @@ public class AutogestionServiceImpl implements AutogestionService {
 
         return FamiliarResponse.builder()
                 .personaId(persona.getId())
+                .tipoDocumento(persona.getTipoDocumento())
                 .documento(persona.getDocumento())
                 .nombreCompleto(persona.getNombreCompleto())
                 .parentesco(vinculo.getParentesco())

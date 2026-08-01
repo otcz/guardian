@@ -4,10 +4,11 @@ import { TooltipModule } from 'primeng/tooltip';
 
 import { FotoUploadComponent } from './foto-upload/foto-upload.component';
 import { FotoPipe } from './foto-upload/foto.pipe';
+import { DocumentoPipe } from './documento.pipe';
 
 @NgModule({
-  declarations: [FotoUploadComponent, FotoPipe],
+  declarations: [FotoUploadComponent, FotoPipe, DocumentoPipe],
   imports: [CommonModule, TooltipModule],
-  exports: [FotoUploadComponent, FotoPipe]
+  exports: [FotoUploadComponent, FotoPipe, DocumentoPipe]
 })
 export class SharedModule { }

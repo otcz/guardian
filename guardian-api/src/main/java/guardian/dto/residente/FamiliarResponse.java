@@ -11,6 +11,7 @@ import lombok.Data;
 public class FamiliarResponse {
 
     private Long personaId;
+    private String tipoDocumento;
     private String documento;
     private String nombreCompleto;
     private String parentesco;

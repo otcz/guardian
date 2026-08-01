@@ -9,10 +9,10 @@
   <ng-container *ngIf="!sinCasa">
 
     <div class="encabezado">
-      <h1><i class="pi pi-ticket"></i> Invitados</h1>
-      <button type="button" class="principal" (click)="mostrarAlta = !mostrarAlta">
-        <i class="pi" [ngClass]="mostrarAlta ? 'pi-times' : 'pi-user-plus'"></i>
-        {{ mostrarAlta ? 'Cancelar' : 'Invitar' }}
+      <h2 class="gd-titulo-seccion">Mis invitaciones</h2>
+      <button type="button" class="agregar" (click)="mostrarAlta = !mostrarAlta"
+              [attr.aria-label]="mostrarAlta ? 'Cancelar' : 'Nueva invitación'">
+        <i class="pi" [ngClass]="mostrarAlta ? 'pi-times' : 'pi-plus'"></i>
       </button>
     </div>
 
@@ -63,37 +63,44 @@
     <div class="aviso-ok" *ngIf="aviso">{{ aviso }}</div>
     <div class="aviso-error" *ngIf="error">{{ error }}</div>
 
-    <!-- QR desplegado -->
-    <div class="qr-panel gd-card" *ngIf="qrAbierto">
+    <!-- Código del invitado: hoja que sube desde abajo, como en una app. -->
+    <div class="velo" *ngIf="qrAbierto" (click)="qrAbierto = null"></div>
+
+    <div class="hoja" *ngIf="qrAbierto">
+      <div class="asa"></div>
+
       <div class="qr-cuadro">
         <qrcode [qrdata]="qrAbierto.payload" [width]="200" [margin]="1"
                 errorCorrectionLevel="H" elementType="canvas"></qrcode>
       </div>
-      <div class="qr-datos">
-        <strong>{{ qrAbierto.nombreInvitado }}</strong>
-        <span class="gd-muted">
-          {{ qrAbierto.casaIdentificador }} ·
-          {{ qrAbierto.vigenciaHasta | date:'dd/MM' }} ·
-          {{ qrAbierto.usosMaximos - qrAbierto.usosRealizados }} ingreso(s)
-        </span>
-        <p class="instruccion">
-          Comparte el link: el invitado lo abre en su celular y muestra este
-          código en la portería. No necesita instalar nada.
-        </p>
-        <div class="qr-acciones">
-          <button type="button" class="principal" (click)="compartir(qrAbierto)">
-            <i class="pi pi-share-alt"></i> Compartir link
-          </button>
-          <button type="button" class="alterno" (click)="qrAbierto = null">Cerrar</button>
-        </div>
+
+      <strong class="qr-nombre">{{ qrAbierto.nombreInvitado }}</strong>
+      <span class="gd-muted">
+        {{ qrAbierto.casaIdentificador }} ·
+        {{ qrAbierto.vigenciaHasta | date:'d MMM' }} ·
+        {{ qrAbierto.usosMaximos - qrAbierto.usosRealizados }} ingreso(s)
+      </span>
+
+      <p class="instruccion">
+        El invitado abre el link en su celular y muestra este código en la
+        portería. No necesita instalar nada.
+      </p>
+
+      <div class="qr-acciones">
+        <button type="button" class="principal" (click)="compartir(qrAbierto)">
+          <i class="pi pi-share-alt"></i> Compartir link
+        </button>
+        <button type="button" class="peligro-texto" (click)="revocar(qrAbierto)">
+          Revocar invitación
+        </button>
       </div>
     </div>
 
     <p class="gd-muted" *ngIf="cargando">Cargando…</p>
 
     <!-- Lista -->
-    <div class="tarjetas" *ngIf="!cargando">
-      <article class="invitacion gd-card"
+    <div class="gd-lista" *ngIf="!cargando && invitaciones.length > 0">
+      <article class="gd-fila invitacion"
                *ngFor="let invitacion of invitaciones"
                [class.apagada]="!esVigente(invitacion)">
         <div class="icono-tipo">
@@ -103,45 +110,36 @@
         <div class="datos">
           <strong>{{ invitacion.nombreInvitado }}</strong>
           <span class="detalle">
-            {{ invitacion.documentoInvitado }}
+            {{ invitacion.vigenciaHasta | date:'d MMM' }} ·
+            {{ invitacion.usosRealizados }}/{{ invitacion.usosMaximos }} ingresos
             <ng-container *ngIf="invitacion.placa"> · {{ invitacion.placa }}</ng-container>
           </span>
-          <span class="detalle tenue">
-            {{ invitacion.vigenciaHasta | date:'dd/MM/yyyy' }} ·
-            {{ invitacion.usosRealizados }}/{{ invitacion.usosMaximos }} ingresos
-          </span>
         </div>
 
-        <div class="acciones">
-          <span class="pastilla"
-                [class.si]="invitacion.estado === 'VIGENTE'"
-                [class.espera]="invitacion.estado === 'NO_VIGENTE'"
-                [class.no]="invitacion.estado === 'VENCIDA' || invitacion.estado === 'REVOCADA'"
-                [class.uso]="invitacion.estado === 'AGOTADA'">
-            {{ etiquetaEstado(invitacion.estado) }}
-          </span>
+        <span class="pastilla"
+              [class.si]="invitacion.estado === 'VIGENTE'"
+              [class.espera]="invitacion.estado === 'NO_VIGENTE'"
+              [class.no]="invitacion.estado === 'VENCIDA' || invitacion.estado === 'REVOCADA'"
+              [class.uso]="invitacion.estado === 'AGOTADA'">
+          {{ etiquetaEstado(invitacion.estado) }}
+        </span>
 
-          <button type="button" class="accion" *ngIf="esVigente(invitacion)"
-                  (click)="qrAbierto = invitacion"
-                  pTooltip="Ver QR" tooltipPosition="left">
-            <i class="pi pi-qrcode"></i>
-          </button>
-          <button type="button" class="accion" *ngIf="esVigente(invitacion)"
-                  (click)="compartir(invitacion)"
-                  pTooltip="Compartir link" tooltipPosition="left">
-            <i class="pi pi-share-alt"></i>
-          </button>
-          <button type="button" class="accion peligro" *ngIf="esVigente(invitacion)"
-                  (click)="revocar(invitacion)"
-                  pTooltip="Revocar" tooltipPosition="left">
-            <i class="pi pi-ban"></i>
-          </button>
-        </div>
+        <!-- Una sola acción destacada: compartir es lo que se hace el 90% de
+             las veces. Ver el QR y revocar salen del panel del código. -->
+        <button type="button" class="accion" *ngIf="esVigente(invitacion)"
+                (click)="qrAbierto = invitacion"
+                pTooltip="Ver código" tooltipPosition="left" aria-label="Ver código">
+          <i class="pi pi-chevron-right"></i>
+        </button>
       </article>
+    </div>
 
-      <p class="gd-muted" *ngIf="invitaciones.length === 0">
-        Todavía no has invitado a nadie.
-      </p>
+    <div class="vacio" *ngIf="!cargando && invitaciones.length === 0">
+      <i class="pi pi-ticket"></i>
+      <p>Aún no has invitado a nadie</p>
+      <button type="button" class="principal" (click)="mostrarAlta = true">
+        Crear una invitación
+      </button>
     </div>
 
   </ng-container>

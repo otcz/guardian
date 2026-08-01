@@ -24,6 +24,8 @@ export interface FichaVerificacion {
   mensaje: string | null;
   fotoUrl: string | null;
   nombreCompleto: string | null;
+  /** Null en invitados: declaran solo el número. */
+  tipoDocumento: string | null;
   documento: string | null;
   casaIdentificador: string | null;
   edad: number | null;
@@ -104,6 +106,7 @@ export interface InvitacionPublica {
 export interface MiQr {
   payload: string;
   nombreCompleto: string;
+  tipoDocumento: string;
   documento: string;
   casaIdentificador: string | null;
   fotoUrl: string | null;

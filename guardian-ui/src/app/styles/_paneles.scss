@@ -43,18 +43,16 @@
 
   input,
   select {
+    min-height: var(--tactil);
     padding: 0.55rem 0.7rem;
-    font-size: 0.95rem;
     color: var(--text-strong);
     background: var(--bg-surface);
     border: 1px solid var(--border-default);
-    border-radius: 8px;
-    outline: none;
+    border-radius: var(--r-sm);
     min-width: 0;
 
     &:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-soft);
     }
   }
 }
@@ -68,19 +66,27 @@
 .principal {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.6rem 1.1rem;
-  font-size: 0.9rem;
+  justify-content: center;
+  gap: var(--e-2);
+  min-height: var(--tactil);
+  padding: 0 1.1rem;
+  font-size: var(--t-md);
   font-weight: 600;
   color: var(--text-inverse);
   background: var(--accent);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   cursor: pointer;
   white-space: nowrap;
+  transition: transform var(--transicion), filter var(--transicion);
+
+  &:active {
+    transform: scale(0.97);
+    filter: brightness(0.95);
+  }
 
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
   }
 }
 
@@ -155,25 +161,34 @@
   gap: 0.35rem;
 }
 
+/* 40px y no 32: 32 es medida de cursor, no de dedo. El icono se ve igual;
+   lo que crece es el blanco al que hay que apuntar. */
 .accion {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
-  color: var(--text-default);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-radius: var(--r-full);
   cursor: pointer;
+  transition: background var(--transicion), color var(--transicion);
 
-  &:hover {
-    background: var(--bg-soft);
+  &:active {
+    transform: scale(0.9);
   }
 
-  &.peligro:hover {
-    color: var(--deny);
-    border-color: var(--deny);
-    background: var(--deny-soft);
+  @media (hover: hover) {
+    &:hover {
+      color: var(--text-strong);
+      background: var(--bg-soft);
+    }
+
+    &.peligro:hover {
+      color: var(--deny);
+      background: var(--deny-soft);
+    }
   }
 }
 
@@ -208,7 +223,6 @@
     color: var(--text-strong);
     background: none;
     border: none;
-    outline: none;
     min-width: 0;
   }
 }

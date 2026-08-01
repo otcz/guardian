@@ -10,6 +10,7 @@
   gap: 1rem;
   padding: 1.25rem;
   min-height: calc(100vh - 56px);
+  min-height: calc(100dvh - 56px);
 }
 
 /* ── Contadores de presencia ─────────────────────────────────────────────── */
@@ -116,7 +117,6 @@ section {
     background: var(--bg-surface);
     border: 1px solid var(--border-default);
     border-radius: 8px;
-    outline: none;
 
     &:focus {
       border-color: var(--accent);

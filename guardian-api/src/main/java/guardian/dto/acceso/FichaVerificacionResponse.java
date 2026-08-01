@@ -36,6 +36,8 @@ public class FichaVerificacionResponse {
     private String fotoUrl;
 
     private String nombreCompleto;
+    /** Tipo de documento (CC, TI, ...). Null en invitados: declaran solo el numero. */
+    private String tipoDocumento;
     private String documento;
     private String casaIdentificador;
     private Integer edad;

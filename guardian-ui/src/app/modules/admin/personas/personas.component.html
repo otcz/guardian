@@ -19,7 +19,14 @@
 
     <div class="campos">
       <div class="campo">
-        <label for="documento">Documento</label>
+        <label for="tipoDocumento">Tipo</label>
+        <select id="tipoDocumento" formControlName="tipoDocumento">
+          <option *ngFor="let t of tiposDocumento" [value]="t.codigo">{{ t.valor }}</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label for="documento">Número</label>
         <input id="documento" type="text" formControlName="documento"
                placeholder="Ej: 1020304050">
       </div>
@@ -127,7 +134,10 @@
           {{ persona.nombreCompleto }}
           <small class="rol" *ngIf="persona.rol">{{ persona.rol }}</small>
         </td>
-        <td>{{ persona.documento }}</td>
+        <td>
+          <span class="tipo-doc">{{ persona.tipoDocumento }}</span>
+          {{ persona.documento | documento }}
+        </td>
         <td>{{ persona.casaIdentificador ?? '—' }}</td>
         <td>{{ persona.edad ?? '—' }}</td>
         <td>

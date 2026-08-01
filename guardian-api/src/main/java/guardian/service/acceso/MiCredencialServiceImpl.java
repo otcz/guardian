@@ -41,6 +41,7 @@ public class MiCredencialServiceImpl implements MiCredencialService {
         return MiQrResponse.builder()
                 .payload(credencialQrService.construirPayload(credencial))
                 .nombreCompleto(persona.getNombreCompleto())
+                .tipoDocumento(persona.getTipoDocumento())
                 .documento(persona.getDocumento())
                 .casaIdentificador(casa)
                 .fotoUrl(persona.getFotoUrl())

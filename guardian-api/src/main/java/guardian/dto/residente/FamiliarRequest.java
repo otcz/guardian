@@ -15,6 +15,10 @@ import java.util.Date;
 @Data
 public class FamiliarRequest {
 
+    /** Codigo del grupo TIPO_DOCUMENTO (CC, TI, CE, PA, RC). Null = CC. */
+    @Size(max = 5)
+    private String tipoDocumento;
+
     @NotBlank(message = "Escribe el numero de documento")
     @Size(max = 20)
     private String documento;

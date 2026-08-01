@@ -29,6 +29,7 @@ export class MiHogarComponent implements OnInit {
   vehiculos: Vehiculo[] = [];
   parentescos: Parametro[] = [];
   tiposVehiculo: Parametro[] = [];
+  tiposDocumento: Parametro[] = [];
 
   cargando = true;
   sinCasa = false;
@@ -39,6 +40,7 @@ export class MiHogarComponent implements OnInit {
   guardando = false;
 
   readonly formularioFamiliar = this.fb.nonNullable.group({
+    tipoDocumento: ['CC', [Validators.required]],
     documento: ['', [Validators.required]],
     nombres: ['', [Validators.required]],
     apellidos: ['', [Validators.required]],
@@ -68,6 +70,7 @@ export class MiHogarComponent implements OnInit {
       this.parentescos = parametros.filter(p => p.codigo !== 'TITULAR');
     });
     this.admin.parametros('TIPO_VEHICULO').subscribe(tipos => (this.tiposVehiculo = tipos));
+    this.admin.parametros('TIPO_DOCUMENTO').subscribe(t => (this.tiposDocumento = t));
   }
 
   cargar(): void {
@@ -116,7 +119,7 @@ export class MiHogarComponent implements OnInit {
         next: () => {
           this.guardando = false;
           this.mostrarAltaFamiliar = false;
-          this.formularioFamiliar.reset({ fotoUrl: null });
+          this.formularioFamiliar.reset({ tipoDocumento: 'CC', fotoUrl: null });
           this.cargar();
         },
         error: (fallo: HttpErrorResponse) => {

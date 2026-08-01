@@ -4,10 +4,20 @@
   <meta charset="utf-8">
   <title>GUARDIAN</title>
   <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- viewport-fit=cover NO es opcional: sin él, env(safe-area-inset-*) siempre
+       devuelve 0 y la barra inferior queda debajo del indicador de gestos. -->
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, viewport-fit=cover">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#1f6feb">
+
+  <!-- La barra de estado continúa el color de la pantalla, no un azul que no
+       aparece en ningún lado. Copia literal de --bg-base en cada modo. -->
+  <meta name="theme-color" content="#f4f6f8" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e1420" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GUARDIAN">
 </head>
 <body>
   <app-root></app-root>

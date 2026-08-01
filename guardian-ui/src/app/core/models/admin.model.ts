@@ -18,6 +18,7 @@ export interface CasaRequest {
 
 export interface Persona {
   id: number;
+  tipoDocumento: string;
   documento: string;
   nombres: string;
   apellidos: string;
@@ -37,6 +38,8 @@ export interface Persona {
 }
 
 export interface PersonaRequest {
+  /** Código del grupo TIPO_DOCUMENTO (CC, TI, CE, PA, RC). */
+  tipoDocumento?: string | null;
   documento: string;
   nombres: string;
   apellidos: string;
@@ -84,6 +87,7 @@ export interface Usuario {
 /** Miembro de la casa en "Mi hogar". */
 export interface Familiar {
   personaId: number;
+  tipoDocumento: string;
   documento: string;
   nombreCompleto: string;
   parentesco: string;
@@ -95,6 +99,7 @@ export interface Familiar {
 }
 
 export interface FamiliarRequest {
+  tipoDocumento?: string | null;
   documento: string;
   nombres: string;
   apellidos: string;

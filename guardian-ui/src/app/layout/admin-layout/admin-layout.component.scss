@@ -1,6 +1,7 @@
 :host {
   display: block;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* El @media de abajo es del cascarón de la aplicación (sidebar vs barra
@@ -8,6 +9,7 @@
 .oficina {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .lateral {
@@ -21,6 +23,7 @@
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100dvh;
 }
 
 .marca {

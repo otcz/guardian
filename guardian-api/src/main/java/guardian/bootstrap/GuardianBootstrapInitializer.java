@@ -108,6 +108,16 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
                 new Opcion(Codigos.CREDENCIAL_PERMANENTE, "Permanente"),
                 new Opcion(Codigos.CREDENCIAL_TEMPORAL, "Temporal")));
 
+        // Identificacion: en un conjunto hay menores con tarjeta de identidad
+        // y extranjeros con cedula de extranjeria o pasaporte. CC va protegido
+        // porque es el default estructural de las altas sin tipo.
+        creados += sembrarGrupo(Codigos.GRUPO_TIPO_DOCUMENTO, false, Arrays.asList(
+                new Opcion(Codigos.TIPO_DOCUMENTO_CC, "Cedula de ciudadania", true),
+                new Opcion("TI", "Tarjeta de identidad"),
+                new Opcion("CE", "Cedula de extranjeria"),
+                new Opcion("PA", "Pasaporte"),
+                new Opcion("RC", "Registro civil")));
+
         creados += sembrarGrupo(Codigos.GRUPO_MOTIVO_DENEGACION, true, Arrays.asList(
                 new Opcion(Codigos.MOTIVO_FIRMA_INVALIDA, "Codigo no valido"),
                 new Opcion(Codigos.MOTIVO_CREDENCIAL_REVOCADA, "Credencial revocada"),
@@ -179,6 +189,7 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
 
         GdPersona persona = new GdPersona();
         persona.setConjunto(conjunto);
+        persona.setTipoDocumento(Codigos.TIPO_DOCUMENTO_CC);
         persona.setDocumento(adminDocumento);
         persona.setNombres("Administrador");
         persona.setApellidos("del conjunto");

@@ -20,6 +20,7 @@ export class PersonasComponent implements OnInit {
   casas: Casa[] = [];
   parentescos: Parametro[] = [];
   roles: Parametro[] = [];
+  tiposDocumento: Parametro[] = [];
 
   cargando = true;
   guardando = false;
@@ -36,6 +37,7 @@ export class PersonasComponent implements OnInit {
   private readonly busqueda$ = new Subject<string>();
 
   readonly formulario = this.fb.nonNullable.group({
+    tipoDocumento: ['CC', [Validators.required]],
     documento: ['', [Validators.required]],
     nombres: ['', [Validators.required]],
     apellidos: ['', [Validators.required]],
@@ -56,6 +58,7 @@ export class PersonasComponent implements OnInit {
     this.admin.casas().subscribe(casas => (this.casas = casas));
     this.admin.parametros('PARENTESCO').subscribe(p => (this.parentescos = p));
     this.admin.parametros('ROL').subscribe(r => (this.roles = r));
+    this.admin.parametros('TIPO_DOCUMENTO').subscribe(t => (this.tiposDocumento = t));
 
     // debounce para no disparar una consulta por cada tecla.
     this.busqueda$
@@ -126,6 +129,7 @@ export class PersonasComponent implements OnInit {
     this.editando = persona;
     this.mostrarAlta = true;
     this.formulario.setValue({
+      tipoDocumento: persona.tipoDocumento ?? 'CC',
       documento: persona.documento,
       nombres: persona.nombres,
       apellidos: persona.apellidos,
@@ -143,7 +147,7 @@ export class PersonasComponent implements OnInit {
   cancelarEdicion(): void {
     this.editando = null;
     this.mostrarAlta = false;
-    this.formulario.reset({ fotoUrl: null });
+    this.formulario.reset({ tipoDocumento: 'CC', fotoUrl: null });
   }
 
   alternarEstado(persona: Persona): void {

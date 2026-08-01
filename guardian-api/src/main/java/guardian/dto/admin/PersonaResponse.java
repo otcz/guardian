@@ -10,6 +10,7 @@ import java.util.Date;
 public class PersonaResponse {
 
     private Long id;
+    private String tipoDocumento;
     private String documento;
     private String nombres;
     private String apellidos;

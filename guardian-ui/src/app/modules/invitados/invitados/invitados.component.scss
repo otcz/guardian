@@ -1,20 +1,36 @@
+:host {
+  display: block;
+}
+
+::ng-deep .gd-page {
+  padding: var(--e-4) var(--e-4) 0;
+}
+
 .encabezado {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  margin-bottom: 0.85rem;
+  gap: var(--e-3);
+  margin-bottom: var(--e-2);
+}
 
-  h1 {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1.15rem;
+.agregar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  font-size: var(--t-sm);
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: none;
+  border-radius: var(--r-full);
+  cursor: pointer;
+  transition: transform var(--transicion), filter var(--transicion);
 
-    i {
-      color: var(--accent);
-    }
+  &:active {
+    transform: scale(0.9);
+    filter: brightness(0.95);
   }
 }
 
@@ -22,8 +38,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
-  padding: 2.5rem 1rem;
+  gap: var(--e-1);
+  padding: var(--e-6) var(--e-4);
   text-align: center;
 
   i {
@@ -41,54 +57,61 @@
   }
 }
 
+/* ── Formulario ──────────────────────────────────────────────────────────── */
 .alta {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-  margin-bottom: 1rem;
+  gap: var(--e-3);
+  margin-bottom: var(--e-3);
+  border-radius: var(--r-lg);
 }
 
 .campos {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: var(--e-3);
 }
 
 .campo {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: var(--e-1);
   flex: 1 1 150px;
   min-width: 0;
 
   label {
     display: flex;
     align-items: center;
-    gap: 0.3rem;
-    font-size: 0.8rem;
+    gap: var(--e-1);
+    font-size: var(--t-xs);
     font-weight: 600;
-    color: var(--text-default);
+    color: var(--text-muted);
   }
 
   input {
-    padding: 0.55rem 0.7rem;
-    font-size: 0.95rem;
+    padding: 0.65rem 0.75rem;
     color: var(--text-strong);
-    background: var(--bg-surface);
-    border: 1px solid var(--border-default);
-    border-radius: 8px;
+    background: var(--bg-base);
+    border: 1px solid transparent;
+    border-radius: var(--r-sm);
     outline: none;
     min-width: 0;
+    transition: border-color var(--transicion), background var(--transicion);
 
     &:focus {
+      background: var(--bg-surface);
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-soft);
     }
+  }
+
+  .error {
+    font-size: var(--t-xs);
+    color: var(--deny);
   }
 }
 
 .ayuda {
-  font-size: 0.75rem;
+  font-size: var(--t-xs);
   color: var(--text-muted);
   cursor: help;
 }
@@ -97,111 +120,141 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  padding: 0.6rem 1.1rem;
-  font-size: 0.9rem;
+  gap: var(--e-2);
+  min-height: var(--tactil);
+  padding: 0 1.25rem;
+  font-size: var(--t-md);
   font-weight: 600;
   color: var(--text-inverse);
   background: var(--accent);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--r-md);
   cursor: pointer;
   white-space: nowrap;
+  transition: transform var(--transicion), filter var(--transicion);
+
+  &:active {
+    transform: scale(0.97);
+    filter: brightness(0.95);
+  }
 
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
   }
 }
 
-.alterno {
-  padding: 0.55rem 0.9rem;
-  font-size: 0.85rem;
-  color: var(--text-muted);
+/* Una acción destructiva se ofrece como texto, no como botón: hay que poder
+   encontrarla, pero no tropezarse con ella. */
+.peligro-texto {
+  min-height: var(--tactil);
+  padding: 0 var(--e-3);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--deny);
   background: none;
-  border: 1px solid var(--border-default);
-  border-radius: 8px;
+  border: none;
   cursor: pointer;
-
-  &:hover {
-    color: var(--text-default);
-    background: var(--bg-soft);
-  }
 }
 
-/* Panel del QR recién creado o consultado. */
-.qr-panel {
+/* ── Hoja del código ─────────────────────────────────────────────────────
+   Sube desde abajo y oscurece el resto: el patrón de "bottom sheet" nativo,
+   que en el móvil reemplaza al modal centrado del escritorio. */
+.velo {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--overlay);
+  animation: aparecer 200ms ease-out;
+}
+
+.hoja {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 41;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  border: 2px solid var(--accent);
+  gap: var(--e-2);
+  width: 100%;
+  max-width: 520px;
+  padding: var(--e-2) var(--e-4) calc(var(--seguro-abajo) + var(--e-5));
+  text-align: center;
+  background: var(--bg-surface);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  box-shadow: var(--shadow-flotante);
+  animation: subir 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* El asa dice "esto se puede cerrar arrastrando" sin una sola palabra. */
+.asa {
+  width: 36px;
+  height: 4px;
+  margin-bottom: var(--e-2);
+  background: var(--border-strong);
+  border-radius: var(--r-full);
+}
+
+@keyframes subir {
+  from { transform: translate(-50%, 100%); }
+  to { transform: translate(-50%, 0); }
+}
+
+@keyframes aparecer {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* El QR siempre sobre blanco: un QR invertido no escanea. */
 .qr-cuadro {
-  padding: 0.6rem;
+  padding: var(--e-3);
   background: #ffffff;
-  border-radius: 12px;
+  border-radius: var(--r-lg);
   line-height: 0;
 }
 
-.qr-datos {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  flex: 1 1 220px;
-  min-width: 0;
+.qr-nombre {
+  margin-top: var(--e-2);
+  font-size: var(--t-lg);
+  color: var(--text-strong);
+}
 
-  strong {
-    font-size: 1.05rem;
-    color: var(--text-strong);
-  }
-
-  .instruccion {
-    margin: 0.2rem 0 0;
-    font-size: 0.82rem;
-    color: var(--text-muted);
-    line-height: 1.4;
-  }
+.instruccion {
+  margin: var(--e-1) 0 0;
+  font-size: var(--t-sm);
+  color: var(--text-muted);
+  line-height: 1.45;
 }
 
 .qr-acciones {
   display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  flex-wrap: wrap;
-}
-
-/* Tarjetas de invitación. */
-.tarjetas {
-  display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  align-items: stretch;
+  gap: var(--e-1);
+  width: 100%;
+  margin-top: var(--e-3);
 }
 
-.invitacion {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  padding: 0.75rem 1rem;
-
-  &.apagada {
-    opacity: 0.6;
+/* ── Filas ───────────────────────────────────────────────────────────────── */
+.invitacion.apagada {
+  .icono-tipo,
+  .datos {
+    opacity: 0.5;
   }
 }
 
 .icono-tipo {
   display: grid;
   place-items: center;
-  width: 46px;
-  height: 46px;
+  width: 44px;
+  height: 44px;
   flex: 0 0 auto;
-  border-radius: 10px;
+  border-radius: var(--r-md);
   background: var(--accent-soft);
 
   i {
-    font-size: 1.15rem;
+    font-size: var(--t-lg);
     color: var(--accent);
   }
 }
@@ -214,32 +267,28 @@
   min-width: 0;
 
   strong {
+    font-size: var(--t-md);
     color: var(--text-strong);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .detalle {
-    font-size: 0.82rem;
-    color: var(--text-default);
-  }
-
-  .tenue {
+    font-size: var(--t-sm);
     color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
-}
-
-.acciones {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-  justify-content: flex-end;
 }
 
 .pastilla {
+  flex: 0 0 auto;
   padding: 0.15rem 0.55rem;
-  font-size: 0.72rem;
+  font-size: var(--t-xs);
   font-weight: 600;
-  border-radius: 999px;
+  border-radius: var(--r-full);
   white-space: nowrap;
 
   &.si {
@@ -263,44 +312,57 @@
   }
 }
 
+/* El chevron indica "hay más adentro", como en cualquier lista nativa. */
 .accion {
   display: grid;
   place-items: center;
   width: 32px;
   height: 32px;
-  color: var(--text-default);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: 8px;
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  background: none;
+  border: none;
   cursor: pointer;
+}
 
-  &:hover {
-    background: var(--bg-soft);
+.vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-3);
+  padding: var(--e-6) var(--e-4);
+  text-align: center;
+  background: var(--bg-surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+
+  i {
+    font-size: 1.75rem;
+    color: var(--text-muted);
+    opacity: 0.7;
   }
 
-  &.peligro:hover {
-    color: var(--deny);
-    border-color: var(--deny);
-    background: var(--deny-soft);
+  p {
+    margin: 0;
+    font-size: var(--t-md);
+    color: var(--text-muted);
   }
+}
+
+.aviso-error,
+.aviso-ok {
+  margin-bottom: var(--e-3);
+  padding: var(--e-3);
+  font-size: var(--t-sm);
+  border-radius: var(--r-md);
 }
 
 .aviso-error {
-  margin-bottom: 1rem;
-  padding: 0.6rem 0.85rem;
-  font-size: 0.85rem;
   color: var(--deny);
   background: var(--deny-soft);
-  border: 1px solid var(--deny);
-  border-radius: 8px;
 }
 
 .aviso-ok {
-  margin-bottom: 1rem;
-  padding: 0.6rem 0.85rem;
-  font-size: 0.85rem;
   color: var(--ok);
   background: var(--ok-soft);
-  border: 1px solid var(--ok);
-  border-radius: 8px;
 }

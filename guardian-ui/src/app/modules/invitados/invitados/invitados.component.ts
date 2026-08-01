@@ -126,7 +126,12 @@ export class InvitadosComponent implements OnInit {
 
     this.error = null;
     this.residente.revocarInvitacion(invitacion.id).subscribe({
-      next: () => this.cargar(),
+      next: () => {
+        // La hoja muestra un código que acaba de morir: cerrarla es parte de
+        // la acción, no un paso extra para el residente.
+        this.qrAbierto = null;
+        this.cargar();
+      },
       error: (fallo: HttpErrorResponse) => {
         this.error = fallo.error?.mensaje ?? 'No pudimos revocar la invitación.';
       }

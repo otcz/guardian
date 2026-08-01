@@ -2,6 +2,7 @@
   display: grid;
   place-items: center;
   min-height: 100vh;
+  min-height: 100dvh;
   padding: 1.25rem;
   background: var(--bg-base);
 }
@@ -61,7 +62,6 @@
     background: var(--bg-surface);
     border: 1px solid var(--border-default);
     border-radius: 8px;
-    outline: none;
 
     &:focus {
       border-color: var(--accent);

@@ -88,12 +88,14 @@
         <i class="pi pi-home"></i> {{ ficha.casaIdentificador }}
       </span>
       <span *ngIf="ficha.edad !== null">{{ ficha.edad }} años</span>
-      <span *ngIf="ficha.documento">{{ ficha.documento }}</span>
+      <span *ngIf="ficha.documento">
+        {{ ficha.tipoDocumento ?? '' }} {{ ficha.documento | documento }}
+      </span>
     </div>
 
     <div class="verifica-documento" *ngIf="ficha.esInvitado && ficha.permitido">
       <i class="pi pi-id-card"></i>
-      Pide la cédula y compárala: <strong>{{ ficha.documento }}</strong>
+      Pide el documento y compáralo: <strong>{{ ficha.documento | documento }}</strong>
     </div>
 
     <!-- Un solo toque: el sentido ya viene inferido. Corregirlo es la

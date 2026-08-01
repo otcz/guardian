@@ -1,50 +1,54 @@
 <div class="panel">
+
+  <!-- Cabecera compacta: identidad y utilidades. La navegación NO vive aquí,
+       vive abajo, donde llega el pulgar. -->
   <header class="cabecera">
-    <div class="marca">
-      <i class="pi pi-shield"></i>
-      <span>GUARDIAN</span>
+    <div class="identidad" *ngIf="sesion">
+      <span class="saludo">{{ saludo }}</span>
+      <span class="nombre">{{ primerNombre }}</span>
     </div>
 
-    <div class="acciones">
+    <div class="utilidades">
+      <span class="casa" *ngIf="sesion?.casaIdentificador">
+        <i class="pi pi-home"></i> {{ sesion?.casaIdentificador }}
+      </span>
+
       <a *ngIf="puedeIrAPorteria" routerLink="/porteria" class="icono"
-         pTooltip="Ir a Portería" tooltipPosition="bottom">
+         pTooltip="Ir a Portería" tooltipPosition="bottom" aria-label="Ir a Portería">
         <i class="pi pi-shield"></i>
       </a>
       <a *ngIf="puedeIrAAdmin" routerLink="/admin" class="icono"
-         pTooltip="Ir a Administración" tooltipPosition="bottom">
+         pTooltip="Ir a Administración" tooltipPosition="bottom" aria-label="Ir a Administración">
         <i class="pi pi-cog"></i>
       </a>
       <button type="button" class="icono" (click)="tema.alternar()"
               [attr.aria-label]="tema.oscuro ? 'Modo claro' : 'Modo oscuro'">
         <i class="pi" [ngClass]="tema.oscuro ? 'pi-sun' : 'pi-moon'"></i>
       </button>
-      <button type="button" class="icono" (click)="salir()" aria-label="Salir"
-              pTooltip="Salir" tooltipPosition="bottom">
+      <button type="button" class="icono" (click)="salir()" aria-label="Salir">
         <i class="pi pi-sign-out"></i>
       </button>
     </div>
   </header>
 
-  <div class="identidad" *ngIf="sesion">
-    <span class="nombre">{{ sesion.nombreCompleto }}</span>
-    <span class="casa" *ngIf="sesion.casaIdentificador">
-      <i class="pi pi-home"></i> {{ sesion.casaIdentificador }}
-    </span>
-  </div>
-
-  <nav class="pestanas">
-    <a routerLink="mi-qr" routerLinkActive="activa">
-      <i class="pi pi-qrcode"></i> Mi QR
-    </a>
-    <a routerLink="mi-hogar" routerLinkActive="activa">
-      <i class="pi pi-home"></i> Mi hogar
-    </a>
-    <a routerLink="invitados" routerLinkActive="activa">
-      <i class="pi pi-ticket"></i> Invitados
-    </a>
-  </nav>
-
   <main>
     <router-outlet></router-outlet>
   </main>
+
+  <!-- Barra inferior: la convención nativa. Tres destinos, siempre visibles,
+       el activo con color y peso, nunca con un borde. -->
+  <nav class="tabbar" role="tablist">
+    <a routerLink="mi-qr" routerLinkActive="activa" class="tab">
+      <i class="pi pi-qrcode"></i>
+      <span>Mi QR</span>
+    </a>
+    <a routerLink="mi-hogar" routerLinkActive="activa" class="tab">
+      <i class="pi pi-home"></i>
+      <span>Mi hogar</span>
+    </a>
+    <a routerLink="invitados" routerLinkActive="activa" class="tab">
+      <i class="pi pi-ticket"></i>
+      <span>Invitados</span>
+    </a>
+  </nav>
 </div>

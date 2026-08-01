@@ -20,6 +20,44 @@ body {
   background: var(--bg-base);
   color: var(--text-strong);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* Sin rebote al final del scroll: ese "tirón" es la señal más clara de que
+     lo que se está usando es una página web dentro de un navegador. */
+  overscroll-behavior: none;
+}
+
+/* Nada de destello gris al tocar, ni de selección accidental de texto al
+   arrastrar. En una app se seleccionan datos, no la interfaz. */
+body {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input,
+textarea,
+[contenteditable],
+.gd-seleccionable {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* El zoom por doble toque retrasa cada pulsación ~300ms y descuadra la
+   portería. touch-action lo desactiva sin bloquear el scroll. */
+button,
+a,
+select,
+[role='button'] {
+  touch-action: manipulation;
+}
+
+/* iOS hace zoom al enfocar un campo con menos de 16px. Subirlo evita que la
+   pantalla salte cada vez que el residente escribe. */
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: max(16px, var(--t-md));
 }
 
 h1, h2, h3, h4 {
@@ -33,6 +71,30 @@ a {
   text-decoration: none;
 }
 
+/* Un anillo de foco visible SOLO para quien navega con teclado. Los
+   componentes por eso no necesitan `outline: none`: con el dedo nunca
+   aparece, y quien usa teclado no se queda sin saber dónde está. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Quien pidió menos movimiento en su sistema lo pidió por algo — vértigo,
+   migraña, o simplemente batería. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Utilitarias mínimas. Todo lo demás vive en el SCSS del componente. */
 .gd-page {
   padding: 1.25rem;
@@ -43,11 +105,67 @@ a {
 .gd-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
-  border-radius: 12px;
+  border-radius: var(--r-md);
   padding: 1.25rem;
 }
 
 .gd-muted {
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: var(--t-sm);
+}
+
+/* ---------------------------------------------------------------------------
+   Lista agrupada — el patrón de lista nativo (Ajustes de iOS, Material).
+   Un solo contenedor con separadores internos en vez de una tarjeta flotante
+   por fila: menos bordes, menos ruido, y la vista se lee como UNA lista.
+   --------------------------------------------------------------------------- */
+.gd-lista {
+  background: var(--bg-surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.gd-fila {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  width: 100%;
+  min-height: var(--tactil);
+  padding: var(--e-3) var(--e-4);
+  text-align: left;
+  background: none;
+  border: none;
+  /* El separador arranca donde arranca el texto, no en el borde: así el ojo
+     sigue la columna de contenido y no una reja. */
+  box-shadow: inset 0 -1px 0 var(--border-hairline);
+
+  &:last-child {
+    box-shadow: none;
+  }
+}
+
+/* Feedback táctil: en una app el elemento responde al dedo ANTES de que
+   llegue la respuesta del servidor. */
+.gd-presionable {
+  cursor: pointer;
+  transition: background var(--transicion), transform var(--transicion);
+
+  &:active {
+    background: var(--presionado);
+    transform: scale(0.985);
+  }
+}
+
+.gd-titulo-seccion {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  margin: 0 0 var(--e-2);
+  padding: 0 var(--e-1);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }

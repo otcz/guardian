@@ -13,6 +13,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 @Data
 public class PersonaRequest {
 
+    /** Codigo del grupo TIPO_DOCUMENTO (CC, TI, CE, PA, RC). Null = CC. */
+    @Size(max = 5)
+    private String tipoDocumento;
+
     @NotBlank(message = "Escribe el numero de documento")
     @Size(max = 20, message = "El documento no puede superar 20 caracteres")
     private String documento;

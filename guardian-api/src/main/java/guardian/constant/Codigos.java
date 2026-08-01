@@ -56,6 +56,10 @@ public final class Codigos {
     public static final String GRUPO_TIPO_VEHICULO = "TIPO_VEHICULO";
     public static final String GRUPO_MOTIVO_DENEGACION = "MOTIVO_DENEGACION";
     public static final String GRUPO_TIPO_CREDENCIAL = "TIPO_CREDENCIAL";
+    public static final String GRUPO_TIPO_DOCUMENTO = "TIPO_DOCUMENTO";
+
+    /** Tipo de documento por defecto cuando el alta no lo especifica. */
+    public static final String TIPO_DOCUMENTO_CC = "CC";
 
     /** Motivos de denegacion. Sembrados en GD_PARAMETRO, referenciados aca. */
     public static final String MOTIVO_FIRMA_INVALIDA = "FIRMA_INVALIDA";

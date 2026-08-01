@@ -49,6 +49,14 @@ public class GdPersona extends BaseEntity {
     @JoinColumn(name = "CONJUNTO_ID", nullable = false)
     private GdConjunto conjunto;
 
+    /**
+     * Codigo del grupo TIPO_DOCUMENTO: CC, TI, CE, PA, RC. El default en
+     * columna cubre las filas creadas antes de esta migracion.
+     */
+    @Column(name = "TIPO_DOCUMENTO", nullable = false, length = 5,
+            columnDefinition = "varchar(5) default 'CC'")
+    private String tipoDocumento;
+
     @Column(name = "DOCUMENTO", nullable = false, length = 20)
     private String documento;
 

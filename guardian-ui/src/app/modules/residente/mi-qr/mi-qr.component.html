@@ -8,12 +8,10 @@
   <div class="aviso-error" *ngIf="error">{{ error }}</div>
 
   <div class="credencial" *ngIf="credencial">
-    <div class="qr">
-      <qrcode [qrdata]="credencial.payload"
-              [width]="260"
-              [margin]="1"
-              errorCorrectionLevel="H"
-              elementType="canvas"></qrcode>
+    <!-- La foto sobre el QR: es la misma que ve el guardia en su pantalla,
+         así el residente reconoce su propia credencial de un vistazo. -->
+    <div class="retrato" *ngIf="credencial.fotoUrl">
+      <img [src]="credencial.fotoUrl | foto" [alt]="credencial.nombreCompleto">
     </div>
 
     <h1>{{ credencial.nombreCompleto }}</h1>
@@ -22,10 +20,23 @@
       <span class="casa" *ngIf="credencial.casaIdentificador">
         <i class="pi pi-home"></i> {{ credencial.casaIdentificador }}
       </span>
-      <span class="doc">{{ credencial.documento }}</span>
+      <span class="doc gd-seleccionable">
+        {{ credencial.tipoDocumento }} {{ credencial.documento | documento }}
+      </span>
     </div>
 
-    <p class="instruccion">Muestra este código en la portería.</p>
+    <div class="qr">
+      <qrcode [qrdata]="credencial.payload"
+              [width]="240"
+              [margin]="1"
+              errorCorrectionLevel="H"
+              elementType="canvas"></qrcode>
+    </div>
+
+    <p class="instruccion">
+      <i class="pi pi-arrow-up"></i>
+      Muestra este código en la portería
+    </p>
 
     <div class="sin-conexion" *ngIf="desdeCache">
       <i class="pi pi-wifi"></i>

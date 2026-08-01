@@ -14,6 +14,7 @@ public class MiQrResponse {
     private String payload;
 
     private String nombreCompleto;
+    private String tipoDocumento;
     private String documento;
     private String casaIdentificador;
     private String fotoUrl;

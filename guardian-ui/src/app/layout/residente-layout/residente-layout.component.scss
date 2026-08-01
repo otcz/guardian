@@ -1,119 +1,163 @@
 :host {
   display: block;
-  min-height: 100vh;
 }
 
+/* 100dvh y no 100vh: en el móvil la barra del navegador aparece y desaparece,
+   y con vh el contenido queda cortado justo cuando el teclado se abre. */
 .panel {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100dvh;
   max-width: 520px;
   margin: 0 auto;
+  background: var(--bg-base);
 }
 
+/* ── Cabecera ──────────────────────────────────────────────────────────────
+   Se queda arriba al hacer scroll, como la de una app, y respeta la muesca. */
 .cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem 0.25rem;
-}
-
-.marca {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  color: var(--accent);
-
-  i {
-    font-size: 1.1rem;
-  }
-}
-
-.acciones {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.icono {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  color: var(--text-muted);
-  background: none;
-  border: 1px solid var(--border-default);
-  border-radius: 10px;
-  cursor: pointer;
-
-  &:hover {
-    color: var(--text-default);
-    background: var(--bg-soft);
-  }
+  gap: var(--e-3);
+  padding: calc(var(--seguro-arriba) + var(--e-3)) var(--e-4) var(--e-3);
+  background: var(--bg-base);
+  box-shadow: inset 0 -1px 0 var(--border-hairline);
 }
 
 .identidad {
   display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-  padding: 0.5rem 1rem 0;
+  flex-direction: column;
+  min-width: 0;
 
-  .nombre {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--text-strong);
-  }
-
-  .casa {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.15rem 0.6rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--accent);
-    background: var(--accent-soft);
-    border-radius: 999px;
-  }
-}
-
-/* Pestañas grandes: es la navegación principal del celular. */
-.pestanas {
-  display: flex;
-  gap: 0.4rem;
-  padding: 0.85rem 1rem 0.25rem;
-
-  a {
-    flex: 1 1 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.45rem;
-    padding: 0.65rem;
-    font-size: 0.95rem;
+  .saludo {
+    font-size: var(--t-xs);
     font-weight: 600;
     color: var(--text-muted);
-    background: var(--bg-surface);
-    border: 1px solid var(--border-default);
-    border-radius: 12px;
+  }
 
-    &:hover {
-      color: var(--text-default);
-    }
-
-    &.activa {
-      color: var(--accent);
-      background: var(--accent-soft);
-      border-color: var(--accent);
-    }
+  .nombre {
+    font-size: var(--t-xl);
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--text-strong);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
+.utilidades {
+  display: flex;
+  align-items: center;
+  gap: var(--e-1);
+  flex-shrink: 0;
+}
+
+.casa {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-1);
+  margin-right: var(--e-1);
+  padding: 0.2rem 0.6rem;
+  font-size: var(--t-xs);
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: var(--r-full);
+  white-space: nowrap;
+}
+
+/* Sin borde: un icono de utilidad no compite con el contenido. El área
+   táctil es de 40px aunque el icono se vea más chico. */
+.icono {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  font-size: var(--t-md);
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-radius: var(--r-full);
+  cursor: pointer;
+  transition: background var(--transicion), color var(--transicion);
+
+  &:hover {
+    color: var(--text-strong);
+    background: var(--bg-soft);
+  }
+
+  &:active {
+    background: var(--presionado);
+    transform: scale(0.92);
+  }
+}
+
+/* ── Contenido ─────────────────────────────────────────────────────────────
+   El padding inferior reserva el alto de la barra: sin él, la última tarjeta
+   queda debajo de la navegación y nadie la ve. */
 main {
   flex: 1 1 auto;
   min-width: 0;
+  padding-bottom: calc(var(--alto-tabbar) + var(--seguro-abajo) + var(--e-4));
+}
+
+/* ── Barra de navegación inferior ──────────────────────────────────────── */
+.tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  width: 100%;
+  max-width: 520px;
+  padding-bottom: var(--seguro-abajo);
+  background: var(--bg-surface);
+  box-shadow: inset 0 1px 0 var(--border-hairline), 0 -2px 12px rgba(16, 21, 28, 0.06);
+  /* Difumina lo que pasa por debajo donde el navegador lo soporte: es el
+     detalle que más acerca la barra a una nativa. */
+  backdrop-filter: saturate(180%) blur(12px);
+}
+
+.tab {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  min-height: var(--alto-tabbar);
+  padding: var(--e-2) var(--e-1);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: color var(--transicion);
+
+  i {
+    font-size: 1.25rem;
+    transition: transform var(--transicion);
+  }
+
+  &:active i {
+    transform: scale(0.88);
+  }
+
+  /* El destino activo se marca con color y peso, nunca con un recuadro:
+     un borde dentro de la barra la vuelve una fila de botones web. */
+  &.activa {
+    color: var(--accent);
+
+    i {
+      transform: translateY(-1px);
+    }
+  }
+}
+
+html.dark-mode .tabbar {
+  box-shadow: inset 0 1px 0 var(--border-hairline), 0 -2px 12px rgba(0, 0, 0, 0.4);
 }
