@@ -1,7 +1,7 @@
 <div class="panel">
 
-  <!-- Cabecera compacta: identidad y utilidades. La navegación NO vive aquí,
-       vive abajo, donde llega el pulgar. -->
+  <!-- Cabecera compacta: identidad y una sola puerta. La navegación NO vive
+       aquí, vive abajo, donde llega el pulgar. -->
   <header class="cabecera">
     <div class="identidad" *ngIf="sesion">
       <span class="saludo">{{ saludo }}</span>
@@ -13,20 +13,9 @@
         <i class="pi pi-home"></i> {{ sesion?.casaIdentificador }}
       </span>
 
-      <a *ngIf="puedeIrAPorteria" routerLink="/porteria" class="icono"
-         pTooltip="Ir a Portería" tooltipPosition="bottom" aria-label="Ir a Portería">
-        <i class="pi pi-shield"></i>
-      </a>
-      <a *ngIf="puedeIrAAdmin" routerLink="/admin" class="icono"
-         pTooltip="Ir a Administración" tooltipPosition="bottom" aria-label="Ir a Administración">
-        <i class="pi pi-cog"></i>
-      </a>
-      <button type="button" class="icono" (click)="tema.alternar()"
-              [attr.aria-label]="tema.oscuro ? 'Modo claro' : 'Modo oscuro'">
-        <i class="pi" [ngClass]="tema.oscuro ? 'pi-sun' : 'pi-moon'"></i>
-      </button>
-      <button type="button" class="icono" (click)="salir()" aria-label="Salir">
-        <i class="pi pi-sign-out"></i>
+      <button type="button" class="avatar" (click)="mostrarCuenta = true"
+              aria-label="Mi cuenta">
+        {{ inicial }}
       </button>
     </div>
   </header>
@@ -51,4 +40,56 @@
       <span>Invitados</span>
     </a>
   </nav>
+
+  <!-- Mi cuenta. Ninguna app nativa tiene "cerrar sesión" a un toque en la
+       pantalla principal, ni cuatro iconos sin nombre en la esquina. -->
+  <gd-hoja [abierta]="mostrarCuenta" titulo="Mi cuenta"
+           (cerrar)="mostrarCuenta = false">
+
+    <div class="ficha-cuenta" *ngIf="sesion">
+      <span class="nombre-completo">{{ sesion.nombreCompleto }}</span>
+      <span class="gd-muted">
+        {{ sesion.rol }}
+        <ng-container *ngIf="sesion.casaIdentificador">
+          · {{ sesion.casaIdentificador }}
+        </ng-container>
+      </span>
+    </div>
+
+    <h3 class="gd-titulo-seccion">Apariencia</h3>
+    <div class="gd-lista">
+      <button type="button" class="gd-fila gd-presionable"
+              *ngFor="let opcion of opcionesTema"
+              (click)="tema.fijar(opcion.valor)">
+        <i class="pi" [ngClass]="opcion.icono"></i>
+        <span class="etiqueta">{{ opcion.nombre }}</span>
+        <i class="pi pi-check marca" *ngIf="tema.preferencia === opcion.valor"></i>
+      </button>
+    </div>
+
+    <ng-container *ngIf="puedeIrAPorteria || puedeIrAAdmin">
+      <h3 class="gd-titulo-seccion">Otros paneles</h3>
+      <div class="gd-lista">
+        <a class="gd-fila gd-presionable" routerLink="/porteria"
+           *ngIf="puedeIrAPorteria" (click)="mostrarCuenta = false">
+          <i class="pi pi-shield"></i>
+          <span class="etiqueta">Portería</span>
+          <i class="pi pi-chevron-right marca"></i>
+        </a>
+        <a class="gd-fila gd-presionable" routerLink="/admin"
+           *ngIf="puedeIrAAdmin" (click)="mostrarCuenta = false">
+          <i class="pi pi-cog"></i>
+          <span class="etiqueta">Administración</span>
+          <i class="pi pi-chevron-right marca"></i>
+        </a>
+      </div>
+    </ng-container>
+
+    <div class="gd-lista salir">
+      <button type="button" class="gd-fila gd-presionable gd-fila--destructiva"
+              (click)="salir()">
+        Cerrar sesión
+      </button>
+    </div>
+  </gd-hoja>
 </div>

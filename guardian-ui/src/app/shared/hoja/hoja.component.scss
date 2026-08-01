@@ -1,0 +1,75 @@
+/* El z-index real lo pone el componente según cuántas hojas haya encima:
+   con un valor fijo, el velo de la segunda quedaba DEBAJO de la primera. */
+.velo {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-hoja);
+  background: var(--overlay);
+  animation: gd-velo var(--dur-lenta) var(--curva-entrada);
+}
+
+/* El max-width sale del MISMO token que el panel y la barra inferior: con un
+   literal suelto, la hoja quedaría descentrada en pantallas anchas.
+
+   Se centra con margin-inline y NO con translateX(-50%): el transform lo usa
+   la animación de entrada, y una animación gana sobre la declaración normal,
+   así que compartirlo hacía que la hoja subiera medio cuerpo fuera de
+   pantalla y saltara a su sitio al terminar. */
+.hoja {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  z-index: calc(var(--z-hoja) + 1);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--ancho-panel);
+  max-height: 90dvh;
+  overflow-y: auto;
+  /* Al llegar al tope de la hoja el gesto NO debe empezar a mover el fondo. */
+  overscroll-behavior: contain;
+  padding: var(--e-2) var(--e-4) calc(var(--seguro-abajo) + var(--e-4));
+  background: var(--bg-surface);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  box-shadow: var(--shadow-flotante);
+  animation: gd-entrada-abajo var(--dur-lenta) var(--curva-entrada);
+}
+
+.tirador {
+  width: 36px;
+  height: 4px;
+  flex: 0 0 auto;
+  margin: 0 auto var(--e-3);
+  background: var(--border-strong);
+  border-radius: var(--r-full);
+}
+
+.titulo {
+  margin: 0 0 var(--e-3);
+  font-size: var(--t-lg);
+  font-weight: 700;
+}
+
+.cuerpo {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* El pie queda pegado abajo mientras el cuerpo se desplaza: con el teclado
+   abierto, el botón de guardar sigue a la vista. */
+.pie {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: var(--e-2);
+  justify-content: flex-end;
+  flex: 0 0 auto;
+  padding-top: var(--e-3);
+  background: var(--bg-surface);
+
+  &:empty {
+    display: none;
+  }
+}

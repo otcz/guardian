@@ -3,6 +3,9 @@ import { Injectable } from '@angular/core';
 const LLAVE = 'guardian.tema';
 const ID_META_TEMA = 'gd-theme-color';
 
+/** Seguir al sistema es el default; claro y oscuro son anulaciones expresas. */
+export type PreferenciaTema = 'sistema' | 'claro' | 'oscuro';
+
 /** Copia literal de --bg-base en cada modo (app/styles/_tokens.scss). */
 const FONDO_CLARO = '#f4f6f8';
 const FONDO_OSCURO = '#0e1420';
@@ -35,38 +38,51 @@ export class TemaService {
     return document.documentElement.classList.contains('dark-mode');
   }
 
-  alternar(): void {
-    localStorage.setItem(LLAVE, this.oscuro ? 'claro' : 'oscuro');
+  get preferencia(): PreferenciaTema {
+    const guardada = localStorage.getItem(LLAVE);
+    return guardada === 'claro' || guardada === 'oscuro' ? guardada : 'sistema';
+  }
+
+  fijar(preferencia: PreferenciaTema): void {
+    if (preferencia === 'sistema') {
+      localStorage.removeItem(LLAVE);
+    } else {
+      localStorage.setItem(LLAVE, preferencia);
+    }
     this.aplicar();
   }
 
-  /** Vuelve a seguir al sistema. */
-  seguirAlSistema(): void {
-    localStorage.removeItem(LLAVE);
-    this.aplicar();
+  /**
+   * Conmuta claro/oscuro. La portería y el back-office la siguen usando desde
+   * su botón de luna, donde no hay sitio para tres opciones.
+   */
+  alternar(): void {
+    this.fijar(this.oscuro ? 'claro' : 'oscuro');
   }
 
   private get hayPreferenciaGuardada(): boolean {
-    const guardada = localStorage.getItem(LLAVE);
-    return guardada === 'claro' || guardada === 'oscuro';
+    return this.preferencia !== 'sistema';
   }
 
   private aplicar(): void {
-    const guardada = localStorage.getItem(LLAVE);
     const oscuro = this.hayPreferenciaGuardada
-      ? guardada === 'oscuro'
+      ? this.preferencia === 'oscuro'
       : this.consultaSistema.matches;
 
     document.documentElement.classList.toggle('dark-mode', oscuro);
-    this.sincronizarBarraDeEstado(oscuro);
+    this.sincronizarBarraDeEstado();
   }
 
   /**
    * Los meta theme-color del index responden a prefers-color-scheme, que NO
    * cambia al alternar el tema a mano. Este meta sin media gana sobre ambos y
    * mantiene la barra de estado del mismo color que la pantalla.
+   *
+   * <p>El color se LEE del token, no se copia: así el día que cambie
+   * --bg-base la barra de estado cambia con él y no queda un borde de otro
+   * color en la parte superior.</p>
    */
-  private sincronizarBarraDeEstado(oscuro: boolean): void {
+  private sincronizarBarraDeEstado(): void {
     let meta = document.getElementById(ID_META_TEMA) as HTMLMetaElement | null;
 
     if (!meta) {
@@ -75,6 +91,7 @@ export class TemaService {
       meta.name = 'theme-color';
       document.head.appendChild(meta);
     }
-    meta.content = oscuro ? FONDO_OSCURO : FONDO_CLARO;
+    meta.content = getComputedStyle(document.documentElement)
+      .getPropertyValue('--bg-base').trim();
   }
 }

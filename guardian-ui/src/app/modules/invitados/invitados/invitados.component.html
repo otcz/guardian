@@ -10,91 +10,117 @@
 
     <div class="encabezado">
       <h2 class="gd-titulo-seccion">Mis invitaciones</h2>
-      <button type="button" class="agregar" (click)="mostrarAlta = !mostrarAlta"
-              [attr.aria-label]="mostrarAlta ? 'Cancelar' : 'Nueva invitación'">
-        <i class="pi" [ngClass]="mostrarAlta ? 'pi-times' : 'pi-plus'"></i>
+      <button type="button" class="agregar" (click)="mostrarAlta = true"
+              aria-label="Nueva invitación">
+        <i class="pi pi-plus"></i>
       </button>
     </div>
 
-    <!-- Alta -->
-    <form class="alta gd-card" *ngIf="mostrarAlta" [formGroup]="formulario" (ngSubmit)="crear()">
-      <div class="campos">
-        <div class="campo">
-          <label for="i-nombre">Nombre</label>
-          <input id="i-nombre" type="text" formControlName="nombreInvitado"
-                 placeholder="Ej: Carlos Rojas">
+    <!-- Alta en hoja: el acordeón empujaba la lista y dejaba el botón de
+         guardar debajo de la barra con el teclado abierto. -->
+    <gd-hoja [abierta]="mostrarAlta" titulo="Nueva invitación"
+             (cerrar)="mostrarAlta = false">
+      <form id="alta-invitado" class="alta" [formGroup]="formulario" (ngSubmit)="crear()">
+        <div class="campos">
+          <div class="campo">
+            <label for="i-nombre">Nombre</label>
+            <input id="i-nombre" type="text" formControlName="nombreInvitado"
+                   placeholder="Ej: Carlos Rojas">
+          </div>
+          <div class="campo">
+            <label for="i-documento">
+              Documento
+              <i class="pi pi-info-circle ayuda"
+                 pTooltip="La portería lo compara con la cédula"
+                 tooltipPosition="top"></i>
+            </label>
+            <input id="i-documento" type="text" inputmode="numeric"
+                   formControlName="documentoInvitado" placeholder="Ej: 1020304050">
+          </div>
+          <div class="campo">
+            <label for="i-fecha">Día de la visita</label>
+            <input id="i-fecha" type="date" formControlName="fechaVisita" [min]="hoy">
+            <small class="error" *ngIf="fechaEnPasado">La visita no puede ser en el pasado</small>
+          </div>
+          <div class="campo">
+            <label for="i-usos">
+              Ingresos
+              <i class="pi pi-info-circle ayuda"
+                 pTooltip="Cuántas veces puede entrar"
+                 tooltipPosition="top"></i>
+            </label>
+            <input id="i-usos" type="number" min="1" max="20" formControlName="usosMaximos">
+          </div>
+          <div class="campo">
+            <label for="i-placa">Placa</label>
+            <input id="i-placa" type="text" formControlName="placa"
+                   placeholder="Vacío si viene a pie">
+          </div>
         </div>
-        <div class="campo">
-          <label for="i-documento">
-            Documento
-            <i class="pi pi-info-circle ayuda"
-               pTooltip="La portería lo compara con la cédula"
-               tooltipPosition="top"></i>
-          </label>
-          <input id="i-documento" type="text" inputmode="numeric"
-                 formControlName="documentoInvitado" placeholder="Ej: 1020304050">
-        </div>
-        <div class="campo">
-          <label for="i-fecha">Día de la visita</label>
-          <input id="i-fecha" type="date" formControlName="fechaVisita" [min]="hoy">
-          <small class="error" *ngIf="fechaEnPasado">La visita no puede ser en el pasado</small>
-        </div>
-        <div class="campo">
-          <label for="i-usos">
-            Ingresos
-            <i class="pi pi-info-circle ayuda"
-               pTooltip="Cuántas veces puede entrar"
-               tooltipPosition="top"></i>
-          </label>
-          <input id="i-usos" type="number" min="1" max="20" formControlName="usosMaximos">
-        </div>
-        <div class="campo">
-          <label for="i-placa">Placa</label>
-          <input id="i-placa" type="text" formControlName="placa"
-                 placeholder="Vacío si viene a pie">
-        </div>
-      </div>
+      </form>
 
-      <button type="submit" class="principal" [disabled]="guardando">
-        <i class="pi pi-check"></i> Crear invitación
-      </button>
-    </form>
+      <!-- El botón vive fuera del <form>, por eso el atributo form. -->
+      <div pie>
+        <button type="button" class="alterno" (click)="mostrarAlta = false">Cancelar</button>
+        <button type="submit" form="alta-invitado" class="principal" [disabled]="guardando">
+          Crear invitación
+        </button>
+      </div>
+    </gd-hoja>
 
     <div class="aviso-ok" *ngIf="aviso">{{ aviso }}</div>
     <div class="aviso-error" *ngIf="error">{{ error }}</div>
 
-    <!-- Código del invitado: hoja que sube desde abajo, como en una app. -->
-    <div class="velo" *ngIf="qrAbierto" (click)="qrAbierto = null"></div>
+    <!-- Código del invitado -->
+    <gd-hoja [abierta]="!!qrAbierto" (cerrar)="qrAbierto = null">
+      <div class="codigo" *ngIf="qrAbierto">
+        <div class="qr-cuadro">
+          <qrcode [qrdata]="qrAbierto.payload" [width]="200" [margin]="1"
+                  errorCorrectionLevel="H" elementType="canvas"></qrcode>
+        </div>
 
-    <div class="hoja" *ngIf="qrAbierto">
-      <div class="asa"></div>
+        <strong class="qr-nombre">{{ qrAbierto.nombreInvitado }}</strong>
+        <span class="gd-muted">
+          {{ qrAbierto.casaIdentificador }} ·
+          {{ qrAbierto.vigenciaHasta | date:'d MMM' }} ·
+          {{ qrAbierto.usosMaximos - qrAbierto.usosRealizados }} ingreso(s)
+        </span>
 
-      <div class="qr-cuadro">
-        <qrcode [qrdata]="qrAbierto.payload" [width]="200" [margin]="1"
-                errorCorrectionLevel="H" elementType="canvas"></qrcode>
+        <p class="instruccion">
+          El invitado abre el link y muestra el código en la portería.
+        </p>
+
+        <div class="qr-acciones">
+          <button type="button" class="principal" (click)="compartir(qrAbierto)">
+            <i class="pi pi-share-alt"></i> Compartir link
+          </button>
+          <button type="button" class="peligro-texto" (click)="revocar(qrAbierto)">
+            Revocar invitación
+          </button>
+        </div>
       </div>
+    </gd-hoja>
 
-      <strong class="qr-nombre">{{ qrAbierto.nombreInvitado }}</strong>
-      <span class="gd-muted">
-        {{ qrAbierto.casaIdentificador }} ·
-        {{ qrAbierto.vigenciaHasta | date:'d MMM' }} ·
-        {{ qrAbierto.usosMaximos - qrAbierto.usosRealizados }} ingreso(s)
-      </span>
+    <!-- Confirmación de revocar. Antes era un window.confirm, que dibuja el
+         dominio del sitio y los botones del navegador. -->
+    <gd-hoja [abierta]="!!invitacionARevocar"
+             [titulo]="invitacionARevocar?.nombreInvitado || ''"
+             (cerrar)="invitacionARevocar = null">
+      <p class="instruccion">El código dejará de servir de inmediato.</p>
 
-      <p class="instruccion">
-        El invitado abre el link en su celular y muestra este código en la
-        portería. No necesita instalar nada.
-      </p>
-
-      <div class="qr-acciones">
-        <button type="button" class="principal" (click)="compartir(qrAbierto)">
-          <i class="pi pi-share-alt"></i> Compartir link
-        </button>
-        <button type="button" class="peligro-texto" (click)="revocar(qrAbierto)">
+      <div class="gd-lista">
+        <button type="button" class="gd-fila gd-presionable gd-fila--destructiva"
+                (click)="confirmarRevocar()">
           Revocar invitación
         </button>
       </div>
-    </div>
+      <div class="gd-lista separada">
+        <button type="button" class="gd-fila gd-presionable centrada"
+                (click)="invitacionARevocar = null">
+          Cancelar
+        </button>
+      </div>
+    </gd-hoja>
 
     <p class="gd-muted" *ngIf="cargando">Cargando…</p>
 
@@ -134,7 +160,7 @@
       </article>
     </div>
 
-    <div class="vacio" *ngIf="!cargando && invitaciones.length === 0">
+    <div class="gd-vacio" *ngIf="!cargando && invitaciones.length === 0">
       <i class="pi pi-ticket"></i>
       <p>Aún no has invitado a nadie</p>
       <button type="button" class="principal" (click)="mostrarAlta = true">

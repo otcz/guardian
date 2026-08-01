@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 import { AuthService } from '../../core/services/auth.service';
-import { TemaService } from '../../core/services/tema.service';
+import { PreferenciaTema, TemaService } from '../../core/services/tema.service';
 import { Sesion } from '../../core/models/sesion.model';
 
 /**
@@ -20,6 +20,13 @@ import { Sesion } from '../../core/models/sesion.model';
 export class ResidenteLayoutComponent {
 
   sesion: Sesion | null = null;
+  mostrarCuenta = false;
+
+  readonly opcionesTema: { valor: PreferenciaTema; nombre: string; icono: string }[] = [
+    { valor: 'sistema', nombre: 'Como el sistema', icono: 'pi-mobile' },
+    { valor: 'claro', nombre: 'Claro', icono: 'pi-sun' },
+    { valor: 'oscuro', nombre: 'Oscuro', icono: 'pi-moon' }
+  ];
 
   constructor(
     private readonly auth: AuthService,
@@ -31,6 +38,10 @@ export class ResidenteLayoutComponent {
   /** El nombre completo no cabe en una cabecera compacta; el de pila sí. */
   get primerNombre(): string {
     return this.sesion?.nombreCompleto?.trim().split(/\s+/)[0] ?? '';
+  }
+
+  get inicial(): string {
+    return this.primerNombre.charAt(0).toUpperCase();
   }
 
   get saludo(): string {
@@ -50,6 +61,7 @@ export class ResidenteLayoutComponent {
   }
 
   salir(): void {
+    this.mostrarCuenta = false;
     this.auth.cerrarSesion();
   }
 }

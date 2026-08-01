@@ -56,5 +56,21 @@
       "type": "image/png",
       "purpose": "maskable any"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mi QR",
+      "short_name": "Mi QR",
+      "description": "Tu credencial de ingreso",
+      "url": "/app/mi-qr",
+      "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Invitar",
+      "short_name": "Invitar",
+      "description": "Crear una invitación",
+      "url": "/app/invitados",
+      "icons": [{ "src": "icons/icon-96x96.png", "sizes": "96x96" }]
+    }
   ]
 }

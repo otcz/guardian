@@ -1,4 +1,4 @@
-<div class="pantalla">
+<div class="pantalla" [class.sol]="sol">
 
   <div class="cargando" *ngIf="cargando && !credencial">
     <i class="pi pi-spinner pi-spin"></i>
@@ -8,30 +8,34 @@
   <div class="aviso-error" *ngIf="error">{{ error }}</div>
 
   <div class="credencial" *ngIf="credencial">
-    <!-- La foto sobre el QR: es la misma que ve el guardia en su pantalla,
-         así el residente reconoce su propia credencial de un vistazo. -->
-    <div class="retrato" *ngIf="credencial.fotoUrl">
-      <img [src]="credencial.fotoUrl | foto" [alt]="credencial.nombreCompleto">
+    <!-- Identidad en una fila: el QR es lo que importa y se lleva el resto. -->
+    <div class="identidad">
+      <div class="retrato" *ngIf="credencial.fotoUrl">
+        <img [src]="credencial.fotoUrl | foto" [alt]="credencial.nombreCompleto">
+      </div>
+
+      <div class="quien">
+        <h1>{{ credencial.nombreCompleto }}</h1>
+        <div class="datos">
+          <span class="casa" *ngIf="credencial.casaIdentificador">
+            <i class="pi pi-home"></i> {{ credencial.casaIdentificador }}
+          </span>
+          <span class="doc gd-seleccionable">
+            {{ credencial.tipoDocumento }} {{ credencial.documento | documento }}
+          </span>
+        </div>
+      </div>
     </div>
 
-    <h1>{{ credencial.nombreCompleto }}</h1>
-
-    <div class="datos">
-      <span class="casa" *ngIf="credencial.casaIdentificador">
-        <i class="pi pi-home"></i> {{ credencial.casaIdentificador }}
-      </span>
-      <span class="doc gd-seleccionable">
-        {{ credencial.tipoDocumento }} {{ credencial.documento | documento }}
-      </span>
-    </div>
-
-    <div class="qr">
+    <!-- Un toque: pantalla completa en blanco y sin apagarse. -->
+    <button type="button" class="qr" (click)="alternarSol()"
+            [attr.aria-label]="sol ? 'Salir de pantalla completa' : 'Ver en pantalla completa'">
       <qrcode [qrdata]="credencial.payload"
-              [width]="240"
+              [width]="anchoQr"
               [margin]="1"
               errorCorrectionLevel="H"
               elementType="canvas"></qrcode>
-    </div>
+    </button>
 
     <p class="instruccion">
       <i class="pi pi-arrow-up"></i>

@@ -20,30 +20,35 @@
   border-radius: var(--r-md);
 }
 
-/* La credencial es UN objeto físico, no una tarjeta más de una lista: por eso
-   la sombra es más profunda y el radio más generoso que en el resto. */
+/* La credencial es UN objeto, no una tarjeta más de una lista: por eso la
+   sombra es más profunda y el radio más generoso que en el resto. */
 .credencial {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--e-2);
+  gap: var(--e-3);
   width: 100%;
-  max-width: 340px;
-  padding: var(--e-5) var(--e-4);
-  text-align: center;
+  padding: var(--e-4);
   background: var(--bg-surface);
   border-radius: var(--r-xl);
   box-shadow: var(--shadow-flotante);
 }
 
+/* ── Identidad ───────────────────────────────────────────────────────────── */
+.identidad {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  width: 100%;
+}
+
 .retrato {
-  width: 72px;
-  height: 72px;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
   overflow: hidden;
   border-radius: var(--r-full);
   background: var(--bg-soft);
-  /* Anillo en vez de borde: separa la foto del fondo sin dibujar una caja. */
-  box-shadow: 0 0 0 3px var(--bg-surface), 0 0 0 5px var(--accent-soft);
 
   img {
     width: 100%;
@@ -52,11 +57,21 @@
   }
 }
 
+.quien {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
 h1 {
-  margin: var(--e-2) 0 0;
-  font-size: var(--t-lg);
+  margin: 0;
+  font-size: var(--t-md);
   font-weight: 700;
   line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .datos {
@@ -64,14 +79,13 @@ h1 {
   align-items: center;
   gap: var(--e-2);
   flex-wrap: wrap;
-  justify-content: center;
   font-size: var(--t-sm);
 
   .casa {
     display: inline-flex;
     align-items: center;
     gap: var(--e-1);
-    padding: 0.2rem 0.6rem;
+    padding: 0.1rem 0.5rem;
     background: var(--accent-soft);
     color: var(--accent);
     border-radius: var(--r-full);
@@ -84,14 +98,21 @@ h1 {
   }
 }
 
-/* El QR va sobre blanco SIEMPRE, también en modo oscuro: los lectores
-   necesitan el contraste claro-oscuro y un QR invertido no escanea. */
+/* ── El código ──────────────────────────────────────────────────────────── */
+/* Sobre blanco SIEMPRE, también en modo oscuro: los lectores necesitan el
+   contraste claro-oscuro y un QR invertido no escanea. */
 .qr {
-  margin-top: var(--e-3);
   padding: var(--e-3);
-  background: #ffffff;
+  background: var(--bg-codigo);
+  border: none;
   border-radius: var(--r-lg);
   line-height: 0;
+  cursor: pointer;
+  transition: transform var(--transicion);
+
+  &:active {
+    transform: scale(0.98);
+  }
 }
 
 .instruccion {
@@ -99,7 +120,7 @@ h1 {
   align-items: center;
   justify-content: center;
   gap: var(--e-2);
-  margin: var(--e-2) 0 0;
+  margin: 0;
   font-size: var(--t-sm);
   color: var(--text-muted);
 
@@ -112,11 +133,43 @@ h1 {
   display: flex;
   align-items: center;
   gap: var(--e-2);
-  margin-top: var(--e-2);
   padding: var(--e-2) var(--e-3);
   font-size: var(--t-xs);
   font-weight: 600;
   color: var(--warn);
   background: var(--warn-soft);
   border-radius: var(--r-sm);
+}
+
+/* ── Modo sol ────────────────────────────────────────────────────────────
+   Bajo el sol el problema no es el QR (ya es blanco) sino todo lo que lo
+   rodea: en modo oscuro la tarjeta baja el contraste percibido y el residente
+   termina subiendo el brillo a mano. Acá desaparece todo menos el código.
+   Tapa la barra inferior a propósito, y se sale tocando en cualquier punto. */
+.pantalla.sol {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-sol);
+  /* Mismo blanco del cuadro del QR y por la misma razón: un QR invertido no
+     escanea, así que este fondo NO se invierte en modo oscuro. */
+  background: var(--bg-codigo);
+  padding: 0;
+
+  .credencial {
+    background: none;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .identidad,
+  .instruccion,
+  .sin-conexion {
+    display: none;
+  }
+
+  /* El tamaño lo decide el componente y el canvas se redibuja: aquí no se
+     estira nada, solo se quita el marco. */
+  .qr {
+    padding: 0;
+  }
 }

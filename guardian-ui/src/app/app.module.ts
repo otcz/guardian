@@ -10,6 +10,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import Aura from '@primeng/themes/aura';
 
 import { AppRoutingModule } from './app-routing.module';
+import { SharedModule } from './shared/shared.module';
 import { AppComponent } from './app.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { ResidenteLayoutComponent } from './layout/residente-layout/residente-layout.component';
@@ -31,6 +32,8 @@ registerLocaleData(localeEsCO);
     BrowserModule,
     AppRoutingModule,
     TooltipModule,
+    // Los tres layouts se declaran acá, y el del residente usa gd-hoja.
+    SharedModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000'

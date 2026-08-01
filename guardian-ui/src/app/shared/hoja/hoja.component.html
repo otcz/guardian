@@ -1,0 +1,22 @@
+<div class="velo" *ngIf="abierta" (click)="cerrar.emit()"
+     [style.z-index]="'calc(var(--z-hoja) + ' + nivel + ')'"></div>
+
+<section class="hoja"
+         *ngIf="abierta"
+         role="dialog"
+         aria-modal="true"
+         [attr.aria-label]="titulo"
+         [style.z-index]="'calc(var(--z-hoja) + ' + (nivel + 1) + ')'">
+  <!-- El tirador dice "esto se cierra arrastrando" sin una sola palabra. -->
+  <div class="tirador"></div>
+
+  <h2 class="titulo" *ngIf="titulo">{{ titulo }}</h2>
+
+  <div class="cuerpo">
+    <ng-content></ng-content>
+  </div>
+
+  <div class="pie">
+    <ng-content select="[pie]"></ng-content>
+  </div>
+</section>

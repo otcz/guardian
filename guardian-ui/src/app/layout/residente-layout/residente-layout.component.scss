@@ -2,23 +2,26 @@
   display: block;
 }
 
-/* 100dvh y no 100vh: en el móvil la barra del navegador aparece y desaparece,
-   y con vh el contenido queda cortado justo cuando el teclado se abre. */
+/* 100vh primero como respaldo (Safari iOS < 15.4 no conoce dvh). El panel NO
+   se desplaza: lo hace su contenido, así la cabecera y la barra inferior se
+   quedan fijas de verdad, como el cromo de una app. */
 .panel {
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;
-  max-width: 520px;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  max-width: var(--ancho-panel);
   margin: 0 auto;
   background: var(--bg-base);
 }
 
-/* ── Cabecera ──────────────────────────────────────────────────────────────
-   Se queda arriba al hacer scroll, como la de una app, y respeta la muesca. */
+/* ── Cabecera ─────────────────────────────────────────────────────────────
+   Fuera del área que se desplaza, y respetando la muesca. */
 .cabecera {
-  position: sticky;
-  top: 0;
-  z-index: 20;
+  position: relative;
+  z-index: var(--z-cabecera);
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -71,57 +74,50 @@
   white-space: nowrap;
 }
 
-/* Sin borde: un icono de utilidad no compite con el contenido. El área
-   táctil es de 40px aunque el icono se vea más chico. */
-.icono {
+/* Una sola puerta a las utilidades, con la inicial del residente: es lo que
+   hace una app, en vez de cuatro iconos sin nombre apretados en la esquina. */
+.avatar {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: var(--tactil);
+  height: var(--tactil);
   font-size: var(--t-md);
-  color: var(--text-muted);
-  background: none;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
   border: none;
   border-radius: var(--r-full);
   cursor: pointer;
-  transition: background var(--transicion), color var(--transicion);
-
-  &:hover {
-    color: var(--text-strong);
-    background: var(--bg-soft);
-  }
+  transition: filter var(--transicion), transform var(--transicion);
 
   &:active {
-    background: var(--presionado);
     transform: scale(0.92);
+    filter: brightness(0.95);
   }
 }
 
 /* ── Contenido ─────────────────────────────────────────────────────────────
-   El padding inferior reserva el alto de la barra: sin él, la última tarjeta
-   queda debajo de la navegación y nadie la ve. */
+   Es lo único que se desplaza. La barra inferior ya ocupa su propio espacio
+   en el flujo, así que aquí solo hace falta aire al final del scroll. */
 main {
   flex: 1 1 auto;
   min-width: 0;
-  padding-bottom: calc(var(--alto-tabbar) + var(--seguro-abajo) + var(--e-4));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding-bottom: var(--e-4);
 }
 
 /* ── Barra de navegación inferior ──────────────────────────────────────── */
 .tabbar {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 30;
+  position: relative;
+  z-index: var(--z-tabbar);
+  flex: 0 0 auto;
   display: flex;
   width: 100%;
-  max-width: 520px;
   padding-bottom: var(--seguro-abajo);
   background: var(--bg-surface);
-  box-shadow: inset 0 1px 0 var(--border-hairline), 0 -2px 12px rgba(16, 21, 28, 0.06);
-  /* Difumina lo que pasa por debajo donde el navegador lo soporte: es el
-     detalle que más acerca la barra a una nativa. */
-  backdrop-filter: saturate(180%) blur(12px);
+  box-shadow: var(--sombra-barra);
 }
 
 .tab {
@@ -158,6 +154,38 @@ main {
   }
 }
 
-html.dark-mode .tabbar {
-  box-shadow: inset 0 1px 0 var(--border-hairline), 0 -2px 12px rgba(0, 0, 0, 0.4);
+/* ── Contenido de la hoja Mi cuenta ─────────────────────────────────────── */
+.ficha-cuenta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin-bottom: var(--e-4);
+
+  .nombre-completo {
+    font-size: var(--t-lg);
+    font-weight: 700;
+    color: var(--text-strong);
+  }
+}
+
+.etiqueta {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--t-md);
+  font-weight: 500;
+  color: var(--text-strong);
+}
+
+.marca {
+  flex: 0 0 auto;
+  color: var(--accent);
+}
+
+/* Separada del resto: cerrar sesión no se toca por accidente al elegir tema. */
+.salir {
+  margin-top: var(--e-4);
+}
+
+:host ::ng-deep gd-hoja .gd-lista + .gd-titulo-seccion {
+  margin-top: var(--e-4);
 }

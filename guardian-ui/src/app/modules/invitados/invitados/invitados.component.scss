@@ -2,7 +2,7 @@
   display: block;
 }
 
-::ng-deep .gd-page {
+.gd-page {
   padding: var(--e-4) var(--e-4) 0;
 }
 
@@ -94,7 +94,6 @@
     background: var(--bg-base);
     border: 1px solid transparent;
     border-radius: var(--r-sm);
-    outline: none;
     min-width: 0;
     transition: border-color var(--transicion), background var(--transicion);
 
@@ -139,7 +138,26 @@
   }
 
   &:disabled {
-    opacity: 0.5;
+    opacity: var(--opacidad-deshabilitado);
+  }
+}
+
+.alterno {
+  min-height: var(--tactil);
+  padding: 0 1.1rem;
+  font-size: var(--t-md);
+  font-weight: 600;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-radius: var(--r-md);
+  cursor: pointer;
+
+  @media (hover: hover) {
+    &:hover {
+      color: var(--text-strong);
+      background: var(--bg-soft);
+    }
   }
 }
 
@@ -156,60 +174,28 @@
   cursor: pointer;
 }
 
-/* ── Hoja del código ─────────────────────────────────────────────────────
-   Sube desde abajo y oscurece el resto: el patrón de "bottom sheet" nativo,
-   que en el móvil reemplaza al modal centrado del escritorio. */
-.velo {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  background: var(--overlay);
-  animation: aparecer 200ms ease-out;
-}
-
-.hoja {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 41;
+/* ── Contenido de la hoja del código ────────────────────────────────────── */
+.codigo {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--e-2);
-  width: 100%;
-  max-width: 520px;
-  padding: var(--e-2) var(--e-4) calc(var(--seguro-abajo) + var(--e-5));
   text-align: center;
-  background: var(--bg-surface);
-  border-radius: var(--r-xl) var(--r-xl) 0 0;
-  box-shadow: var(--shadow-flotante);
-  animation: subir 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* El asa dice "esto se puede cerrar arrastrando" sin una sola palabra. */
-.asa {
-  width: 36px;
-  height: 4px;
-  margin-bottom: var(--e-2);
-  background: var(--border-strong);
-  border-radius: var(--r-full);
+.separada {
+  margin-top: var(--e-2);
 }
 
-@keyframes subir {
-  from { transform: translate(-50%, 100%); }
-  to { transform: translate(-50%, 0); }
-}
-
-@keyframes aparecer {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.centrada {
+  justify-content: center;
+  font-weight: 600;
 }
 
 /* El QR siempre sobre blanco: un QR invertido no escanea. */
 .qr-cuadro {
   padding: var(--e-3);
-  background: #ffffff;
+  background: var(--bg-codigo);
   border-radius: var(--r-lg);
   line-height: 0;
 }
@@ -240,7 +226,7 @@
 .invitacion.apagada {
   .icono-tipo,
   .datos {
-    opacity: 0.5;
+    opacity: var(--opacidad-deshabilitado);
   }
 }
 
@@ -316,36 +302,18 @@
 .accion {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: var(--tactil);
+  height: var(--tactil);
   flex: 0 0 auto;
   color: var(--text-muted);
   background: none;
   border: none;
+  border-radius: var(--r-full);
   cursor: pointer;
-}
 
-.vacio {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--e-3);
-  padding: var(--e-6) var(--e-4);
-  text-align: center;
-  background: var(--bg-surface);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow-card);
-
-  i {
-    font-size: 1.75rem;
-    color: var(--text-muted);
-    opacity: 0.7;
-  }
-
-  p {
-    margin: 0;
-    font-size: var(--t-md);
-    color: var(--text-muted);
+  &:active {
+    background: var(--presionado);
+    transform: scale(0.9);
   }
 }
 

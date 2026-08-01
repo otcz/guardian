@@ -15,13 +15,15 @@
       <div class="encabezado">
         <h2 class="gd-titulo-seccion">Mi familia</h2>
         <button type="button" class="agregar"
-                (click)="mostrarAltaFamiliar = !mostrarAltaFamiliar"
-                [attr.aria-label]="mostrarAltaFamiliar ? 'Cancelar' : 'Agregar persona'">
-          <i class="pi" [ngClass]="mostrarAltaFamiliar ? 'pi-times' : 'pi-plus'"></i>
+                (click)="mostrarAltaFamiliar = true"
+                aria-label="Agregar persona">
+          <i class="pi pi-plus"></i>
         </button>
       </div>
 
-      <form class="alta gd-card" *ngIf="mostrarAltaFamiliar"
+      <gd-hoja [abierta]="mostrarAltaFamiliar" titulo="Agregar a mi familia"
+               (cerrar)="mostrarAltaFamiliar = false">
+      <form id="alta-familiar" class="alta"
             [formGroup]="formularioFamiliar" (ngSubmit)="agregarFamiliar()">
 
         <gd-foto-upload
@@ -66,10 +68,17 @@
           </div>
         </div>
 
-        <button type="submit" class="principal" [disabled]="guardando">
-          <i class="pi pi-check"></i> Guardar
-        </button>
       </form>
+
+      <div pie>
+        <button type="button" class="alterno" (click)="mostrarAltaFamiliar = false">
+          Cancelar
+        </button>
+        <button type="submit" form="alta-familiar" class="principal" [disabled]="guardando">
+          Guardar
+        </button>
+      </div>
+      </gd-hoja>
 
       <p class="gd-muted" *ngIf="cargando">Cargando…</p>
 
@@ -97,9 +106,14 @@
 
           <span class="pastilla no" *ngIf="!activo(familiar.activo)">Inactivo</span>
 
+          <!-- aria-label y no solo pTooltip: en un celular no hay "por
+               encima", así que un tooltip como única etiqueta es un nombre
+               que nadie llega a leer. -->
           <button type="button" class="accion"
                   *ngIf="!familiar.esUsuarioActual"
                   (click)="alternarEstadoFamiliar(familiar)"
+                  [attr.aria-label]="(activo(familiar.activo) ? 'Inactivar a ' : 'Activar a ')
+                    + familiar.nombreCompleto"
                   [pTooltip]="activo(familiar.activo) ? 'Inactivar' : 'Activar'"
                   tooltipPosition="left">
             <i class="pi" [ngClass]="activo(familiar.activo) ? 'pi-ban' : 'pi-check'"></i>
@@ -107,7 +121,7 @@
         </article>
       </div>
 
-      <div class="vacio" *ngIf="!cargando && familia.length === 0">
+      <div class="gd-vacio" *ngIf="!cargando && familia.length === 0">
         <i class="pi pi-users"></i>
         <p>Aún no hay nadie más en tu casa</p>
         <button type="button" class="principal" (click)="mostrarAltaFamiliar = true">
@@ -121,13 +135,15 @@
       <div class="encabezado">
         <h2 class="gd-titulo-seccion">Mis vehículos</h2>
         <button type="button" class="agregar"
-                (click)="mostrarAltaVehiculo = !mostrarAltaVehiculo"
-                [attr.aria-label]="mostrarAltaVehiculo ? 'Cancelar' : 'Agregar vehículo'">
-          <i class="pi" [ngClass]="mostrarAltaVehiculo ? 'pi-times' : 'pi-plus'"></i>
+                (click)="mostrarAltaVehiculo = true"
+                aria-label="Agregar vehículo">
+          <i class="pi pi-plus"></i>
         </button>
       </div>
 
-      <form class="alta gd-card" *ngIf="mostrarAltaVehiculo"
+      <gd-hoja [abierta]="mostrarAltaVehiculo" titulo="Agregar vehículo"
+               (cerrar)="mostrarAltaVehiculo = false">
+      <form id="alta-vehiculo" class="alta"
             [formGroup]="formularioVehiculo" (ngSubmit)="agregarVehiculo()">
         <div class="campos">
           <div class="campo">
@@ -151,10 +167,17 @@
           </div>
         </div>
 
-        <button type="submit" class="principal" [disabled]="guardando">
-          <i class="pi pi-check"></i> Guardar
-        </button>
       </form>
+
+      <div pie>
+        <button type="button" class="alterno" (click)="mostrarAltaVehiculo = false">
+          Cancelar
+        </button>
+        <button type="submit" form="alta-vehiculo" class="principal" [disabled]="guardando">
+          Guardar
+        </button>
+      </div>
+      </gd-hoja>
 
       <div class="gd-lista" *ngIf="vehiculos.length > 0">
         <article class="gd-fila miembro"
@@ -176,6 +199,8 @@
 
           <button type="button" class="accion"
                   (click)="alternarEstadoVehiculo(vehiculo)"
+                  [attr.aria-label]="(activo(vehiculo.activo) ? 'Inhabilitar ' : 'Habilitar ')
+                    + vehiculo.placa"
                   [pTooltip]="activo(vehiculo.activo) ? 'Inhabilitar' : 'Habilitar'"
                   tooltipPosition="left">
             <i class="pi" [ngClass]="activo(vehiculo.activo) ? 'pi-ban' : 'pi-check'"></i>
@@ -183,7 +208,7 @@
         </article>
       </div>
 
-      <div class="vacio" *ngIf="vehiculos.length === 0 && !cargando">
+      <div class="gd-vacio" *ngIf="vehiculos.length === 0 && !cargando">
         <i class="pi pi-car"></i>
         <p>No has registrado vehículos</p>
         <button type="button" class="principal" (click)="mostrarAltaVehiculo = true">
@@ -191,6 +216,26 @@
         </button>
       </div>
     </section>
+
+    <!-- Confirmación de lo destructivo. Inactivar a alguien le quita el
+         ingreso al conjunto y hasta ahora no preguntaba nada. -->
+    <gd-hoja [abierta]="!!aConfirmar" [titulo]="aConfirmar?.titulo || ''"
+             (cerrar)="aConfirmar = null">
+      <p class="detalle-confirmar">{{ aConfirmar?.detalle }}</p>
+
+      <div class="gd-lista">
+        <button type="button" class="gd-fila gd-presionable gd-fila--destructiva"
+                (click)="confirmar()">
+          {{ aConfirmar?.etiqueta }}
+        </button>
+      </div>
+      <div class="gd-lista separada">
+        <button type="button" class="gd-fila gd-presionable centrada"
+                (click)="aConfirmar = null">
+          Cancelar
+        </button>
+      </div>
+    </gd-hoja>
 
   </ng-container>
 </div>

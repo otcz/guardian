@@ -39,6 +39,13 @@ export class MiHogarComponent implements OnInit {
   mostrarAltaVehiculo = false;
   guardando = false;
 
+  /**
+   * Acción destructiva esperando confirmación. Inactivar a un familiar le
+   * quita el ingreso al conjunto: no puede pasar por un toque accidental,
+   * y hasta ahora no preguntaba nada.
+   */
+  aConfirmar: { titulo: string; detalle: string; etiqueta: string; accion: () => void } | null = null;
+
   readonly formularioFamiliar = this.fb.nonNullable.group({
     tipoDocumento: ['CC', [Validators.required]],
     documento: ['', [Validators.required]],
@@ -130,6 +137,20 @@ export class MiHogarComponent implements OnInit {
   }
 
   alternarEstadoFamiliar(familiar: Familiar): void {
+    // Reactivar no destruye nada: se ejecuta directo. Inactivar sí.
+    if (!this.activo(familiar.activo)) {
+      this.aplicarEstadoFamiliar(familiar);
+      return;
+    }
+    this.aConfirmar = {
+      titulo: familiar.nombreCompleto,
+      detalle: 'No podrá entrar al conjunto hasta que lo actives de nuevo.',
+      etiqueta: 'Inactivar',
+      accion: () => this.aplicarEstadoFamiliar(familiar)
+    };
+  }
+
+  private aplicarEstadoFamiliar(familiar: Familiar): void {
     this.error = null;
     this.residente
       .cambiarEstadoFamiliar(familiar.personaId, familiar.activo !== 'S')
@@ -167,6 +188,19 @@ export class MiHogarComponent implements OnInit {
   }
 
   alternarEstadoVehiculo(vehiculo: Vehiculo): void {
+    if (!this.activo(vehiculo.activo)) {
+      this.aplicarEstadoVehiculo(vehiculo);
+      return;
+    }
+    this.aConfirmar = {
+      titulo: vehiculo.placa,
+      detalle: 'La portería dejará de permitir su ingreso.',
+      etiqueta: 'Inhabilitar',
+      accion: () => this.aplicarEstadoVehiculo(vehiculo)
+    };
+  }
+
+  private aplicarEstadoVehiculo(vehiculo: Vehiculo): void {
     this.error = null;
     this.residente.cambiarEstadoVehiculo(vehiculo.id, vehiculo.activo !== 'S').subscribe({
       next: () => this.cargar(),
@@ -174,6 +208,12 @@ export class MiHogarComponent implements OnInit {
         this.error = fallo.error?.mensaje ?? 'No pudimos cambiar el estado.';
       }
     });
+  }
+
+  confirmar(): void {
+    const pendiente = this.aConfirmar;
+    this.aConfirmar = null;
+    pendiente?.accion();
   }
 
   // ── Presentación ─────────────────────────────────────────────────────────

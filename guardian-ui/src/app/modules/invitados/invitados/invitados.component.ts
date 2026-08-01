@@ -31,6 +31,9 @@ export class InvitadosComponent implements OnInit {
   /** Invitación cuyo QR está desplegado en pantalla. */
   qrAbierto: Invitacion | null = null;
 
+  /** Invitación pendiente de confirmar su revocación. */
+  invitacionARevocar: Invitacion | null = null;
+
   /** Piso del selector de fecha: una visita no puede agendarse en el pasado. */
   readonly hoy = this.hoyIso();
 
@@ -118,21 +121,26 @@ export class InvitadosComponent implements OnInit {
   }
 
   revocar(invitacion: Invitacion): void {
-    const seguro = window.confirm(
-      `¿Revocar la invitación de ${invitacion.nombreInvitado}? El código dejará de servir.`);
-    if (!seguro) {
+    this.invitacionARevocar = invitacion;
+  }
+
+  confirmarRevocar(): void {
+    const invitacion = this.invitacionARevocar;
+    if (!invitacion) {
       return;
     }
 
     this.error = null;
     this.residente.revocarInvitacion(invitacion.id).subscribe({
       next: () => {
-        // La hoja muestra un código que acaba de morir: cerrarla es parte de
-        // la acción, no un paso extra para el residente.
+        // Las dos hojas se cierran: la de confirmar porque terminó, y la del
+        // código porque muestra un QR que acaba de morir.
+        this.invitacionARevocar = null;
         this.qrAbierto = null;
         this.cargar();
       },
       error: (fallo: HttpErrorResponse) => {
+        this.invitacionARevocar = null;
         this.error = fallo.error?.mensaje ?? 'No pudimos revocar la invitación.';
       }
     });

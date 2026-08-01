@@ -60,6 +60,14 @@ textarea {
   font-size: max(16px, var(--t-md));
 }
 
+/* Sin esto un <button> se queda con la fuente del navegador — Arial 13.3px
+   en Chrome — y cualquier boton que no fije su tipografia desentona con el
+   resto de la interfaz. */
+button {
+  font: inherit;
+  color: inherit;
+}
+
 h1, h2, h3, h4 {
   margin: 0;
   font-weight: 600;
@@ -71,16 +79,12 @@ a {
   text-decoration: none;
 }
 
-/* Un anillo de foco visible SOLO para quien navega con teclado. Los
-   componentes por eso no necesitan `outline: none`: con el dedo nunca
-   aparece, y quien usa teclado no se queda sin saber dónde está. */
-:focus-visible {
-  outline: 2px solid var(--accent);
+/* Un anillo de foco visible SOLO para quien navega con teclado. Con :where()
+   la especificidad es 0, así que ningún componente se rompe; y como
+   :focus-visible no dispara con el dedo, nadie necesita `outline: none`. */
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--anillo-foco);
   outline-offset: 2px;
-}
-
-:focus:not(:focus-visible) {
-  outline: none;
 }
 
 /* Quien pidió menos movimiento en su sistema lo pidió por algo — vértigo,
@@ -95,9 +99,13 @@ a {
   }
 }
 
-/* Utilitarias mínimas. Todo lo demás vive en el SCSS del componente. */
+/* Utilitarias mínimas. Todo lo demás vive en el SCSS del componente.
+
+   El tope de ancho es del back-office: en un monitor de 27" una tabla a
+   ancho completo obliga a barrer la cabeza de un extremo al otro. En el
+   panel del residente no estorba porque el panel ya mide 520px. */
 .gd-page {
-  padding: 1.25rem;
+  padding: var(--e-4);
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -123,7 +131,9 @@ a {
   background: var(--bg-surface);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-card);
-  overflow: hidden;
+  /* clip y no hidden: recorta igual las esquinas pero NO crea contexto de
+     desplazamiento, así el anillo de foco de una fila no queda cortado. */
+  overflow: clip;
 }
 
 .gd-fila {
@@ -134,8 +144,14 @@ a {
   min-height: var(--tactil);
   padding: var(--e-3) var(--e-4);
   text-align: left;
+  /* La utilidad se usa sobre <article>, <button> y <a>: sin fijar el color,
+     la misma fila sale negra en un botón y azul en un enlace. */
+  color: var(--text-strong);
+  font-size: var(--t-md);
   background: none;
   border: none;
+  /* El anillo hacia dentro no se recorta contra el borde del contenedor. */
+  outline-offset: -2px;
   /* El separador arranca donde arranca el texto, no en el borde: así el ojo
      sigue la columna de contenido y no una reja. */
   box-shadow: inset 0 -1px 0 var(--border-hairline);
@@ -168,4 +184,82 @@ a {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-muted);
+}
+
+/* Botón de icono. 44px porque es la medida del dedo; el icono se ve igual,
+   lo que crece es el blanco al que hay que apuntar. */
+.gd-accion {
+  display: grid;
+  place-items: center;
+  width: var(--tactil);
+  height: var(--tactil);
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-radius: var(--r-full);
+  cursor: pointer;
+  transition: background var(--transicion), color var(--transicion);
+
+  i {
+    font-size: var(--t-md);
+  }
+
+  &:active {
+    background: var(--presionado);
+    transform: scale(0.9);
+  }
+
+  /* REGLA DEL SISTEMA: todo :hover va dentro de esta consulta. El admin de
+     escritorio lo conserva y en el móvil no queda pegado tras el toque. */
+  @media (hover: hover) {
+    &:hover {
+      color: var(--text-strong);
+      background: var(--bg-soft);
+    }
+  }
+}
+
+/* Estado vacío: dice qué falta y ofrece el siguiente paso, en vez de dejar
+   un párrafo gris que no lleva a ninguna parte. */
+.gd-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-3);
+  padding: var(--e-6) var(--e-4);
+  text-align: center;
+  background: var(--bg-surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+
+  i {
+    font-size: 1.75rem;
+    color: var(--text-muted);
+    opacity: 0.7;
+  }
+
+  p {
+    margin: 0;
+    font-size: var(--t-md);
+    color: var(--text-muted);
+  }
+}
+
+/* En una hoja de acción lo destructivo es el texto en rojo, nunca un bloque
+   de color: el bloque invita a tocarlo. */
+.gd-fila--destructiva {
+  color: var(--deny);
+  font-weight: 600;
+  justify-content: center;
+}
+
+@keyframes gd-entrada-abajo {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes gd-velo {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

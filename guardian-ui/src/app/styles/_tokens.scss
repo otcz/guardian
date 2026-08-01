@@ -23,7 +23,10 @@
 
   --text-strong: #14181f;
   --text-default: #39424e;
-  --text-muted: #6b7684;
+  /* #5a6675 y no #6b7684: sube de 4.7:1 a ~6:1 sobre blanco. El residente
+     lee el detalle de una fila caminando y con sol. El valor oscuro NO se
+     toca: la garita de noche ya está calibrada. */
+  --text-muted: #5a6675;
   --text-inverse: #ffffff;
 
   --border-default: #d9dfe6;
@@ -42,10 +45,16 @@
 
   --shadow-card: 0 1px 2px rgba(16, 21, 28, 0.06), 0 2px 8px rgba(16, 21, 28, 0.04);
   --shadow-flotante: 0 8px 24px rgba(16, 21, 28, 0.12);
+  --sombra-barra: inset 0 1px 0 var(--border-hairline), 0 -2px 12px rgba(16, 21, 28, 0.06);
+  --anillo-foco: var(--accent);
   /* Separador de 1px real en pantallas retina, como el hairline nativo. */
   --border-hairline: rgba(16, 21, 28, 0.08);
   --overlay: rgba(16, 21, 28, 0.45);
   --presionado: rgba(16, 21, 28, 0.05);
+
+  /* El QR va SIEMPRE sobre blanco, tambien en modo oscuro: un codigo
+     invertido no escanea. Por eso este token NO cambia entre temas. */
+  --bg-codigo: #ffffff;
 }
 
 /* ---------------------------------------------------------------------------
@@ -78,7 +87,25 @@
      toque fallido es una persona esperando más. */
   --tactil: 44px;
 
-  --transicion: 160ms cubic-bezier(0.2, 0, 0.2, 1);
+  /* Movimiento con nombre: así el próximo componente no inventa su propia
+     duración y todo se siente del mismo material. */
+  --dur-media: 160ms;
+  --dur-lenta: 260ms;
+  --curva-estandar: cubic-bezier(0.2, 0, 0.2, 1);
+  --curva-entrada: cubic-bezier(0, 0, 0.2, 1);
+  --transicion: var(--dur-media) var(--curva-estandar);
+
+  /* Capas ordenadas. Sin esta escala, el siguiente que necesite algo encima
+     inventa un 999 y a partir de ahí nadie sabe qué tapa a qué. */
+  --z-cabecera: 20;
+  --z-tabbar: 30;
+  --z-hoja: 40;
+  --z-sol: 60;
+
+  /* El ancho del panel lo declaran el layout, la tab bar y la hoja: si vive
+     en tres literales, el día que cambie uno la hoja queda descentrada. */
+  --ancho-panel: 520px;
+  --opacidad-deshabilitado: 0.5;
 
   /* Muescas y barra de gestos. En navegador valen 0; en PWA instalada, no. */
   --seguro-arriba: env(safe-area-inset-top, 0px);
@@ -114,6 +141,8 @@ html.dark-mode {
 
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.3);
   --shadow-flotante: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --sombra-barra: inset 0 1px 0 var(--border-hairline), 0 -2px 12px rgba(0, 0, 0, 0.4);
+  --anillo-foco: var(--accent);
   --border-hairline: rgba(255, 255, 255, 0.08);
   --overlay: rgba(0, 0, 0, 0.6);
   --presionado: rgba(255, 255, 255, 0.06);
