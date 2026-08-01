@@ -27,6 +27,11 @@ public interface GdUsuarioRepository extends JpaRepository<GdUsuario, Long> {
 
     List<GdUsuario> findByRol(String rol);
 
+    /** Si una sede ya tiene administrador. Sirve para no crear un segundo. */
+    @Query("SELECT COUNT(u) > 0 FROM GdUsuario u "
+            + "WHERE u.persona.conjunto.id = :conjuntoId AND u.rol = :rol")
+    boolean existeRolEnConjunto(@Param("conjuntoId") Long conjuntoId, @Param("rol") String rol);
+
     /**
      * Login. Trae la persona y el conjunto en el mismo query porque el token se
      * arma con datos de las tres entidades y con open-in-view=false una relacion
@@ -43,10 +48,18 @@ public interface GdUsuarioRepository extends JpaRepository<GdUsuario, Long> {
     Optional<GdUsuario> buscarPorDocumento(@Param("documento") String documento);
 
     /**
-     * Estado fresco para el filtro de seguridad. JOIN FETCH porque el filtro
-     * corre fuera de transaccion y una persona LAZY reventaria al leerla.
+     * Estado fresco para el filtro de seguridad.
+     *
+     * <p>El JOIN FETCH del CONJUNTO no es opcional: este codigo corre en el
+     * filtro, FUERA de transaccion y con open-in-view=false, asi que leer
+     * {@code persona.getConjunto()} sin traerlo lanzaria
+     * LazyInitializationException en CADA peticion autenticada de CADA
+     * usuario — con un stacktrace que no menciona sedes por ningun lado.</p>
      */
-    @Query("SELECT u FROM GdUsuario u JOIN FETCH u.persona WHERE u.id = :id")
+    @Query("SELECT u FROM GdUsuario u "
+            + "JOIN FETCH u.persona p "
+            + "JOIN FETCH p.conjunto "
+            + "WHERE u.id = :id")
     Optional<GdUsuario> buscarConPersona(@Param("id") Long id);
 
     /**

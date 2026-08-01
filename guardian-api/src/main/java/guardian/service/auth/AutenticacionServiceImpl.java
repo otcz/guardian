@@ -61,7 +61,13 @@ public class AutenticacionServiceImpl implements AutenticacionService {
 
         // El chequeo de usuario activo va DESPUES de validar la clave. Al reves,
         // un desconocido podria distinguir cuentas deshabilitadas de inexistentes.
-        if (!usuario.puedeOperar() || !usuario.getPersona().puedeOperar()) {
+        // Las mismas tres condiciones que evalua el filtro en cada peticion:
+        // usuario, persona y SEDE. Sin la sede aca, una sede desactivada
+        // seguiria entregando tokens que el filtro rechaza despues — el
+        // usuario entra "bien" y luego nada le funciona.
+        if (!usuario.puedeOperar()
+                || !usuario.getPersona().puedeOperar()
+                || !usuario.getPersona().getConjunto().puedeOperar()) {
             log.info("[auth] login fallido documento={} motivo={}", documento,
                     usuario.estaBloqueado() ? "bloqueado" : "inactivo");
             throw GuardianException.noAutorizado(MensajesGlobales.USUARIO_INACTIVO);

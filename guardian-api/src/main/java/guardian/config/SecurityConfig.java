@@ -64,17 +64,32 @@ public class SecurityConfig {
                 // sesion es lo UNICO que puede hacer quien no la ha cambiado.
                 .antMatchers(ApiEndpoint.AUTH + "/**").authenticated()
 
+                // Plataforma. VA ANTES que el matcher de /admin: si quedara
+                // despues, el prefijo mas general ganaria por orden.
+                .antMatchers(ApiEndpoint.SUPER + "/**")
+                .hasRole(Codigos.ROL_SUPER_ADMIN)
+
+                // La porteria NO la opera el super administrador.
                 .antMatchers(ApiEndpoint.ACCESO + "/**")
                 .hasAnyRole(Codigos.ROL_GUARDIA, Codigos.ROL_ADMIN)
 
+                // El super administrador no tiene casa ni credencial.
+                .antMatchers(ApiEndpoint.RESIDENTE + "/**")
+                .hasAnyRole(Codigos.ROL_ADMIN, Codigos.ROL_GUARDIA, Codigos.ROL_RESIDENTE)
+
+                // El back-office lo usa tambien el super administrador cuando
+                // entra a una sede: su token lleva la sede y todo lo de abajo
+                // sigue filtrando por ella sin cambiar una sola firma.
                 .antMatchers(ApiEndpoint.ADMIN + "/**")
-                .hasRole(Codigos.ROL_ADMIN)
+                .hasAnyRole(Codigos.ROL_ADMIN, Codigos.ROL_SUPER_ADMIN)
 
                 // El resto exige un rol REAL. authenticated() no basta: dejaria
                 // pasar a CLAVE_PENDIENTE y el cambio obligatorio seria
-                // decorativo a nivel de API.
+                // decorativo a nivel de API. SUPER_ADMIN va incluido o se queda
+                // sin /api/parametros y sin poder llenar ningun formulario.
                 .anyRequest().hasAnyRole(
-                        Codigos.ROL_ADMIN, Codigos.ROL_GUARDIA, Codigos.ROL_RESIDENTE)
+                        Codigos.ROL_SUPER_ADMIN, Codigos.ROL_ADMIN,
+                        Codigos.ROL_GUARDIA, Codigos.ROL_RESIDENTE)
 
                 .and()
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

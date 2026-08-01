@@ -25,8 +25,25 @@ public class UsuarioAutenticado {
      */
     private final boolean cambioClavePendiente;
 
+    /**
+     * true cuando un super administrador esta operando DENTRO de una sede.
+     *
+     * <p>Sin esta marca, un cambio hecho por el operador de la plataforma
+     * queda en los campos de auditoria indistinguible de uno hecho por el
+     * administrador local, y en una disputa entre ambos no hay forma de
+     * reconstruir quien lo hizo.</p>
+     */
+    private final boolean sedeSuplantada;
+
     public UsuarioAutenticado(Long usuarioId, Long personaId, Long conjuntoId,
                               String documento, String nombreCompleto, String rol) {
-        this(usuarioId, personaId, conjuntoId, documento, nombreCompleto, rol, false);
+        this(usuarioId, personaId, conjuntoId, documento, nombreCompleto, rol, false, false);
+    }
+
+    public UsuarioAutenticado(Long usuarioId, Long personaId, Long conjuntoId,
+                              String documento, String nombreCompleto, String rol,
+                              boolean cambioClavePendiente) {
+        this(usuarioId, personaId, conjuntoId, documento, nombreCompleto, rol,
+                cambioClavePendiente, false);
     }
 }

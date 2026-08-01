@@ -59,11 +59,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         estadoUsuarioService.estadoDe(delToken.getUsuarioId());
 
                 estado.filter(EstadoUsuario::isPuedeOperar)
+                        .filter(e -> !suplantacionInvalida(delToken, e))
                         .ifPresent(e -> autenticar(delToken, e));
             }
         }
 
         chain.doFilter(request, response);
+    }
+
+    /**
+     * Un token con sede suplantada solo vale si quien lo lleva SIGUE siendo
+     * super administrador. Sin este contraste, a quien le quiten el rol
+     * conserva el acceso a esa sede hasta que el JWT expire — hasta 12 horas.
+     */
+    private boolean suplantacionInvalida(UsuarioAutenticado delToken, EstadoUsuario estado) {
+        return delToken.isSedeSuplantada()
+                && !Codigos.ROL_SUPER_ADMIN.equals(estado.getRol());
     }
 
     private void autenticar(UsuarioAutenticado delToken, EstadoUsuario estado) {
@@ -81,7 +92,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 delToken.getDocumento(),
                 delToken.getNombreCompleto(),
                 estado.getRol(),
-                estado.isCambioClavePendiente());
+                estado.isCambioClavePendiente(),
+                delToken.isSedeSuplantada());
 
         UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(

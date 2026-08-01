@@ -27,6 +27,18 @@ public final class MensajesGlobales {
     public static final String SIN_PERMISO =
             "No tienes permiso para realizar esta accion.";
 
+    // ── Sedes ────────────────────────────────────────────────────────────────
+    public static final String SIN_SEDE_ELEGIDA =
+            "Primero entra a una sede para administrarla.";
+    public static final String SEDE_NO_ENCONTRADA =
+            "No encontramos esa sede.";
+    public static final String SEDE_YA_REGISTRADA =
+            "Ya existe una sede con ese nombre.";
+    public static final String SEDE_YA_TIENE_ADMIN =
+            "Esa sede ya tiene un administrador.";
+    public static final String ROL_NO_ASIGNABLE =
+            "Ese rol no se puede asignar desde aca.";
+
     // ── Acceso ───────────────────────────────────────────────────────────────
     public static final String QR_NO_RECONOCIDO =
             "El codigo no es valido.";

@@ -55,6 +55,12 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
     @Value("${guardian.bootstrap.conjunto-nombre}")
     private String conjuntoNombre;
 
+    @Value("${guardian.bootstrap.super-admin-documento}")
+    private String superAdminDocumento;
+
+    @Value("${guardian.bootstrap.super-admin-clave}")
+    private String superAdminClave;
+
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
@@ -62,22 +68,76 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
         sembrarParametros();
         sembrarPuntoAcceso(conjunto);
         sembrarAdministrador(conjunto);
+        sembrarSuperAdministrador();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
 
     private GdConjunto sembrarConjunto() {
-        return conjuntoRepository.findFirstByOrderByIdAsc().orElseGet(() -> {
-            GdConjunto conjunto = new GdConjunto();
-            conjunto.setNombre(conjuntoNombre);
-            conjunto.setActivo(Codigos.SI);
-            conjunto.setUsuarioCreador(EJECUTOR);
+        return conjuntoRepository
+                .findByEsPlataformaOrderByNombreAsc(Codigos.NO)
+                .stream()
+                .findFirst()
+                .orElseGet(() -> {
+                    GdConjunto conjunto = new GdConjunto();
+                    conjunto.setNombre(conjuntoNombre);
+                    conjunto.setEsPlataforma(Codigos.NO);
+                    conjunto.setActivo(Codigos.SI);
+                    conjunto.setUsuarioCreador(EJECUTOR);
 
-            GdConjunto guardado = conjuntoRepository.save(conjunto);
-            log.info("[bootstrap] conjunto creado id={} nombre={}",
-                    guardado.getId(), conjuntoNombre);
-            return guardado;
-        });
+                    GdConjunto guardado = conjuntoRepository.save(conjunto);
+                    log.info("[bootstrap] sede creada id={} nombre={}",
+                            guardado.getId(), conjuntoNombre);
+                    return guardado;
+                });
+    }
+
+    /**
+     * Super administrador de la plataforma.
+     *
+     * <p>Cuelga de una fila tecnica marcada {@code ES_PLATAFORMA='S'} que NO es
+     * una sede: no se lista, no se cuenta y no se puede entrar en ella. Existe
+     * porque el vinculo persona-sede es NOT NULL en las bases ya creadas y
+     * {@code ddl-auto=update} nunca relaja un NOT NULL.</p>
+     */
+    private void sembrarSuperAdministrador() {
+        if (personaRepository.findByDocumento(superAdminDocumento).isPresent()) {
+            return;
+        }
+
+        GdConjunto plataforma = conjuntoRepository
+                .findFirstByEsPlataforma(Codigos.SI)
+                .orElseGet(() -> {
+                    GdConjunto fila = new GdConjunto();
+                    fila.setNombre("Plataforma GUARDIAN");
+                    fila.setEsPlataforma(Codigos.SI);
+                    fila.setActivo(Codigos.SI);
+                    fila.setUsuarioCreador(EJECUTOR);
+                    return conjuntoRepository.save(fila);
+                });
+
+        GdPersona persona = new GdPersona();
+        persona.setConjunto(plataforma);
+        persona.setTipoDocumento(Codigos.TIPO_DOCUMENTO_CC);
+        persona.setDocumento(superAdminDocumento);
+        persona.setNombres("Super");
+        persona.setApellidos("Administrador");
+        persona.setActivo(Codigos.SI);
+        persona.setUsuarioCreador(EJECUTOR);
+
+        GdPersona guardada = personaRepository.save(persona);
+
+        GdUsuario usuario = new GdUsuario();
+        usuario.setPersona(guardada);
+        usuario.setRol(Codigos.ROL_SUPER_ADMIN);
+        usuario.setClaveHash(passwordEncoder.encode(superAdminClave));
+        usuario.setRequiereCambioClave(
+                superAdminClave.equals(superAdminDocumento) ? Codigos.SI : Codigos.NO);
+        usuario.setActivo(Codigos.SI);
+        usuario.setUsuarioCreador(EJECUTOR);
+        usuarioRepository.save(usuario);
+
+        log.info("[bootstrap] super administrador creado usuario={}", superAdminDocumento);
     }
 
     private void sembrarParametros() {

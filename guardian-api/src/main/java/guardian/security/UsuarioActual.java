@@ -29,8 +29,29 @@ public class UsuarioActual {
         return (UsuarioAutenticado) auth.getPrincipal();
     }
 
+    /**
+     * Sede del llamante, exigida.
+     *
+     * <p>Falla con 403 en vez de devolver null porque un {@code conjuntoId}
+     * nulo llegando a los repositorios produce {@code WHERE conjunto_id =
+     * NULL}, que en SQL nunca es cierto: el back-office entero se veria vacio
+     * en lugar de dar un mensaje, y eso se diagnostica mal durante horas.</p>
+     */
     public Long conjuntoId() {
+        Long sede = obtener().getConjuntoId();
+        if (sede == null) {
+            throw GuardianException.sinPermiso(MensajesGlobales.SIN_SEDE_ELEGIDA);
+        }
+        return sede;
+    }
+
+    /** Null cuando el super administrador aun no ha entrado a ninguna sede. */
+    public Long conjuntoIdOpcional() {
         return obtener().getConjuntoId();
+    }
+
+    public boolean esSuperAdmin() {
+        return guardian.constant.Codigos.ROL_SUPER_ADMIN.equals(obtener().getRol());
     }
 
     public Long personaId() {

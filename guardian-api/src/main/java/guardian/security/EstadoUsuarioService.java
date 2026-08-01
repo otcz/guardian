@@ -67,7 +67,13 @@ public class EstadoUsuarioService {
         // cuenta siga "activa". La persona tambien cuenta porque inhabilitar a
         // la persona es inhabilitar su acceso, y dejarle la app abierta seria
         // incoherente.
-        boolean puedeOperar = usuario.puedeOperar() && usuario.getPersona().puedeOperar();
+        //
+        // Y la SEDE: sin esta tercera condicion, desactivar una sede no expulsa
+        // a nadie y el boton del panel del super administrador seria cosmetico.
+        boolean puedeOperar = usuario.puedeOperar()
+                && usuario.getPersona().puedeOperar()
+                && usuario.getPersona().getConjunto().puedeOperar();
+
         return new EstadoUsuario(puedeOperar, usuario.getRol(), usuario.debeCambiarClave());
     }
 }

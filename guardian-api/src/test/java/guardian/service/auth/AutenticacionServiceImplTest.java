@@ -56,11 +56,14 @@ class AutenticacionServiceImplTest {
 
     private GdUsuario usuario;
     private GdPersona persona;
+    private GdConjunto conjunto;
 
     @BeforeEach
     void preparar() {
-        GdConjunto conjunto = new GdConjunto();
+        conjunto = new GdConjunto();
         conjunto.setId(1L);
+        conjunto.setActivo(Codigos.SI);
+        conjunto.setBloqueado(Codigos.NO);
 
         persona = new GdPersona();
         persona.setId(50L);
@@ -145,6 +148,26 @@ class AutenticacionServiceImplTest {
     @DisplayName("persona inhabilitada bloquea el login aunque el usuario este activo")
     void personaInactivaBloqueaLogin() {
         persona.setActivo(Codigos.NO);
+        when(passwordEncoder.matches("clave", "$hash")).thenReturn(true);
+
+        assertThatThrownBy(() -> servicio.login(loginRequest("clave")))
+                .hasMessage(MensajesGlobales.USUARIO_INACTIVO);
+    }
+
+    @Test
+    @DisplayName("una SEDE desactivada deja fuera a toda su gente")
+    void sedeDesactivadaBloqueaLogin() {
+        conjunto.setActivo(Codigos.NO);
+        when(passwordEncoder.matches("clave", "$hash")).thenReturn(true);
+
+        assertThatThrownBy(() -> servicio.login(loginRequest("clave")))
+                .hasMessage(MensajesGlobales.USUARIO_INACTIVO);
+    }
+
+    @Test
+    @DisplayName("una sede bloqueada tambien deja fuera a su gente")
+    void sedeBloqueadaBloqueaLogin() {
+        conjunto.setBloqueado(Codigos.SI);
         when(passwordEncoder.matches("clave", "$hash")).thenReturn(true);
 
         assertThatThrownBy(() -> servicio.login(loginRequest("clave")))

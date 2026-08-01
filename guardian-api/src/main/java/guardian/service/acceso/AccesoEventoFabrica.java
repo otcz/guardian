@@ -44,6 +44,15 @@ public class AccesoEventoFabrica {
      * configurarlo, y sin este default la columna quedaria siempre nula.</p>
      */
     public GdAccesoEvento nuevoEvento(UsuarioAutenticado guardia, Long puntoAccesoId) {
+        // Falla cerrado y ANTES de construir nada. Lo grave de no hacerlo no
+        // seria el 500: las rutas de DENEGACION pasan por esta misma fabrica,
+        // asi que el intento fallido tampoco quedaria registrado y se perderia
+        // la evidencia que el negocio declara no negociable.
+        if (guardia.getConjuntoId() == null) {
+            throw guardian.exception.GuardianException.sinPermiso(
+                    guardian.constant.MensajesGlobales.SIN_SEDE_ELEGIDA);
+        }
+
         GdAccesoEvento evento = new GdAccesoEvento();
         evento.setConjuntoId(guardia.getConjuntoId());
         evento.setFechaEvento(new Date());

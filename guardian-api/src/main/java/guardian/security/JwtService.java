@@ -29,6 +29,7 @@ public class JwtService {
     private static final String CLAIM_NOMBRE = "nombre";
     private static final String CLAIM_ROL = "rol";
     private static final String CLAIM_CAMBIO_PENDIENTE = "cambioPendiente";
+    private static final String CLAIM_SEDE_SUPLANTADA = "sedeSuplantada";
 
     private static final long MILIS_POR_HORA = 3_600_000L;
 
@@ -58,6 +59,7 @@ public class JwtService {
                 .claim(CLAIM_NOMBRE, usuario.getNombreCompleto())
                 .claim(CLAIM_ROL, usuario.getRol())
                 .claim(CLAIM_CAMBIO_PENDIENTE, usuario.isCambioClavePendiente())
+                .claim(CLAIM_SEDE_SUPLANTADA, usuario.isSedeSuplantada())
                 .setIssuedAt(ahora)
                 .setExpiration(new Date(ahora.getTime() + ttlMilis))
                 .signWith(clave, SignatureAlgorithm.HS256)
@@ -86,7 +88,8 @@ public class JwtService {
                     claims.get(CLAIM_DOCUMENTO, String.class),
                     claims.get(CLAIM_NOMBRE, String.class),
                     claims.get(CLAIM_ROL, String.class),
-                    Boolean.TRUE.equals(claims.get(CLAIM_CAMBIO_PENDIENTE, Boolean.class)));
+                    Boolean.TRUE.equals(claims.get(CLAIM_CAMBIO_PENDIENTE, Boolean.class)),
+                    Boolean.TRUE.equals(claims.get(CLAIM_SEDE_SUPLANTADA, Boolean.class)));
 
         } catch (Exception ex) {
             log.debug("[auth] token rechazado: {}", ex.getMessage());

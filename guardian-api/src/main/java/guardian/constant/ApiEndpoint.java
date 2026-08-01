@@ -58,6 +58,17 @@ public final class ApiEndpoint {
     /** Bloqueos administrativos: la llave que el residente no puede levantar. */
     public static final String ADMIN_BLOQUEOS = ADMIN + "/bloqueos";
 
+    /**
+     * Plataforma — rol SUPER_ADMIN. Prefijo PROPIO y no anidado bajo /admin:
+     * si colgara de ahi, el matcher de /api/admin/** ganaria por orden y el
+     * super administrador recibiria 403 en sus propios endpoints.
+     */
+    public static final String SUPER = API + "/super";
+    public static final String SUPER_SEDES = SUPER + "/sedes";
+    public static final String SEDE_ADMINISTRADOR = "/{id}/administrador";
+    public static final String SEDE_ENTRAR = "/{id}/entrar";
+    public static final String SEDE_SALIR = "/salir";
+
     /** Sufijos reutilizados. */
     public static final String POR_ID = "/{id}";
     public static final String ACTIVAR = "/{id}/activar";

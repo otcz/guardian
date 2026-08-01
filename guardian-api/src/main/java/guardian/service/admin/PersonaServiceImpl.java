@@ -136,6 +136,12 @@ public class PersonaServiceImpl implements PersonaService {
         if (request.getRolUsuario() == null || request.getRolUsuario().trim().isEmpty()) {
             return;
         }
+        // La via menos obvia de escalada: el alta de persona acepta el rol en
+        // el mismo request y crea la cuenta de un tiron. Quien blinde solo
+        // UsuarioServiceImpl deja esta puerta abierta.
+        if (Codigos.ROL_SUPER_ADMIN.equals(request.getRolUsuario())) {
+            throw GuardianException.sinPermiso(MensajesGlobales.ROL_NO_ASIGNABLE);
+        }
         parametroService.exigirCodigoValido(Codigos.GRUPO_ROL, request.getRolUsuario());
 
         GdUsuario usuario = new GdUsuario();
