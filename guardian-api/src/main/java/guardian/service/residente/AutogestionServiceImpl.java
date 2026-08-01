@@ -8,14 +8,12 @@ import guardian.dto.admin.VehiculoResponse;
 import guardian.dto.residente.FamiliarRequest;
 import guardian.dto.residente.FamiliarResponse;
 import guardian.dto.residente.VehiculoResidenteRequest;
-import guardian.entity.base.BaseEntity;
 import guardian.entity.conjunto.GdCasa;
 import guardian.entity.persona.GdPersona;
 import guardian.entity.persona.GdResidenteCasa;
 import guardian.entity.vehiculo.GdVehiculo;
 import guardian.exception.GuardianException;
 import guardian.repository.GdCredencialQrRepository;
-import guardian.repository.GdPersonaRepository;
 import guardian.repository.GdResidenteCasaRepository;
 import guardian.repository.GdVehiculoRepository;
 import guardian.security.UsuarioAutenticado;
@@ -44,7 +42,6 @@ public class AutogestionServiceImpl implements AutogestionService {
     private final GdResidenteCasaRepository residenteCasaRepository;
     private final GdCredencialQrRepository credencialRepository;
     private final GdVehiculoRepository vehiculoRepository;
-    private final GdPersonaRepository personaRepository;
     private final PersonaService personaService;
     private final VehiculoService vehiculoService;
 
@@ -109,8 +106,9 @@ public class AutogestionServiceImpl implements AutogestionService {
                 .findByPersonaIdAndCasaId(personaId, casa.getId())
                 .orElseThrow(() -> GuardianException.sinPermiso(MensajesGlobales.FAMILIAR_AJENO));
 
-        if (activo) {
-            exigirInhabilitacionDeLaCasa(vinculo.getPersona(), casa);
+        // Lo que la administracion bloqueo no lo levanta el celular de nadie.
+        if (vinculo.getPersona().estaBloqueado()) {
+            throw GuardianException.sinPermiso(MensajesGlobales.DESBLOQUEO_SOLO_ADMIN);
         }
 
         personaService.cambiarEstado(personaId, activo, usuario);
@@ -154,8 +152,8 @@ public class AutogestionServiceImpl implements AutogestionService {
                 .filter(v -> v.getCasa().getId().equals(casa.getId()))
                 .orElseThrow(() -> GuardianException.sinPermiso(MensajesGlobales.FAMILIAR_AJENO));
 
-        if (activo) {
-            exigirInhabilitacionDeLaCasa(vehiculo, casa);
+        if (vehiculo.estaBloqueado()) {
+            throw GuardianException.sinPermiso(MensajesGlobales.DESBLOQUEO_SOLO_ADMIN);
         }
 
         return vehiculoService.cambiarEstado(vehiculoId, activo, usuario);
@@ -180,25 +178,9 @@ public class AutogestionServiceImpl implements AutogestionService {
         }
     }
 
-    /**
-     * Reactivar solo procede si la inhabilitacion la hizo alguien de la misma
-     * casa. Si la hizo la administracion — o no se sabe quien — el residente
-     * no puede revertirla: seria darle la vuelta a una sancion del conjunto
-     * con dos toques en el celular.
-     */
-    private void exigirInhabilitacionDeLaCasa(BaseEntity entidad, GdCasa casa) {
-        String quienInhabilito = entidad.getUsuarioModificador();
-
-        boolean fueDeLaCasa = quienInhabilito != null && personaRepository
-                .findByConjuntoIdAndDocumento(casa.getConjunto().getId(), quienInhabilito)
-                .flatMap(p -> residenteCasaRepository
-                        .findByPersonaIdAndCasaId(p.getId(), casa.getId()))
-                .isPresent();
-
-        if (!fueDeLaCasa) {
-            throw GuardianException.sinPermiso(MensajesGlobales.REACTIVAR_SOLO_ADMIN);
-        }
-    }
+    // La heuristica de "quien lo inhabilito" desaparecio: ahora hay dos
+    // llaves reales (activo del residente, bloqueado del administrador) y no
+    // hace falta adivinar quien apago el interruptor mirando el auditor.
 
     private FamiliarResponse mapear(GdResidenteCasa vinculo, UsuarioAutenticado usuario) {
         GdPersona persona = vinculo.getPersona();

@@ -62,9 +62,12 @@ public class EstadoUsuarioService {
     }
 
     private EstadoUsuario mapear(GdUsuario usuario) {
-        // La persona tambien cuenta: inhabilitar a la persona es inhabilitar
-        // su acceso al conjunto, y dejarle la app abierta seria incoherente.
-        boolean puedeOperar = usuario.estaActivo() && usuario.getPersona().estaActivo();
+        // Hacen falta las DOS llaves, en el usuario y en la persona: el
+        // administrador que bloquea a un guardia le corta la sesion aunque la
+        // cuenta siga "activa". La persona tambien cuenta porque inhabilitar a
+        // la persona es inhabilitar su acceso, y dejarle la app abierta seria
+        // incoherente.
+        boolean puedeOperar = usuario.puedeOperar() && usuario.getPersona().puedeOperar();
         return new EstadoUsuario(puedeOperar, usuario.getRol(), usuario.debeCambiarClave());
     }
 }

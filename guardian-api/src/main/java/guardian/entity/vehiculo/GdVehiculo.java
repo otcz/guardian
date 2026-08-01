@@ -33,8 +33,11 @@ import javax.persistence.UniqueConstraint;
 @Table(
         name = "GD_VEHICULO",
         uniqueConstraints = @UniqueConstraint(
-                name = "UK_VEHICULO_CONJUNTO_PLACA",
-                columnNames = {"CONJUNTO_ID", "PLACA"}
+                // Placa unica en TODO el sistema: un mismo carro no puede estar
+                // registrado en dos sedes ni en dos casas, o la bitacora no
+                // podria decir por donde entro de verdad.
+                name = "UK_VEHICULO_PLACA",
+                columnNames = "PLACA"
         )
 )
 public class GdVehiculo extends BaseEntity {
@@ -44,11 +47,7 @@ public class GdVehiculo extends BaseEntity {
     @Column(name = "ID")
     private Long id;
 
-    /**
-     * Se desnormaliza el conjunto para poder exigir placa unica por conjunto
-     * con una constraint de base. Derivarlo de la casa obligaria a validarlo en
-     * codigo, y una placa duplicada es justo el error que no se puede permitir.
-     */
+    /** Sede, desnormalizada desde la casa para poder filtrar sin un join. */
     @Column(name = "CONJUNTO_ID", nullable = false)
     private Long conjuntoId;
 

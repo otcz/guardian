@@ -64,7 +64,9 @@ public class VehiculoServiceImpl implements VehiculoService {
         String placa = normalizarPlaca(request.getPlaca());
         parametroService.exigirCodigoValido(Codigos.GRUPO_TIPO_VEHICULO, request.getTipo());
 
-        if (vehiculoRepository.existsByConjuntoIdAndPlaca(ejecutor.getConjuntoId(), placa)) {
+        // Placa unica en TODO el sistema: el mismo carro no puede estar en dos
+        // sedes ni en dos casas, o la bitacora deja de ser confiable.
+        if (vehiculoRepository.findByPlaca(placa).isPresent()) {
             throw GuardianException.conflicto(MensajesGlobales.PLACA_YA_REGISTRADA);
         }
 
@@ -91,7 +93,7 @@ public class VehiculoServiceImpl implements VehiculoService {
         String placa = normalizarPlaca(request.getPlaca());
         parametroService.exigirCodigoValido(Codigos.GRUPO_TIPO_VEHICULO, request.getTipo());
 
-        vehiculoRepository.findByConjuntoIdAndPlaca(ejecutor.getConjuntoId(), placa)
+        vehiculoRepository.findByPlaca(placa)
                 .filter(otro -> !otro.getId().equals(id))
                 .ifPresent(otro -> {
                     throw GuardianException.conflicto(MensajesGlobales.PLACA_YA_REGISTRADA);

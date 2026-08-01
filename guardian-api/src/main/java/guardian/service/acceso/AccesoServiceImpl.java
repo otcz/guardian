@@ -267,11 +267,17 @@ public class AccesoServiceImpl implements AccesoService {
                                            GdCasa casa) {
         Date ahora = new Date();
 
-        if (!credencial.estaActivo()) {
+        if (!credencial.puedeOperar()) {
             return Codigos.MOTIVO_CREDENCIAL_REVOCADA;
         }
         if (credencial.estaVencida(ahora) || credencial.agotoUsos()) {
             return Codigos.MOTIVO_CREDENCIAL_VENCIDA;
+        }
+        // El bloqueo de la administracion se reporta aparte de "inactiva": al
+        // guardia no le sirve el mismo mensaje para "la familia lo apago" que
+        // para "la administracion lo bloqueo".
+        if (persona.estaBloqueado()) {
+            return Codigos.MOTIVO_PERSONA_BLOQUEADA;
         }
         if (!persona.estaActivo()) {
             return Codigos.MOTIVO_PERSONA_INACTIVA;
@@ -279,6 +285,9 @@ public class AccesoServiceImpl implements AccesoService {
         // Sin casa vinculada no se deniega: un guardia o un administrador que no
         // vive en el conjunto entra igual. Lo que se bloquea es una casa
         // explicitamente deshabilitada.
+        if (casa != null && casa.estaBloqueado()) {
+            return Codigos.MOTIVO_CASA_BLOQUEADA;
+        }
         if (casa != null && !casa.estaActivo()) {
             return Codigos.MOTIVO_CASA_INACTIVA;
         }
@@ -332,11 +341,19 @@ public class AccesoServiceImpl implements AccesoService {
         GdVehiculo vehiculo = vehiculoRepository.findById(request.getVehiculoId())
                 .orElseThrow(() -> GuardianException.noEncontrado(MensajesGlobales.NO_ENCONTRADO));
 
-        // El vehiculo tiene que ser de la misma casa. Sin este chequeo el
-        // frontend podria mandar cualquier id y quedaria registrado que la
-        // persona entro en un carro que no es suyo.
+        // El vehiculo es de la CASA, no de una persona: cualquier miembro del
+        // nucleo puede salir en cualquier vehiculo de su casa. Lo que se
+        // impide es usar el de otra casa mandando un id cualquiera.
         if (casa == null || !vehiculo.getCasa().getId().equals(casa.getId())) {
             throw GuardianException.solicitudInvalida(MensajesGlobales.VEHICULO_NO_PERTENECE);
+        }
+        // Un vehiculo bloqueado por la administracion no sale, aunque la
+        // familia lo tenga encendido.
+        if (vehiculo.estaBloqueado()) {
+            throw GuardianException.conflicto(MensajesGlobales.VEHICULO_BLOQUEADO);
+        }
+        if (!vehiculo.estaActivo()) {
+            throw GuardianException.conflicto(MensajesGlobales.VEHICULO_NO_PERTENECE);
         }
         return vehiculo;
     }
@@ -377,18 +394,32 @@ public class AccesoServiceImpl implements AccesoService {
     // Mapeo
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * La casa para EVALUAR el ingreso se resuelve SIN mirar si el vinculo esta
+     * activo.
+     *
+     * <p>Si se filtrara por vinculo activo, apagarlo dejaria a la persona "sin
+     * casa" — y sin casa no se deniega. Con el administrador bloqueando una
+     * casa completa, bastaria con que alguien apagara su propio vinculo desde
+     * el celular para evaporar el bloqueo de toda la familia.</p>
+     */
     private Optional<GdCasa> casaDe(GdPersona persona) {
         return residenteCasaRepository
-                .findFirstByPersonaIdAndActivoOrderByIdAsc(persona.getId(), Codigos.SI)
+                .findFirstByPersonaIdOrderByIdAsc(persona.getId())
                 .map(GdResidenteCasa::getCasa);
     }
 
+    /**
+     * Solo los vehiculos que el registro va a aceptar. Ofrecerle al guardia una
+     * placa que despues se rechaza es peor que no ofrecerla: toca, falla, y la
+     * fila crece.
+     */
     private List<VehiculoResumen> vehiculosDe(GdCasa casa) {
         if (casa == null) {
             return Collections.emptyList();
         }
         return vehiculoRepository
-                .findByCasaIdAndActivoOrderByPlacaAsc(casa.getId(), Codigos.SI)
+                .operativosDeLaCasa(casa.getId())
                 .stream()
                 .map(v -> VehiculoResumen.builder()
                         .id(v.getId())
@@ -439,8 +470,12 @@ public class AccesoServiceImpl implements AccesoService {
                 return MensajesGlobales.QR_VENCIDO;
             case Codigos.MOTIVO_PERSONA_INACTIVA:
                 return MensajesGlobales.PERSONA_INACTIVA;
+            case Codigos.MOTIVO_PERSONA_BLOQUEADA:
+                return MensajesGlobales.PERSONA_BLOQUEADA;
             case Codigos.MOTIVO_CASA_INACTIVA:
                 return MensajesGlobales.CASA_INACTIVA;
+            case Codigos.MOTIVO_CASA_BLOQUEADA:
+                return MensajesGlobales.CASA_BLOQUEADA;
             default:
                 return MensajesGlobales.QR_NO_RECONOCIDO;
         }

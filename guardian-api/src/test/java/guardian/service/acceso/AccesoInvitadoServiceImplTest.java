@@ -76,6 +76,8 @@ class AccesoInvitadoServiceImplTest {
         invitacion.setNombreInvitado("Pedro Perez");
         invitacion.setDocumentoInvitado("999");
         invitacion.setActivo(Codigos.SI);
+        invitacion.setBloqueado(Codigos.NO);
+        casa.setBloqueado(Codigos.NO);
         invitacion.setVigenciaDesde(new Date(System.currentTimeMillis() - HORA_MILIS));
         invitacion.setVigenciaHasta(new Date(System.currentTimeMillis() + HORA_MILIS));
         invitacion.setUsosMaximos(1);

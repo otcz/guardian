@@ -38,11 +38,33 @@ public abstract class BaseEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaModificacion;
 
+    /**
+     * Llave del RESIDENTE: enciende o apaga lo suyo. Nunca alcanza para pasar
+     * por si sola — ver {@link #puedeOperar()}.
+     */
     @Column(name = "ACTIVO", length = 1, nullable = false)
     private String activo;
 
+    /**
+     * Llave del ADMINISTRADOR, y solo suya. Gana siempre.
+     *
+     * <p>Son dos estados independientes a proposito: el residente administra
+     * su nucleo, pero cuando la administracion bloquea a alguien o algo, esa
+     * decision no se puede revertir desde el celular. Un vehiculo activo pero
+     * bloqueado NO sale del conjunto hasta que el administrador lo desbloquee.</p>
+     *
+     * <p>El default en columna migra las filas existentes como no bloqueadas.</p>
+     */
+    @Column(name = "BLOQUEADO", length = 1, nullable = false,
+            columnDefinition = "varchar(1) default 'N'")
+    private String bloqueado;
+
     @Column(name = "OBSERVACIONES", columnDefinition = "TEXT")
     private String observaciones;
+
+    /** Motivo del bloqueo, para que la porteria pueda explicarlo. */
+    @Column(name = "MOTIVO_BLOQUEO", length = 200)
+    private String motivoBloqueo;
 
     @PrePersist
     protected void alCrear() {
@@ -52,6 +74,9 @@ public abstract class BaseEntity {
         if (this.activo == null) {
             this.activo = Codigos.SI;
         }
+        if (this.bloqueado == null) {
+            this.bloqueado = Codigos.NO;
+        }
     }
 
     @PreUpdate
@@ -59,7 +84,20 @@ public abstract class BaseEntity {
         this.fechaModificacion = new Date();
     }
 
+    /** Solo la llave del residente. Casi nunca es lo que hay que preguntar. */
     public boolean estaActivo() {
         return Codigos.SI.equals(this.activo);
+    }
+
+    public boolean estaBloqueado() {
+        return Codigos.SI.equals(this.bloqueado);
+    }
+
+    /**
+     * La pregunta real del sistema: hacen falta LAS DOS llaves. Encendido por
+     * su dueno y no bloqueado por la administracion.
+     */
+    public boolean puedeOperar() {
+        return estaActivo() && !estaBloqueado();
     }
 }

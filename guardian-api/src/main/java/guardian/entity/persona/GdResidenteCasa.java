@@ -17,13 +17,16 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 /**
- * Vinculo entre una persona y la casa donde vive.
+ * Vinculo entre una persona y la casa donde vive. <b>La casa ES el nucleo
+ * familiar</b> del sistema.
  *
- * <p>Es una tabla aparte y no un campo en GdPersona porque una persona puede
- * vivir en dos unidades del mismo conjunto (padres e hijos con apartamentos
- * separados, un propietario que tambien arrienda) y porque el vinculo tiene
+ * <p>Es una tabla aparte y no un campo en GdPersona porque el vinculo tiene
  * historia propia: cuando alguien se muda, el registro se desactiva pero no se
  * borra, y sus eventos de acceso pasados siguen teniendo sentido.</p>
+ *
+ * <p><b>Una persona pertenece a UN solo nucleo activo.</b> Sin esa regla, la
+ * misma cedula podria aparecer en dos casas y la porteria no sabria a que
+ * familia avisarle, ni de que casa son los vehiculos que puede usar.</p>
  *
  * <p>El {@code parentesco} describe la relacion con la casa (TITULAR, ESPOSO,
  * ESPOSA, HIJO, OTRO). No es un rol de permisos: los permisos los da

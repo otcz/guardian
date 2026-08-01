@@ -80,12 +80,14 @@ class AccesoServiceImplTest {
         persona.setApellidos("Diaz");
         persona.setDocumento("123");
         persona.setActivo(Codigos.SI);
+        persona.setBloqueado(Codigos.NO);
         persona.setFotoUrl("/api/publico/fotos/x.png");
 
         credencial = new GdCredencialQr();
         credencial.setId(7L);
         credencial.setPersona(persona);
         credencial.setActivo(Codigos.SI);
+        credencial.setBloqueado(Codigos.NO);
         credencial.setUsosRealizados(0);
 
         casa = new GdCasa();
@@ -93,14 +95,16 @@ class AccesoServiceImplTest {
         casa.setConjunto(conjunto);
         casa.setIdentificador("M1-C5");
         casa.setActivo(Codigos.SI);
+        casa.setBloqueado(Codigos.NO);
 
         GdResidenteCasa vinculo = new GdResidenteCasa();
         vinculo.setPersona(persona);
         vinculo.setCasa(casa);
 
         lenient().when(credencialQrService.resolver("QR")).thenReturn(Optional.of(credencial));
-        lenient().when(residenteCasaRepository
-                .findFirstByPersonaIdAndActivoOrderByIdAsc(50L, Codigos.SI))
+        // La porteria resuelve la casa SIN filtrar por vinculo activo: apagar
+        // el propio vinculo no puede servir para evadir el bloqueo de la casa.
+        lenient().when(residenteCasaRepository.findFirstByPersonaIdOrderByIdAsc(50L))
                 .thenReturn(Optional.of(vinculo));
         lenient().when(fabrica.nuevoEvento(any(), any()))
                 .thenAnswer(inv -> new GdAccesoEvento());
@@ -115,7 +119,7 @@ class AccesoServiceImplTest {
                     .build();
         });
         lenient().when(fabrica.lecturaReciente(anyLong())).thenReturn(Optional.empty());
-        lenient().when(vehiculoRepository.findByCasaIdAndActivoOrderByPlacaAsc(anyLong(), anyString()))
+        lenient().when(vehiculoRepository.operativosDeLaCasa(anyLong()))
                 .thenReturn(java.util.Collections.emptyList());
     }
 

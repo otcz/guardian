@@ -55,6 +55,9 @@ public final class ApiEndpoint {
     public static final String ADMIN_INVITACIONES = ADMIN + "/invitaciones";
     public static final String ADMIN_PARAMETROS = ADMIN + "/parametros";
 
+    /** Bloqueos administrativos: la llave que el residente no puede levantar. */
+    public static final String ADMIN_BLOQUEOS = ADMIN + "/bloqueos";
+
     /** Sufijos reutilizados. */
     public static final String POR_ID = "/{id}";
     public static final String ACTIVAR = "/{id}/activar";

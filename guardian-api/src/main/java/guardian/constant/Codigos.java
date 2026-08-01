@@ -35,6 +35,7 @@ public final class Codigos {
     public static final String RESULTADO_DENEGADO = "DENEGADO";
 
     /** Roles de usuario. */
+    public static final String ROL_SUPER_ADMIN = "SUPER_ADMIN";
     public static final String ROL_ADMIN = "ADMIN";
     public static final String ROL_GUARDIA = "GUARDIA";
     public static final String ROL_RESIDENTE = "RESIDENTE";
@@ -69,6 +70,15 @@ public final class Codigos {
     public static final String MOTIVO_CASA_INACTIVA = "CASA_INACTIVA";
     public static final String MOTIVO_INVITACION_NO_VIGENTE = "INVITACION_NO_VIGENTE";
     public static final String MOTIVO_INVITACION_AGOTADA = "INVITACION_AGOTADA";
+
+    /**
+     * Bloqueos de la administracion. Se distinguen de PERSONA_INACTIVA y
+     * CASA_INACTIVA a proposito: al guardia y al residente hay que decirles
+     * cosas distintas segun quien apago el interruptor.
+     */
+    public static final String MOTIVO_PERSONA_BLOQUEADA = "PERSONA_BLOQUEADA";
+    public static final String MOTIVO_CASA_BLOQUEADA = "CASA_BLOQUEADA";
+    public static final String MOTIVO_VEHICULO_BLOQUEADO = "VEHICULO_BLOQUEADO";
 
     /** Parentescos con significado especial en la logica. */
     public static final String PARENTESCO_TITULAR = "TITULAR";

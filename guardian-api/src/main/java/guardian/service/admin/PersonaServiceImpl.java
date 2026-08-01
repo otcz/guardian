@@ -89,9 +89,12 @@ public class PersonaServiceImpl implements PersonaService {
         // dos personas y el login con cualquiera de las dos seria ambiguo.
         String documento = request.getDocumento().trim().toUpperCase();
 
-        if (personaRepository.existsByConjuntoIdAndDocumento(ejecutor.getConjuntoId(), documento)) {
+        // Unicidad GLOBAL, no por sede: la misma cedula no puede existir dos
+        // veces aunque los conjuntos sean distintos.
+        if (personaRepository.findByDocumento(documento).isPresent()) {
             throw GuardianException.conflicto(MensajesGlobales.DOCUMENTO_YA_REGISTRADO);
         }
+        exigirTelefonoLibre(request.getTelefono(), null);
 
         GdConjunto conjunto = conjuntoRepository.findById(ejecutor.getConjuntoId())
                 .orElseThrow(() -> GuardianException.noEncontrado(MensajesGlobales.NO_ENCONTRADO));
@@ -151,11 +154,12 @@ public class PersonaServiceImpl implements PersonaService {
         GdPersona persona = obtenerEntidad(id, ejecutor.getConjuntoId());
         String documento = request.getDocumento().trim().toUpperCase();
 
-        personaRepository.findByConjuntoIdAndDocumento(ejecutor.getConjuntoId(), documento)
+        personaRepository.findByDocumento(documento)
                 .filter(otra -> !otra.getId().equals(id))
                 .ifPresent(otra -> {
                     throw GuardianException.conflicto(MensajesGlobales.DOCUMENTO_YA_REGISTRADO);
                 });
+        exigirTelefonoLibre(request.getTelefono(), id);
 
         persona.setDocumento(documento);
         aplicar(persona, request);
@@ -259,6 +263,24 @@ public class PersonaServiceImpl implements PersonaService {
 
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * El telefono tambien es unico en todo el sistema: es la via por la que la
+     * administracion contacta a una casa, y dos personas con el mismo numero
+     * dejan la notificacion sin dueno.
+     *
+     * @param idPersona la persona que se esta editando, o null en un alta.
+     */
+    private void exigirTelefonoLibre(String telefono, Long idPersona) {
+        if (telefono == null || telefono.trim().isEmpty()) {
+            return;
+        }
+        personaRepository.findByTelefono(telefono.trim())
+                .filter(otra -> idPersona == null || !otra.getId().equals(idPersona))
+                .ifPresent(otra -> {
+                    throw GuardianException.conflicto(MensajesGlobales.TELEFONO_YA_REGISTRADO);
+                });
+    }
+
     private GdPersona obtenerEntidad(Long id, Long conjuntoId) {
         GdPersona persona = personaRepository.findById(id)
                 .orElseThrow(() -> GuardianException.noEncontrado(MensajesGlobales.NO_ENCONTRADO));
@@ -319,6 +341,16 @@ public class PersonaServiceImpl implements PersonaService {
         if (!casa.getConjunto().getId().equals(ejecutor.getConjuntoId())) {
             throw GuardianException.noEncontrado(MensajesGlobales.NO_ENCONTRADO);
         }
+
+        // Un nucleo por persona: si ya vive en OTRA casa, primero hay que
+        // sacarla de esa. Sin esta regla la misma cedula aparece en dos
+        // familias y la porteria no sabe de que casa son sus vehiculos.
+        residenteCasaRepository
+                .findFirstByPersonaIdAndActivoOrderByIdAsc(persona.getId(), Codigos.SI)
+                .filter(otro -> !otro.getCasa().getId().equals(casa.getId()))
+                .ifPresent(otro -> {
+                    throw GuardianException.conflicto(MensajesGlobales.PERSONA_YA_EN_UNA_CASA);
+                });
 
         // Una casa tiene un solo titular. Dos titulares dejarian sin respuesta
         // la pregunta de a quien se le notifica o quien autoriza invitados en F2.

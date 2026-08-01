@@ -126,8 +126,11 @@ public class AccesoInvitadoServiceImpl implements AccesoInvitadoService {
         }
 
         Date ahora = new Date();
-        if (!invitacion.estaActivo()) {
+        if (!invitacion.puedeOperar()) {
             return Codigos.MOTIVO_CREDENCIAL_REVOCADA;
+        }
+        if (invitacion.getCasa().estaBloqueado()) {
+            return Codigos.MOTIVO_CASA_BLOQUEADA;
         }
         if (!invitacion.getCasa().estaActivo()) {
             return Codigos.MOTIVO_CASA_INACTIVA;

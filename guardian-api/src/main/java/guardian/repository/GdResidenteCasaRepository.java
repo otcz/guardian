@@ -18,12 +18,18 @@ public interface GdResidenteCasaRepository extends JpaRepository<GdResidenteCasa
             Long casaId, String parentesco, String activo);
 
     /**
-     * Vinculo vigente de la persona. Cuando alguien figura en dos unidades se
-     * toma el mas antiguo, que en la practica es su residencia principal: la
-     * segunda suele ser un apartamento heredado o arrendado.
+     * Vinculo vigente de la persona. Se usa para lo que el residente
+     * administra: su hogar, sus vehiculos, sus invitaciones.
      */
     Optional<GdResidenteCasa> findFirstByPersonaIdAndActivoOrderByIdAsc(
             Long personaId, String activo);
+
+    /**
+     * Vinculo SIN filtrar por activo. Es el que usa la porteria para evaluar
+     * el ingreso: un vinculo apagado no puede servir para escaparse del
+     * bloqueo de la casa. Con una persona por nucleo, solo hay uno.
+     */
+    Optional<GdResidenteCasa> findFirstByPersonaIdOrderByIdAsc(Long personaId);
 
     /** Solo para la eliminacion fisica de la persona (exclusiva del admin). */
     void deleteByPersonaId(Long personaId);

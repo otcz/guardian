@@ -38,6 +38,18 @@ public final class MensajesGlobales {
             "Esta persona no tiene el ingreso habilitado.";
     public static final String CASA_INACTIVA =
             "La casa no tiene el ingreso habilitado.";
+
+    // ── Bloqueos de la administracion ────────────────────────────────────────
+    public static final String PERSONA_BLOQUEADA =
+            "La administracion bloqueo el ingreso de esta persona.";
+    public static final String CASA_BLOQUEADA =
+            "La administracion bloqueo el ingreso de esta casa.";
+    public static final String VEHICULO_BLOQUEADO =
+            "La administracion bloqueo este vehiculo.";
+    public static final String DESBLOQUEO_SOLO_ADMIN =
+            "Esto lo bloqueo la administracion. Solo ella puede habilitarlo de nuevo.";
+    public static final String BLOQUEO_SOLO_ADMIN =
+            "Bloquear es una accion de la administracion.";
     public static final String VEHICULO_NO_PERTENECE =
             "El vehiculo seleccionado no esta registrado para esa casa.";
     public static final String ACCESO_PERMITIDO =
@@ -50,8 +62,12 @@ public final class MensajesGlobales {
     // ── Administracion ───────────────────────────────────────────────────────
     public static final String DOCUMENTO_YA_REGISTRADO =
             "Ya existe una persona con ese numero de documento.";
+    public static final String TELEFONO_YA_REGISTRADO =
+            "Ese telefono ya esta registrado por otra persona.";
     public static final String PLACA_YA_REGISTRADA =
             "Ya existe un vehiculo con esa placa.";
+    public static final String PERSONA_YA_EN_UNA_CASA =
+            "Esa persona ya pertenece a otra casa.";
     public static final String CASA_YA_REGISTRADA =
             "Ya existe una casa con ese identificador.";
     public static final String PERSONA_SIN_FOTO =
@@ -76,8 +92,6 @@ public final class MensajesGlobales {
             "El titular de la casa solo lo asigna la administracion.";
     public static final String SOLO_TITULAR_FAMILIA =
             "Solo el titular de la casa administra la familia.";
-    public static final String REACTIVAR_SOLO_ADMIN =
-            "Esa inhabilitacion la hizo la administracion. Pide alli la reactivacion.";
 
     // ── Invitaciones ─────────────────────────────────────────────────────────
     public static final String INVITACION_VIGENCIA_INVALIDA =

@@ -33,10 +33,13 @@ import java.util.Date;
 @Entity
 @Table(
         name = "GD_PERSONA",
-        uniqueConstraints = @UniqueConstraint(
-                name = "UK_PERSONA_CONJUNTO_DOCUMENTO",
-                columnNames = {"CONJUNTO_ID", "DOCUMENTO"}
-        )
+        uniqueConstraints = {
+                // Unicidad GLOBAL, no por sede: una cedula identifica a UNA
+                // persona en todo el sistema. Asi la misma persona no puede
+                // existir dos veces aunque las sedes sean distintas.
+                @UniqueConstraint(name = "UK_PERSONA_DOCUMENTO", columnNames = "DOCUMENTO"),
+                @UniqueConstraint(name = "UK_PERSONA_TELEFONO", columnNames = "TELEFONO")
+        }
 )
 public class GdPersona extends BaseEntity {
 
@@ -86,6 +89,10 @@ public class GdPersona extends BaseEntity {
 
     @Column(name = "EMAIL", length = 120)
     private String email;
+
+    // OJO: no agregar aca un getConjuntoId(). Spring Data lo tomaria como un
+    // atributo de la entidad y romperia countByConjuntoId y las demas consultas
+    // derivadas, que navegan por la relacion 'conjunto'.
 
     public String getNombreCompleto() {
         return (nombres + " " + apellidos).trim();
