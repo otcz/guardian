@@ -3,6 +3,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { AdminService } from '../../../core/services/admin.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Parametro, Persona, Usuario } from '../../../core/models/admin.model';
 
 /**
@@ -34,7 +35,10 @@ export class UsuariosComponent implements OnInit {
     rol: ['', [Validators.required]]
   });
 
-  constructor(private readonly admin: AdminService) {}
+  constructor(
+    private readonly admin: AdminService,
+    private readonly auth: AuthService
+  ) {}
 
   ngOnInit(): void {
     this.cargar();
@@ -99,6 +103,38 @@ export class UsuariosComponent implements OnInit {
       },
       error: (fallo: HttpErrorResponse) => {
         this.error = fallo.error?.mensaje ?? 'No pudimos cambiar el estado.';
+      }
+    });
+  }
+
+  /**
+   * El backend impide cambiarse el propio rol; el select se deshabilita para
+   * no ofrecer una accion que va a fallar.
+   */
+  esMiCuenta(usuario: Usuario): boolean {
+    return this.auth.sesion?.usuarioId === usuario.id;
+  }
+
+  cambiarRol(usuario: Usuario, rol: string): void {
+    if (rol === usuario.rol) {
+      return;
+    }
+    const seguro = window.confirm(
+      `¿Cambiar el rol de ${usuario.nombreCompleto} a ${rol}?`);
+    if (!seguro) {
+      this.cargar();
+      return;
+    }
+
+    this.error = null;
+    this.admin.cambiarRolUsuario(usuario.id, rol).subscribe({
+      next: actualizado => {
+        this.usuarios = this.usuarios.map(u => (u.id === actualizado.id ? actualizado : u));
+        this.aviso = `${actualizado.nombreCompleto} ahora es ${actualizado.rol}.`;
+      },
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos cambiar el rol.';
+        this.cargar();
       }
     });
   }

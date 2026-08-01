@@ -9,3 +9,18 @@
   border: 1px solid var(--ok);
   border-radius: 8px;
 }
+
+// El rol se edita donde se lee: un select discreto en la propia fila.
+.rol-en-linea {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-default);
+  font-size: 0.85rem;
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}

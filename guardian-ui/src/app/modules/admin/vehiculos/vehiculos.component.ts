@@ -24,6 +24,9 @@ export class VehiculosComponent implements OnInit {
   error: string | null = null;
   mostrarAlta = false;
 
+  /** Vehículo en edición. Null = el formulario está en modo alta. */
+  editando: Vehiculo | null = null;
+
   readonly formulario = this.fb.nonNullable.group({
     casaId: [null as number | null, [Validators.required]],
     placa: ['', [Validators.required]],
@@ -54,30 +57,50 @@ export class VehiculosComponent implements OnInit {
     });
   }
 
-  crear(): void {
+  guardar(): void {
     if (this.formulario.invalid || this.guardando) {
       this.formulario.markAllAsTouched();
       return;
     }
 
     const datos = this.formulario.getRawValue();
+    const request = { ...datos, casaId: datos.casaId! };
     this.guardando = true;
     this.error = null;
 
-    this.admin
-      .crearVehiculo({ ...datos, casaId: datos.casaId! })
-      .subscribe({
-        next: () => {
-          this.guardando = false;
-          this.mostrarAlta = false;
-          this.formulario.reset();
-          this.cargar();
-        },
-        error: (fallo: HttpErrorResponse) => {
-          this.guardando = false;
-          this.error = fallo.error?.mensaje ?? 'No pudimos registrar el vehículo.';
-        }
-      });
+    const peticion = this.editando
+      ? this.admin.actualizarVehiculo(this.editando.id, request)
+      : this.admin.crearVehiculo(request);
+
+    peticion.subscribe({
+      next: () => {
+        this.guardando = false;
+        this.cancelarEdicion();
+        this.cargar();
+      },
+      error: (fallo: HttpErrorResponse) => {
+        this.guardando = false;
+        this.error = fallo.error?.mensaje ?? 'No pudimos guardar el vehículo.';
+      }
+    });
+  }
+
+  editar(vehiculo: Vehiculo): void {
+    this.editando = vehiculo;
+    this.mostrarAlta = true;
+    this.formulario.setValue({
+      casaId: vehiculo.casaId,
+      placa: vehiculo.placa,
+      tipo: vehiculo.tipo,
+      marca: vehiculo.marca ?? '',
+      color: vehiculo.color ?? ''
+    });
+  }
+
+  cancelarEdicion(): void {
+    this.editando = null;
+    this.mostrarAlta = false;
+    this.formulario.reset();
   }
 
   alternarEstado(vehiculo: Vehiculo): void {

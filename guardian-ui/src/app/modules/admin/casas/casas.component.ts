@@ -20,6 +20,9 @@ export class CasasComponent implements OnInit {
   guardando = false;
   error: string | null = null;
 
+  /** Casa en edición. Null = el formulario está en modo alta. */
+  editando: Casa | null = null;
+
   readonly formulario = this.fb.nonNullable.group({
     torre: [''],
     numero: ['', [Validators.required]],
@@ -46,7 +49,7 @@ export class CasasComponent implements OnInit {
     });
   }
 
-  crear(): void {
+  guardar(): void {
     if (this.formulario.invalid || this.guardando) {
       this.formulario.markAllAsTouched();
       return;
@@ -54,19 +57,40 @@ export class CasasComponent implements OnInit {
 
     this.guardando = true;
     this.error = null;
+    const datos = this.formulario.getRawValue();
 
-    this.admin.crearCasa(this.formulario.getRawValue()).subscribe({
+    const peticion = this.editando
+      ? this.admin.actualizarCasa(this.editando.id, datos)
+      : this.admin.crearCasa(datos);
+
+    peticion.subscribe({
       next: casa => {
-        this.casas = [...this.casas, casa].sort((a, b) =>
-          a.identificador.localeCompare(b.identificador));
-        this.formulario.reset({ torre: '', numero: '', cuposParqueadero: 0 });
+        this.casas = (this.editando
+          ? this.casas.map(c => (c.id === casa.id ? casa : c))
+          : [...this.casas, casa])
+          .sort((a, b) => a.identificador.localeCompare(b.identificador));
+        this.cancelarEdicion();
         this.guardando = false;
       },
       error: (fallo: HttpErrorResponse) => {
-        this.error = fallo.error?.mensaje ?? 'No pudimos crear la casa.';
+        this.error = fallo.error?.mensaje ?? 'No pudimos guardar la casa.';
         this.guardando = false;
       }
     });
+  }
+
+  editar(casa: Casa): void {
+    this.editando = casa;
+    this.formulario.setValue({
+      torre: casa.torre ?? '',
+      numero: casa.numero,
+      cuposParqueadero: casa.cuposParqueadero ?? 0
+    });
+  }
+
+  cancelarEdicion(): void {
+    this.editando = null;
+    this.formulario.reset({ torre: '', numero: '', cuposParqueadero: 0 });
   }
 
   alternarEstado(casa: Casa): void {

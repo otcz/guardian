@@ -1,7 +1,8 @@
 <div class="gd-page">
   <h1>Casas</h1>
 
-  <form class="alta gd-card" [formGroup]="formulario" (ngSubmit)="crear()">
+  <form class="alta gd-card" [formGroup]="formulario" (ngSubmit)="guardar()"
+        [class.editando]="editando">
     <div class="campo">
       <label for="torre">
         Edificio
@@ -28,7 +29,12 @@
     </div>
 
     <button type="submit" class="principal" [disabled]="guardando">
-      <i class="pi pi-plus"></i> Agregar
+      <i class="pi" [ngClass]="editando ? 'pi-check' : 'pi-plus'"></i>
+      {{ editando ? 'Guardar cambios' : 'Agregar' }}
+    </button>
+
+    <button type="button" class="alterno" *ngIf="editando" (click)="cancelarEdicion()">
+      Cancelar
     </button>
   </form>
 
@@ -58,7 +64,12 @@
             {{ activa(casa) ? 'Activa' : 'Inactiva' }}
           </span>
         </td>
-        <td class="derecha">
+        <td class="derecha acciones">
+          <button type="button" class="accion"
+                  (click)="editar(casa)"
+                  pTooltip="Editar" tooltipPosition="left">
+            <i class="pi pi-pencil"></i>
+          </button>
           <button type="button"
                   class="accion"
                   (click)="alternarEstado(casa)"

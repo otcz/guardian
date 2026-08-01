@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Observable, Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { AdminService } from '../../../core/services/admin.service';
 import { Casa, Parametro, Persona } from '../../../core/models/admin.model';
@@ -26,6 +26,12 @@ export class PersonasComponent implements OnInit {
   error: string | null = null;
   mostrarAlta = false;
 
+  /**
+   * Persona en edición. Null = alta. En edición no se toca la cuenta de
+   * acceso: rol y estado de la cuenta se administran en el panel de Usuarios.
+   */
+  editando: Persona | null = null;
+
   texto = '';
   private readonly busqueda$ = new Subject<string>();
 
@@ -36,6 +42,7 @@ export class PersonasComponent implements OnInit {
     fechaNacimiento: [''],
     fotoUrl: [null as string | null],
     telefono: [''],
+    email: ['', [Validators.email]],
     casaId: [null as number | null],
     parentesco: [''],
     rolUsuario: ['']
@@ -75,7 +82,7 @@ export class PersonasComponent implements OnInit {
     });
   }
 
-  crear(): void {
+  guardar(): void {
     if (this.formulario.invalid || this.guardando) {
       this.formulario.markAllAsTouched();
       return;
@@ -85,28 +92,58 @@ export class PersonasComponent implements OnInit {
     this.error = null;
 
     const datos = this.formulario.getRawValue();
+    const request = {
+      ...datos,
+      fechaNacimiento: datos.fechaNacimiento || null,
+      telefono: datos.telefono || null,
+      email: datos.email || null,
+      casaId: datos.casaId || null,
+      parentesco: datos.casaId ? datos.parentesco : null,
+      // La cuenta solo se crea en el alta; en edición se administra en Usuarios.
+      rolUsuario: this.editando ? null : (datos.rolUsuario || null)
+    };
 
-    this.admin
-      .crearPersona({
-        ...datos,
-        fechaNacimiento: datos.fechaNacimiento || null,
-        telefono: datos.telefono || null,
-        casaId: datos.casaId || null,
-        parentesco: datos.casaId ? datos.parentesco : null,
-        rolUsuario: datos.rolUsuario || null
-      })
-      .subscribe({
-        next: () => {
-          this.guardando = false;
-          this.mostrarAlta = false;
-          this.formulario.reset({ fotoUrl: null });
-          this.cargar(this.texto);
-        },
-        error: (fallo: HttpErrorResponse) => {
-          this.error = fallo.error?.mensaje ?? 'No pudimos registrar a la persona.';
-          this.guardando = false;
-        }
-      });
+    // El alta devuelve PersonaRegistrada (con el payload del QR) y la
+    // edicion una Persona; aqui solo importa que la operacion termine.
+    const peticion: Observable<unknown> = this.editando
+      ? this.admin.actualizarPersona(this.editando.id, request)
+      : this.admin.crearPersona(request);
+
+    peticion.subscribe({
+      next: () => {
+        this.guardando = false;
+        this.cancelarEdicion();
+        this.cargar(this.texto);
+      },
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos guardar a la persona.';
+        this.guardando = false;
+      }
+    });
+  }
+
+  editar(persona: Persona): void {
+    this.editando = persona;
+    this.mostrarAlta = true;
+    this.formulario.setValue({
+      documento: persona.documento,
+      nombres: persona.nombres,
+      apellidos: persona.apellidos,
+      // El API entrega un timestamp; el input date solo entiende yyyy-MM-dd.
+      fechaNacimiento: persona.fechaNacimiento?.substring(0, 10) ?? '',
+      fotoUrl: persona.fotoUrl,
+      telefono: persona.telefono ?? '',
+      email: persona.email ?? '',
+      casaId: persona.casaId,
+      parentesco: persona.parentesco ?? '',
+      rolUsuario: ''
+    });
+  }
+
+  cancelarEdicion(): void {
+    this.editando = null;
+    this.mostrarAlta = false;
+    this.formulario.reset({ fotoUrl: null });
   }
 
   alternarEstado(persona: Persona): void {

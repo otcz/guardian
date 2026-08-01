@@ -1,13 +1,14 @@
 <div class="gd-page">
   <div class="encabezado">
     <h1>Vehículos</h1>
-    <button type="button" class="principal" (click)="mostrarAlta = !mostrarAlta">
+    <button type="button" class="principal"
+            (click)="mostrarAlta ? cancelarEdicion() : (mostrarAlta = true)">
       <i class="pi" [ngClass]="mostrarAlta ? 'pi-times' : 'pi-plus'"></i>
       {{ mostrarAlta ? 'Cancelar' : 'Registrar' }}
     </button>
   </div>
 
-  <form class="alta gd-card" *ngIf="mostrarAlta" [formGroup]="formulario" (ngSubmit)="crear()">
+  <form class="alta gd-card" *ngIf="mostrarAlta" [formGroup]="formulario" (ngSubmit)="guardar()">
     <div class="campo">
       <label for="casa">Casa</label>
       <select id="casa" formControlName="casaId">
@@ -40,7 +41,8 @@
     </div>
 
     <button type="submit" class="principal" [disabled]="guardando">
-      <i class="pi pi-check"></i> Guardar
+      <i class="pi pi-check"></i>
+      {{ editando ? 'Guardar cambios' : 'Guardar' }}
     </button>
   </form>
 
@@ -73,6 +75,11 @@
           </span>
         </td>
         <td class="derecha acciones">
+          <button type="button" class="accion"
+                  (click)="editar(vehiculo)"
+                  pTooltip="Editar" tooltipPosition="left">
+            <i class="pi pi-pencil"></i>
+          </button>
           <button type="button" class="accion"
                   (click)="alternarEstado(vehiculo)"
                   [pTooltip]="activo(vehiculo) ? 'Inhabilitar' : 'Habilitar'"

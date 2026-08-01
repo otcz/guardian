@@ -100,6 +100,10 @@ export class AdminService {
     return this.http.post<Vehiculo>(`${this.base}/vehiculos`, request);
   }
 
+  actualizarVehiculo(id: number, request: VehiculoRequest): Observable<Vehiculo> {
+    return this.http.put<Vehiculo>(`${this.base}/vehiculos/${id}`, request);
+  }
+
   cambiarEstadoVehiculo(id: number, activar: boolean): Observable<Vehiculo> {
     const accion = activar ? 'activar' : 'desactivar';
     return this.http.patch<Vehiculo>(`${this.base}/vehiculos/${id}/${accion}`, {});
@@ -123,6 +127,11 @@ export class AdminService {
   cambiarEstadoUsuario(id: number, activar: boolean): Observable<Usuario> {
     const accion = activar ? 'activar' : 'desactivar';
     return this.http.patch<Usuario>(`${this.base}/usuarios/${id}/${accion}`, {});
+  }
+
+  cambiarRolUsuario(id: number, rol: string): Observable<Usuario> {
+    const params = new HttpParams().set('rol', rol);
+    return this.http.patch<Usuario>(`${this.base}/usuarios/${id}/rol`, {}, { params });
   }
 
   restablecerClave(id: number): Observable<Usuario> {

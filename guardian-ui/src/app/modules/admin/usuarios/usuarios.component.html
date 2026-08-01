@@ -56,7 +56,16 @@
       <tr *ngFor="let usuario of usuarios" [class.inactiva]="!activo(usuario)">
         <td class="fuerte">{{ usuario.nombreCompleto }}</td>
         <td>{{ usuario.documento }}</td>
-        <td>{{ usuario.rol }}</td>
+        <td>
+          <select class="rol-en-linea"
+                  [value]="usuario.rol"
+                  [disabled]="esMiCuenta(usuario)"
+                  [pTooltip]="esMiCuenta(usuario) ? 'Tu propia cuenta' : ''"
+                  tooltipPosition="top"
+                  (change)="cambiarRol(usuario, $any($event.target).value)">
+            <option *ngFor="let rol of roles" [value]="rol.codigo">{{ rol.valor }}</option>
+          </select>
+        </td>
         <td>{{ (usuario.fechaUltimoIngreso | date:'dd/MM/yyyy HH:mm') ?? 'Nunca' }}</td>
         <td>
           <span class="pastilla" [class.si]="activo(usuario)" [class.no]="!activo(usuario)">
