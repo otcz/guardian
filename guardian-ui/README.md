@@ -1,27 +1,32 @@
-# GuardianUi
+# guardian-ui
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.21.
+Frontend PWA de **GUARDIAN** — control de acceso residencial. Angular 18 +
+PrimeNG, con tres paneles por rol:
 
-## Development server
+| Ruta | Panel | Quién |
+|---|---|---|
+| `/app` | Mi QR, Mi hogar, Invitados | Residente / Titular |
+| `/porteria` | Escáner y ficha de verificación | Guardia |
+| `/admin` | Resumen, casas, personas, vehículos, usuarios, invitaciones, bitácora | Administrador |
+| `/invitado/:codigo` | Página pública del QR temporal | Invitado (sin cuenta) |
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## Correr en local
 
-## Code scaffolding
+```bash
+npm install
+npm start        # http://localhost:4200
+```
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+El backend debe estar arriba en `http://localhost:8484` (ver el README de la
+raíz del repo). La URL del API vive en `src/environments/`.
 
-## Build
+## Convenciones
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+Las reglas de arquitectura del frontend — tokens CSS, lazy loading, cero HTTP
+en componentes, modo claro/oscuro, la pantalla de la garita — están en
+[`../.claude/CLAUDE.md`](../.claude/CLAUDE.md) §5 y son obligatorias.
 
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+```bash
+npm test         # Karma + Jasmine
+npm run build    # produccion, con service worker (PWA)
+```

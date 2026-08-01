@@ -89,13 +89,23 @@ public class PersonaController {
         return ResponseEntity.ok(Collections.singletonMap("payload", payload));
     }
 
+    /** Freno de emergencia: revoca sin reemitir. El QR muere en el proximo escaneo. */
+    @DeleteMapping(ApiEndpoint.CREDENCIAL)
+    public ResponseEntity<Void> revocarCredencial(@PathVariable Long id) {
+        personaService.revocarCredencial(id, usuarioActual.obtener());
+        return ResponseEntity.noContent().build();
+    }
+
     /** PNG para imprimir el carnet de quien no usa smartphone. */
     @GetMapping(value = ApiEndpoint.CREDENCIAL_PNG, produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<byte[]> credencialPng(
             @PathVariable Long id,
             @RequestParam(defaultValue = "" + TAMANO_QR_PX) int tamano) {
 
-        byte[] png = personaService.credencialPng(id, usuarioActual.conjuntoId(), tamano);
+        // Acotado: un tamano arbitrario renderiza un bitmap gigante y eso es
+        // un OOM gratis para cualquiera con sesion.
+        int tamanoPx = Math.max(128, Math.min(tamano, 1024));
+        byte[] png = personaService.credencialPng(id, usuarioActual.conjuntoId(), tamanoPx);
 
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noStore())

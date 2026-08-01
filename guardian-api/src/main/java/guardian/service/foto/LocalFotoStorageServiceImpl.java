@@ -65,4 +65,21 @@ public class LocalFotoStorageServiceImpl implements FotoStorageService {
             return null;
         }
     }
+
+    @Override
+    public void eliminar(String nombreArchivo) {
+        // La misma defensa de path traversal que la lectura: un nombre que no
+        // sea UUID.extension ni siquiera se resuelve contra el disco.
+        if (nombreArchivo == null || !NOMBRE_VALIDO.matcher(nombreArchivo).matches()) {
+            return;
+        }
+        try {
+            Files.deleteIfExists(directorioBase.resolve(nombreArchivo));
+            log.info("[foto] eliminada nombre={}", nombreArchivo);
+        } catch (IOException ex) {
+            // No se propaga: la eliminacion de la persona ya ocurrio y revertir
+            // la transaccion por un archivo dejaria el estado peor, no mejor.
+            log.warn("[foto] no se pudo eliminar nombre={}", nombreArchivo, ex);
+        }
+    }
 }

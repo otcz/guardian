@@ -41,4 +41,23 @@ public interface GdUsuarioRepository extends JpaRepository<GdUsuario, Long> {
             + "JOIN FETCH p.conjunto "
             + "WHERE UPPER(p.documento) = UPPER(:documento)")
     Optional<GdUsuario> buscarPorDocumento(@Param("documento") String documento);
+
+    /**
+     * Estado fresco para el filtro de seguridad. JOIN FETCH porque el filtro
+     * corre fuera de transaccion y una persona LAZY reventaria al leerla.
+     */
+    @Query("SELECT u FROM GdUsuario u JOIN FETCH u.persona WHERE u.id = :id")
+    Optional<GdUsuario> buscarConPersona(@Param("id") Long id);
+
+    /**
+     * Listado del back-office. El filtro por conjunto va en el query — no en
+     * memoria — y los FETCH evitan el N+1 del mapeo (persona y conjunto se
+     * leen para cada fila del panel).
+     */
+    @Query("SELECT u FROM GdUsuario u "
+            + "JOIN FETCH u.persona p "
+            + "JOIN FETCH p.conjunto c "
+            + "WHERE c.id = :conjuntoId "
+            + "ORDER BY p.apellidos, p.nombres")
+    List<GdUsuario> listarPorConjunto(@Param("conjuntoId") Long conjuntoId);
 }

@@ -18,6 +18,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Version;
 import java.util.Date;
 
 /**
@@ -89,6 +90,17 @@ public class GdInvitacion extends BaseEntity {
 
     @Column(name = "USOS_REALIZADOS", nullable = false)
     private Integer usosRealizados;
+
+    /**
+     * Bloqueo optimista. Dos porterias escaneando la misma invitacion de un
+     * solo uso en el mismo instante leerian ambas usosRealizados=0 y ambas
+     * dejarian entrar; con la version, la segunda escritura falla y el update
+     * perdido se convierte en un 409 en vez de una entrada de mas. El default
+     * en columna cubre las filas creadas antes de esta migracion.
+     */
+    @Version
+    @Column(name = "VERSION", nullable = false, columnDefinition = "bigint default 0")
+    private Long version;
 
     /** Identificador opaco que viaja en el QR y en el link publico. */
     @Column(name = "CODIGO_PUBLICO", nullable = false, unique = true, length = 64)

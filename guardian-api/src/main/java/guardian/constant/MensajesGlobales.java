@@ -42,6 +42,10 @@ public final class MensajesGlobales {
             "El vehiculo seleccionado no esta registrado para esa casa.";
     public static final String ACCESO_PERMITIDO =
             "Ingreso registrado.";
+    public static final String SELECCIONA_VEHICULO =
+            "Selecciona el vehiculo.";
+    public static final String SOLO_SALIDA =
+            "Puede salir, pero no volver a entrar.";
 
     // ── Administracion ───────────────────────────────────────────────────────
     public static final String DOCUMENTO_YA_REGISTRADO =
@@ -70,10 +74,18 @@ public final class MensajesGlobales {
             "No puedes inactivarte a ti mismo.";
     public static final String TITULAR_SOLO_ADMIN =
             "El titular de la casa solo lo asigna la administracion.";
+    public static final String SOLO_TITULAR_FAMILIA =
+            "Solo el titular de la casa administra la familia.";
+    public static final String REACTIVAR_SOLO_ADMIN =
+            "Esa inhabilitacion la hizo la administracion. Pide alli la reactivacion.";
 
     // ── Invitaciones ─────────────────────────────────────────────────────────
     public static final String INVITACION_VIGENCIA_INVALIDA =
             "La vigencia debe terminar despues de empezar.";
+    public static final String INVITACION_EN_PASADO =
+            "La visita no puede ser en el pasado.";
+    public static final String INVITACION_MUY_LARGA =
+            "La vigencia supera el maximo permitido.";
     public static final String INVITACION_NO_VIGENTE_MSG =
             "Esta invitacion aun no esta vigente.";
     public static final String INVITACION_AGOTADA_MSG =
@@ -84,6 +96,12 @@ public final class MensajesGlobales {
     // ── Fotos ────────────────────────────────────────────────────────────────
     public static final String FOTO_INVALIDA =
             "La foto debe ser JPG, PNG o WEBP y pesar menos de 5 MB.";
+    public static final String FOTO_URL_INVALIDA =
+            "La foto debe subirse desde la aplicacion.";
+
+    // ── Credenciales ─────────────────────────────────────────────────────────
+    public static final String SIN_CREDENCIAL =
+            "Esta persona todavia no tiene credencial.";
 
     // ── Eliminacion (solo administrador) ─────────────────────────────────────
     public static final String NO_ELIMINARSE_A_SI_MISMO =
@@ -93,4 +111,6 @@ public final class MensajesGlobales {
     public static final String NO_ENCONTRADO = "No encontramos lo que buscabas.";
     public static final String ERROR_INESPERADO =
             "Ocurrio un error inesperado. Intenta de nuevo en unos minutos.";
+    public static final String OPERACION_CRUZADA =
+            "Otra persona hizo un cambio al mismo tiempo. Intenta de nuevo.";
 }

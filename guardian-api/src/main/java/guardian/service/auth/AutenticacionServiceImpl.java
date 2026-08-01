@@ -12,6 +12,7 @@ import guardian.entity.persona.GdUsuario;
 import guardian.exception.GuardianException;
 import guardian.repository.GdResidenteCasaRepository;
 import guardian.repository.GdUsuarioRepository;
+import guardian.security.EstadoUsuarioService;
 import guardian.security.JwtService;
 import guardian.security.UsuarioAutenticado;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +33,15 @@ public class AutenticacionServiceImpl implements AutenticacionService {
     private final GdResidenteCasaRepository residenteCasaRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final IntentosLoginService intentosLoginService;
+    private final EstadoUsuarioService estadoUsuarioService;
 
     @Override
     @Transactional
     public LoginResponse login(LoginRequest request) {
         String documento = request.getDocumento().trim();
+
+        intentosLoginService.exigirNoBloqueado(documento);
 
         GdUsuario usuario = usuarioRepository.buscarPorDocumento(documento)
                 .orElseThrow(() -> {
@@ -44,21 +49,24 @@ public class AutenticacionServiceImpl implements AutenticacionService {
                     // si lo hiciera, cualquiera podria averiguar que cedulas
                     // estan registradas en el conjunto probando numeros.
                     log.info("[auth] login fallido documento={} motivo=no_existe", documento);
+                    intentosLoginService.registrarFallo(documento);
                     return GuardianException.noAutorizado(MensajesGlobales.CREDENCIALES_INVALIDAS);
                 });
 
         if (!passwordEncoder.matches(request.getClave(), usuario.getClaveHash())) {
             log.info("[auth] login fallido documento={} motivo=clave_incorrecta", documento);
+            intentosLoginService.registrarFallo(documento);
             throw GuardianException.noAutorizado(MensajesGlobales.CREDENCIALES_INVALIDAS);
         }
 
         // El chequeo de usuario activo va DESPUES de validar la clave. Al reves,
         // un desconocido podria distinguir cuentas deshabilitadas de inexistentes.
-        if (!usuario.estaActivo()) {
+        if (!usuario.estaActivo() || !usuario.getPersona().estaActivo()) {
             log.info("[auth] login fallido documento={} motivo=inactivo", documento);
             throw GuardianException.noAutorizado(MensajesGlobales.USUARIO_INACTIVO);
         }
 
+        intentosLoginService.limpiar(documento);
         usuario.setFechaUltimoIngreso(new Date());
 
         UsuarioAutenticado identidad = construirIdentidad(usuario);
@@ -73,7 +81,7 @@ public class AutenticacionServiceImpl implements AutenticacionService {
 
     @Override
     @Transactional
-    public void cambiarClave(UsuarioAutenticado autenticado, CambiarClaveRequest request) {
+    public LoginResponse cambiarClave(UsuarioAutenticado autenticado, CambiarClaveRequest request) {
         GdUsuario usuario = usuarioRepository.findById(autenticado.getUsuarioId())
                 .orElseThrow(() -> GuardianException.noAutorizado(MensajesGlobales.SESION_REQUERIDA));
 
@@ -83,8 +91,9 @@ public class AutenticacionServiceImpl implements AutenticacionService {
 
         // Sin esta validacion el "cambio obligatorio" del primer ingreso seria
         // decorativo: bastaria con volver a escribir el documento y la cuenta
-        // quedaria igual de expuesta que antes.
-        if (request.getClaveNueva().equals(autenticado.getDocumento())) {
+        // quedaria igual de expuesta que antes. Ignora mayusculas por la misma
+        // razon que el login las ignora.
+        if (request.getClaveNueva().equalsIgnoreCase(autenticado.getDocumento())) {
             throw GuardianException.solicitudInvalida(MensajesGlobales.CLAVE_IGUAL_AL_DOCUMENTO);
         }
 
@@ -92,7 +101,18 @@ public class AutenticacionServiceImpl implements AutenticacionService {
         usuario.setRequiereCambioClave(Codigos.NO);
         usuario.setUsuarioModificador(autenticado.getDocumento());
 
+        // El cache de estado todavia dice "cambio pendiente"; sin invalidarlo,
+        // el token nuevo naceria degradado hasta que expire el TTL.
+        estadoUsuarioService.invalidar(usuario.getId());
+
         log.info("[auth] clave cambiada personaId={}", autenticado.getPersonaId());
+
+        UsuarioAutenticado identidad = construirIdentidad(usuario);
+        return LoginResponse.builder()
+                .token(jwtService.emitir(identidad))
+                .usuario(construirSesion(usuario, identidad))
+                .requiereCambioClave(false)
+                .build();
     }
 
     @Override
@@ -112,7 +132,8 @@ public class AutenticacionServiceImpl implements AutenticacionService {
                 persona.getConjunto().getId(),
                 persona.getDocumento(),
                 persona.getNombreCompleto(),
-                usuario.getRol());
+                usuario.getRol(),
+                usuario.debeCambiarClave());
     }
 
     private SesionResponse construirSesion(GdUsuario usuario, UsuarioAutenticado identidad) {

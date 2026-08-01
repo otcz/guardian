@@ -1,0 +1,42 @@
+# CI de GUARDIAN — el camino automatizado que ejecuta los tests.
+# Sin esto, los tests solo corren cuando alguien se acuerda: el Dockerfile los
+# salta a proposito (el build de imagen no es el lugar) y este workflow si.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          # El mismo JDK del Dockerfile. El bytecode sale para Java 8 via
+          # la opcion release del compilador.
+          java-version: '17'
+          cache: maven
+      - name: Tests del backend
+        run: mvn -B -f guardian-api/pom.xml test
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: guardian-ui
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: guardian-ui/package-lock.json
+      - run: npm ci
+      - name: Tests del frontend
+        run: npx ng test --watch=false --browsers=ChromeHeadless
+      - name: Build de produccion
+        run: npx ng build

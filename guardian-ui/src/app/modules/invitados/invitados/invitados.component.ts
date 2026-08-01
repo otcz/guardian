@@ -31,6 +31,9 @@ export class InvitadosComponent implements OnInit {
   /** Invitación cuyo QR está desplegado en pantalla. */
   qrAbierto: Invitacion | null = null;
 
+  /** Piso del selector de fecha: una visita no puede agendarse en el pasado. */
+  readonly hoy = this.hoyIso();
+
   readonly formulario = this.fb.nonNullable.group({
     nombreInvitado: ['', [Validators.required]],
     documentoInvitado: ['', [Validators.required]],
@@ -38,6 +41,11 @@ export class InvitadosComponent implements OnInit {
     fechaVisita: [this.hoyIso(), [Validators.required]],
     usosMaximos: [1, [Validators.required, Validators.min(1), Validators.max(20)]]
   });
+
+  get fechaEnPasado(): boolean {
+    const campo = this.formulario.controls.fechaVisita;
+    return campo.touched && campo.value < this.hoy;
+  }
 
   constructor(private readonly residente: ResidenteService) {}
 
@@ -70,13 +78,19 @@ export class InvitadosComponent implements OnInit {
     }
 
     const datos = this.formulario.getRawValue();
+    if (datos.fechaVisita < this.hoyIso()) {
+      this.formulario.controls.fechaVisita.markAsTouched();
+      return;
+    }
     this.guardando = true;
     this.error = null;
 
     // La visita es "ese día completo": desde las 00:00 si es una fecha futura
-    // (o ahora si es hoy) hasta la medianoche. El backend pone el tope del día.
+    // (o ahora si es hoy) hasta la medianoche. Las horas van CON el offset
+    // local: sin él, el backend las leería como UTC y la invitación moriría
+    // horas antes de la medianoche real del conjunto.
     const esHoy = datos.fechaVisita === this.hoyIso();
-    const desde = esHoy ? null : `${datos.fechaVisita}T00:00:00`;
+    const desde = esHoy ? null : this.conOffsetLocal(datos.fechaVisita, '00:00:00');
 
     this.residente
       .crearInvitacion({
@@ -84,7 +98,7 @@ export class InvitadosComponent implements OnInit {
         documentoInvitado: datos.documentoInvitado,
         placa: datos.placa || null,
         vigenciaDesde: desde,
-        vigenciaHasta: `${datos.fechaVisita}T23:59:59`,
+        vigenciaHasta: this.conOffsetLocal(datos.fechaVisita, '23:59:59'),
         usosMaximos: datos.usosMaximos
       })
       .subscribe({
@@ -161,5 +175,15 @@ export class InvitadosComponent implements OnInit {
     const mes = String(hoy.getMonth() + 1).padStart(2, '0');
     const dia = String(hoy.getDate()).padStart(2, '0');
     return `${hoy.getFullYear()}-${mes}-${dia}`;
+  }
+
+  /** `2026-08-01` + `23:59:59` → `2026-08-01T23:59:59-05:00` (offset real del dispositivo). */
+  private conOffsetLocal(fecha: string, hora: string): string {
+    const minutos = -new Date(`${fecha}T12:00:00`).getTimezoneOffset();
+    const signo = minutos >= 0 ? '+' : '-';
+    const absolutos = Math.abs(minutos);
+    const hh = String(Math.floor(absolutos / 60)).padStart(2, '0');
+    const mm = String(absolutos % 60).padStart(2, '0');
+    return `${fecha}T${hora}${signo}${hh}:${mm}`;
   }
 }

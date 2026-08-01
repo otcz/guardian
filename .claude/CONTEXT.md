@@ -36,9 +36,10 @@ Los permisos los da `GD_USUARIO.rol`: `RESIDENTE`, `GUARDIA`, `ADMIN`.
 
 **El QR de residente es permanente y firmado, no rotativo.**
 
-El payload es `v1.<credencialId>.<HMAC-SHA256>` — no lleva datos personales, solo
-un identificador opaco y su firma. Se emite una vez y sirve sin internet en el
-teléfono del residente.
+El payload es `GRD1.<codigoPublico>.<HMAC-SHA256>` — no lleva datos personales,
+solo un UUID opaco y su firma. Se emite una vez y sirve sin internet en el
+teléfono del residente. El QR de invitado usa el prefijo `GRDI` con el mismo
+esquema, para que la portería distinga los dos mundos desde el primer byte.
 
 Que sea permanente es una decisión consciente: un QR rotativo obligaría al
 residente a tener datos móviles y la app abierta justo cuando llega a la
@@ -74,10 +75,11 @@ máximos, generado por la familia. Ahí sí el token es efímero por naturaleza.
 7. Se escribe GD_ACCESO_EVENTO (sentido, modo, guardia, punto, resultado)
 ```
 
-**El sentido lo infiere el sistema**, no lo escoge el guardia: se mira el último
-evento `PERMITIDO` de esa persona en el día. Si fue `ENTRADA`, este es `SALIDA`,
-y viceversa. El guardia puede corregirlo, pero el default acierta casi siempre y
-le quita un toque al flujo (que en hora pico importa).
+**El sentido lo infiere el sistema**, no lo escoge el guardia: si el último
+evento `PERMITIDO` de esa persona fue `ENTRADA`, este es `SALIDA`, y viceversa
+(sin ventana de tiempo). El guardia puede corregirlo con un toque explícito —
+el flag `corregirSentido` — que queda registrado; un sentido divergente SIN ese
+flag se rechaza, porque es una pantalla desactualizada y no una corrección.
 
 **Todo intento se registra, incluso el denegado.** Un QR revocado que se sigue
 intentando usar es justo lo que un administrador quiere ver.
@@ -96,7 +98,15 @@ a querer ajustar sin esperar un deploy:
 | `CREDENCIAL_VENCIDA` | Pasó la vigencia (aplica sobre todo a invitados) |
 | `PERSONA_INACTIVA` | El admin deshabilitó a la persona |
 | `CASA_INACTIVA` | El admin deshabilitó la casa completa |
+| `INVITACION_NO_VIGENTE` | La invitación existe pero su ventana aún no empieza |
+| `INVITACION_AGOTADA` | La invitación ya consumió todos sus ingresos |
 | `SIN_CUPO` | Reservado para F4 (control de cupos de parqueadero) |
+
+**Excepción transversal: quien está ADENTRO siempre puede salir.** Una
+credencial revocada, una persona inhabilitada o una invitación vencida
+bloquean la próxima *entrada*, nunca la salida — retener a alguien dentro del
+conjunto no protege a nadie. El evento de salida queda anotado con el estado
+de la credencial.
 
 ---
 

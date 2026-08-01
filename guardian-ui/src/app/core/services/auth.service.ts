@@ -11,6 +11,7 @@ import {
   Rol,
   Sesion
 } from '../models/sesion.model';
+import { LLAVE_CACHE_MI_QR } from '../models/acceso.model';
 
 const LLAVE_TOKEN = 'guardian.token';
 const LLAVE_SESION = 'guardian.sesion';
@@ -28,27 +29,36 @@ export class AuthService {
 
   login(request: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, request).pipe(
-      tap(respuesta => {
-        localStorage.setItem(LLAVE_TOKEN, respuesta.token);
-        localStorage.setItem(LLAVE_SESION, JSON.stringify(respuesta.usuario));
-        localStorage.setItem(LLAVE_CAMBIO, String(respuesta.requiereCambioClave));
-        this.sesionSubject.next(respuesta.usuario);
-      })
+      tap(respuesta => this.guardarSesion(respuesta))
     );
   }
 
-  cambiarClave(request: CambiarClaveRequest): Observable<void> {
-    return this.http.post<void>(`${environment.apiUrl}/auth/cambiar-clave`, request).pipe(
-      tap(() => localStorage.setItem(LLAVE_CAMBIO, 'false'))
-    );
+  /**
+   * El backend responde con una sesión NUEVA: el token anterior lleva la
+   * autoridad degradada de clave pendiente y no sirve para nada más.
+   */
+  cambiarClave(request: CambiarClaveRequest): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${environment.apiUrl}/auth/cambiar-clave`, request)
+      .pipe(tap(respuesta => this.guardarSesion(respuesta)));
   }
 
   cerrarSesion(): void {
     localStorage.removeItem(LLAVE_TOKEN);
     localStorage.removeItem(LLAVE_SESION);
     localStorage.removeItem(LLAVE_CAMBIO);
+    // La credencial cacheada es del usuario, no del dispositivo: en una
+    // tablet compartida, el siguiente en entrar no debe ver el QR del anterior.
+    localStorage.removeItem(LLAVE_CACHE_MI_QR);
     this.sesionSubject.next(null);
     this.router.navigate(['/ingreso']);
+  }
+
+  private guardarSesion(respuesta: LoginResponse): void {
+    localStorage.setItem(LLAVE_TOKEN, respuesta.token);
+    localStorage.setItem(LLAVE_SESION, JSON.stringify(respuesta.usuario));
+    localStorage.setItem(LLAVE_CAMBIO, String(respuesta.requiereCambioClave));
+    this.sesionSubject.next(respuesta.usuario);
   }
 
   get token(): string | null {

@@ -133,6 +133,12 @@
                   tooltipPosition="left">
             <i class="pi pi-qrcode"></i>
           </button>
+          <button type="button" class="accion peligro"
+                  *ngIf="persona.tieneCredencial"
+                  (click)="revocarCredencial(persona)"
+                  pTooltip="Revocar QR" tooltipPosition="left">
+            <i class="pi pi-shield"></i>
+          </button>
           <button type="button" class="accion"
                   (click)="alternarEstado(persona)"
                   [pTooltip]="activa(persona) ? 'Deshabilitar ingreso' : 'Habilitar ingreso'"

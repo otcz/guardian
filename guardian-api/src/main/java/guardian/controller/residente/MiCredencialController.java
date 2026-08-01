@@ -36,7 +36,9 @@ public class MiCredencialController {
     public ResponseEntity<byte[]> miQrPng(
             @RequestParam(defaultValue = "" + TAMANO_QR_PX) int tamano) {
 
-        byte[] png = miCredencialService.miQrPng(usuarioActual.obtener(), tamano);
+        // Acotado: un tamano sin tope es un OOM gratis para cualquier sesion.
+        byte[] png = miCredencialService.miQrPng(
+                usuarioActual.obtener(), Math.max(128, Math.min(tamano, 1024)));
 
         // noStore: la imagen es una credencial de acceso. Si un proxy o el disco
         // del navegador la guardan, queda una copia utilizable en un equipo

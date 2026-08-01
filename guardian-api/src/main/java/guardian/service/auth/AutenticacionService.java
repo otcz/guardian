@@ -10,7 +10,12 @@ public interface AutenticacionService {
 
     LoginResponse login(LoginRequest request);
 
-    void cambiarClave(UsuarioAutenticado usuario, CambiarClaveRequest request);
+    /**
+     * @return una sesion NUEVA con token fresco. El token anterior lleva la
+     *         autoridad degradada CLAVE_PENDIENTE; sin reemplazarlo, el usuario
+     *         quedaria bloqueado justo despues de hacer lo correcto.
+     */
+    LoginResponse cambiarClave(UsuarioAutenticado usuario, CambiarClaveRequest request);
 
     SesionResponse sesionActual(UsuarioAutenticado usuario);
 }

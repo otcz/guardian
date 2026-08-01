@@ -30,10 +30,12 @@ public class AutenticacionController {
         return ResponseEntity.ok(autenticacionService.login(request));
     }
 
+    /** Devuelve una sesion nueva: el token anterior quedo degradado a CLAVE_PENDIENTE. */
     @PostMapping(ApiEndpoint.AUTH_CAMBIAR_CLAVE)
-    public ResponseEntity<Void> cambiarClave(@Valid @RequestBody CambiarClaveRequest request) {
-        autenticacionService.cambiarClave(usuarioActual.obtener(), request);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<LoginResponse> cambiarClave(
+            @Valid @RequestBody CambiarClaveRequest request) {
+        return ResponseEntity.ok(
+                autenticacionService.cambiarClave(usuarioActual.obtener(), request));
     }
 
     @GetMapping(ApiEndpoint.AUTH_YO)

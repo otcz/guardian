@@ -2,9 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { AccesoService } from '../../../core/services/acceso.service';
-import { MiQr } from '../../../core/models/acceso.model';
-
-const LLAVE_CACHE = 'guardian.miQr';
+import { LLAVE_CACHE_MI_QR as LLAVE_CACHE, MiQr } from '../../../core/models/acceso.model';
 
 /**
  * La credencial del residente.

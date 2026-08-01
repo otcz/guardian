@@ -35,6 +35,13 @@ public final class ApiEndpoint {
     public static final String FOTOS = API + "/fotos";
     public static final String PUBLICO_FOTOS = API + "/publico/fotos";
 
+    /**
+     * Catalogos para CUALQUIER usuario autenticado. Los formularios del
+     * residente (parentescos, tipos de vehiculo) los necesitan igual que el
+     * back-office; servirlos solo bajo /admin les daba 403 a los residentes.
+     */
+    public static final String PARAMETROS = API + "/parametros";
+
     /** Pagina del invitado: abre el link sin cuenta, protegido por codigo UUID. */
     public static final String PUBLICO_INVITACIONES = API + "/publico/invitaciones";
 

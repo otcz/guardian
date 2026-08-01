@@ -87,15 +87,12 @@ guardian/
 
 ## Estado
 
-**Fase 1 — en curso.** QR de residentes, entrada/salida y panel de
-administración.
-
 | Fase | Alcance | Estado |
 |---|---|---|
-| F1 | Login + cambio de clave, QR residente, entrada/salida, admin | En curso |
-| F2 | Invitados con QR temporal + notificación al anfitrión | Pendiente |
+| F1 | Login + cambio de clave, QR residente, entrada/salida, admin | Hecho |
+| F2 | Invitados con QR temporal | Hecho — falta la notificación al anfitrión |
 | F3 | Huella (biométrico) | Pendiente |
-| F4 | Reportes, ocupación en vivo, historial por casa | Pendiente |
+| F4 | Reportes, ocupación en vivo, historial por casa | Parcial — presencia y bitácora ya existen |
 
 El detalle de negocio (actores, reglas, máquina de estados del acceso) está en
 [`.claude/CONTEXT.md`](.claude/CONTEXT.md).

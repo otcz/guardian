@@ -5,6 +5,9 @@ infra/.env
 **/application-local.properties
 **/application-local.yml
 
+### Fotos de personas (dato sensible — storage local de dev) ###
+data-fotos/
+
 ### Java / Maven ###
 HELP.md
 target/

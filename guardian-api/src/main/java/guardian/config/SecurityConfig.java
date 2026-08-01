@@ -59,13 +59,22 @@ public class SecurityConfig {
                 // El invitado abre su link sin cuenta; el codigo UUID es la llave.
                 .antMatchers(ApiEndpoint.PUBLICO_INVITACIONES + "/**").permitAll()
 
+                // Los endpoints de autenticacion aceptan tambien la autoridad
+                // degradada CLAVE_PENDIENTE: cambiar la clave y consultar la
+                // sesion es lo UNICO que puede hacer quien no la ha cambiado.
+                .antMatchers(ApiEndpoint.AUTH + "/**").authenticated()
+
                 .antMatchers(ApiEndpoint.ACCESO + "/**")
                 .hasAnyRole(Codigos.ROL_GUARDIA, Codigos.ROL_ADMIN)
 
                 .antMatchers(ApiEndpoint.ADMIN + "/**")
                 .hasRole(Codigos.ROL_ADMIN)
 
-                .anyRequest().authenticated()
+                // El resto exige un rol REAL. authenticated() no basta: dejaria
+                // pasar a CLAVE_PENDIENTE y el cambio obligatorio seria
+                // decorativo a nivel de API.
+                .anyRequest().hasAnyRole(
+                        Codigos.ROL_ADMIN, Codigos.ROL_GUARDIA, Codigos.ROL_RESIDENTE)
 
                 .and()
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

@@ -32,9 +32,8 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional(readOnly = true)
     public List<UsuarioResponse> listar(Long conjuntoId) {
-        return usuarioRepository.findAll()
+        return usuarioRepository.listarPorConjunto(conjuntoId)
                 .stream()
-                .filter(u -> u.getPersona().getConjunto().getId().equals(conjuntoId))
                 .map(this::mapear)
                 .collect(Collectors.toList());
     }

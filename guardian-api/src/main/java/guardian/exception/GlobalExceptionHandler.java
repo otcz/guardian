@@ -4,6 +4,7 @@ import guardian.constant.MensajesGlobales;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -38,6 +39,21 @@ public class GlobalExceptionHandler {
                 .badRequest()
                 .body(new ErrorResponse(new Date(), HttpStatus.BAD_REQUEST.value(),
                         "Revisa los datos del formulario.", detalles));
+    }
+
+    /**
+     * Dos escrituras simultaneas sobre la misma fila (dos porterias con la
+     * misma invitacion, dos revocaciones a la vez). El que llega segundo pierde
+     * y reintenta; eso es exactamente lo que el bloqueo optimista promete.
+     */
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ErrorResponse> manejarConcurrencia(
+            ObjectOptimisticLockingFailureException ex) {
+        log.warn("[error] escritura concurrente perdida entidad={}", ex.getPersistentClassName());
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse(new Date(), HttpStatus.CONFLICT.value(),
+                        MensajesGlobales.OPERACION_CRUZADA, null));
     }
 
     /**

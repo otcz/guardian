@@ -96,9 +96,15 @@
       Pide la cédula y compárala: <strong>{{ ficha.documento }}</strong>
     </div>
 
-    <!-- Un solo toque: el sentido ya viene inferido -->
+    <!-- Un solo toque: el sentido ya viene inferido. Corregirlo es la
+         excepción (primer día del sistema, alguien que entró sin escanear). -->
     <div class="acciones" *ngIf="ficha.permitido">
-      <p class="sentido">Registrar {{ textoSentido }}</p>
+      <p class="sentido">
+        Registrar {{ textoSentido }}
+        <button type="button" class="corregir" (click)="alternarSentido()">
+          Cambiar a {{ textoSentidoOpuesto }}
+        </button>
+      </p>
 
       <button type="button" class="opcion" (click)="registrar('PEATON')">
         <i class="pi pi-user"></i> A pie

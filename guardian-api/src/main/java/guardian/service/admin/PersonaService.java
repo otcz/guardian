@@ -24,6 +24,12 @@ public interface PersonaService {
     byte[] credencialPng(Long id, Long conjuntoId, int tamanoPx);
 
     /**
+     * Revoca la credencial activa sin emitir otra. Es el freno de emergencia
+     * cuando un QR se compromete: surte efecto en el siguiente escaneo.
+     */
+    void revocarCredencial(Long id, UsuarioAutenticado ejecutor);
+
+    /**
      * Eliminacion FISICA — exclusiva del administrador; los residentes solo
      * inactivan. La bitacora sobrevive: los eventos conservan nombre y
      * documento copiados y solo se anula la FK.

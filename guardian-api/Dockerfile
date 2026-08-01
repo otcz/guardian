@@ -1,8 +1,14 @@
 FROM maven:3.9-eclipse-temurin-17 AS builder
 
 WORKDIR /build
+# Las dependencias en su propia capa: mientras el pom no cambie, un cambio de
+# codigo no vuelve a bajar medio Maven Central.
 COPY pom.xml .
+RUN mvn -q -Dmaven.repo.local=/root/.m2/repository dependency:go-offline
+
 COPY src ./src
+# Los tests NO corren aca: los corre el CI en cada push. Repetirlos en el
+# build de imagen solo alargaria el deploy.
 RUN mvn -q -Dmaven.test.skip=true clean package
 
 FROM eclipse-temurin:8-jre-jammy

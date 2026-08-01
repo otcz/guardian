@@ -79,6 +79,11 @@ export class AdminService {
     return this.http.post<{ payload: string }>(`${this.base}/personas/${id}/credencial`, {});
   }
 
+  /** Freno de emergencia: el QR muere en el próximo escaneo, sin reemitir. */
+  revocarCredencial(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/personas/${id}/credencial`);
+  }
+
   /** Eliminación física — exclusiva del administrador. */
   eliminarPersona(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/personas/${id}`);
@@ -138,6 +143,9 @@ export class AdminService {
 
   parametros(grupo: string): Observable<Parametro[]> {
     const params = new HttpParams().set('grupo', grupo);
-    return this.http.get<Parametro[]>(`${this.base}/parametros`, { params });
+    // Ruta comun, no /admin: los formularios del residente (parentesco, tipo
+    // de vehiculo) necesitan los catalogos igual que el back-office, y bajo
+    // /admin recibian 403.
+    return this.http.get<Parametro[]>(`${environment.apiUrl}/parametros`, { params });
   }
 }

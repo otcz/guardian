@@ -36,7 +36,8 @@
         </div>
         <div class="campo">
           <label for="i-fecha">Día de la visita</label>
-          <input id="i-fecha" type="date" formControlName="fechaVisita">
+          <input id="i-fecha" type="date" formControlName="fechaVisita" [min]="hoy">
+          <small class="error" *ngIf="fechaEnPasado">La visita no puede ser en el pasado</small>
         </div>
         <div class="campo">
           <label for="i-usos">

@@ -42,6 +42,15 @@ export class EscanerComponent implements OnInit, OnDestroy {
   modoManual = false;
   payloadManual = '';
 
+  /**
+   * Sentido elegido por el guardia cuando corrige el inferido (CONTEXT.md §4).
+   * Null = aceptar la sugerencia del sistema, que es el caso normal.
+   */
+  sentidoCorregido: Sentido | null = null;
+
+  /** Evita el doble toque en "A pie"/placa: dos POST concurrentes duplicarían. */
+  registrando = false;
+
   private lector: Html5Qrcode | null = null;
   private procesando = false;
 
@@ -133,16 +142,21 @@ export class EscanerComponent implements OnInit, OnDestroy {
   }
 
   registrar(modo: Modo, vehiculo?: VehiculoResumen): void {
-    if (!this.ficha?.payload) {
+    if (!this.ficha?.payload || this.registrando) {
       return;
     }
+    this.registrando = true;
+    this.error = null;
+
+    const sentido = this.sentidoCorregido ?? this.ficha.sentidoSugerido;
 
     this.acceso
       .registrar({
         payload: this.ficha.payload,
         modo,
         vehiculoId: vehiculo?.id ?? null,
-        sentido: this.ficha.sentidoSugerido
+        sentido,
+        corregirSentido: this.sentidoCorregido !== null
       })
       .subscribe({
         next: () => {
@@ -152,15 +166,28 @@ export class EscanerComponent implements OnInit, OnDestroy {
           setTimeout(() => this.reiniciar(), 2000);
         },
         error: (fallo: HttpErrorResponse) => {
+          this.registrando = false;
           this.error = fallo.error?.mensaje ?? 'No pudimos registrar el ingreso.';
         }
       });
+  }
+
+  /** Un toque alterna; el sistema ya acertó casi siempre, esto es la excepción. */
+  alternarSentido(): void {
+    const sugerido = this.ficha?.sentidoSugerido ?? 'E';
+    if (this.sentidoCorregido === null) {
+      this.sentidoCorregido = sugerido === 'E' ? 'S' : 'E';
+    } else {
+      this.sentidoCorregido = null;
+    }
   }
 
   reiniciar(): void {
     this.ficha = null;
     this.payloadManual = '';
     this.procesando = false;
+    this.registrando = false;
+    this.sentidoCorregido = null;
     this.etapa = 'escaneando';
 
     if (!this.modoManual) {
@@ -182,8 +209,13 @@ export class EscanerComponent implements OnInit, OnDestroy {
   // ── Presentación ─────────────────────────────────────────────────────────
 
   get textoSentido(): string {
-    const sentido: Sentido | null | undefined = this.ficha?.sentidoSugerido;
+    const sentido: Sentido | null | undefined =
+      this.sentidoCorregido ?? this.ficha?.sentidoSugerido;
     return sentido === 'S' ? 'SALIDA' : 'ENTRADA';
+  }
+
+  get textoSentidoOpuesto(): string {
+    return this.textoSentido === 'SALIDA' ? 'ENTRADA' : 'SALIDA';
   }
 
   get tieneVehiculos(): boolean {

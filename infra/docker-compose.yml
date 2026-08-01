@@ -65,7 +65,7 @@ services:
       STORAGE_TYPE: ${STORAGE_TYPE:-local}
       STORAGE_LOCAL_PATH: /data/fotos
       # Dentro del contenedor la app escucha en 8080 (el default de server.port
-      # es 8088 para el dev local SIN docker; aca se fija explicito para que el
+      # es 8484 para el dev local SIN docker; aca se fija explicito para que el
       # EXPOSE y el healthcheck del Dockerfile sigan siendo ciertos).
       PORT: "8080"
     # 8484 en el host: 8080 y 8088 los ocupan los contenedores de otro proyecto.

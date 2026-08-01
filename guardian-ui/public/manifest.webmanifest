@@ -1,7 +1,8 @@
 {
-  "name": "guardian-ui",
-  "short_name": "guardian-ui",
-  "theme_color": "#1976d2",
+  "name": "GUARDIAN — Control de acceso",
+  "short_name": "GUARDIAN",
+  "lang": "es",
+  "theme_color": "#1f6feb",
   "background_color": "#fafafa",
   "display": "standalone",
   "scope": "./",

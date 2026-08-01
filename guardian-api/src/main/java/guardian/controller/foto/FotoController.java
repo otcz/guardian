@@ -4,6 +4,7 @@ import guardian.constant.ApiEndpoint;
 import guardian.constant.MensajesGlobales;
 import guardian.exception.GuardianException;
 import guardian.service.foto.FotoStorageService;
+import guardian.util.ImagenUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
@@ -51,7 +52,16 @@ public class FotoController {
             throw GuardianException.solicitudInvalida(MensajesGlobales.FOTO_INVALIDA);
         }
 
-        String nombre = fotoStorageService.guardar(archivo.getBytes(), extension);
+        byte[] contenido = archivo.getBytes();
+
+        // La extension la elige el cliente; los magic bytes son del archivo.
+        // Sin esto, un HTML renombrado a .png quedaria servido publicamente
+        // desde el dominio del sistema.
+        if (!ImagenUtil.contenidoCoincide(contenido, extension)) {
+            throw GuardianException.solicitudInvalida(MensajesGlobales.FOTO_INVALIDA);
+        }
+
+        String nombre = fotoStorageService.guardar(contenido, extension);
         return ResponseEntity.ok(Collections.singletonMap(
                 "url", ApiEndpoint.PUBLICO_FOTOS + "/" + nombre));
     }

@@ -39,17 +39,25 @@ public interface GdAccesoEventoRepository
     List<GdAccesoEvento> findByInvitacionIdAndFechaEventoAfterOrderByFechaEventoDesc(
             Long invitacionId, Date desde);
 
-    /** Invitados cuyo ultimo evento permitido es una entrada: estan adentro. */
+    /**
+     * Invitados cuyo ultimo evento permitido es una entrada: estan adentro.
+     * Con piso de fecha: un invitado que salio a pie sin escanear quedaria
+     * "adentro" para siempre y el conteo de evacuacion se volveria mentira.
+     * El piso no aplica a estaAdentroInvitado — quien de verdad siga adentro
+     * despues de la ventana igual puede registrar su salida.
+     */
     @Query("SELECT COUNT(DISTINCT e.invitacion.id) FROM GdAccesoEvento e "
             + "WHERE e.conjuntoId = :conjuntoId "
             + "AND e.resultado = :permitido "
             + "AND e.sentido = :entrada "
             + "AND e.invitacion IS NOT NULL "
+            + "AND e.fechaEvento > :piso "
             + "AND e.fechaEvento = (SELECT MAX(e2.fechaEvento) FROM GdAccesoEvento e2 "
             + "                     WHERE e2.invitacion = e.invitacion AND e2.resultado = :permitido)")
     long contarInvitadosAdentro(@Param("conjuntoId") Long conjuntoId,
                                 @Param("permitido") String permitido,
-                                @Param("entrada") String entrada);
+                                @Param("entrada") String entrada,
+                                @Param("piso") Date piso);
 
     /**
      * Cuantas personas estan adentro: aquellas cuyo ULTIMO evento permitido es

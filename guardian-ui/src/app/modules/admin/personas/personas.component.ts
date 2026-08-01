@@ -131,6 +131,23 @@ export class PersonasComponent implements OnInit {
     });
   }
 
+  /** Freno de emergencia para un QR comprometido: revoca sin reemitir. */
+  revocarCredencial(persona: Persona): void {
+    const seguro = window.confirm(
+      `¿Revocar el QR de ${persona.nombreCompleto}? Dejará de servir en el próximo escaneo.`);
+    if (!seguro) {
+      return;
+    }
+
+    this.error = null;
+    this.admin.revocarCredencial(persona.id).subscribe({
+      next: () => this.cargar(this.texto),
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos revocar la credencial.';
+      }
+    });
+  }
+
   eliminar(persona: Persona): void {
     const seguro = window.confirm(
       `¿Eliminar definitivamente a ${persona.nombreCompleto}? ` +

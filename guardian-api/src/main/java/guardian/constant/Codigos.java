@@ -39,6 +39,13 @@ public final class Codigos {
     public static final String ROL_GUARDIA = "GUARDIA";
     public static final String ROL_RESIDENTE = "RESIDENTE";
 
+    /**
+     * Pseudo-rol de seguridad, NO es un rol del catalogo: lo recibe quien aun
+     * debe cambiar su clave inicial y solo le abre los endpoints de
+     * autenticacion. Vive aca porque el codigo ramifica sobre el.
+     */
+    public static final String ROL_CLAVE_PENDIENTE = "CLAVE_PENDIENTE";
+
     /** Tipos de credencial QR. */
     public static final String CREDENCIAL_PERMANENTE = "PERMANENTE";
     public static final String CREDENCIAL_TEMPORAL = "TEMPORAL";

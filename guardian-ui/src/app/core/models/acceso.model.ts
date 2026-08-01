@@ -2,6 +2,13 @@ export type Sentido = 'E' | 'S';
 export type Modo = 'PEATON' | 'VEHICULO';
 export type Resultado = 'PERMITIDO' | 'DENEGADO';
 
+/**
+ * Llave del payload de la credencial cacheado en el dispositivo. Exportada
+ * para que cerrar sesión pueda borrarla: en una tablet compartida, el QR del
+ * usuario anterior no debe sobrevivir a su sesión.
+ */
+export const LLAVE_CACHE_MI_QR = 'guardian.miQr';
+
 export interface VehiculoResumen {
   id: number;
   placa: string;
@@ -33,6 +40,8 @@ export interface RegistrarAccesoRequest {
   modo: Modo;
   vehiculoId?: number | null;
   sentido?: Sentido | null;
+  /** true solo cuando el guardia contradice conscientemente el sentido inferido. */
+  corregirSentido?: boolean | null;
   puntoAccesoId?: number | null;
 }
 

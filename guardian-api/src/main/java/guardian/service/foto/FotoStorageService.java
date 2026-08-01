@@ -12,4 +12,10 @@ public interface FotoStorageService {
 
     /** @return el contenido, o null si no existe. */
     byte[] leer(String nombreArchivo);
+
+    /**
+     * Borra el archivo si existe. Se usa al eliminar fisicamente a la persona:
+     * la foto es publica por nombre y no debe sobrevivir a su dueno.
+     */
+    void eliminar(String nombreArchivo);
 }

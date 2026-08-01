@@ -17,9 +17,6 @@ import guardian.entity.vehiculo.GdVehiculo;
 import guardian.exception.GuardianException;
 import guardian.repository.GdAccesoEventoRepository;
 import guardian.repository.GdCredencialQrRepository;
-import guardian.repository.GdPersonaRepository;
-import guardian.repository.GdPuntoAccesoRepository;
-import guardian.repository.GdInvitacionRepository;
 import guardian.repository.GdResidenteCasaRepository;
 import guardian.repository.GdVehiculoRepository;
 import guardian.repository.spec.AccesoEventoSpecs;
@@ -27,7 +24,6 @@ import guardian.security.UsuarioAutenticado;
 import guardian.util.EdadUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -42,26 +38,28 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Flujo de porteria para RESIDENTES y consulta de la bitacora. El flujo de
+ * invitados vive en {@link AccesoInvitadoService}; lo comun a ambos — creacion
+ * de eventos, anti-rebote, mapeo — en {@link AccesoEventoFabrica}.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AccesoServiceImpl implements AccesoService {
 
-    private static final long MILIS_POR_SEGUNDO = 1_000L;
+    /** Tope de pagina de la bitacora: un tamano arbitrario seria un DoS gratis. */
+    private static final int TAMANO_MAXIMO_PAGINA = 200;
 
     private final CredencialQrService credencialQrService;
     private final GdCredencialQrRepository credencialRepository;
-    private final GdAccesoEventoRepository eventoRepository;
     private final GdResidenteCasaRepository residenteCasaRepository;
     private final GdVehiculoRepository vehiculoRepository;
-    private final GdPuntoAccesoRepository puntoAccesoRepository;
-    private final GdPersonaRepository personaRepository;
-    private final GdInvitacionRepository invitacionRepository;
     private final PresenciaService presenciaService;
     private final InvitacionService invitacionService;
-
-    @Value("${guardian.acceso.segundos-anti-rebote}")
-    private long segundosAntiRebote;
+    private final AccesoInvitadoService accesoInvitadoService;
+    private final AccesoEventoFabrica fabrica;
+    private final GdAccesoEventoRepository eventoRepository;
 
     // ─────────────────────────────────────────────────────────────────────────
     // Verificacion
@@ -79,7 +77,7 @@ public class AccesoServiceImpl implements AccesoService {
             // mundos y cada resolver valida su propia firma.
             Optional<GdInvitacion> invitacion = invitacionService.resolver(request.getPayload());
             if (invitacion.isPresent()) {
-                return verificarInvitacion(invitacion.get(), request, guardia);
+                return accesoInvitadoService.verificar(invitacion.get(), request, guardia);
             }
 
             // Ni siquiera sabemos de quien es el codigo, pero el intento se
@@ -92,25 +90,38 @@ public class AccesoServiceImpl implements AccesoService {
 
         GdCredencialQr credencial = encontrada.get();
         GdPersona persona = credencial.getPersona();
-        Optional<GdCasa> casa = casaDe(persona);
 
+        if (deOtroConjunto(persona, guardia)) {
+            registrarDenegacion(null, null, Codigos.MOTIVO_FIRMA_INVALIDA,
+                    guardia, request.getPuntoAccesoId());
+            return fichaDenegada(Codigos.MOTIVO_FIRMA_INVALIDA, MensajesGlobales.QR_NO_RECONOCIDO);
+        }
+
+        Optional<GdCasa> casa = casaDe(persona);
+        boolean adentro = presenciaService.estaAdentro(persona.getId());
         String motivo = evaluarMotivoDenegacion(credencial, persona, casa.orElse(null));
 
-        if (motivo != null) {
+        if (motivo != null && !adentro) {
             registrarDenegacion(credencial, casa.orElse(null), motivo,
                     guardia, request.getPuntoAccesoId());
             return fichaDenegadaConIdentidad(persona, casa.orElse(null), motivo);
         }
 
+        // motivo != null pero esta ADENTRO: la salida se permite siempre —
+        // retener a alguien dentro del conjunto no protege a nadie. La ficha
+        // avisa que es SOLO salida y el registrar rechaza cualquier intento
+        // de convertirla en entrada.
+        boolean soloSalida = motivo != null;
+
         return FichaVerificacionResponse.builder()
                 .permitido(true)
-                .mensaje(null)
+                .mensaje(soloSalida ? MensajesGlobales.SOLO_SALIDA : null)
                 .fotoUrl(persona.getFotoUrl())
                 .nombreCompleto(persona.getNombreCompleto())
                 .documento(persona.getDocumento())
                 .casaIdentificador(casa.map(GdCasa::getIdentificador).orElse(null))
                 .edad(EdadUtil.calcular(persona.getFechaNacimiento()))
-                .sentidoSugerido(sentidoPorPresencia(persona.getId()))
+                .sentidoSugerido(adentro ? Codigos.SALIDA : Codigos.ENTRADA)
                 .vehiculos(vehiculosDe(casa.orElse(null)))
                 .payload(request.getPayload())
                 .build();
@@ -132,25 +143,32 @@ public class AccesoServiceImpl implements AccesoService {
             GdInvitacion invitacion = invitacionService.resolver(request.getPayload())
                     .orElseThrow(() -> GuardianException.solicitudInvalida(
                             MensajesGlobales.QR_NO_RECONOCIDO));
-            return registrarInvitacion(invitacion, request, guardia);
+            return accesoInvitadoService.registrar(invitacion, request, guardia);
         }
 
         GdCredencialQr credencial = credencialResuelta.get();
         GdPersona persona = credencial.getPersona();
+
+        if (deOtroConjunto(persona, guardia)) {
+            throw GuardianException.solicitudInvalida(MensajesGlobales.QR_NO_RECONOCIDO);
+        }
+
         Optional<GdCasa> casa = casaDe(persona);
 
         // Se revalida todo. Entre el escaneo y el toque del guardia pasan
         // segundos, pero en esos segundos el administrador pudo revocar la
         // credencial — y confiar en el resultado de la verificacion anterior
         // dejaria pasar justo el caso que motivo la revocacion.
+        boolean adentro = presenciaService.estaAdentro(persona.getId());
         String motivo = evaluarMotivoDenegacion(credencial, persona, casa.orElse(null));
-        if (motivo != null) {
+
+        if (motivo != null && !adentro) {
             GdAccesoEvento denegado = registrarDenegacion(credencial, casa.orElse(null), motivo,
                     guardia, request.getPuntoAccesoId());
-            return mapear(denegado);
+            return fabrica.mapear(denegado);
         }
 
-        Optional<GdAccesoEvento> reciente = buscarLecturaReciente(credencial.getId());
+        Optional<GdAccesoEvento> reciente = fabrica.lecturaReciente(credencial.getId());
         if (reciente.isPresent()) {
             // Doble escaneo. Se devuelve el evento que ya existe en vez de crear
             // uno nuevo: si no, el nerviosismo del guardia generaria una entrada
@@ -158,24 +176,16 @@ public class AccesoServiceImpl implements AccesoService {
             // adentro.
             log.info("[acceso] doble escaneo ignorado credencialId={} eventoId={}",
                     credencial.getId(), reciente.get().getId());
-            return mapear(reciente.get());
+            return fabrica.mapear(reciente.get());
         }
+
+        boolean soloSalida = motivo != null;
+        String sentido = resolverSentido(request, adentro, soloSalida, persona.getId());
 
         String modo = request.getModo();
         GdVehiculo vehiculo = resolverVehiculo(request, casa.orElse(null), modo);
 
-        // El sentido lo decide el SISTEMA por presencia: quien ya entro no
-        // puede volver a entrar, quien ya salio no puede volver a salir. Si el
-        // cliente manda un sentido y contradice la presencia real, es una
-        // pantalla desactualizada — se rechaza en vez de corromper el conteo.
-        String sentido = sentidoPorPresencia(persona.getId());
-        if (request.getSentido() != null && !request.getSentido().equals(sentido)) {
-            throw GuardianException.conflicto(Codigos.ENTRADA.equals(request.getSentido())
-                    ? MensajesGlobales.YA_ADENTRO
-                    : MensajesGlobales.YA_AFUERA);
-        }
-
-        GdAccesoEvento evento = nuevoEvento(guardia, request.getPuntoAccesoId());
+        GdAccesoEvento evento = fabrica.nuevoEvento(guardia, request.getPuntoAccesoId());
         evento.setSentido(sentido);
         evento.setModo(modo);
         evento.setResultado(Codigos.RESULTADO_PERMITIDO);
@@ -183,6 +193,10 @@ public class AccesoServiceImpl implements AccesoService {
         evento.setPersona(persona);
         evento.setPersonaNombre(persona.getNombreCompleto());
         evento.setPersonaDocumento(persona.getDocumento());
+
+        if (soloSalida) {
+            evento.setObservaciones("Salida permitida con credencial en estado " + motivo);
+        }
 
         casa.ifPresent(c -> {
             evento.setCasa(c);
@@ -194,7 +208,7 @@ public class AccesoServiceImpl implements AccesoService {
             evento.setVehiculoPlaca(vehiculo.getPlaca());
         }
 
-        GdAccesoEvento guardado = eventoRepository.save(evento);
+        GdAccesoEvento guardado = fabrica.guardar(evento);
 
         credencial.setUsosRealizados(credencial.getUsosRealizados() + 1);
         credencialRepository.save(credencial);
@@ -202,7 +216,7 @@ public class AccesoServiceImpl implements AccesoService {
         log.info("[acceso] registrado personaId={} sentido={} modo={} guardiaId={}",
                 persona.getId(), sentido, modo, guardia.getPersonaId());
 
-        return mapear(guardado);
+        return fabrica.mapear(guardado);
     }
 
     @Override
@@ -218,19 +232,22 @@ public class AccesoServiceImpl implements AccesoService {
                 .and(AccesoEventoSpecs.deCasa(casaId))
                 .and(AccesoEventoSpecs.conResultado(resultado));
 
-        return eventoRepository.findAll(filtro, ordenar(pageable)).map(this::mapear);
+        return eventoRepository.findAll(filtro, ordenar(pageable)).map(fabrica::mapear);
     }
 
     /**
-     * Lo mas reciente primero, salvo que el llamante pida otro orden. La
-     * bitacora se lee siempre desde el ultimo movimiento hacia atras.
+     * Lo mas reciente primero, salvo que el llamante pida otro orden, y con el
+     * tamano de pagina acotado. La bitacora se lee siempre desde el ultimo
+     * movimiento hacia atras.
      */
     private Pageable ordenar(Pageable pageable) {
-        if (pageable.getSort().isSorted()) {
-            return pageable;
-        }
-        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-                Sort.by(Sort.Direction.DESC, "fechaEvento"));
+        int tamano = Math.min(pageable.getPageSize(), TAMANO_MAXIMO_PAGINA);
+
+        Sort orden = pageable.getSort().isSorted()
+                ? pageable.getSort()
+                : Sort.by(Sort.Direction.DESC, "fechaEvento");
+
+        return PageRequest.of(pageable.getPageNumber(), tamano, orden);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -240,7 +257,9 @@ public class AccesoServiceImpl implements AccesoService {
     /**
      * @return el codigo del motivo por el que se deniega, o {@code null} si el
      *         acceso procede. Un solo lugar con todas las puertas para que
-     *         verificar y registrar no puedan divergir.
+     *         verificar y registrar no puedan divergir. La excepcion de
+     *         "adentro siempre sale" NO vive aca: la aplican los llamantes,
+     *         que son quienes conocen la presencia.
      */
     private String evaluarMotivoDenegacion(GdCredencialQr credencial,
                                            GdPersona persona,
@@ -265,197 +284,40 @@ public class AccesoServiceImpl implements AccesoService {
         return null;
     }
 
-    /** Adentro → lo unico registrable es SALIDA; afuera → ENTRADA. */
-    private String sentidoPorPresencia(Long personaId) {
-        return presenciaService.estaAdentro(personaId) ? Codigos.SALIDA : Codigos.ENTRADA;
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // Invitados
-    // ─────────────────────────────────────────────────────────────────────────
-
-    private FichaVerificacionResponse verificarInvitacion(GdInvitacion invitacion,
-                                                          VerificarQrRequest request,
-                                                          UsuarioAutenticado guardia) {
-        String motivo = motivoDenegacionInvitacion(invitacion);
-        if (motivo != null) {
-            registrarDenegacionInvitacion(invitacion, motivo, guardia, request.getPuntoAccesoId());
-            return fichaInvitado(invitacion, false, motivo, request.getPayload());
-        }
-        return fichaInvitado(invitacion, true, null, request.getPayload());
-    }
-
-    private AccesoEventoResponse registrarInvitacion(GdInvitacion invitacion,
-                                                     RegistrarAccesoRequest request,
-                                                     UsuarioAutenticado guardia) {
-        // Se revalida igual que con credenciales: entre el escaneo y el toque
-        // del guardia el anfitrion pudo revocar la invitacion.
-        String motivo = motivoDenegacionInvitacion(invitacion);
-        if (motivo != null) {
-            return mapear(registrarDenegacionInvitacion(
-                    invitacion, motivo, guardia, request.getPuntoAccesoId()));
-        }
-
-        Optional<GdAccesoEvento> reciente = buscarLecturaRecienteInvitacion(invitacion.getId());
-        if (reciente.isPresent()) {
-            log.info("[acceso] doble escaneo de invitacion ignorado invitacionId={} eventoId={}",
-                    invitacion.getId(), reciente.get().getId());
-            return mapear(reciente.get());
-        }
-
-        String sentido = sentidoInvitado(invitacion.getId());
-        if (request.getSentido() != null && !request.getSentido().equals(sentido)) {
-            throw GuardianException.conflicto(Codigos.ENTRADA.equals(request.getSentido())
-                    ? MensajesGlobales.YA_ADENTRO
-                    : MensajesGlobales.YA_AFUERA);
-        }
-
-        // El invitado no tiene vehiculos registrados en el conjunto: su unica
-        // placa valida es la declarada en la invitacion.
-        String modo = request.getModo();
-        if (Codigos.MODO_VEHICULO.equals(modo) && invitacion.getPlaca() == null) {
-            throw GuardianException.solicitudInvalida(MensajesGlobales.INVITADO_SIN_VEHICULO);
-        }
-
-        GdAccesoEvento evento = nuevoEvento(guardia, request.getPuntoAccesoId());
-        evento.setSentido(sentido);
-        evento.setModo(modo);
-        evento.setResultado(Codigos.RESULTADO_PERMITIDO);
-        evento.setInvitacion(invitacion);
-        evento.setPersonaNombre(invitacion.getNombreInvitado());
-        evento.setPersonaDocumento(invitacion.getDocumentoInvitado());
-        evento.setCasa(invitacion.getCasa());
-        evento.setCasaIdentificador(invitacion.getCasa().getIdentificador());
-        if (Codigos.MODO_VEHICULO.equals(modo)) {
-            evento.setVehiculoPlaca(invitacion.getPlaca());
-        }
-
-        GdAccesoEvento guardado = eventoRepository.save(evento);
-
-        // Solo la ENTRADA consume uso: nadie debe quedar atrapado adentro
-        // porque su invitacion "se gasto".
-        if (Codigos.ENTRADA.equals(sentido)) {
-            invitacion.setUsosRealizados(invitacion.getUsosRealizados() + 1);
-            invitacionRepository.save(invitacion);
-        }
-
-        log.info("[acceso] invitado registrado invitacionId={} sentido={} usos={}/{} guardiaId={}",
-                invitacion.getId(), sentido, invitacion.getUsosRealizados(),
-                invitacion.getUsosMaximos(), guardia.getPersonaId());
-
-        return mapear(guardado);
-    }
-
     /**
-     * Puertas de la invitacion, en orden de gravedad. Un invitado que ya esta
-     * ADENTRO siempre puede salir aunque la invitacion se haya vencido o
-     * agotado mientras tanto: retenerlo no protege a nadie.
+     * El sentido lo decide la presencia. Un sentido explicito que la
+     * contradiga solo se acepta con {@code corregirSentido} — la correccion
+     * consciente del guardia (CONTEXT.md seccion 4) — y nunca cuando la
+     * credencial esta en estado de solo-salida.
      */
-    private String motivoDenegacionInvitacion(GdInvitacion invitacion) {
-        Date ahora = new Date();
+    private String resolverSentido(RegistrarAccesoRequest request, boolean adentro,
+                                   boolean soloSalida, Long personaId) {
+        String porPresencia = adentro ? Codigos.SALIDA : Codigos.ENTRADA;
 
-        if (!invitacion.estaActivo()) {
-            return Codigos.MOTIVO_CREDENCIAL_REVOCADA;
+        if (request.getSentido() == null || request.getSentido().equals(porPresencia)) {
+            return porPresencia;
         }
-        if (!invitacion.getCasa().estaActivo()) {
-            return Codigos.MOTIVO_CASA_INACTIVA;
+        if (soloSalida) {
+            throw GuardianException.conflicto(MensajesGlobales.SOLO_SALIDA);
         }
-
-        boolean adentro = presenciaService.estaAdentroInvitado(invitacion.getId());
-        if (adentro) {
-            return null;
+        if (Boolean.TRUE.equals(request.getCorregirSentido())) {
+            log.warn("[acceso] sentido corregido por el guardia personaId={} de={} a={}",
+                    personaId, porPresencia, request.getSentido());
+            return request.getSentido();
         }
-
-        if (invitacion.aunNoVigente(ahora)) {
-            return Codigos.MOTIVO_INVITACION_NO_VIGENTE;
-        }
-        if (invitacion.vencida(ahora)) {
-            return Codigos.MOTIVO_CREDENCIAL_VENCIDA;
-        }
-        if (invitacion.agotada()) {
-            return Codigos.MOTIVO_INVITACION_AGOTADA;
-        }
-        return null;
+        throw GuardianException.conflicto(Codigos.ENTRADA.equals(request.getSentido())
+                ? MensajesGlobales.YA_ADENTRO
+                : MensajesGlobales.YA_AFUERA);
     }
 
-    private String sentidoInvitado(Long invitacionId) {
-        return presenciaService.estaAdentroInvitado(invitacionId)
-                ? Codigos.SALIDA
-                : Codigos.ENTRADA;
-    }
-
-    private Optional<GdAccesoEvento> buscarLecturaRecienteInvitacion(Long invitacionId) {
-        Date desde = new Date(System.currentTimeMillis() - segundosAntiRebote * MILIS_POR_SEGUNDO);
-
-        return eventoRepository
-                .findByInvitacionIdAndFechaEventoAfterOrderByFechaEventoDesc(invitacionId, desde)
-                .stream()
-                .filter(GdAccesoEvento::fuePermitido)
-                .findFirst();
-    }
-
-    private GdAccesoEvento registrarDenegacionInvitacion(GdInvitacion invitacion, String motivo,
-                                                         UsuarioAutenticado guardia,
-                                                         Long puntoAccesoId) {
-        GdAccesoEvento evento = nuevoEvento(guardia, puntoAccesoId);
-        evento.setSentido(Codigos.ENTRADA);
-        evento.setModo(Codigos.MODO_PEATON);
-        evento.setResultado(Codigos.RESULTADO_DENEGADO);
-        evento.setMotivoDenegacion(motivo);
-        evento.setInvitacion(invitacion);
-        evento.setPersonaNombre(invitacion.getNombreInvitado());
-        evento.setPersonaDocumento(invitacion.getDocumentoInvitado());
-        evento.setCasa(invitacion.getCasa());
-        evento.setCasaIdentificador(invitacion.getCasa().getIdentificador());
-
-        log.info("[acceso] invitado denegado motivo={} invitacionId={} guardiaId={}",
-                motivo, invitacion.getId(), guardia.getPersonaId());
-
-        return eventoRepository.save(evento);
-    }
-
-    /**
-     * Ficha del invitado. Sin foto — el control es el documento fisico contra
-     * el declarado — y con el anfitrion visible para que el guardia pueda
-     * confirmar con la casa si algo no cuadra.
-     */
-    private FichaVerificacionResponse fichaInvitado(GdInvitacion invitacion, boolean permitido,
-                                                    String motivo, String payload) {
-        return FichaVerificacionResponse.builder()
-                .permitido(permitido)
-                .motivoDenegacion(motivo)
-                .mensaje(permitido ? null : mensajeInvitacionDe(motivo))
-                .nombreCompleto(invitacion.getNombreInvitado())
-                .documento(invitacion.getDocumentoInvitado())
-                .casaIdentificador(invitacion.getCasa().getIdentificador())
-                .esInvitado(true)
-                .anfitrionNombre(invitacion.getAnfitrion().getNombreCompleto())
-                .invitacionPlaca(invitacion.getPlaca())
-                .sentidoSugerido(permitido ? sentidoInvitado(invitacion.getId()) : null)
-                .vehiculos(Collections.emptyList())
-                .payload(payload)
-                .build();
-    }
-
-    private String mensajeInvitacionDe(String motivo) {
-        switch (motivo) {
-            case Codigos.MOTIVO_INVITACION_NO_VIGENTE:
-                return MensajesGlobales.INVITACION_NO_VIGENTE_MSG;
-            case Codigos.MOTIVO_INVITACION_AGOTADA:
-                return MensajesGlobales.INVITACION_AGOTADA_MSG;
-            default:
-                return mensajeDe(motivo);
+    private boolean deOtroConjunto(GdPersona persona, UsuarioAutenticado guardia) {
+        boolean ajena = !persona.getConjunto().getId().equals(guardia.getConjuntoId());
+        if (ajena) {
+            // Frontera de tenant: para esta porteria el codigo no existe.
+            log.warn("[acceso] credencial de otro conjunto personaId={} guardiaConjunto={}",
+                    persona.getId(), guardia.getConjuntoId());
         }
-    }
-
-    private Optional<GdAccesoEvento> buscarLecturaReciente(Long credencialId) {
-        Date desde = new Date(System.currentTimeMillis() - segundosAntiRebote * MILIS_POR_SEGUNDO);
-
-        return eventoRepository
-                .findByCredencialIdAndFechaEventoAfterOrderByFechaEventoDesc(credencialId, desde)
-                .stream()
-                .filter(GdAccesoEvento::fuePermitido)
-                .findFirst();
+        return ajena;
     }
 
     private GdVehiculo resolverVehiculo(RegistrarAccesoRequest request, GdCasa casa, String modo) {
@@ -463,7 +325,7 @@ public class AccesoServiceImpl implements AccesoService {
             return null;
         }
         if (request.getVehiculoId() == null) {
-            throw GuardianException.solicitudInvalida("Selecciona el vehiculo.");
+            throw GuardianException.solicitudInvalida(MensajesGlobales.SELECCIONA_VEHICULO);
         }
 
         GdVehiculo vehiculo = vehiculoRepository.findById(request.getVehiculoId())
@@ -486,7 +348,7 @@ public class AccesoServiceImpl implements AccesoService {
                                                String motivo, UsuarioAutenticado guardia,
                                                Long puntoAccesoId) {
 
-        GdAccesoEvento evento = nuevoEvento(guardia, puntoAccesoId);
+        GdAccesoEvento evento = fabrica.nuevoEvento(guardia, puntoAccesoId);
         evento.setSentido(Codigos.ENTRADA);
         evento.setModo(Codigos.MODO_PEATON);
         evento.setResultado(Codigos.RESULTADO_DENEGADO);
@@ -507,23 +369,7 @@ public class AccesoServiceImpl implements AccesoService {
         log.info("[acceso] denegado motivo={} credencialId={} guardiaId={}",
                 motivo, credencial != null ? credencial.getId() : null, guardia.getPersonaId());
 
-        return eventoRepository.save(evento);
-    }
-
-    private GdAccesoEvento nuevoEvento(UsuarioAutenticado guardia, Long puntoAccesoId) {
-        GdAccesoEvento evento = new GdAccesoEvento();
-        evento.setConjuntoId(guardia.getConjuntoId());
-        evento.setFechaEvento(new Date());
-        evento.setActivo(Codigos.SI);
-        evento.setUsuarioCreador(guardia.getDocumento());
-        evento.setGuardiaNombre(guardia.getNombreCompleto());
-
-        personaRepository.findById(guardia.getPersonaId()).ifPresent(evento::setGuardia);
-
-        if (puntoAccesoId != null) {
-            puntoAccesoRepository.findById(puntoAccesoId).ifPresent(evento::setPuntoAcceso);
-        }
-        return evento;
+        return fabrica.guardar(evento);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -596,25 +442,5 @@ public class AccesoServiceImpl implements AccesoService {
             default:
                 return MensajesGlobales.QR_NO_RECONOCIDO;
         }
-    }
-
-    private AccesoEventoResponse mapear(GdAccesoEvento evento) {
-        return AccesoEventoResponse.builder()
-                .id(evento.getId())
-                .fechaEvento(evento.getFechaEvento())
-                .sentido(evento.getSentido())
-                .modo(evento.getModo())
-                .resultado(evento.getResultado())
-                .motivoDenegacion(evento.getMotivoDenegacion())
-                .personaNombre(evento.getPersonaNombre())
-                .personaDocumento(evento.getPersonaDocumento())
-                .casaIdentificador(evento.getCasaIdentificador())
-                .vehiculoPlaca(evento.getVehiculoPlaca())
-                .guardiaNombre(evento.getGuardiaNombre())
-                .puntoAcceso(evento.getPuntoAcceso() != null
-                        ? evento.getPuntoAcceso().getNombre()
-                        : null)
-                .invitado(evento.getInvitacion() != null)
-                .build();
     }
 }

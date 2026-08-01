@@ -8,11 +8,14 @@ import guardian.dto.admin.VehiculoResponse;
 import guardian.dto.residente.FamiliarRequest;
 import guardian.dto.residente.FamiliarResponse;
 import guardian.dto.residente.VehiculoResidenteRequest;
+import guardian.entity.base.BaseEntity;
 import guardian.entity.conjunto.GdCasa;
 import guardian.entity.persona.GdPersona;
 import guardian.entity.persona.GdResidenteCasa;
+import guardian.entity.vehiculo.GdVehiculo;
 import guardian.exception.GuardianException;
 import guardian.repository.GdCredencialQrRepository;
+import guardian.repository.GdPersonaRepository;
 import guardian.repository.GdResidenteCasaRepository;
 import guardian.repository.GdVehiculoRepository;
 import guardian.security.UsuarioAutenticado;
@@ -41,6 +44,7 @@ public class AutogestionServiceImpl implements AutogestionService {
     private final GdResidenteCasaRepository residenteCasaRepository;
     private final GdCredencialQrRepository credencialRepository;
     private final GdVehiculoRepository vehiculoRepository;
+    private final GdPersonaRepository personaRepository;
     private final PersonaService personaService;
     private final VehiculoService vehiculoService;
 
@@ -61,6 +65,10 @@ public class AutogestionServiceImpl implements AutogestionService {
     @Transactional
     public PersonaRegistrada agregarFamiliar(FamiliarRequest request, UsuarioAutenticado usuario) {
         GdCasa casa = miCasa(usuario);
+
+        // CONTEXT.md seccion 2: quien administra la familia es el TITULAR. Un
+        // hijo o un "OTRO" de la casa ve la lista, pero no agrega gente.
+        exigirTitular(usuario, casa);
 
         // El titular lo asigna la administracion: si cualquier residente
         // pudiera nombrarse titular, la regla de titular unico por casa
@@ -90,6 +98,7 @@ public class AutogestionServiceImpl implements AutogestionService {
     public FamiliarResponse cambiarEstadoFamiliar(Long personaId, boolean activo,
                                                   UsuarioAutenticado usuario) {
         GdCasa casa = miCasa(usuario);
+        exigirTitular(usuario, casa);
 
         if (personaId.equals(usuario.getPersonaId())) {
             throw GuardianException.solicitudInvalida(MensajesGlobales.NO_INACTIVARSE_A_SI_MISMO);
@@ -98,6 +107,10 @@ public class AutogestionServiceImpl implements AutogestionService {
         GdResidenteCasa vinculo = residenteCasaRepository
                 .findByPersonaIdAndCasaId(personaId, casa.getId())
                 .orElseThrow(() -> GuardianException.sinPermiso(MensajesGlobales.FAMILIAR_AJENO));
+
+        if (activo) {
+            exigirInhabilitacionDeLaCasa(vinculo.getPersona(), casa);
+        }
 
         personaService.cambiarEstado(personaId, activo, usuario);
         return mapear(vinculo, usuario);
@@ -136,11 +149,12 @@ public class AutogestionServiceImpl implements AutogestionService {
 
         // Solo vehiculos de MI casa: sin esto, cualquier residente podria
         // inhabilitar el carro del vecino adivinando el id.
-        boolean esDeMiCasa = vehiculoRepository.findById(vehiculoId)
-                .map(v -> v.getCasa().getId().equals(casa.getId()))
-                .orElse(false);
-        if (!esDeMiCasa) {
-            throw GuardianException.sinPermiso(MensajesGlobales.FAMILIAR_AJENO);
+        GdVehiculo vehiculo = vehiculoRepository.findById(vehiculoId)
+                .filter(v -> v.getCasa().getId().equals(casa.getId()))
+                .orElseThrow(() -> GuardianException.sinPermiso(MensajesGlobales.FAMILIAR_AJENO));
+
+        if (activo) {
+            exigirInhabilitacionDeLaCasa(vehiculo, casa);
         }
 
         return vehiculoService.cambiarEstado(vehiculoId, activo, usuario);
@@ -153,6 +167,36 @@ public class AutogestionServiceImpl implements AutogestionService {
                 .findFirstByPersonaIdAndActivoOrderByIdAsc(usuario.getPersonaId(), Codigos.SI)
                 .map(GdResidenteCasa::getCasa)
                 .orElseThrow(() -> GuardianException.solicitudInvalida(MensajesGlobales.SIN_CASA));
+    }
+
+    private void exigirTitular(UsuarioAutenticado usuario, GdCasa casa) {
+        boolean esTitular = residenteCasaRepository
+                .findByPersonaIdAndCasaId(usuario.getPersonaId(), casa.getId())
+                .map(v -> Codigos.PARENTESCO_TITULAR.equals(v.getParentesco()))
+                .orElse(false);
+        if (!esTitular) {
+            throw GuardianException.sinPermiso(MensajesGlobales.SOLO_TITULAR_FAMILIA);
+        }
+    }
+
+    /**
+     * Reactivar solo procede si la inhabilitacion la hizo alguien de la misma
+     * casa. Si la hizo la administracion — o no se sabe quien — el residente
+     * no puede revertirla: seria darle la vuelta a una sancion del conjunto
+     * con dos toques en el celular.
+     */
+    private void exigirInhabilitacionDeLaCasa(BaseEntity entidad, GdCasa casa) {
+        String quienInhabilito = entidad.getUsuarioModificador();
+
+        boolean fueDeLaCasa = quienInhabilito != null && personaRepository
+                .findByConjuntoIdAndDocumento(casa.getConjunto().getId(), quienInhabilito)
+                .flatMap(p -> residenteCasaRepository
+                        .findByPersonaIdAndCasaId(p.getId(), casa.getId()))
+                .isPresent();
+
+        if (!fueDeLaCasa) {
+            throw GuardianException.sinPermiso(MensajesGlobales.REACTIVAR_SOLO_ADMIN);
+        }
     }
 
     private FamiliarResponse mapear(GdResidenteCasa vinculo, UsuarioAutenticado usuario) {

@@ -112,6 +112,15 @@
             <version>3.5.3</version>
         </dependency>
 
+        <!-- Cache in-memory para el estado de sesion y el freno de fuerza bruta
+             del login. Es el default economico del proyecto (CLAUDE.md seccion
+             8): nada de Redis. Linea 2.x porque 3.x exige Java 11+. -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>2.9.3</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -142,6 +151,29 @@
                          Asegura paridad con la imagen docker (Temurin 8). -->
                     <release>8</release>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>exigir-jdk-moderno</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>[9,)</version>
+                                    <!-- La opcion "release" del compilador existe desde el
+                                         JDK 9. Con un JDK 8 el build muere con un error
+                                         criptico de bandera invalida; este mensaje lo evita. -->
+                                    <message>Compila con JDK 9+ (el Dockerfile usa 17). El bytecode sale para Java 8 via la opcion release del compilador.</message>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

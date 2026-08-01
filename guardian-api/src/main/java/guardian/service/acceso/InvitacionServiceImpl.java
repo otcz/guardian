@@ -51,12 +51,22 @@ public class InvitacionServiceImpl implements InvitacionService {
     private static final String ESTADO_VENCIDA = "VENCIDA";
     private static final String ESTADO_REVOCADA = "REVOCADA";
 
+    /** Margen para "desde ahora": evita rechazar el reloj desincronizado del telefono. */
+    private static final long TOLERANCIA_PASADO_MILIS = 15 * 60 * 1_000L;
+    private static final long MILIS_POR_DIA = 24 * 60 * 60 * 1_000L;
+
     private final GdInvitacionRepository invitacionRepository;
     private final GdResidenteCasaRepository residenteCasaRepository;
     private final GdPersonaRepository personaRepository;
 
     @Value("${guardian.security.qr-hmac-secret}")
     private String secretoHmac;
+
+    @Value("${guardian.invitacion.dias-vigencia-maxima}")
+    private long diasVigenciaMaxima;
+
+    @Value("${guardian.invitacion.usos-maximos-tope}")
+    private int usosMaximosTope;
 
     // ── Creacion y gestion del anfitrion ─────────────────────────────────────
 
@@ -67,13 +77,29 @@ public class InvitacionServiceImpl implements InvitacionService {
         GdPersona persona = personaRepository.findById(anfitrion.getPersonaId())
                 .orElseThrow(() -> GuardianException.noAutorizado(MensajesGlobales.SESION_REQUERIDA));
 
-        Date desde = request.getVigenciaDesde() != null ? request.getVigenciaDesde() : new Date();
+        Date ahora = new Date();
+        Date desde = request.getVigenciaDesde() != null ? request.getVigenciaDesde() : ahora;
         Date hasta = request.getVigenciaHasta() != null
                 ? request.getVigenciaHasta()
                 : finDelDia(desde);
 
         if (!hasta.after(desde)) {
             throw GuardianException.solicitudInvalida(MensajesGlobales.INVITACION_VIGENCIA_INVALIDA);
+        }
+        // Una invitacion que nace vencida o en el pasado es siempre un error de
+        // digitacion; aceptarla solo confundiria al invitado en la porteria.
+        if (hasta.before(ahora)
+                || desde.getTime() < ahora.getTime() - TOLERANCIA_PASADO_MILIS) {
+            throw GuardianException.solicitudInvalida(MensajesGlobales.INVITACION_EN_PASADO);
+        }
+        // El QR del invitado es efimero por definicion (CONTEXT.md seccion 3).
+        // Sin tope, "efimero" seria una promesa: alguien crearia una invitacion
+        // de anos y tendria una credencial permanente sin foto ni control.
+        if (hasta.getTime() - desde.getTime() > diasVigenciaMaxima * MILIS_POR_DIA) {
+            throw GuardianException.solicitudInvalida(MensajesGlobales.INVITACION_MUY_LARGA);
+        }
+        if (request.getUsosMaximos() != null && request.getUsosMaximos() > usosMaximosTope) {
+            throw GuardianException.solicitudInvalida(MensajesGlobales.INVITACION_MUY_LARGA);
         }
 
         String codigo = UUID.randomUUID().toString();
@@ -154,16 +180,23 @@ public class InvitacionServiceImpl implements InvitacionService {
         GdInvitacion invitacion = invitacionRepository.buscarPorCodigoPublico(codigoPublico)
                 .orElseThrow(() -> GuardianException.noEncontrado(MensajesGlobales.NO_ENCONTRADO));
 
+        String estado = estadoDe(invitacion);
+
+        // El payload solo viaja mientras el QR sirva de algo. Una invitacion
+        // revocada, vencida o agotada no debe seguir repartiendo un codigo
+        // escaneable — ni el nombre del anfitrion — por un link viejo.
+        boolean util = ESTADO_VIGENTE.equals(estado) || ESTADO_NO_VIGENTE.equals(estado);
+
         return InvitacionPublicaResponse.builder()
                 .nombreInvitado(invitacion.getNombreInvitado())
                 .casaIdentificador(invitacion.getCasa().getIdentificador())
-                .anfitrionNombre(invitacion.getAnfitrion().getNombreCompleto())
+                .anfitrionNombre(util ? invitacion.getAnfitrion().getNombreCompleto() : null)
                 .vigenciaDesde(invitacion.getVigenciaDesde())
                 .vigenciaHasta(invitacion.getVigenciaHasta())
                 .usosRestantes(Math.max(0,
                         invitacion.getUsosMaximos() - invitacion.getUsosRealizados()))
-                .estado(estadoDe(invitacion))
-                .payload(construirPayload(invitacion))
+                .estado(estado)
+                .payload(util ? construirPayload(invitacion) : null)
                 .build();
     }
 
@@ -223,10 +256,14 @@ public class InvitacionServiceImpl implements InvitacionService {
     }
 
     private String normalizarPlaca(String placa) {
-        if (placa == null || placa.trim().isEmpty()) {
+        if (placa == null) {
             return null;
         }
-        return placa.trim().toUpperCase().replaceAll("[\\s-]", "");
+        String normalizada = placa.trim().toUpperCase().replaceAll("[\\s-]", "");
+        // "- -" o solo espacios quedarian como cadena vacia: eso es "a pie",
+        // no una placa. Persistirla rompe la regla de la garita de que placa
+        // presente = puede entrar en vehiculo.
+        return normalizada.isEmpty() ? null : normalizada;
     }
 
     private String estadoDe(GdInvitacion invitacion) {

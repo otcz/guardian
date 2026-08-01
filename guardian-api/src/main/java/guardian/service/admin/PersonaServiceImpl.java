@@ -1,5 +1,6 @@
 package guardian.service.admin;
 
+import guardian.constant.ApiEndpoint;
 import guardian.constant.Codigos;
 import guardian.constant.MensajesGlobales;
 import guardian.dto.admin.PersonaRequest;
@@ -35,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -52,6 +54,7 @@ public class PersonaServiceImpl implements PersonaService {
     private final CredencialQrService credencialQrService;
     private final ParametroService parametroService;
     private final PasswordEncoder passwordEncoder;
+    private final guardian.service.foto.FotoStorageService fotoStorageService;
 
     @Override
     @Transactional(readOnly = true)
@@ -81,7 +84,10 @@ public class PersonaServiceImpl implements PersonaService {
     @Override
     @Transactional
     public PersonaRegistrada crear(PersonaRequest request, UsuarioAutenticado ejecutor) {
-        String documento = request.getDocumento().trim();
+        // Mayusculas SIEMPRE: el login compara sin distinguirlas, pero la
+        // unicidad en base si distingue. Sin normalizar, "abc" y "ABC" serian
+        // dos personas y el login con cualquiera de las dos seria ambiguo.
+        String documento = request.getDocumento().trim().toUpperCase();
 
         if (personaRepository.existsByConjuntoIdAndDocumento(ejecutor.getConjuntoId(), documento)) {
             throw GuardianException.conflicto(MensajesGlobales.DOCUMENTO_YA_REGISTRADO);
@@ -143,7 +149,7 @@ public class PersonaServiceImpl implements PersonaService {
     @Transactional
     public PersonaResponse actualizar(Long id, PersonaRequest request, UsuarioAutenticado ejecutor) {
         GdPersona persona = obtenerEntidad(id, ejecutor.getConjuntoId());
-        String documento = request.getDocumento().trim();
+        String documento = request.getDocumento().trim().toUpperCase();
 
         personaRepository.findByConjuntoIdAndDocumento(ejecutor.getConjuntoId(), documento)
                 .filter(otra -> !otra.getId().equals(id))
@@ -190,10 +196,24 @@ public class PersonaServiceImpl implements PersonaService {
                 .findFirstByPersonaIdAndTipoAndActivoOrderByIdDesc(
                         persona.getId(), Codigos.CREDENCIAL_PERMANENTE, Codigos.SI)
                 .orElseThrow(() -> GuardianException.solicitudInvalida(
-                        "Esta persona todavia no tiene credencial."));
+                        MensajesGlobales.SIN_CREDENCIAL));
 
         return credencialQrService.renderizarPng(
                 credencialQrService.construirPayload(credencial), tamanoPx);
+    }
+
+    @Override
+    @Transactional
+    public void revocarCredencial(Long id, UsuarioAutenticado ejecutor) {
+        GdPersona persona = obtenerEntidad(id, ejecutor.getConjuntoId());
+
+        GdCredencialQr credencial = credencialRepository
+                .findFirstByPersonaIdAndTipoAndActivoOrderByIdDesc(
+                        persona.getId(), Codigos.CREDENCIAL_PERMANENTE, Codigos.SI)
+                .orElseThrow(() -> GuardianException.solicitudInvalida(
+                        MensajesGlobales.SIN_CREDENCIAL));
+
+        credencialQrService.revocar(credencial.getId(), ejecutor.getDocumento());
     }
 
     @Override
@@ -220,8 +240,21 @@ public class PersonaServiceImpl implements PersonaService {
         usuarioRepository.deleteByPersonaId(id);
         personaRepository.delete(persona);
 
+        // La foto tambien se va: el archivo es publico por nombre UUID y
+        // dejarlo huerfano en disco mantendria accesible el dato mas sensible
+        // de una persona que pidio ser eliminada.
+        borrarFotoDe(persona);
+
         log.warn("[admin] persona ELIMINADA id={} documento={} por={}",
                 id, persona.getDocumento(), ejecutor.getDocumento());
+    }
+
+    private void borrarFotoDe(GdPersona persona) {
+        String url = persona.getFotoUrl();
+        if (url == null || !url.startsWith(ApiEndpoint.PUBLICO_FOTOS + "/")) {
+            return;
+        }
+        fotoStorageService.eliminar(url.substring((ApiEndpoint.PUBLICO_FOTOS + "/").length()));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -236,7 +269,21 @@ public class PersonaServiceImpl implements PersonaService {
         return persona;
     }
 
+    /**
+     * La foto solo puede ser una subida por la propia aplicacion. Aceptar una
+     * URL arbitraria dejaria colar una imagen externa — o un enlace roto — en
+     * el control de seguridad central del sistema.
+     */
+    private static final Pattern FOTO_URL_VALIDA =
+            Pattern.compile(Pattern.quote(ApiEndpoint.PUBLICO_FOTOS)
+                    + "/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                    + "\\.[a-z0-9]{2,5}");
+
     private void aplicar(GdPersona persona, PersonaRequest request) {
+        if (request.getFotoUrl() != null && !request.getFotoUrl().trim().isEmpty()
+                && !FOTO_URL_VALIDA.matcher(request.getFotoUrl().trim()).matches()) {
+            throw GuardianException.solicitudInvalida(MensajesGlobales.FOTO_URL_INVALIDA);
+        }
         persona.setNombres(request.getNombres().trim());
         persona.setApellidos(request.getApellidos().trim());
         persona.setFechaNacimiento(request.getFechaNacimiento());

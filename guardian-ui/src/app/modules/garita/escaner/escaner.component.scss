@@ -303,6 +303,26 @@ h1 {
   color: var(--text-muted);
 }
 
+// La corrección es la excepción, no el flujo: discreta al lado del sentido,
+// pero con área táctil suficiente para un dedo con guantes.
+.corregir {
+  margin-left: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--text-strong);
+    border-color: var(--text-muted);
+  }
+}
+
 .opcion {
   display: flex;
   align-items: center;
