@@ -44,3 +44,6 @@ Thumbs.db
 
 ### Claude tooling ###
 .claude/worktrees/
+
+### Config local del preview de Claude ###
+.claude/launch.json
