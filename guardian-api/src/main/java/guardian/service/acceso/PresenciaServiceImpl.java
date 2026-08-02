@@ -50,13 +50,26 @@ public class PresenciaServiceImpl implements PresenciaService {
     @Override
     @Transactional(readOnly = true)
     public PresenciaResponse conteo(Long conjuntoId) {
+        return conteo(conjuntoId, null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PresenciaResponse conteo(Long conjuntoId, Long exceptoPersonaId) {
         long personasAdentro = eventoRepository.contarAdentro(
                 conjuntoId, Codigos.RESULTADO_PERMITIDO, Codigos.ENTRADA);
         Date piso = new Date(System.currentTimeMillis()
                 - horasPresenciaInvitado * MILIS_POR_HORA);
         long invitadosAdentro = eventoRepository.contarInvitadosAdentro(
                 conjuntoId, Codigos.RESULTADO_PERMITIDO, Codigos.ENTRADA, piso);
-        long totalActivos = personaRepository.countByConjuntoIdAndActivo(conjuntoId, Codigos.SI);
+
+        // La exclusion aplica a la POBLACION, no a quien esta adentro: alguien
+        // que nunca ha escaneado no puede estar adentro, y si escaneara,
+        // fisicamente esta ahi y para una evacuacion cuenta.
+        long totalActivos = exceptoPersonaId == null
+                ? personaRepository.countByConjuntoIdAndActivo(conjuntoId, Codigos.SI)
+                : personaRepository.countByConjuntoIdAndActivoAndIdNot(
+                        conjuntoId, Codigos.SI, exceptoPersonaId);
 
         // ADENTRO cuenta a TODO el que este dentro del conjunto, invitados
         // incluidos: ese numero responde "¿a quien evacuo en una emergencia?".

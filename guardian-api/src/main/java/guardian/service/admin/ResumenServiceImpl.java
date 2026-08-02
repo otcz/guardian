@@ -5,6 +5,7 @@ import guardian.dto.acceso.AccesoEventoResponse;
 import guardian.dto.acceso.PresenciaResponse;
 import guardian.dto.admin.ResumenResponse;
 import guardian.repository.GdCasaRepository;
+import guardian.security.UsuarioAutenticado;
 import guardian.repository.GdPersonaRepository;
 import guardian.repository.GdUsuarioRepository;
 import guardian.repository.GdVehiculoRepository;
@@ -35,8 +36,14 @@ public class ResumenServiceImpl implements ResumenService {
 
     @Override
     @Transactional(readOnly = true)
-    public ResumenResponse resumen(Long conjuntoId) {
-        PresenciaResponse presencia = presenciaService.conteo(conjuntoId);
+    public ResumenResponse resumen(UsuarioAutenticado ejecutor) {
+        Long conjuntoId = ejecutor.getConjuntoId();
+        // El tablero cuenta lo MISMO que muestran los listados. Contando al
+        // administrador decia "1 persona activa" sobre una lista vacia, y a
+        // partir de ahi ningun numero de la pantalla era creible.
+        Long yo = ejecutor.getPersonaId();
+        Long miCuenta = ejecutor.getUsuarioId();
+        PresenciaResponse presencia = presenciaService.conteo(conjuntoId, yo);
 
         // "Hoy" en la zona del servidor: es la misma zona de la porteria fisica.
         Date inicioDia = Date.from(LocalDate.now()
@@ -58,12 +65,14 @@ public class ResumenServiceImpl implements ResumenService {
                 .afuera(presencia.getAfuera())
                 .casasActivas(casaRepository.countByConjuntoIdAndActivo(conjuntoId, Codigos.SI))
                 .casasTotal(casaRepository.countByConjuntoId(conjuntoId))
-                .personasActivas(personaRepository.countByConjuntoIdAndActivo(conjuntoId, Codigos.SI))
-                .personasTotal(personaRepository.countByConjuntoId(conjuntoId))
+                .personasActivas(personaRepository.countByConjuntoIdAndActivoAndIdNot(
+                        conjuntoId, Codigos.SI, yo))
+                .personasTotal(personaRepository.countByConjuntoIdAndIdNot(conjuntoId, yo))
                 .vehiculosActivos(vehiculoRepository.countByConjuntoIdAndActivo(conjuntoId, Codigos.SI))
                 .vehiculosTotal(vehiculoRepository.countByConjuntoId(conjuntoId))
-                .usuariosActivos(usuarioRepository.contarPorConjuntoYActivo(conjuntoId, Codigos.SI))
-                .usuariosTotal(usuarioRepository.contarPorConjunto(conjuntoId))
+                .usuariosActivos(usuarioRepository.contarPorConjuntoYActivoExcepto(
+                        conjuntoId, Codigos.SI, miCuenta))
+                .usuariosTotal(usuarioRepository.contarPorConjuntoExcepto(conjuntoId, miCuenta))
                 .eventosHoy(hoy.getTotalElements())
                 .denegadosHoy(denegadosHoy.getTotalElements())
                 .permitidosHoy(hoy.getTotalElements() - denegadosHoy.getTotalElements())

@@ -20,6 +20,18 @@ public interface GdUsuarioRepository extends JpaRepository<GdUsuario, Long> {
     @Query("SELECT COUNT(u) FROM GdUsuario u WHERE u.persona.conjunto.id = :conjuntoId")
     long contarPorConjunto(@Param("conjuntoId") Long conjuntoId);
 
+    /** Los mismos conteos sin la cuenta del que mira el tablero. */
+    @Query("SELECT COUNT(u) FROM GdUsuario u "
+            + "WHERE u.persona.conjunto.id = :conjuntoId AND u.id <> :excepto")
+    long contarPorConjuntoExcepto(@Param("conjuntoId") Long conjuntoId,
+                                  @Param("excepto") Long excepto);
+
+    @Query("SELECT COUNT(u) FROM GdUsuario u WHERE u.persona.conjunto.id = :conjuntoId "
+            + "AND u.activo = :activo AND u.id <> :excepto")
+    long contarPorConjuntoYActivoExcepto(@Param("conjuntoId") Long conjuntoId,
+                                         @Param("activo") String activo,
+                                         @Param("excepto") Long excepto);
+
     @Query("SELECT COUNT(u) FROM GdUsuario u "
             + "WHERE u.persona.conjunto.id = :conjuntoId AND u.activo = :activo")
     long contarPorConjuntoYActivo(@Param("conjuntoId") Long conjuntoId,

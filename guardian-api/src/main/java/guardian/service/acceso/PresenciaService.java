@@ -16,4 +16,13 @@ public interface PresenciaService {
     boolean estaAdentroInvitado(Long invitacionId);
 
     PresenciaResponse conteo(Long conjuntoId);
+
+    /**
+     * El mismo conteo dejando a una persona fuera de la poblacion.
+     *
+     * <p>Lo usa el tablero del administrador, que no se cuenta a si mismo. La
+     * porteria sigue usando el conteo completo: ahi el numero responde "¿a
+     * quien evacuo?" y nadie sobra.</p>
+     */
+    PresenciaResponse conteo(Long conjuntoId, Long exceptoPersonaId);
 }

@@ -20,6 +20,6 @@ public class ResumenController {
 
     @GetMapping
     public ResponseEntity<ResumenResponse> resumen() {
-        return ResponseEntity.ok(resumenService.resumen(usuarioActual.conjuntoId()));
+        return ResponseEntity.ok(resumenService.resumen(usuarioActual.obtener()));
     }
 }

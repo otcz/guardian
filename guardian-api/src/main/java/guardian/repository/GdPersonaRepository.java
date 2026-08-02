@@ -21,6 +21,15 @@ public interface GdPersonaRepository
 
     long countByConjuntoIdAndActivo(Long conjuntoId, String activo);
 
+    /**
+     * Los mismos conteos SIN una persona: el administrador no se cuenta a si
+     * mismo en su tablero, igual que no se ve en sus listados. Sin esto el
+     * Resumen decia "1 persona activa" sobre una lista vacia.
+     */
+    long countByConjuntoIdAndActivoAndIdNot(Long conjuntoId, String activo, Long id);
+
+    long countByConjuntoIdAndIdNot(Long conjuntoId, Long id);
+
     long countByConjuntoId(Long conjuntoId);
 
     // La busqueda por texto libre vive en
