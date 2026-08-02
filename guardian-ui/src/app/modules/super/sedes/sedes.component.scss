@@ -73,106 +73,103 @@ main {
 
 /* ── Rejilla de sedes ───────────────────────────────────────────────────── */
 
-/* flex-wrap y no grid-template-columns fijo: el panel tiene que responder al
-   ancho del contenedor, no al del monitor. */
-.rejilla {
+/* ── Resumen de la plataforma ───────────────────────────────────────────── */
+
+/* Mismas fichas que el Resumen del back-office. La plataforma no necesita un
+   lenguaje visual propio: necesita el mismo, para que quien administra una
+   sede y la plataforma no cambie de idioma al cruzar la puerta. */
+.fila {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--e-4);
-
-  /* El estado vacío ocupa la fila completa: como hijo flex sin base propia
-     se encogería a una columna angosta y el mensaje quedaría partido. */
-  .gd-vacio {
-    flex: 1 1 100%;
-  }
+  gap: 0.75rem;
+  margin-bottom: var(--e-4);
 }
 
-.sede {
+.kpi {
   display: flex;
   flex-direction: column;
-  gap: var(--e-3);
-  flex: 1 1 300px;
+  gap: 0.15rem;
+  flex: 1 1 160px;
   min-width: 0;
+  padding: 0.9rem 1rem;
+  background: var(--bg-surface);
+  border: 2px solid var(--border-default);
+  border-radius: 14px;
 
-  /* La opacidad se aplica a los DATOS, no a la tarjeta entera: si atenúa
-     también los botones, el de "Activar" —lo único que se puede hacer con una
-     sede apagada— queda ilegible. */
-  &.inactiva {
-    .titulo h2,
-    .datos,
-    .contadores,
-    .sin-admin {
-      opacity: var(--opacidad-deshabilitado);
-    }
+  > i {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin-bottom: 0.2rem;
+  }
+
+  .valor {
+    font-size: 1.9rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text-strong);
+    font-variant-numeric: tabular-nums;
   }
 
   .titulo {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--e-2);
-
-    h2 {
-      font-size: var(--t-lg);
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    text-transform: uppercase;
   }
 
-  .datos {
-    margin: 0;
-    font-size: var(--t-sm);
+  .detalle {
+    font-size: 0.78rem;
     color: var(--text-muted);
   }
 
-  .contadores {
-    display: flex;
-    gap: var(--e-2);
-  }
-
-  .contador {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--e-1);
-    flex: 1 1 0;
-    min-width: 0;
-    padding: var(--e-2);
-    background: var(--bg-soft);
-    border-radius: var(--r-sm);
-
-    strong {
-      font-size: var(--t-lg);
-      font-variant-numeric: tabular-nums;
-    }
-
-    span {
-      font-size: var(--t-xs);
-      color: var(--text-muted);
-    }
-  }
-
-  .sin-admin {
-    display: flex;
-    align-items: center;
-    gap: var(--e-2);
-    padding: var(--e-2) var(--e-3);
-    font-size: var(--t-sm);
-    color: var(--warn);
+  /* Solo se pinta cuando hay algo que hacer, así que puede permitirse gritar. */
+  &.alerta {
+    border-color: var(--warn);
     background: var(--warn-soft);
-    border-radius: var(--r-sm);
-  }
 
-  .botones {
-    display: flex;
-    align-items: center;
-    gap: var(--e-1);
-    margin-top: auto;
-
-    .principal {
-      flex: 1 1 auto;
+    > i,
+    .titulo {
+      color: var(--warn);
     }
   }
+}
+
+/* ── Tabla de sedes ─────────────────────────────────────────────────────── */
+
+.nombre-sede {
+  display: block;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.datos-sede {
+  display: block;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+
+/* Tabular para que las columnas de cifras se lean en vertical de un barrido. */
+.numero {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Entrar es la acción de la fila, pero no debe pesar como el botón de una
+   página entera: antes ocupaba 1170px de ancho él solo. */
+.principal.compacto {
+  min-height: 34px;
+  padding: 0 0.8rem;
+  font-size: var(--t-sm);
+}
+
+.pastilla.aviso {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: 0.35rem;
+  color: var(--warn);
+  background: var(--warn-soft);
 }
 
 /* ── Diálogo del administrador ──────────────────────────────────────────── */

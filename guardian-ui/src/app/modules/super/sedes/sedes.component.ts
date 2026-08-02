@@ -230,6 +230,29 @@ export class SedesComponent implements OnInit {
     return this.formularioAdmin.controls.documento.value.trim().toUpperCase();
   }
 
+  /**
+   * Totales de la plataforma. Se calculan acá y no en el template: la regla
+   * es que el HTML bindea valores, no los deriva.
+   *
+   * <p>Sin endpoint nuevo — los contadores ya vienen por sede, y sumarlos en
+   * el cliente evita una consulta agregada por cada visita a una pantalla que
+   * en un despliegue real tiene diez o veinte filas.</p>
+   */
+  get total(): {
+    activas: number; casas: number; personas: number;
+    cuentas: number; sinAdministrador: number;
+  } {
+    return this.sedes.reduce(
+      (acumulado, sede) => ({
+        activas: acumulado.activas + (this.activa(sede) ? 1 : 0),
+        casas: acumulado.casas + sede.casas,
+        personas: acumulado.personas + sede.personas,
+        cuentas: acumulado.cuentas + sede.usuarios,
+        sinAdministrador: acumulado.sinAdministrador + (sede.tieneAdministrador ? 0 : 1)
+      }),
+      { activas: 0, casas: 0, personas: 0, cuentas: 0, sinAdministrador: 0 });
+  }
+
   get tituloFormulario(): string {
     return this.editando ? 'Editar sede' : 'Nueva sede';
   }

@@ -68,85 +68,116 @@
 
     <p class="gd-muted" *ngIf="cargando">Cargando…</p>
 
-    <!-- Tarjetas y no tabla: la decisión acá es "a cuál entro", y para eso
-         pesan el tamaño de la sede y si ya tiene quien la administre. -->
-    <div class="rejilla" *ngIf="!cargando">
-      <article class="sede gd-card" *ngFor="let sede of sedes"
-               [class.inactiva]="!activa(sede)">
+    <ng-container *ngIf="!cargando && sedes.length > 0">
 
-        <div class="titulo">
-          <h2>{{ sede.nombre }}</h2>
-          <span class="pastilla" [class.si]="activa(sede)" [class.no]="!activa(sede)">
-            {{ activa(sede) ? 'Activa' : 'Inactiva' }}
-          </span>
-        </div>
-
-        <p class="datos" *ngIf="sede.nit || sede.direccion">
-          <ng-container *ngIf="sede.nit">NIT {{ sede.nit }}</ng-container>
-          <ng-container *ngIf="sede.nit && sede.direccion"> · </ng-container>
-          <ng-container *ngIf="sede.direccion">{{ sede.direccion }}</ng-container>
-        </p>
-
-        <div class="contadores">
-          <div class="contador">
-            <strong>{{ sede.casas }}</strong>
-            <span>Casas</span>
-          </div>
-          <div class="contador">
-            <strong>{{ sede.personas }}</strong>
-            <span>Personas</span>
-          </div>
-          <div class="contador">
-            <strong>{{ sede.usuarios }}</strong>
-            <span>Cuentas</span>
-          </div>
-        </div>
-
-        <!-- Una sede sin administrador no la puede operar nadie de adentro.
-             Es lo primero que hay que resolver, así que se dice, no se
-             esconde en un menú. -->
-        <div class="sin-admin" *ngIf="!sede.tieneAdministrador">
+      <!-- La plataforma de un vistazo. El super administrador entra a decidir
+           dónde meterse, y para eso primero necesita saber qué hay. -->
+      <section class="fila">
+        <article class="kpi">
+          <i class="pi pi-sitemap"></i>
+          <span class="valor">{{ total.activas }}</span>
+          <span class="titulo">Sedes activas</span>
+          <span class="detalle">de {{ sedes.length }}</span>
+        </article>
+        <article class="kpi">
+          <i class="pi pi-building"></i>
+          <span class="valor">{{ total.casas }}</span>
+          <span class="titulo">Casas</span>
+        </article>
+        <article class="kpi">
+          <i class="pi pi-users"></i>
+          <span class="valor">{{ total.personas }}</span>
+          <span class="titulo">Personas</span>
+        </article>
+        <article class="kpi">
+          <i class="pi pi-key"></i>
+          <span class="valor">{{ total.cuentas }}</span>
+          <span class="titulo">Cuentas</span>
+        </article>
+        <!-- Solo aparece cuando hay algo que resolver: una sede sin
+             administrador no la puede operar nadie de adentro. -->
+        <article class="kpi alerta" *ngIf="total.sinAdministrador > 0">
           <i class="pi pi-exclamation-triangle"></i>
-          <span>Todavía no tiene administrador</span>
-        </div>
+          <span class="valor">{{ total.sinAdministrador }}</span>
+          <span class="titulo">Sin administrador</span>
+        </article>
+      </section>
 
-        <div class="botones">
-          <button type="button" class="principal" (click)="entrar(sede)"
-                  [disabled]="!activa(sede)">
-            <i class="pi pi-sign-in"></i>
-            Entrar
-          </button>
+      <table class="tabla gd-card">
+        <thead>
+          <tr>
+            <th>Sede</th>
+            <th class="numero">Casas</th>
+            <th class="numero">Personas</th>
+            <th class="numero">Cuentas</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let sede of sedes" [class.inactiva]="!activa(sede)">
+            <td>
+              <span class="nombre-sede">{{ sede.nombre }}</span>
+              <span class="datos-sede" *ngIf="sede.nit || sede.direccion">
+                <ng-container *ngIf="sede.nit">NIT {{ sede.nit }}</ng-container>
+                <ng-container *ngIf="sede.nit && sede.direccion"> · </ng-container>
+                <ng-container *ngIf="sede.direccion">{{ sede.direccion }}</ng-container>
+              </span>
+            </td>
+            <td class="numero">{{ sede.casas }}</td>
+            <td class="numero">{{ sede.personas }}</td>
+            <td class="numero">{{ sede.usuarios }}</td>
+            <td>
+              <span class="pastilla" [class.si]="activa(sede)" [class.no]="!activa(sede)">
+                {{ activa(sede) ? 'Activa' : 'Inactiva' }}
+              </span>
+              <span class="pastilla aviso" *ngIf="!sede.tieneAdministrador">
+                <i class="pi pi-exclamation-triangle"></i>
+                Sin administrador
+              </span>
+            </td>
+            <td class="derecha acciones">
+              <button type="button" class="principal compacto" (click)="entrar(sede)"
+                      [disabled]="!activa(sede)"
+                      [attr.aria-label]="'Entrar a ' + sede.nombre">
+                <i class="pi pi-sign-in"></i>
+                Entrar
+              </button>
 
-          <button type="button" class="accion" (click)="editar(sede)"
-                  [attr.aria-label]="'Editar ' + sede.nombre"
-                  pTooltip="Editar" tooltipPosition="top">
-            <i class="pi pi-pencil"></i>
-          </button>
+              <span class="separador" aria-hidden="true"></span>
 
-          <button type="button" class="accion" *ngIf="!sede.tieneAdministrador"
-                  (click)="abrirAdministrador(sede)"
-                  [attr.aria-label]="'Nombrar administrador de ' + sede.nombre"
-                  pTooltip="Nombrar administrador" tooltipPosition="top">
-            <i class="pi pi-user-plus"></i>
-          </button>
+              <button type="button" class="accion" *ngIf="!sede.tieneAdministrador"
+                      (click)="abrirAdministrador(sede)"
+                      [attr.aria-label]="'Nombrar administrador de ' + sede.nombre"
+                      pTooltip="Nombrar administrador" tooltipPosition="left">
+                <i class="pi pi-user-plus"></i>
+              </button>
 
-          <button type="button" class="accion" [class.peligro]="activa(sede)"
-                  (click)="alternarEstado(sede)"
-                  [attr.aria-label]="(activa(sede) ? 'Desactivar ' : 'Activar ') + sede.nombre"
-                  [pTooltip]="activa(sede) ? 'Desactivar' : 'Activar'"
-                  tooltipPosition="top">
-            <i class="pi" [ngClass]="activa(sede) ? 'pi-ban' : 'pi-check'"></i>
-          </button>
-        </div>
-      </article>
+              <button type="button" class="accion" (click)="editar(sede)"
+                      [attr.aria-label]="'Editar ' + sede.nombre"
+                      pTooltip="Editar" tooltipPosition="left">
+                <i class="pi pi-pencil"></i>
+              </button>
 
-      <div class="gd-vacio" *ngIf="sedes.length === 0">
-        <i class="pi pi-sitemap"></i>
-        <p>Todavía no hay sedes</p>
-        <button type="button" class="principal" (click)="abrirAlta()">
-          Crear la primera
-        </button>
-      </div>
+              <button type="button" class="accion" [class.peligro]="activa(sede)"
+                      (click)="alternarEstado(sede)"
+                      [attr.aria-label]="(activa(sede) ? 'Desactivar ' : 'Activar ') + sede.nombre"
+                      [pTooltip]="activa(sede) ? 'Desactivar' : 'Activar'"
+                      tooltipPosition="left">
+                <i class="pi" [ngClass]="activa(sede) ? 'pi-ban' : 'pi-check'"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-container>
+
+    <div class="gd-vacio" *ngIf="!cargando && sedes.length === 0">
+      <i class="pi pi-sitemap"></i>
+      <p>Todavía no hay sedes</p>
+      <button type="button" class="principal" (click)="abrirAlta()">
+        Crear la primera
+      </button>
     </div>
   </main>
 
