@@ -163,7 +163,7 @@
         <td>
           <button type="button" class="acceso" (click)="abrirAcceso(persona)"
                   [class.sin-cuenta]="!tieneCuenta(persona)"
-                  [class.pendiente]="cuentaSinHabilitar(persona)"
+                  [class.pendiente]="cuentaInactiva(persona)"
                   [class.bloqueada]="cuentaBloqueada(persona)"
                   [attr.aria-label]="'Administrar el acceso de ' + persona.nombreCompleto">
             <i class="pi" [ngClass]="tieneCuenta(persona) ? 'pi-key' : 'pi-plus-circle'"></i>
@@ -191,24 +191,24 @@
           </button>
           <button type="button" class="accion"
                   (click)="alternarEstado(persona)"
-                  [attr.aria-label]="(activa(persona) ? 'Inactivar a ' : 'Activar a ')
+                  [attr.aria-label]="(activa(persona) ? 'Desactivar a ' : 'Activar a ')
                     + persona.nombreCompleto"
-                  [pTooltip]="activa(persona) ? 'Inactivar registro' : 'Activar registro'"
+                  [pTooltip]="activa(persona) ? 'Desactivar' : 'Activar'"
                   tooltipPosition="left">
             <i class="pi" [ngClass]="activa(persona) ? 'pi-ban' : 'pi-check'"></i>
           </button>
 
-          <!-- Separado a propósito: activar/inactivar es la llave del
-               residente; el candado es la de la administración, y confundirlas
-               es lo que hace que un bloqueo se levante sin querer. -->
+          <!-- Separado a propósito: activar y desactivar es la llave del
+               hogar; el candado es la de la administración, y confundirlas es
+               lo que hace que algo se habilite sin querer. -->
           <span class="separador" aria-hidden="true"></span>
 
           <button type="button" class="accion candado"
                   [class.puesto]="bloqueada(persona)"
                   (click)="alternarBloqueo(persona)"
-                  [attr.aria-label]="(bloqueada(persona) ? 'Levantar el bloqueo de ' : 'Bloquear a ')
+                  [attr.aria-label]="(bloqueada(persona) ? 'Habilitar a ' : 'Deshabilitar a ')
                     + persona.nombreCompleto"
-                  [pTooltip]="bloqueada(persona) ? 'Levantar bloqueo' : 'Bloquear'"
+                  [pTooltip]="bloqueada(persona) ? 'Habilitar' : 'Deshabilitar'"
                   tooltipPosition="left">
             <i class="pi" [ngClass]="bloqueada(persona) ? 'pi-lock-open' : 'pi-lock'"></i>
           </button>
@@ -321,7 +321,7 @@
           <button type="button" class="gd-fila gd-presionable" (click)="alternarEstadoCuenta()">
             <i class="pi" [ngClass]="p.usuarioActivo === 'S' ? 'pi-ban' : 'pi-check'"></i>
             <span class="etiqueta">
-              {{ p.usuarioActivo === 'S' ? 'Inhabilitar la cuenta' : 'Habilitar la cuenta' }}
+              {{ p.usuarioActivo === 'S' ? 'Desactivar la cuenta' : 'Activar la cuenta' }}
             </span>
           </button>
           <!-- El candado es la otra llave: además de apagar la cuenta, corta
@@ -331,7 +331,7 @@
                   (click)="alternarBloqueoCuenta()">
             <i class="pi" [ngClass]="cuentaBloqueada(p) ? 'pi-lock-open' : 'pi-lock'"></i>
             <span class="etiqueta">
-              {{ cuentaBloqueada(p) ? 'Levantar el bloqueo' : 'Bloquear la cuenta' }}
+              {{ cuentaBloqueada(p) ? 'Habilitar la cuenta' : 'Deshabilitar la cuenta' }}
             </span>
           </button>
         </div>

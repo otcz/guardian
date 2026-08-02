@@ -110,7 +110,7 @@
             </span>
           </div>
 
-          <span class="pastilla no" *ngIf="bloqueado(familiar)">Bloqueado</span>
+          <span class="pastilla no" *ngIf="bloqueado(familiar)">Deshabilitado</span>
           <span class="pastilla no" *ngIf="!bloqueado(familiar) && !activo(familiar.activo)">
             Inactivo
           </span>
@@ -120,7 +120,7 @@
           <button type="button" class="accion candado"
                   *ngIf="bloqueado(familiar)"
                   (click)="explicarBloqueo(familiar.nombreCompleto, familiar.motivoBloqueo)"
-                  [attr.aria-label]="'Por qué está bloqueado ' + familiar.nombreCompleto">
+                  [attr.aria-label]="'Por qué está deshabilitado ' + familiar.nombreCompleto">
             <i class="pi pi-lock"></i>
           </button>
 
@@ -130,9 +130,9 @@
           <button type="button" class="accion"
                   *ngIf="!familiar.esUsuarioActual && !bloqueado(familiar)"
                   (click)="alternarEstadoFamiliar(familiar)"
-                  [attr.aria-label]="(activo(familiar.activo) ? 'Inactivar a ' : 'Activar a ')
+                  [attr.aria-label]="(activo(familiar.activo) ? 'Desactivar a ' : 'Activar a ')
                     + familiar.nombreCompleto"
-                  [pTooltip]="activo(familiar.activo) ? 'Inactivar' : 'Activar'"
+                  [pTooltip]="activo(familiar.activo) ? 'Desactivar' : 'Activar'"
                   tooltipPosition="left">
             <i class="pi" [ngClass]="activo(familiar.activo) ? 'pi-ban' : 'pi-check'"></i>
           </button>
@@ -219,24 +219,24 @@
             </span>
           </div>
 
-          <span class="pastilla no" *ngIf="bloqueado(vehiculo)">Bloqueado</span>
+          <span class="pastilla no" *ngIf="bloqueado(vehiculo)">Deshabilitado</span>
           <span class="pastilla no" *ngIf="!bloqueado(vehiculo) && !activo(vehiculo.activo)">
-            Inhabilitado
+            Inactivo
           </span>
 
           <button type="button" class="accion candado"
                   *ngIf="bloqueado(vehiculo)"
                   (click)="explicarBloqueo(vehiculo.placa, vehiculo.motivoBloqueo)"
-                  [attr.aria-label]="'Por qué está bloqueado ' + vehiculo.placa">
+                  [attr.aria-label]="'Por qué está deshabilitado ' + vehiculo.placa">
             <i class="pi pi-lock"></i>
           </button>
 
           <button type="button" class="accion"
                   *ngIf="!bloqueado(vehiculo)"
                   (click)="alternarEstadoVehiculo(vehiculo)"
-                  [attr.aria-label]="(activo(vehiculo.activo) ? 'Inhabilitar ' : 'Habilitar ')
+                  [attr.aria-label]="(activo(vehiculo.activo) ? 'Desactivar ' : 'Activar ')
                     + vehiculo.placa"
-                  [pTooltip]="activo(vehiculo.activo) ? 'Inhabilitar' : 'Habilitar'"
+                  [pTooltip]="activo(vehiculo.activo) ? 'Desactivar' : 'Activar'"
                   tooltipPosition="left">
             <i class="pi" [ngClass]="activo(vehiculo.activo) ? 'pi-ban' : 'pi-check'"></i>
           </button>
@@ -252,7 +252,7 @@
       </div>
     </section>
 
-    <!-- Confirmación de lo destructivo. Inactivar a alguien le quita el
+    <!-- Confirmación de lo destructivo. Desactivar a alguien le quita el
          ingreso al conjunto y hasta ahora no preguntaba nada. -->
     <gd-hoja [abierta]="!!aConfirmar" [titulo]="aConfirmar?.titulo || ''"
              (cerrar)="aConfirmar = null">

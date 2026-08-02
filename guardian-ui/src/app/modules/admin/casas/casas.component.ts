@@ -143,9 +143,9 @@ export class CasasComponent implements OnInit {
 
   private desbloquear(casa: Casa): void {
     const seguro = window.confirm(
-      `${casa.identificador} está bloqueada por: ` +
+      `${casa.identificador} está deshabilitada por: ` +
       `${casa.motivoBloqueo || 'sin motivo registrado'}.\n\n` +
-      '¿Levantar el bloqueo? Sus residentes vuelven a ingresar.');
+      '¿Habilitarla de nuevo? Sus residentes vuelven a ingresar.');
     if (!seguro) {
       return;
     }
@@ -154,7 +154,7 @@ export class CasasComponent implements OnInit {
     this.admin.desbloquear('casas', casa.id).subscribe({
       next: () => this.cargar(),
       error: (fallo: HttpErrorResponse) => {
-        this.error = fallo.error?.mensaje ?? 'No pudimos levantar el bloqueo.';
+        this.error = fallo.error?.mensaje ?? 'No pudimos habilitarla.';
       }
     });
   }
@@ -169,10 +169,10 @@ export class CasasComponent implements OnInit {
     return casa.bloqueado === 'S';
   }
 
-  /** El bloqueo gana: una casa bloqueada deja fuera a todos sus residentes. */
+  /** La llave de la administración gana: deja fuera a todos sus residentes. */
   estado(casa: Casa): string {
     if (this.bloqueada(casa)) {
-      return 'Bloqueada';
+      return 'Deshabilitada';
     }
     return this.activa(casa) ? 'Activa' : 'Inactiva';
   }

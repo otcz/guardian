@@ -1,9 +1,13 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 /**
- * Captura del motivo de un bloqueo administrativo.
+ * Captura del motivo cuando la administración deshabilita algo.
  *
- * <p>El motivo es obligatorio a propósito: un bloqueo sin explicación deja al
+ * <p>Es la llave de la administración, distinta de la del hogar: el titular
+ * activa y desactiva lo suyo, la administración habilita y deshabilita. Hacen
+ * falta las dos para pasar por la portería, y ninguna levanta la otra.</p>
+ *
+ * <p>El motivo es obligatorio a propósito: deshabilitar sin explicación deja al
  * siguiente administrador — y al guardia que tiene que dar la cara en la
  * portería — sin saber por qué esa persona no entra.</p>
  *
@@ -18,7 +22,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 })
 export class BloqueoComponent {
 
-  /** Qué se está bloqueando: "Ana Díaz", "El vehículo ABC123". */
+  /** Qué se está deshabilitando: "Ana Díaz", "El vehículo ABC123". */
   @Input() objetivo = '';
 
   /** Consecuencia concreta. Vacío = la del ingreso al conjunto. */
@@ -45,8 +49,8 @@ export class BloqueoComponent {
 
   get texto(): string {
     return this.descripcion
-      || `${this.objetivo} no podrá ingresar hasta que la administración levante `
-         + 'el bloqueo. El titular no puede quitarlo desde su celular.';
+      || `${this.objetivo} no podrá ingresar hasta que la administración vuelva `
+         + 'a habilitarlo. El titular no puede hacerlo desde su celular.';
   }
 
   aceptar(): void {

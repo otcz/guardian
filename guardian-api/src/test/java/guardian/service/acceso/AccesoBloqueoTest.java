@@ -257,13 +257,52 @@ class AccesoBloqueoTest {
     }
 
     @Test
-    @DisplayName("vehiculo apagado por la familia tampoco sale")
+    @DisplayName("vehiculo apagado por la familia tampoco sale, y se dice POR QUE")
     void vehiculoApagadoNoSale() {
         vehiculo.setActivo(Codigos.NO);
         when(presenciaService.estaAdentro(50L)).thenReturn(false);
 
         assertThatThrownBy(() -> servicio.registrar(registrarEnVehiculo(), guardia))
-                .isInstanceOf(GuardianException.class);
+                .isInstanceOf(GuardianException.class)
+                // Decia VEHICULO_NO_PERTENECE, que es falso: el carro SI es de
+                // la casa. El guardia leia "no esta registrado para esa casa" y
+                // mandaba al residente a la administracion a corregir un dato
+                // que estaba bien, cuando lo unico que hacia falta era que su
+                // hogar volviera a activarlo.
+                .hasMessage(MensajesGlobales.VEHICULO_INACTIVO);
+    }
+
+    @Test
+    @DisplayName("las dos causas del vehiculo se distinguen: no es el mismo mensaje")
+    void lasDosLlavesDelVehiculoSeDistinguen() {
+        // Una la levanta la administracion y la otra el titular desde su
+        // celular. Con un solo mensaje para las dos, el guardia manda a la
+        // persona al sitio equivocado y vuelve a la fila igual de varada.
+        when(presenciaService.estaAdentro(50L)).thenReturn(false);
+
+        vehiculo.setActivo(Codigos.SI);
+        vehiculo.setBloqueado(Codigos.SI);
+        assertThatThrownBy(() -> servicio.registrar(registrarEnVehiculo(), guardia))
+                .hasMessage(MensajesGlobales.VEHICULO_BLOQUEADO);
+
+        vehiculo.setBloqueado(Codigos.NO);
+        vehiculo.setActivo(Codigos.NO);
+        assertThatThrownBy(() -> servicio.registrar(registrarEnVehiculo(), guardia))
+                .hasMessage(MensajesGlobales.VEHICULO_INACTIVO);
+    }
+
+    @Test
+    @DisplayName("un vehiculo de OTRA casa si dice que no pertenece")
+    void vehiculoAjenoConservaSuMensaje() {
+        // El mensaje que se libero al darle uno propio al vehiculo inactivo
+        // sigue siendo el correcto para su caso real.
+        GdCasa otra = new GdCasa();
+        otra.setId(99L);
+        vehiculo.setCasa(otra);
+        when(presenciaService.estaAdentro(50L)).thenReturn(false);
+
+        assertThatThrownBy(() -> servicio.registrar(registrarEnVehiculo(), guardia))
+                .hasMessage(MensajesGlobales.VEHICULO_NO_PERTENECE);
     }
 
     @Test

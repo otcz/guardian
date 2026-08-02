@@ -252,9 +252,9 @@ export class PersonasComponent implements OnInit {
 
   private desbloquear(persona: Persona): void {
     const seguro = window.confirm(
-      `${persona.nombreCompleto} está bloqueada por: ` +
+      `${persona.nombreCompleto} está deshabilitada por: ` +
       `${persona.motivoBloqueo || 'sin motivo registrado'}.\n\n` +
-      '¿Levantar el bloqueo? Volverá a ingresar si su registro está activo.');
+      '¿Habilitarla de nuevo? Volverá a ingresar si su hogar la tiene activa.');
     if (!seguro) {
       return;
     }
@@ -263,7 +263,7 @@ export class PersonasComponent implements OnInit {
     this.admin.desbloquear('personas', persona.id).subscribe({
       next: () => this.cargar(this.texto),
       error: (fallo: HttpErrorResponse) => {
-        this.error = fallo.error?.mensaje ?? 'No pudimos levantar el bloqueo.';
+        this.error = fallo.error?.mensaje ?? 'No pudimos habilitarla.';
       }
     });
   }
@@ -278,7 +278,7 @@ export class PersonasComponent implements OnInit {
    * Tiene cuenta de acceso pero nadie la ha habilitado todavía, así que no
    * puede entrar por más que su registro figure activo.
    */
-  cuentaSinHabilitar(persona: Persona): boolean {
+  cuentaInactiva(persona: Persona): boolean {
     return this.tieneCuenta(persona) && persona.usuarioActivo === 'N';
   }
 
@@ -318,9 +318,9 @@ export class PersonasComponent implements OnInit {
       return 'Sin acceso';
     }
     if (this.cuentaBloqueada(persona)) {
-      return 'Bloqueada';
+      return 'Deshabilitada';
     }
-    return persona.usuarioActivo === 'S' ? 'Habilitada' : 'Inhabilitada';
+    return persona.usuarioActivo === 'S' ? 'Activa' : 'Inactiva';
   }
 
   abrirAcceso(persona: Persona): void {
@@ -453,15 +453,16 @@ export class PersonasComponent implements OnInit {
 
     if (this.cuentaBloqueada(persona)) {
       const seguro = window.confirm(
-        `La cuenta está bloqueada por: ${persona.usuarioMotivoBloqueo || 'sin motivo registrado'}.`
-        + '\n\n¿Levantar el bloqueo?');
+        `La cuenta está deshabilitada por: `
+        + `${persona.usuarioMotivoBloqueo || 'sin motivo registrado'}.`
+        + '\n\n¿Habilitarla de nuevo?');
       if (!seguro) {
         return;
       }
       this.admin.desbloquear('usuarios', persona.usuarioId).subscribe({
         next: () => this.refrescarAcceso(),
         error: (fallo: HttpErrorResponse) => {
-          this.error = fallo.error?.mensaje ?? 'No pudimos levantar el bloqueo.';
+          this.error = fallo.error?.mensaje ?? 'No pudimos habilitar la cuenta.';
         }
       });
       return;
@@ -482,12 +483,12 @@ export class PersonasComponent implements OnInit {
     this.admin.bloquear('usuarios', persona.usuarioId, motivo).subscribe({
       next: () => {
         this.bloqueandoCuenta = false;
-        this.avisoAcceso = 'Cuenta bloqueada. Si tenía la aplicación abierta, ya salió de ella.';
+        this.avisoAcceso = 'Cuenta deshabilitada. Si tenía la aplicación abierta, ya salió de ella.';
         this.refrescarAcceso();
       },
       error: (fallo: HttpErrorResponse) => {
         this.bloqueandoCuenta = false;
-        this.error = fallo.error?.mensaje ?? 'No pudimos bloquear la cuenta.';
+        this.error = fallo.error?.mensaje ?? 'No pudimos deshabilitar la cuenta.';
       }
     });
   }
@@ -513,10 +514,14 @@ export class PersonasComponent implements OnInit {
     return persona.bloqueado === 'S';
   }
 
-  /** El bloqueo gana sobre "activa": es la llave que el residente no levanta. */
+  /**
+   * La llave de la administración gana sobre la del hogar: es la que el
+   * titular no puede levantar. Decir "Inactiva" cuando además está
+   * deshabilitada lo mandaría a activarla desde su celular para nada.
+   */
   estado(persona: Persona): string {
     if (this.bloqueada(persona)) {
-      return 'Bloqueada';
+      return 'Deshabilitada';
     }
     return this.activa(persona) ? 'Activa' : 'Inactiva';
   }

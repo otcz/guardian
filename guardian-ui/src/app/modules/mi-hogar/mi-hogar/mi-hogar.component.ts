@@ -13,7 +13,7 @@ import {
 
 /**
  * Autogestión del residente: su núcleo familiar (esposa, hijos, invitados) y
- * los vehículos de su casa. Aquí no existe eliminar — solo activar/inactivar;
+ * los vehículos de su casa. Aquí no existe eliminar — solo activar y desactivar;
  * la eliminación es exclusiva del administrador.
  */
 @Component({
@@ -43,7 +43,7 @@ export class MiHogarComponent implements OnInit {
   guardando = false;
 
   /**
-   * Acción destructiva esperando confirmación. Inactivar a un familiar le
+   * Acción destructiva esperando confirmación. Desactivar a un familiar le
    * quita el ingreso al conjunto: no puede pasar por un toque accidental,
    * y hasta ahora no preguntaba nada.
    */
@@ -145,7 +145,7 @@ export class MiHogarComponent implements OnInit {
   }
 
   alternarEstadoFamiliar(familiar: Familiar): void {
-    // Reactivar no destruye nada: se ejecuta directo. Inactivar sí.
+    // Reactivar no destruye nada: se ejecuta directo. Desactivar sí.
     if (!this.activo(familiar.activo)) {
       this.aplicarEstadoFamiliar(familiar);
       return;
@@ -153,7 +153,7 @@ export class MiHogarComponent implements OnInit {
     this.aConfirmar = {
       titulo: familiar.nombreCompleto,
       detalle: 'No podrá entrar al conjunto hasta que lo actives de nuevo.',
-      etiqueta: 'Inactivar',
+      etiqueta: 'Desactivar',
       accion: () => this.aplicarEstadoFamiliar(familiar)
     };
   }
@@ -203,7 +203,7 @@ export class MiHogarComponent implements OnInit {
     this.aConfirmar = {
       titulo: vehiculo.placa,
       detalle: 'La portería dejará de permitir su ingreso.',
-      etiqueta: 'Inhabilitar',
+      etiqueta: 'Desactivar',
       accion: () => this.aplicarEstadoVehiculo(vehiculo)
     };
   }
@@ -235,9 +235,10 @@ export class MiHogarComponent implements OnInit {
   }
 
   /**
-   * Bloqueado por la administración. El residente no puede levantarlo, así que
-   * en su lugar ve un candado y no un interruptor: ofrecerle un botón que el
-   * backend le va a negar es prometerle algo que no se cumple.
+   * Deshabilitado por la administración: la otra llave. El titular activa y
+   * desactiva lo suyo, pero esta no la puede levantar, así que en su lugar ve
+   * un candado y no un interruptor — ofrecerle un botón que el backend le va a
+   * negar es prometerle algo que no se cumple.
    */
   bloqueado(entidad: { bloqueado: string }): boolean {
     return entidad.bloqueado === 'S';
@@ -319,8 +320,8 @@ export class MiHogarComponent implements OnInit {
     this.bloqueoInfo = {
       titulo: nombre,
       detalle: motivo
-        ? `La administración lo bloqueó: ${motivo}. Comunícate con ella para levantarlo.`
-        : 'La administración lo bloqueó. Comunícate con ella para levantarlo.'
+        ? `La administración lo deshabilitó: ${motivo}. Comunícate con ella para habilitarlo.`
+        : 'La administración lo deshabilitó. Comunícate con ella para habilitarlo.'
     };
   }
 }

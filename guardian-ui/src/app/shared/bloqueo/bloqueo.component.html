@@ -1,4 +1,4 @@
-<gd-hoja [abierta]="visible" titulo="Bloquear" (cerrar)="cerrar.emit()">
+<gd-hoja [abierta]="visible" titulo="Deshabilitar" (cerrar)="cerrar.emit()">
 
   <p class="explicacion">{{ texto }}</p>
 
@@ -15,7 +15,7 @@
     <button type="button" class="alterno" (click)="cerrar.emit()">Cancelar</button>
     <button type="submit" form="forma-bloqueo" class="principal peligro"
             [disabled]="!motivo.trim()">
-      Bloquear
+      Deshabilitar
     </button>
   </div>
 </gd-hoja>

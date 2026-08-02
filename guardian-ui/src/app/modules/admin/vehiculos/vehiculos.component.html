@@ -98,22 +98,23 @@
           </button>
           <button type="button" class="accion"
                   (click)="alternarEstado(vehiculo)"
-                  [attr.aria-label]="(activo(vehiculo) ? 'Inhabilitar ' : 'Habilitar ') + vehiculo.placa"
-                  [pTooltip]="activo(vehiculo) ? 'Inhabilitar' : 'Habilitar'"
+                  [attr.aria-label]="(activo(vehiculo) ? 'Desactivar ' : 'Activar ') + vehiculo.placa"
+                  [pTooltip]="activo(vehiculo) ? 'Desactivar' : 'Activar'"
                   tooltipPosition="left">
             <i class="pi" [ngClass]="activo(vehiculo) ? 'pi-ban' : 'pi-check'"></i>
           </button>
 
-          <!-- El residente habilita e inhabilita su carro; el candado lo pone
-               solo la administración y él no puede quitarlo. -->
+          <!-- Dos llaves y hacen falta las dos. El hogar activa y desactiva su
+               carro; la administración lo habilita y deshabilita, y eso el
+               hogar no lo puede levantar. -->
           <span class="separador" aria-hidden="true"></span>
 
           <button type="button" class="accion candado"
                   [class.puesto]="bloqueado(vehiculo)"
                   (click)="alternarBloqueo(vehiculo)"
-                  [attr.aria-label]="(bloqueado(vehiculo) ? 'Levantar el bloqueo de ' : 'Bloquear ')
+                  [attr.aria-label]="(bloqueado(vehiculo) ? 'Habilitar ' : 'Deshabilitar ')
                     + vehiculo.placa"
-                  [pTooltip]="bloqueado(vehiculo) ? 'Levantar bloqueo' : 'Bloquear'"
+                  [pTooltip]="bloqueado(vehiculo) ? 'Habilitar' : 'Deshabilitar'"
                   tooltipPosition="left">
             <i class="pi" [ngClass]="bloqueado(vehiculo) ? 'pi-lock-open' : 'pi-lock'"></i>
           </button>
@@ -139,8 +140,8 @@
   <gd-bloqueo [abierta]="!!bloqueando"
               [objetivo]="bloqueando?.placa || ''"
               [descripcion]="'El vehículo ' + (bloqueando?.placa || '') + ' desaparece de la '
-                + 'portería y no puede entrar ni salir hasta que la administración levante el '
-                + 'bloqueo. Sus dueños no pueden quitarlo desde la aplicación.'"
+                + 'portería y no puede entrar ni salir hasta que la administración vuelva a '
+                + 'habilitarlo. Sus dueños no pueden hacerlo desde la aplicación.'"
               (confirmar)="confirmarBloqueo($event)"
               (cerrar)="bloqueando = null">
   </gd-bloqueo>

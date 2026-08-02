@@ -184,9 +184,9 @@ export class VehiculosComponent implements OnInit {
 
   private desbloquear(vehiculo: Vehiculo): void {
     const seguro = window.confirm(
-      `${vehiculo.placa} está bloqueado por: ` +
+      `${vehiculo.placa} está deshabilitado por: ` +
       `${vehiculo.motivoBloqueo || 'sin motivo registrado'}.\n\n` +
-      '¿Levantar el bloqueo? Volverá a aparecer en la portería.');
+      '¿Habilitarlo de nuevo? Volverá a aparecer en la portería.');
     if (!seguro) {
       return;
     }
@@ -210,12 +210,17 @@ export class VehiculosComponent implements OnInit {
     return vehiculo.bloqueado === 'S';
   }
 
-  /** El bloqueo gana: un carro bloqueado no sale aunque esté habilitado. */
+  /**
+   * Las dos llaves, y la de la administración se nombra primero porque es la
+   * que el hogar no puede levantar: decir "Inactivo" cuando además está
+   * deshabilitado mandaría al residente a activarlo desde su celular para
+   * nada.
+   */
   estado(vehiculo: Vehiculo): string {
     if (this.bloqueado(vehiculo)) {
-      return 'Bloqueado';
+      return 'Deshabilitado';
     }
-    return this.activo(vehiculo) ? 'Habilitado' : 'Inhabilitado';
+    return this.activo(vehiculo) ? 'Activo' : 'Inactivo';
   }
 
   operativo(vehiculo: Vehiculo): boolean {

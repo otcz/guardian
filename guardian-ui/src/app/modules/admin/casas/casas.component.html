@@ -78,8 +78,8 @@
           <button type="button"
                   class="accion"
                   (click)="alternarEstado(casa)"
-                  [attr.aria-label]="(activa(casa) ? 'Inactivar ' : 'Activar ') + casa.identificador"
-                  [pTooltip]="activa(casa) ? 'Inactivar la casa completa' : 'Activar'"
+                  [attr.aria-label]="(activa(casa) ? 'Desactivar ' : 'Activar ') + casa.identificador"
+                  [pTooltip]="activa(casa) ? 'Desactivar la casa completa' : 'Activar'"
                   tooltipPosition="left">
             <i class="pi" [ngClass]="activa(casa) ? 'pi-ban' : 'pi-check'"></i>
           </button>
@@ -89,9 +89,9 @@
           <button type="button" class="accion candado"
                   [class.puesto]="bloqueada(casa)"
                   (click)="alternarBloqueo(casa)"
-                  [attr.aria-label]="(bloqueada(casa) ? 'Levantar el bloqueo de ' : 'Bloquear ')
+                  [attr.aria-label]="(bloqueada(casa) ? 'Habilitar ' : 'Deshabilitar ')
                     + casa.identificador"
-                  [pTooltip]="bloqueada(casa) ? 'Levantar bloqueo' : 'Bloquear'"
+                  [pTooltip]="bloqueada(casa) ? 'Habilitar' : 'Deshabilitar'"
                   tooltipPosition="left">
             <i class="pi" [ngClass]="bloqueada(casa) ? 'pi-lock-open' : 'pi-lock'"></i>
           </button>
@@ -108,7 +108,7 @@
               [objetivo]="bloqueando?.identificador || ''"
               [descripcion]="'Nadie de ' + (bloqueando?.identificador || '') + ' podrá ingresar '
                 + 'al conjunto —ni sus residentes ni sus vehículos— hasta que la administración '
-                + 'levante el bloqueo.'"
+                + 'vuelva a habilitarla.'"
               (confirmar)="confirmarBloqueo($event)"
               (cerrar)="bloqueando = null">
   </gd-bloqueo>

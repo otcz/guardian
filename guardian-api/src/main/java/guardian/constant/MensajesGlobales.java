@@ -57,22 +57,29 @@ public final class MensajesGlobales {
             "Esta credencial fue revocada.";
     public static final String QR_VENCIDO =
             "Esta credencial ya vencio.";
+    // ── Llave del titular: activo ────────────────────────────────────────────
+    // Lo que el hogar apago. Se dice "inactiva", nunca "deshabilitada": esa
+    // palabra es de la otra llave, y al guardia le tienen que quedar claras
+    // las dos causas porque manda a la persona a sitios distintos — al titular
+    // de su casa o a la administracion.
     public static final String PERSONA_INACTIVA =
-            "Esta persona no tiene el ingreso habilitado.";
+            "Su hogar tiene esta persona inactiva.";
     public static final String CASA_INACTIVA =
-            "La casa no tiene el ingreso habilitado.";
+            "Esta casa esta inactiva.";
+    public static final String VEHICULO_INACTIVO =
+            "Este vehiculo esta inactivo. Su hogar puede activarlo.";
 
-    // ── Bloqueos de la administracion ────────────────────────────────────────
+    // ── Llave de la administracion: bloqueado ────────────────────────────────
     public static final String PERSONA_BLOQUEADA =
-            "La administracion bloqueo el ingreso de esta persona.";
+            "La administracion deshabilito el ingreso de esta persona.";
     public static final String CASA_BLOQUEADA =
-            "La administracion bloqueo el ingreso de esta casa.";
+            "La administracion deshabilito el ingreso de esta casa.";
     public static final String VEHICULO_BLOQUEADO =
-            "La administracion bloqueo este vehiculo.";
+            "La administracion deshabilito este vehiculo.";
     public static final String DESBLOQUEO_SOLO_ADMIN =
-            "Esto lo bloqueo la administracion. Solo ella puede habilitarlo de nuevo.";
+            "Esto lo deshabilito la administracion. Solo ella puede habilitarlo de nuevo.";
     public static final String BLOQUEO_SOLO_ADMIN =
-            "Bloquear es una accion de la administracion.";
+            "Deshabilitar es una accion de la administracion.";
     public static final String VEHICULO_NO_PERTENECE =
             "El vehiculo seleccionado no esta registrado para esa casa.";
     public static final String ACCESO_PERMITIDO =

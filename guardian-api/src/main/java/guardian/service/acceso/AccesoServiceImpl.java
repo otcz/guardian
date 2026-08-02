@@ -349,13 +349,20 @@ public class AccesoServiceImpl implements AccesoService {
         if (casa == null || !vehiculo.getCasa().getId().equals(casa.getId())) {
             throw GuardianException.solicitudInvalida(MensajesGlobales.VEHICULO_NO_PERTENECE);
         }
-        // Un vehiculo bloqueado por la administracion no sale, aunque la
-        // familia lo tenga encendido.
+        // Las dos llaves, y con mensajes distintos. Un vehiculo deshabilitado
+        // por la administracion no sale aunque la familia lo tenga activo, y
+        // uno que la familia desactivo tampoco — pero al guardia le tienen que
+        // quedar claras las dos causas: una la levanta la administracion y la
+        // otra el titular desde su celular.
         if (vehiculo.estaBloqueado()) {
             throw GuardianException.conflicto(MensajesGlobales.VEHICULO_BLOQUEADO);
         }
+        // Decia VEHICULO_NO_PERTENECE, que es falso: el carro SI es de la casa,
+        // solo esta apagado. El guardia leia "no esta registrado para esa casa"
+        // y mandaba al residente a la administracion a corregir un dato que
+        // estaba bien.
         if (!vehiculo.estaActivo()) {
-            throw GuardianException.conflicto(MensajesGlobales.VEHICULO_NO_PERTENECE);
+            throw GuardianException.conflicto(MensajesGlobales.VEHICULO_INACTIVO);
         }
         return vehiculo;
     }

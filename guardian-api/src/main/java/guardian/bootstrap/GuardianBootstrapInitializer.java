@@ -225,13 +225,16 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
                 new Opcion(Codigos.MOTIVO_FIRMA_INVALIDA, "Codigo no valido"),
                 new Opcion(Codigos.MOTIVO_CREDENCIAL_REVOCADA, "Credencial revocada"),
                 new Opcion(Codigos.MOTIVO_CREDENCIAL_VENCIDA, "Credencial vencida"),
-                // "Inactiva" es la llave del residente; "bloqueada", la de la
-                // administracion. Al guardia hay que decirle cual de las dos.
-                new Opcion(Codigos.MOTIVO_PERSONA_INACTIVA, "Persona inactiva"),
-                new Opcion(Codigos.MOTIVO_PERSONA_BLOQUEADA, "Persona bloqueada por la administracion"),
+                // Dos llaves, dos palabras, y nunca la del otro. "Inactiva" es
+                // la del hogar —la apaga el titular desde su celular—;
+                // "deshabilitada" es la de la administracion. El guardia lee
+                // esto para saber a donde mandar a la persona, y con una sola
+                // palabra para las dos causas la manda al sitio equivocado.
+                new Opcion(Codigos.MOTIVO_PERSONA_INACTIVA, "Persona inactiva (la apago su hogar)"),
+                new Opcion(Codigos.MOTIVO_PERSONA_BLOQUEADA, "Persona deshabilitada por la administracion"),
                 new Opcion(Codigos.MOTIVO_CASA_INACTIVA, "Casa inactiva"),
-                new Opcion(Codigos.MOTIVO_CASA_BLOQUEADA, "Casa bloqueada por la administracion"),
-                new Opcion(Codigos.MOTIVO_VEHICULO_BLOQUEADO, "Vehiculo bloqueado por la administracion"),
+                new Opcion(Codigos.MOTIVO_CASA_BLOQUEADA, "Casa deshabilitada por la administracion"),
+                new Opcion(Codigos.MOTIVO_VEHICULO_BLOQUEADO, "Vehiculo deshabilitado por la administracion"),
                 new Opcion(Codigos.MOTIVO_INVITACION_NO_VIGENTE, "Invitacion aun no vigente"),
                 new Opcion(Codigos.MOTIVO_INVITACION_AGOTADA, "Invitacion sin ingresos disponibles")));
 
