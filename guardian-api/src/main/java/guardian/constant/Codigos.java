@@ -47,6 +47,19 @@ public final class Codigos {
      */
     public static final String ROL_CLAVE_PENDIENTE = "CLAVE_PENDIENTE";
 
+    /**
+     * Longitud minima de una clave elegida por una persona.
+     *
+     * <p>Fuente unica: la usan las validaciones de los DTO y el bootstrap para
+     * decidir si la clave sembrada es demasiado debil para dejar entrar sin
+     * cambiarla. Duplicada como literal, el dia que suba se olvidaria en uno de
+     * los tres sitios.</p>
+     */
+    public static final int CLAVE_LONGITUD_MINIMA = 8;
+
+    /** Tope de BCrypt: ignora en silencio todo byte despues del 72. */
+    public static final int CLAVE_LONGITUD_MAXIMA = 72;
+
     /** Tipos de credencial QR. */
     public static final String CREDENCIAL_PERMANENTE = "PERMANENTE";
     public static final String CREDENCIAL_TEMPORAL = "TEMPORAL";

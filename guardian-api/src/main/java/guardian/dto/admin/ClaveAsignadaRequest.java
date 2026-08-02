@@ -1,5 +1,6 @@
 package guardian.dto.admin;
 
+import guardian.constant.Codigos;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -18,6 +19,7 @@ public class ClaveAsignadaRequest {
     // Tope 72: BCrypt ignora en silencio todo byte despues del 72. Aceptar una
     // clave mas larga le prometeria al usuario una seguridad que no tiene.
     @NotBlank(message = "Escribe la nueva contrasena")
-    @Size(min = 8, max = 72, message = "La contrasena debe tener entre 8 y 72 caracteres")
+    @Size(min = Codigos.CLAVE_LONGITUD_MINIMA, max = Codigos.CLAVE_LONGITUD_MAXIMA,
+            message = "La contrasena debe tener entre 8 y 72 caracteres")
     private String claveNueva;
 }

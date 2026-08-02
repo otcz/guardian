@@ -43,6 +43,9 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
 
     private static final String EJECUTOR = "SYSTEM";
 
+    /** El default de application.properties. Esta en git: no es un secreto. */
+    private static final String CLAVE_PUBLICADA_EN_EL_REPO = "2306";
+
     @Value("${guardian.bootstrap.super-admin-documento}")
     private String superAdminDocumento;
 
@@ -103,17 +106,41 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
 
         GdPersona guardada = personaRepository.save(persona);
 
+        boolean debilita = claveDemasiadoDebil();
+
         GdUsuario usuario = new GdUsuario();
         usuario.setPersona(guardada);
         usuario.setRol(Codigos.ROL_SUPER_ADMIN);
         usuario.setClaveHash(passwordEncoder.encode(superAdminClave));
-        usuario.setRequiereCambioClave(
-                superAdminClave.equals(superAdminDocumento) ? Codigos.SI : Codigos.NO);
+        usuario.setRequiereCambioClave(debilita ? Codigos.SI : Codigos.NO);
         usuario.setActivo(Codigos.SI);
         usuario.setUsuarioCreador(EJECUTOR);
         usuarioRepository.save(usuario);
 
-        log.info("[bootstrap] super administrador creado usuario={}", superAdminDocumento);
+        if (debilita) {
+            log.warn("[bootstrap] super administrador creado usuario={} "
+                    + "— la clave sembrada no cumple las reglas del sistema y debe "
+                    + "cambiarse en el primer ingreso", superAdminDocumento);
+        } else {
+            log.info("[bootstrap] super administrador creado usuario={}", superAdminDocumento);
+        }
+    }
+
+    /**
+     * ¿La clave sembrada pasaria las reglas que el sistema le exige a
+     * cualquier persona que elige la suya?
+     *
+     * <p>Son tres casos y los tres terminan igual — entrar una vez y cambiarla:
+     * la clave igual al usuario (la que cualquiera adivina), la publicada en el
+     * repositorio (equivale a no tener secreto) y la mas corta que el minimo
+     * que el propio endpoint de cambio rechaza. Este ultimo era el mas raro:
+     * el sistema arrancaba con una clave que despues no dejaba escribir, y
+     * quien la cambiaba no podia volver a ella.</p>
+     */
+    private boolean claveDemasiadoDebil() {
+        return superAdminClave.equals(superAdminDocumento)
+                || CLAVE_PUBLICADA_EN_EL_REPO.equals(superAdminClave)
+                || superAdminClave.length() < Codigos.CLAVE_LONGITUD_MINIMA;
     }
 
     private void sembrarParametros() {
