@@ -37,6 +37,7 @@ $logUi = Join-Path $logs 'ui.log'
 $logBuild = Join-Path $logs 'build.log'
 $jar = Join-Path $raiz 'guardian-api\target\guardian-api-0.0.1-SNAPSHOT.jar'
 $compose = Join-Path $raiz 'infra\docker-compose.yml'
+$archivoEnv = Join-Path $raiz 'infra\.env'
 
 $PUERTO_API = 8484
 $PUERTO_UI = 4200
@@ -121,12 +122,51 @@ function Find-Maven {
     usa 'build': despues de recompilar hay que volver a levantar lo que se
     tuvo que bajar para poder recompilar.
 #>
+
+<#
+.SYNOPSIS
+    Pasa infra/.env al proceso del backend.
+.DESCRIPTION
+    docker-compose lee ese archivo solo; el jar corriendo suelto en la maquina
+    no. Sin esto, la configuracion de correo estaria puesta y el codigo de
+    recuperacion seguiria yendo al log — un sintoma que se diagnostica mal
+    durante un buen rato.
+
+    El archivo NO esta en git (lleva secretos). Si no existe, no pasa nada:
+    el backend arranca con sus defaults.
+#>
+function Import-Env {
+    if (-not (Test-Path $archivoEnv)) { return }
+
+    $puestas = 0
+    foreach ($linea in Get-Content $archivoEnv) {
+        $texto = $linea.Trim()
+        if ($texto -eq '' -or $texto.StartsWith('#')) { continue }
+
+        $corte = $texto.IndexOf('=')
+        if ($corte -lt 1) { continue }
+
+        $nombre = $texto.Substring(0, $corte).Trim()
+        $valor = $texto.Substring($corte + 1).Trim()
+        # Un valor vacio es "no configurado": ponerlo como cadena vacia pisaria
+        # el default del application.properties con nada.
+        if ($valor -eq '') { continue }
+
+        Set-Item -Path "env:$nombre" -Value $valor
+        $puestas++
+    }
+    if ($puestas -gt 0) {
+        Write-Paso "Variables de infra/.env: $puestas"
+    }
+}
 function Start-Backend {
     $java = Find-Java
     if (-not $java) {
         Write-Mal "No encontre un JDK 11 o superior para arrancar el backend."
         return $false
     }
+
+    Import-Env
 
     New-Item -ItemType Directory -Force -Path $logs | Out-Null
     Start-Process -FilePath (Join-Path $java 'bin\java.exe') `

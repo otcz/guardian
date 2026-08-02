@@ -74,6 +74,23 @@ services:
       GUARDIAN_SUPER_ADMIN_DOCUMENTO: ${GUARDIAN_SUPER_ADMIN_DOCUMENTO:-SUPERADMIN}
       GUARDIAN_SUPER_ADMIN_CLAVE: ${GUARDIAN_SUPER_ADMIN_CLAVE:-2306}
 
+      # Correo: unico canal de recuperacion de clave. SIN configurar, el
+      # sistema arranca igual y el codigo se escribe en el log en vez de
+      # enviarse — el flujo se prueba completo sin una cuenta SMTP.
+      #
+      # Los valores van en infra/.env, que esta en .gitignore. NUNCA aca:
+      # este archivo si se commitea.
+      #
+      # Con Gmail la clave NO es la de la cuenta —Google dejo de aceptarla en
+      # 2022— sino una "contrasena de aplicacion" de 16 letras, que solo se
+      # puede generar con la verificacion en dos pasos activada.
+      GUARDIAN_SMTP_HOST: ${GUARDIAN_SMTP_HOST:-}
+      GUARDIAN_SMTP_PUERTO: ${GUARDIAN_SMTP_PUERTO:-587}
+      GUARDIAN_SMTP_USUARIO: ${GUARDIAN_SMTP_USUARIO:-}
+      GUARDIAN_SMTP_CLAVE: ${GUARDIAN_SMTP_CLAVE:-}
+      GUARDIAN_CORREO_REMITENTE: ${GUARDIAN_CORREO_REMITENTE:-no-responder@guardian.local}
+      GUARDIAN_CORREO_NOMBRE: ${GUARDIAN_CORREO_NOMBRE:-GUARDIAN}
+
       STORAGE_TYPE: ${STORAGE_TYPE:-local}
       # OJO: dentro del contenedor las fotos van a un volumen de Docker, no a
       # ./data-fotos. Si alternas entre correr el backend aca y en la maquina,
