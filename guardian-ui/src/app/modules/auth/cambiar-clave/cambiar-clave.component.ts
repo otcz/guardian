@@ -69,8 +69,20 @@ export class CambiarClaveComponent implements OnInit {
     });
   }
 
+  /**
+   * La salida depende de POR QUE se llegó acá.
+   *
+   * <p>Con el cambio obligatorio pendiente no hay a dónde volver —ninguna
+   * otra pantalla abre— así que la única salida es cerrar sesión. Pero quien
+   * entró por su cuenta desde el menú viene de algún lado, y cerrarle la
+   * sesión por pulsar "Salir" sería castigarlo por arrepentirse.</p>
+   */
   salir(): void {
-    this.auth.cerrarSesion();
+    if (this.obligatorio) {
+      this.auth.cerrarSesion();
+      return;
+    }
+    this.router.navigate([this.auth.rutaInicial()]);
   }
 
   campoInvalido(nombre: 'claveActual' | 'claveNueva' | 'confirmacion'): boolean {

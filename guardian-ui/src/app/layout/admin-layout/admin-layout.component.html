@@ -34,6 +34,13 @@
         <i class="pi pi-sitemap"></i>
         <span>Todas las sedes</span>
       </button>
+
+      <!-- La clave propia no se cambia desde el panel de Usuarios: ahí el
+           administrador no se ve a sí mismo. Este es su único camino. -->
+      <a routerLink="/cambiar-clave">
+        <i class="pi pi-key"></i>
+        <span>Mi contraseña</span>
+      </a>
     </div>
 
     <div class="pie" *ngIf="sesion">

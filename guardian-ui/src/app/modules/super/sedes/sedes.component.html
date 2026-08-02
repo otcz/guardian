@@ -15,6 +15,14 @@
 
       <div class="quien" *ngIf="sesion">
         <span class="nombre">{{ sesion.nombreCompleto }}</span>
+        <!-- La cuenta de plataforma no aparece en el panel de Usuarios de
+             ninguna sede, así que sin este atajo no hay forma de cambiarle
+             la clave a la cuenta que ve TODAS las sedes. -->
+        <a routerLink="/cambiar-clave" class="accion"
+           aria-label="Cambiar mi contraseña"
+           pTooltip="Mi contraseña" tooltipPosition="bottom">
+          <i class="pi pi-key"></i>
+        </a>
         <button type="button" class="accion" (click)="tema.alternar()"
                 [attr.aria-label]="tema.oscuro ? 'Modo claro' : 'Modo oscuro'">
           <i class="pi" [ngClass]="tema.oscuro ? 'pi-sun' : 'pi-moon'"></i>
