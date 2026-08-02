@@ -28,12 +28,14 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final GdPersonaRepository personaRepository;
     private final PasswordEncoder passwordEncoder;
     private final ParametroService parametroService;
+    private final guardian.security.EstadoUsuarioService estadoUsuarioService;
 
     @Override
     @Transactional(readOnly = true)
-    public List<UsuarioResponse> listar(Long conjuntoId) {
-        return usuarioRepository.listarPorConjunto(conjuntoId)
+    public List<UsuarioResponse> listar(UsuarioAutenticado ejecutor) {
+        return usuarioRepository.listarPorConjunto(ejecutor.getConjuntoId())
                 .stream()
+                .filter(u -> !u.getId().equals(ejecutor.getUsuarioId()))
                 .map(this::mapear)
                 .collect(Collectors.toList());
     }
@@ -85,8 +87,9 @@ public class UsuarioServiceImpl implements UsuarioService {
         exigirRolAsignable(rol);
         parametroService.exigirCodigoValido(Codigos.GRUPO_ROL, rol);
 
-        GdUsuario usuario = obtener(id, ejecutor.getConjuntoId());
-        impedirAutogestion(usuario, ejecutor, "cambiar tu propio rol");
+        // Sin chequeo de autogestion: obtener() ya devuelve 404 sobre la
+        // cuenta propia, asi que quitarse el rol es imposible por construccion.
+        GdUsuario usuario = obtener(id, ejecutor);
 
         usuario.setRol(rol);
         usuario.setUsuarioModificador(ejecutor.getDocumento());
@@ -98,9 +101,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional
     public UsuarioResponse cambiarEstado(Long id, boolean activo, UsuarioAutenticado ejecutor) {
-        GdUsuario usuario = obtener(id, ejecutor.getConjuntoId());
-        impedirAutogestion(usuario, ejecutor, "desactivar tu propia cuenta");
-
+        GdUsuario usuario = obtener(id, ejecutor);
         usuario.setActivo(activo ? Codigos.SI : Codigos.NO);
         usuario.setUsuarioModificador(ejecutor.getDocumento());
 
@@ -112,23 +113,63 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional
     public UsuarioResponse restablecerClave(Long id, UsuarioAutenticado ejecutor) {
-        GdUsuario usuario = obtener(id, ejecutor.getConjuntoId());
+        GdUsuario usuario = obtener(id, ejecutor);
 
         usuario.setClaveHash(passwordEncoder.encode(usuario.getPersona().getDocumento()));
         usuario.setRequiereCambioClave(Codigos.SI);
         usuario.setUsuarioModificador(ejecutor.getDocumento());
 
+        estadoUsuarioService.invalidar(usuario.getId());
+
         log.info("[admin] clave restablecida usuarioId={} por={}", id, ejecutor.getDocumento());
+        return mapear(usuarioRepository.save(usuario));
+    }
+
+    @Override
+    @Transactional
+    public UsuarioResponse asignarClave(Long id, String claveNueva, UsuarioAutenticado ejecutor) {
+        GdUsuario usuario = obtener(id, ejecutor);
+
+        // La misma regla que en el cambio propio: si la clave asignada es el
+        // documento, el "cambio obligatorio" seria decorativo — es justo la que
+        // cualquiera adivina.
+        if (claveNueva.equalsIgnoreCase(usuario.getPersona().getDocumento())) {
+            throw GuardianException.solicitudInvalida(MensajesGlobales.CLAVE_IGUAL_AL_DOCUMENTO);
+        }
+
+        usuario.setClaveHash(passwordEncoder.encode(claveNueva));
+        // Quien la asigno la conoce: mientras el dueno no la cambie, la cuenta
+        // no es suya del todo.
+        usuario.setRequiereCambioClave(Codigos.SI);
+        usuario.setUsuarioModificador(ejecutor.getDocumento());
+
+        // Sin invalidar, la sesion abierta del dueno sigue con la autoridad
+        // completa hasta que expire el TTL: le cambiamos la clave y el token
+        // viejo seguiria trabajando como si nada.
+        estadoUsuarioService.invalidar(usuario.getId());
+
+        log.warn("[admin] clave ASIGNADA a usuarioId={} por={}", id, ejecutor.getDocumento());
         return mapear(usuarioRepository.save(usuario));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
 
-    private GdUsuario obtener(Long id, Long conjuntoId) {
+    /**
+     * Resuelve una cuenta del panel.
+     *
+     * <p>La propia queda fuera con el MISMO 404 que la de otra sede. Antes se
+     * dejaba pasar y se frenaba accion por accion; asi solo hay una regla, y
+     * la que se olvide de repetir no abre un hueco.</p>
+     */
+    private GdUsuario obtener(Long id, UsuarioAutenticado ejecutor) {
+        if (id.equals(ejecutor.getUsuarioId())) {
+            throw GuardianException.noEncontrado(MensajesGlobales.NO_ENCONTRADO);
+        }
+
         GdUsuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> GuardianException.noEncontrado(MensajesGlobales.NO_ENCONTRADO));
 
-        if (!usuario.getPersona().getConjunto().getId().equals(conjuntoId)) {
+        if (!usuario.getPersona().getConjunto().getId().equals(ejecutor.getConjuntoId())) {
             throw GuardianException.noEncontrado(MensajesGlobales.NO_ENCONTRADO);
         }
         return usuario;
@@ -142,17 +183,6 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw GuardianException.noEncontrado(MensajesGlobales.NO_ENCONTRADO);
         }
         return persona;
-    }
-
-    /**
-     * Evita que un administrador se deje a si mismo fuera. Si el unico admin del
-     * conjunto se quita el rol o se desactiva, no queda nadie que pueda
-     * devolverselo y hay que entrar a la base a mano.
-     */
-    private void impedirAutogestion(GdUsuario usuario, UsuarioAutenticado ejecutor, String accion) {
-        if (usuario.getId().equals(ejecutor.getUsuarioId())) {
-            throw GuardianException.solicitudInvalida("No puedes " + accion + ".");
-        }
     }
 
     private UsuarioResponse mapear(GdUsuario usuario) {

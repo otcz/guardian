@@ -45,12 +45,12 @@ public class PersonaController {
             @RequestParam(defaultValue = "25") int tamano) {
 
         return ResponseEntity.ok(personaService.buscar(
-                usuarioActual.conjuntoId(), texto, PageRequest.of(pagina, tamano)));
+                usuarioActual.obtener(), texto, PageRequest.of(pagina, tamano)));
     }
 
     @GetMapping(ApiEndpoint.POR_ID)
     public ResponseEntity<PersonaResponse> obtener(@PathVariable Long id) {
-        return ResponseEntity.ok(personaService.obtener(id, usuarioActual.conjuntoId()));
+        return ResponseEntity.ok(personaService.obtener(id, usuarioActual.obtener()));
     }
 
     @PostMapping
@@ -105,7 +105,7 @@ public class PersonaController {
         // Acotado: un tamano arbitrario renderiza un bitmap gigante y eso es
         // un OOM gratis para cualquiera con sesion.
         int tamanoPx = Math.max(128, Math.min(tamano, 1024));
-        byte[] png = personaService.credencialPng(id, usuarioActual.conjuntoId(), tamanoPx);
+        byte[] png = personaService.credencialPng(id, usuarioActual.obtener(), tamanoPx);
 
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noStore())

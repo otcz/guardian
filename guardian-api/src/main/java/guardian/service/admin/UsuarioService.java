@@ -8,7 +8,11 @@ import java.util.List;
 
 public interface UsuarioService {
 
-    List<UsuarioResponse> listar(Long conjuntoId);
+    /**
+     * Cuentas de la sede, SIN la del propio ejecutor: un administrador no se
+     * gestiona a si mismo desde el panel — su clave la cambia en "Mi cuenta".
+     */
+    List<UsuarioResponse> listar(UsuarioAutenticado ejecutor);
 
     /**
      * Da de alta la cuenta de una persona con clave inicial igual a su documento.
@@ -25,4 +29,17 @@ public interface UsuarioService {
 
     /** Devuelve la clave al documento y vuelve a exigir el cambio en el proximo ingreso. */
     UsuarioResponse restablecerClave(Long id, UsuarioAutenticado ejecutor);
+
+    /**
+     * Asigna una clave elegida por la administracion.
+     *
+     * <p>Es lo que hace falta cuando el guardia esta parado en la porteria sin
+     * poder entrar: restablecer al documento no sirve si el documento es
+     * justamente lo que no recuerda, o si esa clave ya se filtro.</p>
+     *
+     * <p>La cuenta queda con cambio obligatorio en el proximo ingreso. Quien
+     * la asigno la conoce, asi que mientras el dueno no la cambie no es
+     * realmente suya.</p>
+     */
+    UsuarioResponse asignarClave(Long id, String claveNueva, UsuarioAutenticado ejecutor);
 }

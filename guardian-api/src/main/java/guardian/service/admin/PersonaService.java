@@ -8,9 +8,13 @@ import org.springframework.data.domain.Pageable;
 
 public interface PersonaService {
 
-    Page<PersonaResponse> buscar(Long conjuntoId, String texto, Pageable pageable);
+    /**
+     * Listado del panel. Excluye al propio ejecutor: el administrador no se
+     * gestiona a si mismo desde aca.
+     */
+    Page<PersonaResponse> buscar(UsuarioAutenticado ejecutor, String texto, Pageable pageable);
 
-    PersonaResponse obtener(Long id, Long conjuntoId);
+    PersonaResponse obtener(Long id, UsuarioAutenticado ejecutor);
 
     PersonaRegistrada crear(PersonaRequest request, UsuarioAutenticado ejecutor);
 
@@ -21,7 +25,7 @@ public interface PersonaService {
     /** Emite (o reemite) la credencial QR. Exige que la persona tenga foto. */
     String emitirCredencial(Long id, UsuarioAutenticado ejecutor);
 
-    byte[] credencialPng(Long id, Long conjuntoId, int tamanoPx);
+    byte[] credencialPng(Long id, UsuarioAutenticado ejecutor, int tamanoPx);
 
     /**
      * Revoca la credencial activa sin emitir otra. Es el freno de emergencia

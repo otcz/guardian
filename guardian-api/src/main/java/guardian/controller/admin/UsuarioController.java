@@ -1,6 +1,7 @@
 package guardian.controller.admin;
 
 import guardian.constant.ApiEndpoint;
+import guardian.dto.admin.ClaveAsignadaRequest;
 import guardian.dto.admin.UsuarioRequest;
 import guardian.dto.admin.UsuarioResponse;
 import guardian.security.UsuarioActual;
@@ -30,7 +31,7 @@ public class UsuarioController {
 
     @GetMapping
     public ResponseEntity<List<UsuarioResponse>> listar() {
-        return ResponseEntity.ok(usuarioService.listar(usuarioActual.conjuntoId()));
+        return ResponseEntity.ok(usuarioService.listar(usuarioActual.obtener()));
     }
 
     @PostMapping
@@ -59,5 +60,14 @@ public class UsuarioController {
     @PatchMapping("/{id}/restablecer-clave")
     public ResponseEntity<UsuarioResponse> restablecerClave(@PathVariable Long id) {
         return ResponseEntity.ok(usuarioService.restablecerClave(id, usuarioActual.obtener()));
+    }
+
+    /** Clave elegida por la administracion, para cuando restablecer no alcanza. */
+    @PatchMapping("/{id}/clave")
+    public ResponseEntity<UsuarioResponse> asignarClave(
+            @PathVariable Long id, @Valid @RequestBody ClaveAsignadaRequest request) {
+
+        return ResponseEntity.ok(usuarioService.asignarClave(
+                id, request.getClaveNueva(), usuarioActual.obtener()));
     }
 }

@@ -63,9 +63,7 @@
           <select class="rol-en-linea"
                   [ngModel]="usuario.rol"
                   [ngModelOptions]="{ standalone: true }"
-                  [disabled]="esMiCuenta(usuario)"
-                  [pTooltip]="esMiCuenta(usuario) ? 'Tu propia cuenta' : ''"
-                  tooltipPosition="top"
+                  [attr.aria-label]="'Rol de ' + usuario.nombreCompleto"
                   (ngModelChange)="cambiarRol(usuario, $event)">
             <option *ngFor="let rol of roles" [value]="rol.codigo">{{ rol.valor }}</option>
           </select>
@@ -82,9 +80,16 @@
         </td>
         <td class="derecha acciones">
           <button type="button" class="accion"
+                  (click)="abrirAsignarClave(usuario)"
+                  [attr.aria-label]="'Asignar contraseña a ' + usuario.nombreCompleto"
+                  pTooltip="Asignar contraseña" tooltipPosition="left">
+            <i class="pi pi-key"></i>
+          </button>
+          <button type="button" class="accion"
                   (click)="restablecerClave(usuario)"
-                  [attr.aria-label]="'Restablecer la contraseña de ' + usuario.nombreCompleto"
-                  pTooltip="Restablecer contraseña" tooltipPosition="left">
+                  [attr.aria-label]="'Restablecer al documento la contraseña de '
+                    + usuario.nombreCompleto"
+                  pTooltip="Restablecer al documento" tooltipPosition="left">
             <i class="pi pi-refresh"></i>
           </button>
           <button type="button" class="accion"
@@ -100,20 +105,15 @@
                sesión que el guardia ya tiene abierta en la tablet. -->
           <span class="separador" aria-hidden="true"></span>
 
-          <span class="envoltura-accion"
-                [pTooltip]="esMiCuenta(usuario)
-                  ? 'Tu propia cuenta'
-                  : (bloqueado(usuario) ? 'Levantar bloqueo' : 'Bloquear')"
-                tooltipPosition="left">
-            <button type="button" class="accion candado"
-                    [class.puesto]="bloqueado(usuario)"
-                    [disabled]="esMiCuenta(usuario)"
-                    (click)="alternarBloqueo(usuario)"
-                    [attr.aria-label]="(bloqueado(usuario) ? 'Levantar el bloqueo de ' : 'Bloquear a ')
-                      + usuario.nombreCompleto">
-              <i class="pi" [ngClass]="bloqueado(usuario) ? 'pi-lock-open' : 'pi-lock'"></i>
-            </button>
-          </span>
+          <button type="button" class="accion candado"
+                  [class.puesto]="bloqueado(usuario)"
+                  (click)="alternarBloqueo(usuario)"
+                  [attr.aria-label]="(bloqueado(usuario) ? 'Levantar el bloqueo de ' : 'Bloquear a ')
+                    + usuario.nombreCompleto"
+                  [pTooltip]="bloqueado(usuario) ? 'Levantar bloqueo' : 'Bloquear'"
+                  tooltipPosition="left">
+            <i class="pi" [ngClass]="bloqueado(usuario) ? 'pi-lock-open' : 'pi-lock'"></i>
+          </button>
         </td>
       </tr>
 
@@ -122,6 +122,50 @@
       </tr>
     </tbody>
   </table>
+
+  <gd-hoja [abierta]="!!asignandoClave"
+           titulo="Asignar contraseña"
+           [subtitulo]="asignandoClave?.nombreCompleto || ''"
+           (cerrar)="asignandoClave = null">
+
+    <form id="forma-clave" class="formulario-clave"
+          [formGroup]="formularioClave" (ngSubmit)="asignarClave()">
+      <div class="campo">
+        <label for="c-nueva">Contraseña</label>
+        <input id="c-nueva" type="password" formControlName="claveNueva"
+               autocomplete="new-password">
+        <small class="error"
+               *ngIf="formularioClave.controls.claveNueva.invalid
+                 && formularioClave.controls.claveNueva.touched">
+          Debe tener al menos 8 caracteres
+        </small>
+      </div>
+
+      <div class="campo">
+        <label for="c-confirmacion">Repetir</label>
+        <input id="c-confirmacion" type="password" formControlName="confirmacion"
+               autocomplete="new-password">
+        <small class="error" *ngIf="claveNoCoincide">Las dos no coinciden</small>
+      </div>
+
+      <div class="nota-clave">
+        <i class="pi pi-info-circle"></i>
+        <span>
+          Deberá cambiarla en su próximo ingreso. Si tenía la aplicación
+          abierta, la sesión deja de servirle.
+        </span>
+      </div>
+    </form>
+
+    <div pie>
+      <button type="button" class="alterno" (click)="asignandoClave = null">Cancelar</button>
+      <button type="submit" form="forma-clave" class="principal"
+              [disabled]="guardando || claveNoCoincide">
+        <i class="pi pi-check"></i>
+        Asignar
+      </button>
+    </div>
+  </gd-hoja>
 
   <gd-bloqueo [abierta]="!!bloqueando"
               [objetivo]="bloqueando?.nombreCompleto || ''"

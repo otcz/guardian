@@ -141,6 +141,14 @@ export class AdminService {
     return this.http.patch<Usuario>(`${this.base}/usuarios/${id}/restablecer-clave`, {});
   }
 
+  /**
+   * Clave elegida por la administración. Restablecer al documento no sirve
+   * cuando el documento es justamente lo que la persona no recuerda.
+   */
+  asignarClave(id: number, claveNueva: string): Observable<Usuario> {
+    return this.http.patch<Usuario>(`${this.base}/usuarios/${id}/clave`, { claveNueva });
+  }
+
   // ── Bloqueos ─────────────────────────────────────────────────────────────
 
   /**

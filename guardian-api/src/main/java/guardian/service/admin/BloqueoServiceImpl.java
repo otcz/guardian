@@ -35,13 +35,10 @@ public class BloqueoServiceImpl implements BloqueoService {
     @Override
     @Transactional
     public void bloquearPersona(Long id, String motivo, UsuarioAutenticado admin) {
+        // Sin chequeo aparte: personaDe() ya deja fuera la del ejecutor, que
+        // es lo que impide que un administrador se bloquee y quede sin nadie
+        // adentro capaz de revertirlo.
         GdPersona persona = personaDe(id, admin);
-
-        // Bloquear al administrador que ejecuta la accion lo dejaria fuera del
-        // sistema sin nadie que pueda revertirlo.
-        if (persona.getId().equals(admin.getPersonaId())) {
-            throw GuardianException.solicitudInvalida(MensajesGlobales.NO_INACTIVARSE_A_SI_MISMO);
-        }
 
         aplicarBloqueo(persona, motivo, admin, "persona", id);
         personaRepository.save(persona);
@@ -100,10 +97,6 @@ public class BloqueoServiceImpl implements BloqueoService {
     public void bloquearUsuario(Long id, String motivo, UsuarioAutenticado admin) {
         GdUsuario usuario = usuarioDe(id, admin);
 
-        if (usuario.getId().equals(admin.getUsuarioId())) {
-            throw GuardianException.solicitudInvalida(MensajesGlobales.NO_INACTIVARSE_A_SI_MISMO);
-        }
-
         aplicarBloqueo(usuario, motivo, admin, "usuario", id);
         usuarioRepository.save(usuario);
         // Sin esto, el guardia recien bloqueado sigue escaneando hasta que
@@ -149,8 +142,15 @@ public class BloqueoServiceImpl implements BloqueoService {
 
     // ── Resolucion con frontera de sede ──────────────────────────────────────
 
+    /**
+     * La persona del ejecutor no existe para el: mismo 404 que la de otra
+     * sede. Antes se resolvia y se frenaba despues con un 400 que decia "no
+     * puedes inactivarte a ti mismo" — un mensaje distinto confirma que el
+     * registro existe, y la regla quedaba repetida accion por accion.
+     */
     private GdPersona personaDe(Long id, UsuarioAutenticado admin) {
         return personaRepository.findById(id)
+                .filter(p -> !p.getId().equals(admin.getPersonaId()))
                 .filter(p -> p.getConjunto().getId().equals(admin.getConjuntoId()))
                 .orElseThrow(() -> GuardianException.noEncontrado(MensajesGlobales.NO_ENCONTRADO));
     }
@@ -169,6 +169,7 @@ public class BloqueoServiceImpl implements BloqueoService {
 
     private GdUsuario usuarioDe(Long id, UsuarioAutenticado admin) {
         return usuarioRepository.findById(id)
+                .filter(u -> !u.getId().equals(admin.getUsuarioId()))
                 .filter(u -> u.getPersona().getConjunto().getId().equals(admin.getConjuntoId()))
                 .orElseThrow(() -> GuardianException.noEncontrado(MensajesGlobales.NO_ENCONTRADO));
     }

@@ -3,7 +3,6 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { AdminService } from '../../../core/services/admin.service';
-import { AuthService } from '../../../core/services/auth.service';
 import { Parametro, Persona, Usuario } from '../../../core/models/admin.model';
 
 /**
@@ -35,10 +34,9 @@ export class UsuariosComponent implements OnInit {
     rol: ['', [Validators.required]]
   });
 
-  constructor(
-    private readonly admin: AdminService,
-    private readonly auth: AuthService
-  ) {}
+  // Sin AuthService: la cuenta propia ya no llega a esta tabla, así que no hay
+  // nada que comparar contra la sesión. El backend la excluye del listado.
+  constructor(private readonly admin: AdminService) {}
 
   ngOnInit(): void {
     this.cargar();
@@ -107,12 +105,55 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
+  // ── Contraseña asignada por la administración ────────────────────────────
+
+  /** Cuenta a la que se le va a poner una clave. Null = diálogo cerrado. */
+  asignandoClave: Usuario | null = null;
+
+  readonly formularioClave = this.fb.nonNullable.group({
+    claveNueva: ['', [Validators.required, Validators.minLength(8)]],
+    confirmacion: ['', [Validators.required]]
+  });
+
+  abrirAsignarClave(usuario: Usuario): void {
+    this.asignandoClave = usuario;
+    this.formularioClave.reset();
+  }
+
   /**
-   * El backend impide cambiarse el propio rol; el select se deshabilita para
-   * no ofrecer una accion que va a fallar.
+   * Confirmación en dos campos: la clave no se ve mientras se escribe y quien
+   * la dicta por teléfono no puede permitirse un error de tecleo — el dueño
+   * quedaría fuera sin que nadie sepa por qué.
    */
-  esMiCuenta(usuario: Usuario): boolean {
-    return this.auth.sesion?.usuarioId === usuario.id;
+  get claveNoCoincide(): boolean {
+    const { claveNueva, confirmacion } = this.formularioClave.getRawValue();
+    return confirmacion.length > 0 && claveNueva !== confirmacion;
+  }
+
+  asignarClave(): void {
+    const usuario = this.asignandoClave;
+    if (!usuario || this.formularioClave.invalid || this.claveNoCoincide || this.guardando) {
+      this.formularioClave.markAllAsTouched();
+      return;
+    }
+
+    this.guardando = true;
+    this.error = null;
+    this.aviso = null;
+
+    this.admin.asignarClave(usuario.id, this.formularioClave.getRawValue().claveNueva).subscribe({
+      next: () => {
+        this.guardando = false;
+        this.asignandoClave = null;
+        this.aviso = `Contraseña asignada a ${usuario.nombreCompleto}. `
+          + 'Deberá cambiarla en su próximo ingreso.';
+        this.cargar();
+      },
+      error: (fallo: HttpErrorResponse) => {
+        this.guardando = false;
+        this.error = fallo.error?.mensaje ?? 'No pudimos asignar la contraseña.';
+      }
+    });
   }
 
   cambiarRol(usuario: Usuario, rol: string): void {

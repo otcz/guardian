@@ -58,9 +58,10 @@ public class PersonaServiceImpl implements PersonaService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PersonaResponse> buscar(Long conjuntoId, String texto, Pageable pageable) {
+    public Page<PersonaResponse> buscar(UsuarioAutenticado ejecutor, String texto, Pageable pageable) {
         Specification<GdPersona> filtro = Specification
-                .where(PersonaSpecs.delConjunto(conjuntoId))
+                .where(PersonaSpecs.delConjunto(ejecutor.getConjuntoId()))
+                .and(PersonaSpecs.exceptoLaPropia(ejecutor.getPersonaId()))
                 .and(PersonaSpecs.coincideCon(texto));
 
         return personaRepository.findAll(filtro, ordenar(pageable)).map(this::mapear);
@@ -77,8 +78,8 @@ public class PersonaServiceImpl implements PersonaService {
 
     @Override
     @Transactional(readOnly = true)
-    public PersonaResponse obtener(Long id, Long conjuntoId) {
-        return mapear(obtenerEntidad(id, conjuntoId));
+    public PersonaResponse obtener(Long id, UsuarioAutenticado ejecutor) {
+        return mapear(obtenerEntidad(id, ejecutor));
     }
 
     @Override
@@ -157,7 +158,7 @@ public class PersonaServiceImpl implements PersonaService {
     @Override
     @Transactional
     public PersonaResponse actualizar(Long id, PersonaRequest request, UsuarioAutenticado ejecutor) {
-        GdPersona persona = obtenerEntidad(id, ejecutor.getConjuntoId());
+        GdPersona persona = obtenerEntidad(id, ejecutor);
         String documento = request.getDocumento().trim().toUpperCase();
 
         personaRepository.findByDocumento(documento)
@@ -180,7 +181,7 @@ public class PersonaServiceImpl implements PersonaService {
     @Override
     @Transactional
     public PersonaResponse cambiarEstado(Long id, boolean activa, UsuarioAutenticado ejecutor) {
-        GdPersona persona = obtenerEntidad(id, ejecutor.getConjuntoId());
+        GdPersona persona = obtenerEntidad(id, ejecutor);
         persona.setActivo(activa ? Codigos.SI : Codigos.NO);
         persona.setUsuarioModificador(ejecutor.getDocumento());
 
@@ -192,15 +193,15 @@ public class PersonaServiceImpl implements PersonaService {
     @Override
     @Transactional
     public String emitirCredencial(Long id, UsuarioAutenticado ejecutor) {
-        GdPersona persona = obtenerEntidad(id, ejecutor.getConjuntoId());
+        GdPersona persona = obtenerEntidad(id, ejecutor);
         return credencialQrService.construirPayload(
                 credencialQrService.emitirPermanente(persona, ejecutor.getDocumento()));
     }
 
     @Override
     @Transactional
-    public byte[] credencialPng(Long id, Long conjuntoId, int tamanoPx) {
-        GdPersona persona = obtenerEntidad(id, conjuntoId);
+    public byte[] credencialPng(Long id, UsuarioAutenticado ejecutor, int tamanoPx) {
+        GdPersona persona = obtenerEntidad(id, ejecutor);
 
         GdCredencialQr credencial = credencialRepository
                 .findFirstByPersonaIdAndTipoAndActivoOrderByIdDesc(
@@ -215,7 +216,7 @@ public class PersonaServiceImpl implements PersonaService {
     @Override
     @Transactional
     public void revocarCredencial(Long id, UsuarioAutenticado ejecutor) {
-        GdPersona persona = obtenerEntidad(id, ejecutor.getConjuntoId());
+        GdPersona persona = obtenerEntidad(id, ejecutor);
 
         GdCredencialQr credencial = credencialRepository
                 .findFirstByPersonaIdAndTipoAndActivoOrderByIdDesc(
@@ -229,7 +230,7 @@ public class PersonaServiceImpl implements PersonaService {
     @Override
     @Transactional
     public void eliminar(Long id, UsuarioAutenticado ejecutor) {
-        GdPersona persona = obtenerEntidad(id, ejecutor.getConjuntoId());
+        GdPersona persona = obtenerEntidad(id, ejecutor);
 
         // Eliminar la propia persona dejaria al admin con una sesion valida
         // apuntando a un usuario inexistente, y potencialmente sin ningun
@@ -285,6 +286,21 @@ public class PersonaServiceImpl implements PersonaService {
                 .ifPresent(otra -> {
                     throw GuardianException.conflicto(MensajesGlobales.TELEFONO_YA_REGISTRADO);
                 });
+    }
+
+    /**
+     * Resuelve una persona del panel.
+     *
+     * <p>Si no esta en la lista, tampoco se puede operar por id: el ejecutor
+     * queda fuera con el MISMO 404 que una persona de otra sede. Esconderla de
+     * la tabla y dejar el endpoint abierto seria una cortina, no una regla —
+     * bastaria un PUT a mano para inactivarse o borrarse.</p>
+     */
+    private GdPersona obtenerEntidad(Long id, UsuarioAutenticado ejecutor) {
+        if (id.equals(ejecutor.getPersonaId())) {
+            throw GuardianException.noEncontrado(MensajesGlobales.NO_ENCONTRADO);
+        }
+        return obtenerEntidad(id, ejecutor.getConjuntoId());
     }
 
     private GdPersona obtenerEntidad(Long id, Long conjuntoId) {

@@ -24,3 +24,38 @@
     cursor: not-allowed;
   }
 }
+
+/* ── Diálogo de contraseña ───────────────────────────────────────────────── */
+
+.formulario-clave {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+
+  .campo {
+    flex: 1 1 auto;
+  }
+}
+
+/* Consecuencia, no ayuda de un campo: asignar una clave corta la sesión que
+   la persona pueda tener abierta, y eso hay que decirlo antes de guardar. */
+.nota-clave {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e-2);
+  padding: var(--e-3);
+  font-size: var(--t-sm);
+  color: var(--text-default);
+  background: var(--bg-soft);
+  border-radius: var(--r-md);
+
+  i {
+    color: var(--accent);
+    margin-top: 2px;
+  }
+}
+
+.error {
+  font-size: var(--t-xs);
+  color: var(--deny);
+}
