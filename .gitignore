@@ -36,6 +36,8 @@ coverage/
 ### Logs ###
 *.log
 npm-debug.log*
+# Salida de los procesos que lanza guardian.ps1
+.guardian/
 
 ### OS ###
 .DS_Store

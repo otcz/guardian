@@ -3,10 +3,17 @@ name: guardian
 # ============================================================================
 # GUARDIAN — stack de desarrollo local
 # ============================================================================
-# Para trabajar solo la base (backend y frontend corriendo en tu maquina):
-#   docker compose -f infra/docker-compose.yml up -d postgres
+# Para el dia a dia NO uses esto directamente:
 #
-# Para levantar todo:
+#   .\guardian.ps1 start
+#
+# Ese script levanta Postgres aca y el backend y el frontend SUELTOS en la
+# maquina, que es como conviene desarrollar: con el backend en un contenedor
+# cada cambio de codigo obliga a reconstruir la imagen (Maven baja, compila y
+# empaqueta adentro), y el frontend perderia la recarga en caliente.
+#
+# El servicio guardian-api de abajo existe para probar la imagen que despues
+# corre en Cloud Run, no para trabajar:
 #   docker compose -f infra/docker-compose.yml up -d --build
 # ============================================================================
 
@@ -58,11 +65,19 @@ services:
       GUARDIAN_JWT_SECRET: ${GUARDIAN_JWT_SECRET:-guardian-local-dev-secret-change-me-32b!}
       GUARDIAN_QR_HMAC_SECRET: ${GUARDIAN_QR_HMAC_SECRET:-guardian-local-qr-hmac-change-me-32bytes!}
 
-      GUARDIAN_ADMIN_DOCUMENTO: ${GUARDIAN_ADMIN_DOCUMENTO:-ADMIN}
-      GUARDIAN_ADMIN_CLAVE: ${GUARDIAN_ADMIN_CLAVE:-230614}
-      GUARDIAN_CONJUNTO_NOMBRE: ${GUARDIAN_CONJUNTO_NOMBRE:-Conjunto Residencial}
+      # La UNICA cuenta que siembra el sistema. Un GUARDIAN nuevo arranca sin
+      # sedes: el super administrador las crea desde el panel de plataforma.
+      #
+      # Si esta clave se deja en su default, la cuenta nace con cambio
+      # obligatorio en el primer ingreso — el sistema no deja entrar de largo
+      # con una clave que esta publicada en git.
+      GUARDIAN_SUPER_ADMIN_DOCUMENTO: ${GUARDIAN_SUPER_ADMIN_DOCUMENTO:-SUPERADMIN}
+      GUARDIAN_SUPER_ADMIN_CLAVE: ${GUARDIAN_SUPER_ADMIN_CLAVE:-2306}
 
       STORAGE_TYPE: ${STORAGE_TYPE:-local}
+      # OJO: dentro del contenedor las fotos van a un volumen de Docker, no a
+      # ./data-fotos. Si alternas entre correr el backend aca y en la maquina,
+      # cada uno ve SUS fotos y las del otro salen rotas.
       STORAGE_LOCAL_PATH: /data/fotos
       # Dentro del contenedor la app escucha en 8080 (el default de server.port
       # es 8484 para el dev local SIN docker; aca se fija explicito para que el
