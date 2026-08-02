@@ -266,6 +266,15 @@ export class PersonasComponent implements OnInit {
     return persona.activo === 'S';
   }
 
+  /**
+   * Tiene cuenta de acceso pero nadie la ha habilitado todavía, así que no
+   * puede entrar por más que su registro figure activo. Es el paso que más se
+   * olvida después de crear a alguien.
+   */
+  cuentaSinHabilitar(persona: Persona): boolean {
+    return !!persona.rol && persona.usuarioActivo === 'N';
+  }
+
   bloqueada(persona: Persona): boolean {
     return persona.bloqueado === 'S';
   }

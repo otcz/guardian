@@ -118,7 +118,9 @@
         <th>Casa</th>
         <th>Edad</th>
         <th>QR</th>
-        <th>Estado</th>
+        <!-- "Registro" y no "Estado": el estado de la CUENTA se administra en
+             Usuarios y va bajo el nombre. Dos cosas distintas, dos nombres. -->
+        <th>Registro</th>
         <th></th>
       </tr>
     </thead>
@@ -132,7 +134,16 @@
         </td>
         <td class="fuerte">
           {{ persona.nombreCompleto }}
-          <small class="rol" *ngIf="persona.rol">{{ persona.rol }}</small>
+          <small class="rol" *ngIf="persona.rol">
+            {{ persona.rol }}
+            <!-- Lo que faltaba: la columna de estado habla del REGISTRO de la
+                 persona, no de su cuenta. Sin esto la fila decía "Activa"
+                 mientras el interesado recibía "tu cuenta no está habilitada"
+                 al intentar entrar. -->
+            <span class="cuenta-pendiente" *ngIf="cuentaSinHabilitar(persona)">
+              · cuenta sin habilitar
+            </span>
+          </small>
         </td>
         <td>
           <span class="tipo-doc">{{ persona.tipoDocumento }}</span>

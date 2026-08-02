@@ -61,6 +61,12 @@
   color: var(--text-muted);
 }
 
+/* Ámbar: no es un error, es un paso que falta. El administrador tiene que
+   habilitar la cuenta en Usuarios para que la persona pueda entrar. */
+.cuenta-pendiente {
+  color: var(--warn);
+}
+
 .tabla .ok {
   color: var(--ok);
 }

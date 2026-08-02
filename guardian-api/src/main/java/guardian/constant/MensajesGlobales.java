@@ -12,8 +12,15 @@ public final class MensajesGlobales {
     // ── Autenticacion ────────────────────────────────────────────────────────
     public static final String CREDENCIALES_INVALIDAS =
             "El documento o la contrasena no son correctos.";
+    /**
+     * Dice "cuenta" y no "usuario" a proposito. En el panel de Personas el
+     * registro de alguien puede figurar como "Activa" mientras su CUENTA sigue
+     * sin habilitar — son dos cosas distintas — y el mensaje anterior parecia
+     * contradecir a la pantalla.
+     */
     public static final String USUARIO_INACTIVO =
-            "Tu usuario esta inactivo. Comunicate con la administracion del conjunto.";
+            "Tu cuenta todavia no esta habilitada. "
+            + "Comunicate con la administracion del conjunto.";
     public static final String DEBE_CAMBIAR_CLAVE =
             "Debes cambiar tu contrasena antes de continuar.";
     public static final String CLAVE_ACTUAL_INCORRECTA =
