@@ -437,8 +437,12 @@ public class PersonaServiceImpl implements PersonaService {
                 .casaIdentificador(vinculo.map(v -> v.getCasa().getIdentificador()).orElse(null))
                 .parentesco(vinculo.map(GdResidenteCasa::getParentesco).orElse(null))
                 .tieneCredencial(conCredencial)
+                .usuarioId(usuario.map(GdUsuario::getId).orElse(null))
                 .rol(usuario.map(GdUsuario::getRol).orElse(null))
                 .usuarioActivo(usuario.map(GdUsuario::getActivo).orElse(null))
+                .usuarioBloqueado(usuario.map(GdUsuario::getBloqueado).orElse(null))
+                .usuarioMotivoBloqueo(usuario.map(GdUsuario::getMotivoBloqueo).orElse(null))
+                .usuarioUltimoIngreso(usuario.map(GdUsuario::getFechaUltimoIngreso).orElse(null))
                 .build();
     }
 }

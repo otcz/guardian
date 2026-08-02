@@ -118,9 +118,11 @@
         <th>Casa</th>
         <th>Edad</th>
         <th>QR</th>
-        <!-- "Registro" y no "Estado": el estado de la CUENTA se administra en
-             Usuarios y va bajo el nombre. Dos cosas distintas, dos nombres. -->
+        <!-- Dos columnas y no una: el registro dice si entra al CONJUNTO,
+             el acceso si entra a la APLICACIÓN. Verlas juntas es lo que
+             evita el "dice Activa pero no puede entrar". -->
         <th>Registro</th>
+        <th>Acceso</th>
         <th></th>
       </tr>
     </thead>
@@ -134,16 +136,7 @@
         </td>
         <td class="fuerte">
           {{ persona.nombreCompleto }}
-          <small class="rol" *ngIf="persona.rol">
-            {{ persona.rol }}
-            <!-- Lo que faltaba: la columna de estado habla del REGISTRO de la
-                 persona, no de su cuenta. Sin esto la fila decía "Activa"
-                 mientras el interesado recibía "tu cuenta no está habilitada"
-                 al intentar entrar. -->
-            <span class="cuenta-pendiente" *ngIf="cuentaSinHabilitar(persona)">
-              · cuenta sin habilitar
-            </span>
-          </small>
+          <small class="rol" *ngIf="persona.rol">{{ persona.rol }}</small>
         </td>
         <td>
           <span class="tipo-doc">{{ persona.tipoDocumento }}</span>
@@ -164,6 +157,20 @@
             {{ estado(persona) }}
           </span>
         </td>
+
+        <!-- Toda la fila de acceso es un botón: abre la hoja donde se
+             administra la cuenta. Sin cuenta, invita a darla. -->
+        <td>
+          <button type="button" class="acceso" (click)="abrirAcceso(persona)"
+                  [class.sin-cuenta]="!tieneCuenta(persona)"
+                  [class.pendiente]="cuentaSinHabilitar(persona)"
+                  [class.bloqueada]="cuentaBloqueada(persona)"
+                  [attr.aria-label]="'Administrar el acceso de ' + persona.nombreCompleto">
+            <i class="pi" [ngClass]="tieneCuenta(persona) ? 'pi-key' : 'pi-plus-circle'"></i>
+            {{ estadoAcceso(persona) }}
+          </button>
+        </td>
+
         <td class="derecha acciones">
           <button type="button" class="accion"
                   (click)="editar(persona)"
@@ -215,7 +222,7 @@
       </tr>
 
       <tr *ngIf="personas.length === 0">
-        <td colspan="8" class="vacio">No encontramos personas con ese criterio.</td>
+        <td colspan="9" class="vacio">No encontramos personas con ese criterio.</td>
       </tr>
     </tbody>
   </table>
@@ -224,5 +231,161 @@
               [objetivo]="bloqueando?.nombreCompleto || ''"
               (confirmar)="confirmarBloqueo($event)"
               (cerrar)="bloqueando = null">
+  </gd-bloqueo>
+
+  <!-- ── Acceso a la aplicación ──────────────────────────────────────────
+       Todo lo que antes vivía en el panel de Usuarios, aquí, sobre la
+       persona que ya se está mirando. -->
+  <gd-hoja [abierta]="!!gestionandoAcceso"
+           titulo="Acceso a la aplicación"
+           [subtitulo]="gestionandoAcceso?.nombreCompleto || ''"
+           (cerrar)="gestionandoAcceso = null">
+
+    <ng-container *ngIf="gestionandoAcceso as p">
+
+      <div class="aviso-acceso" *ngIf="avisoAcceso">
+        <i class="pi pi-check-circle"></i>
+        <span>{{ avisoAcceso }}</span>
+      </div>
+
+      <!-- ── Sin cuenta: se ofrece crearla ───────────────────────────── -->
+      <ng-container *ngIf="!tieneCuenta(p)">
+        <p class="explicacion">
+          {{ p.nombres }} está registrada y puede entrar al conjunto con su QR,
+          pero no tiene cuenta para abrir la aplicación.
+        </p>
+
+        <form id="forma-acceso" [formGroup]="formularioAcceso" (ngSubmit)="darAcceso()">
+          <div class="campo">
+            <label for="acceso-rol">Rol</label>
+            <select id="acceso-rol" formControlName="rol">
+              <option value="">Selecciona…</option>
+              <option *ngFor="let rol of roles" [value]="rol.codigo">{{ rol.valor }}</option>
+            </select>
+          </div>
+        </form>
+
+        <div class="credencial">
+          <i class="pi pi-key"></i>
+          <div class="detalle">
+            <span class="linea">
+              Entrará con usuario <code>{{ p.documento }}</code>
+              y contraseña <code>{{ claveInicial }}</code>
+            </span>
+            <span class="nota">Tendrá que cambiarla en su primer ingreso.</span>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── Con cuenta: se administra ───────────────────────────────── -->
+      <ng-container *ngIf="tieneCuenta(p)">
+        <div class="ficha-cuenta">
+          <div class="dato">
+            <span class="etiqueta">Usuario</span>
+            <code>{{ p.documento }}</code>
+          </div>
+          <div class="dato">
+            <span class="etiqueta">Último ingreso</span>
+            <strong>{{ (p.usuarioUltimoIngreso | date:'dd/MM/yyyy HH:mm') || 'Nunca' }}</strong>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="acceso-rol-actual">Rol</label>
+          <select id="acceso-rol-actual" [ngModel]="p.rol"
+                  [ngModelOptions]="{ standalone: true }"
+                  (ngModelChange)="cambiarRol($event)">
+            <option *ngFor="let rol of roles" [value]="rol.codigo">{{ rol.valor }}</option>
+          </select>
+        </div>
+
+        <h3 class="gd-titulo-seccion">Contraseña</h3>
+        <div class="gd-lista">
+          <button type="button" class="gd-fila gd-presionable" (click)="cambiandoClave = true">
+            <i class="pi pi-key"></i>
+            <span class="etiqueta">Asignar una contraseña</span>
+            <i class="pi pi-chevron-right marca"></i>
+          </button>
+          <button type="button" class="gd-fila gd-presionable" (click)="restablecerClave()">
+            <i class="pi pi-refresh"></i>
+            <span class="etiqueta">Volver a {{ claveInicial }}</span>
+          </button>
+        </div>
+
+        <h3 class="gd-titulo-seccion">Estado de la cuenta</h3>
+        <div class="gd-lista">
+          <button type="button" class="gd-fila gd-presionable" (click)="alternarEstadoCuenta()">
+            <i class="pi" [ngClass]="p.usuarioActivo === 'S' ? 'pi-ban' : 'pi-check'"></i>
+            <span class="etiqueta">
+              {{ p.usuarioActivo === 'S' ? 'Inhabilitar la cuenta' : 'Habilitar la cuenta' }}
+            </span>
+          </button>
+          <!-- El candado es la otra llave: además de apagar la cuenta, corta
+               la sesión que la persona tenga abierta en ese momento. -->
+          <button type="button" class="gd-fila gd-presionable"
+                  [class.gd-fila--destructiva]="!cuentaBloqueada(p)"
+                  (click)="alternarBloqueoCuenta()">
+            <i class="pi" [ngClass]="cuentaBloqueada(p) ? 'pi-lock-open' : 'pi-lock'"></i>
+            <span class="etiqueta">
+              {{ cuentaBloqueada(p) ? 'Levantar el bloqueo' : 'Bloquear la cuenta' }}
+            </span>
+          </button>
+        </div>
+      </ng-container>
+    </ng-container>
+
+    <div pie>
+      <button type="button" class="alterno" (click)="gestionandoAcceso = null">Cerrar</button>
+      <button type="submit" form="forma-acceso" class="principal"
+              *ngIf="gestionandoAcceso && !tieneCuenta(gestionandoAcceso)"
+              [disabled]="guardando">
+        <i class="pi pi-check"></i>
+        Dar acceso
+      </button>
+    </div>
+  </gd-hoja>
+
+  <!-- Sub-hoja: escribir la contraseña. Va aparte para que la de acceso no
+       se llene de campos que casi nunca se usan. -->
+  <gd-hoja [abierta]="cambiandoClave" titulo="Asignar contraseña"
+           [subtitulo]="gestionandoAcceso?.nombreCompleto || ''"
+           (cerrar)="cambiandoClave = false">
+    <form id="forma-clave" class="formulario-clave"
+          [formGroup]="formularioClave" (ngSubmit)="asignarClave()">
+      <div class="campo">
+        <label for="c-nueva">Contraseña</label>
+        <input id="c-nueva" type="password" formControlName="claveNueva"
+               autocomplete="new-password">
+        <small class="error"
+               *ngIf="formularioClave.controls.claveNueva.invalid
+                 && formularioClave.controls.claveNueva.touched">
+          Debe tener al menos 8 caracteres
+        </small>
+      </div>
+      <div class="campo">
+        <label for="c-confirmacion">Repetir</label>
+        <input id="c-confirmacion" type="password" formControlName="confirmacion"
+               autocomplete="new-password">
+        <small class="error" *ngIf="claveNoCoincide">Las dos no coinciden</small>
+      </div>
+    </form>
+
+    <div pie>
+      <button type="button" class="alterno" (click)="cambiandoClave = false">Cancelar</button>
+      <button type="submit" form="forma-clave" class="principal"
+              [disabled]="guardando || claveNoCoincide">
+        <i class="pi pi-check"></i>
+        Asignar
+      </button>
+    </div>
+  </gd-hoja>
+
+  <gd-bloqueo [abierta]="bloqueandoCuenta"
+              [objetivo]="gestionandoAcceso?.nombreCompleto || ''"
+              [descripcion]="(gestionandoAcceso?.nombreCompleto || '') + ' no podrá entrar a la '
+                + 'aplicación. Si tiene una sesión abierta se cierra en cuanto guardes. '
+                + 'Seguirá entrando al conjunto con su QR.'"
+              (confirmar)="confirmarBloqueoCuenta($event)"
+              (cerrar)="bloqueandoCuenta = false">
   </gd-bloqueo>
 </div>

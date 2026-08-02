@@ -47,8 +47,18 @@ export interface Persona {
   casaIdentificador: string | null;
   parentesco: string | null;
   tieneCredencial: boolean;
+
+  /**
+   * La cuenta de la aplicación, si la tiene. Todo null cuando no — que es el
+   * caso de la mayoría: los menores y las empleadas entran con QR y nunca
+   * abren la aplicación.
+   */
+  usuarioId: number | null;
   rol: string | null;
   usuarioActivo: string | null;
+  usuarioBloqueado: string | null;
+  usuarioMotivoBloqueo: string | null;
+  usuarioUltimoIngreso: string | null;
 }
 
 export interface PersonaRequest {

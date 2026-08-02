@@ -74,3 +74,159 @@
 .tabla .sin {
   color: var(--text-muted);
 }
+
+/* ── Columna Acceso ──────────────────────────────────────────────────────
+   La celda entera es el botón: el objetivo es grande y el estado y la
+   acción son la misma cosa, que es como se lee "esto se puede tocar". */
+.acceso {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ok);
+  background: var(--ok-soft);
+  border: 1px solid transparent;
+  border-radius: var(--r-full);
+  cursor: pointer;
+  white-space: nowrap;
+
+  i {
+    font-size: 0.72rem;
+  }
+
+  /* Sin cuenta no es un problema: la mayoría de las personas de un conjunto
+     nunca abren la aplicación. Gris, e invita a darla. */
+  &.sin-cuenta {
+    color: var(--text-muted);
+    background: none;
+    border-color: var(--border-default);
+  }
+
+  &.pendiente {
+    color: var(--warn);
+    background: var(--warn-soft);
+  }
+
+  &.bloqueada {
+    color: var(--deny);
+    background: var(--deny-soft);
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      border-color: currentColor;
+    }
+  }
+}
+
+/* ── Hoja de acceso ──────────────────────────────────────────────────── */
+
+.explicacion {
+  margin: 0 0 var(--e-4);
+  font-size: var(--t-sm);
+  color: var(--text-default);
+  line-height: 1.5;
+}
+
+.aviso-acceso {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e-2);
+  margin-bottom: var(--e-4);
+  padding: var(--e-3);
+  font-size: var(--t-sm);
+  color: var(--ok);
+  background: var(--ok-soft);
+  border-radius: var(--r-md);
+}
+
+.ficha-cuenta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-4);
+  margin-bottom: var(--e-4);
+  padding: var(--e-3);
+  background: var(--bg-soft);
+  border-radius: var(--r-md);
+
+  .dato {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .etiqueta {
+    font-size: var(--t-xs);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  strong {
+    font-size: var(--t-sm);
+  }
+}
+
+.credencial {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e-3);
+  margin-top: var(--e-4);
+  padding: var(--e-3);
+  background: var(--bg-soft);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-md);
+
+  > i {
+    color: var(--accent);
+    margin-top: 2px;
+  }
+
+  .detalle {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .linea {
+    font-size: var(--t-sm);
+    color: var(--text-default);
+  }
+
+  .nota {
+    font-size: var(--t-xs);
+    color: var(--text-muted);
+  }
+}
+
+code {
+  padding: 1px 6px;
+  font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+  font-size: var(--t-sm);
+  font-weight: 700;
+  color: var(--text-strong);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-sm);
+  word-break: break-all;
+}
+
+.formulario-clave {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+.gd-lista .etiqueta {
+  flex: 1 1 auto;
+}
+
+.gd-lista .marca {
+  color: var(--text-muted);
+  font-size: var(--t-sm);
+}

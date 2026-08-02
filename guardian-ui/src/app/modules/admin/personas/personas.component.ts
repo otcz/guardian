@@ -4,7 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { AdminService } from '../../../core/services/admin.service';
-import { Casa, Parametro, Persona } from '../../../core/models/admin.model';
+import { CLAVE_INICIAL, Casa, Parametro, Persona } from '../../../core/models/admin.model';
 
 @Component({
   selector: 'gd-personas',
@@ -27,10 +27,7 @@ export class PersonasComponent implements OnInit {
   error: string | null = null;
   mostrarAlta = false;
 
-  /**
-   * Persona en edición. Null = alta. En edición no se toca la cuenta de
-   * acceso: rol y estado de la cuenta se administran en el panel de Usuarios.
-   */
+  /** Persona en edición. Null = alta. */
   editando: Persona | null = null;
 
   texto = '';
@@ -268,12 +265,238 @@ export class PersonasComponent implements OnInit {
 
   /**
    * Tiene cuenta de acceso pero nadie la ha habilitado todavía, así que no
-   * puede entrar por más que su registro figure activo. Es el paso que más se
-   * olvida después de crear a alguien.
+   * puede entrar por más que su registro figure activo.
    */
   cuentaSinHabilitar(persona: Persona): boolean {
-    return !!persona.rol && persona.usuarioActivo === 'N';
+    return this.tieneCuenta(persona) && persona.usuarioActivo === 'N';
   }
+
+  // ── Acceso a la aplicación ───────────────────────────────────────────────
+  //
+  // Una persona y su cuenta se administran DESDE EL MISMO SITIO. Antes la
+  // cuenta vivía en otro panel, y esa separación —que en la base es correcta—
+  // se le aparecía al administrador como dos pantallas que se contradecían.
+
+  /** Persona cuyo acceso se está administrando. Null = hoja cerrada. */
+  gestionandoAcceso: Persona | null = null;
+  avisoAcceso: string | null = null;
+
+  readonly formularioAcceso = this.fb.nonNullable.group({
+    rol: ['', [Validators.required]]
+  });
+
+  readonly formularioClave = this.fb.nonNullable.group({
+    claveNueva: ['', [Validators.required, Validators.minLength(8)]],
+    confirmacion: ['', [Validators.required]]
+  });
+
+  /** Sub-hoja para escribir la contraseña. Se abre encima de la de acceso. */
+  cambiandoClave = false;
+
+  tieneCuenta(persona: Persona): boolean {
+    return persona.usuarioId !== null;
+  }
+
+  cuentaBloqueada(persona: Persona): boolean {
+    return persona.usuarioBloqueado === 'S';
+  }
+
+  /** Lo que se lee en la columna Acceso, en una sola frase. */
+  estadoAcceso(persona: Persona): string {
+    if (!this.tieneCuenta(persona)) {
+      return 'Sin acceso';
+    }
+    if (this.cuentaBloqueada(persona)) {
+      return 'Bloqueada';
+    }
+    return persona.usuarioActivo === 'S' ? 'Habilitada' : 'Inhabilitada';
+  }
+
+  abrirAcceso(persona: Persona): void {
+    this.gestionandoAcceso = persona;
+    this.avisoAcceso = null;
+    this.cambiandoClave = false;
+    this.formularioAcceso.setValue({ rol: persona.rol ?? '' });
+    this.formularioClave.reset();
+  }
+
+  /** Le da acceso a la aplicación a alguien que solo era persona. */
+  darAcceso(): void {
+    const persona = this.gestionandoAcceso;
+    if (!persona || this.formularioAcceso.invalid || this.guardando) {
+      this.formularioAcceso.markAllAsTouched();
+      return;
+    }
+
+    this.guardando = true;
+    this.error = null;
+
+    this.admin.crearUsuario(persona.id, this.formularioAcceso.getRawValue().rol).subscribe({
+      next: () => {
+        this.guardando = false;
+        this.avisoAcceso = `Ya puede entrar con la contraseña ${this.claveInicial}.`;
+        this.refrescarAcceso();
+      },
+      error: (fallo: HttpErrorResponse) => {
+        this.guardando = false;
+        this.error = fallo.error?.mensaje ?? 'No pudimos crear la cuenta.';
+      }
+    });
+  }
+
+  cambiarRol(rol: string): void {
+    const persona = this.gestionandoAcceso;
+    if (!persona?.usuarioId || rol === persona.rol) {
+      return;
+    }
+
+    this.error = null;
+    this.admin.cambiarRolUsuario(persona.usuarioId, rol).subscribe({
+      next: () => this.refrescarAcceso(),
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos cambiar el rol.';
+        this.refrescarAcceso();
+      }
+    });
+  }
+
+  alternarEstadoCuenta(): void {
+    const persona = this.gestionandoAcceso;
+    if (!persona?.usuarioId) {
+      return;
+    }
+
+    this.error = null;
+    this.admin
+      .cambiarEstadoUsuario(persona.usuarioId, persona.usuarioActivo !== 'S')
+      .subscribe({
+        next: () => this.refrescarAcceso(),
+        error: (fallo: HttpErrorResponse) => {
+          this.error = fallo.error?.mensaje ?? 'No pudimos cambiar el estado de la cuenta.';
+        }
+      });
+  }
+
+  restablecerClave(): void {
+    const persona = this.gestionandoAcceso;
+    if (!persona?.usuarioId) {
+      return;
+    }
+    const seguro = window.confirm(
+      `¿Devolver la contraseña de ${persona.nombreCompleto} a ${this.claveInicial}? `
+      + 'Deberá cambiarla al entrar y su sesión abierta dejará de servirle.');
+    if (!seguro) {
+      return;
+    }
+
+    this.error = null;
+    this.admin.restablecerClave(persona.usuarioId).subscribe({
+      next: () => {
+        this.avisoAcceso = `Contraseña devuelta a ${this.claveInicial}.`;
+        this.refrescarAcceso();
+      },
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos restablecer la contraseña.';
+      }
+    });
+  }
+
+  /** La confirmación evita que un error de tecleo deje al dueño por fuera. */
+  get claveNoCoincide(): boolean {
+    const { claveNueva, confirmacion } = this.formularioClave.getRawValue();
+    return confirmacion.length > 0 && claveNueva !== confirmacion;
+  }
+
+  asignarClave(): void {
+    const persona = this.gestionandoAcceso;
+    if (!persona?.usuarioId || this.formularioClave.invalid
+        || this.claveNoCoincide || this.guardando) {
+      this.formularioClave.markAllAsTouched();
+      return;
+    }
+
+    this.guardando = true;
+    this.error = null;
+
+    this.admin.asignarClave(persona.usuarioId, this.formularioClave.getRawValue().claveNueva)
+      .subscribe({
+        next: () => {
+          this.guardando = false;
+          this.cambiandoClave = false;
+          this.formularioClave.reset();
+          this.avisoAcceso = 'Contraseña asignada. Deberá cambiarla en su próximo ingreso.';
+          this.refrescarAcceso();
+        },
+        error: (fallo: HttpErrorResponse) => {
+          this.guardando = false;
+          this.error = fallo.error?.mensaje ?? 'No pudimos asignar la contraseña.';
+        }
+      });
+  }
+
+  alternarBloqueoCuenta(): void {
+    const persona = this.gestionandoAcceso;
+    if (!persona?.usuarioId) {
+      return;
+    }
+
+    if (this.cuentaBloqueada(persona)) {
+      const seguro = window.confirm(
+        `La cuenta está bloqueada por: ${persona.usuarioMotivoBloqueo || 'sin motivo registrado'}.`
+        + '\n\n¿Levantar el bloqueo?');
+      if (!seguro) {
+        return;
+      }
+      this.admin.desbloquear('usuarios', persona.usuarioId).subscribe({
+        next: () => this.refrescarAcceso(),
+        error: (fallo: HttpErrorResponse) => {
+          this.error = fallo.error?.mensaje ?? 'No pudimos levantar el bloqueo.';
+        }
+      });
+      return;
+    }
+    this.bloqueandoCuenta = true;
+  }
+
+  /** Hoja del motivo, para bloquear la CUENTA (no la persona). */
+  bloqueandoCuenta = false;
+
+  confirmarBloqueoCuenta(motivo: string): void {
+    const persona = this.gestionandoAcceso;
+    if (!persona?.usuarioId) {
+      return;
+    }
+
+    this.error = null;
+    this.admin.bloquear('usuarios', persona.usuarioId, motivo).subscribe({
+      next: () => {
+        this.bloqueandoCuenta = false;
+        this.avisoAcceso = 'Cuenta bloqueada. Si tenía la aplicación abierta, ya salió de ella.';
+        this.refrescarAcceso();
+      },
+      error: (fallo: HttpErrorResponse) => {
+        this.bloqueandoCuenta = false;
+        this.error = fallo.error?.mensaje ?? 'No pudimos bloquear la cuenta.';
+      }
+    });
+  }
+
+  /**
+   * Recarga el listado y vuelve a apuntar la hoja a la MISMA persona: sin
+   * esto la hoja seguiría mostrando el estado anterior después de cada acción.
+   */
+  private refrescarAcceso(): void {
+    const id = this.gestionandoAcceso?.id;
+    this.admin.personas(this.texto).subscribe(pagina => {
+      this.personas = pagina.content;
+      this.gestionandoAcceso = this.personas.find(p => p.id === id) ?? null;
+      if (this.gestionandoAcceso) {
+        this.formularioAcceso.setValue({ rol: this.gestionandoAcceso.rol ?? '' });
+      }
+    });
+  }
+
+  readonly claveInicial = CLAVE_INICIAL;
 
   bloqueada(persona: Persona): boolean {
     return persona.bloqueado === 'S';

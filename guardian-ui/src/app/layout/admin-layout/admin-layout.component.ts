@@ -29,7 +29,9 @@ export class AdminLayoutComponent {
     { ruta: 'casas', etiqueta: 'Casas', icono: 'pi-building' },
     { ruta: 'personas', etiqueta: 'Personas', icono: 'pi-users' },
     { ruta: 'vehiculos', etiqueta: 'Vehículos', icono: 'pi-car' },
-    { ruta: 'usuarios', etiqueta: 'Usuarios', icono: 'pi-key' },
+    // "Usuarios" ya no está: la cuenta de alguien se administra sobre la
+    // persona, en Personas. Dos pantallas para el mismo ser humano eran la
+    // causa de que una dijera "Activa" y la otra le negara la entrada.
     { ruta: 'invitaciones', etiqueta: 'Invitaciones', icono: 'pi-ticket' },
     { ruta: 'bitacora', etiqueta: 'Bitácora', icono: 'pi-history' }
   ];

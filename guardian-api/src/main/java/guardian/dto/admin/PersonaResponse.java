@@ -33,7 +33,20 @@ public class PersonaResponse {
     /** Si ya tiene credencial QR activa. */
     private boolean tieneCredencial;
 
-    /** Rol del usuario, o null si la persona no tiene cuenta en la aplicacion. */
+    /**
+     * La cuenta de la aplicacion, si la tiene. Todo null cuando no la tiene —
+     * que es el caso de la mayoria: los menores y las empleadas entran con QR
+     * y nunca abren la aplicacion.
+     *
+     * <p>Viaja junto a la persona para que el panel pueda administrar las dos
+     * cosas en un solo lugar. Sin esto la pantalla tendria que cruzar dos
+     * listados a mano, que es justo lo que hacia que "Activa" y "cuenta sin
+     * habilitar" parecieran contradecirse.</p>
+     */
+    private Long usuarioId;
     private String rol;
     private String usuarioActivo;
+    private String usuarioBloqueado;
+    private String usuarioMotivoBloqueo;
+    private Date usuarioUltimoIngreso;
 }

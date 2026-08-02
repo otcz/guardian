@@ -9,7 +9,6 @@ import { ResumenComponent } from './resumen/resumen.component';
 import { CasasComponent } from './casas/casas.component';
 import { PersonasComponent } from './personas/personas.component';
 import { VehiculosComponent } from './vehiculos/vehiculos.component';
-import { UsuariosComponent } from './usuarios/usuarios.component';
 import { InvitacionesComponent } from './invitaciones/invitaciones.component';
 import { BitacoraComponent } from './bitacora/bitacora.component';
 
@@ -21,7 +20,9 @@ const routes: Routes = [
   { path: 'casas', component: CasasComponent },
   { path: 'personas', component: PersonasComponent },
   { path: 'vehiculos', component: VehiculosComponent },
-  { path: 'usuarios', component: UsuariosComponent },
+  // Ruta histórica: el acceso se administra en Personas desde que las dos
+  // pantallas se fundieron. Redirige para no romper enlaces guardados.
+  { path: 'usuarios', redirectTo: 'personas' },
   { path: 'invitaciones', component: InvitacionesComponent },
   { path: 'bitacora', component: BitacoraComponent }
 ];
@@ -32,7 +33,6 @@ const routes: Routes = [
     CasasComponent,
     PersonasComponent,
     VehiculosComponent,
-    UsuariosComponent,
     InvitacionesComponent,
     BitacoraComponent
   ],
