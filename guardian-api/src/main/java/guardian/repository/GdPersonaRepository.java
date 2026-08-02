@@ -17,9 +17,6 @@ public interface GdPersonaRepository
 
     Optional<GdPersona> findByTelefono(String telefono);
 
-    /** Siempre en minusculas: ver CorreoUtil. Es la llave de recuperacion. */
-    Optional<GdPersona> findByEmail(String email);
-
     boolean existsByConjuntoIdAndDocumento(Long conjuntoId, String documento);
 
     long countByConjuntoIdAndActivo(Long conjuntoId, String activo);

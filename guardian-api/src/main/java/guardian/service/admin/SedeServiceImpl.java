@@ -151,7 +151,7 @@ public class SedeServiceImpl implements SedeService {
         persona.setNombres(request.getNombres().trim());
         persona.setApellidos(request.getApellidos().trim());
         persona.setTelefono(request.getTelefono());
-        persona.setEmail(request.getEmail());
+        persona.setEmail(guardian.util.CorreoUtil.normalizar(request.getEmail()));
         persona.setActivo(Codigos.SI);
         persona.setBloqueado(Codigos.NO);
         persona.setUsuarioCreador(ejecutor.getDocumento());

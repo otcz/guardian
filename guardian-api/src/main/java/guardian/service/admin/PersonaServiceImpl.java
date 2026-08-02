@@ -99,7 +99,6 @@ public class PersonaServiceImpl implements PersonaService {
             throw GuardianException.conflicto(MensajesGlobales.DOCUMENTO_YA_REGISTRADO);
         }
         exigirTelefonoLibre(request.getTelefono(), null);
-        exigirCorreoLibre(request.getEmail(), null);
 
         GdConjunto conjunto = conjuntoRepository.findById(ejecutor.getConjuntoId())
                 .orElseThrow(() -> GuardianException.noEncontrado(MensajesGlobales.NO_ENCONTRADO));
@@ -187,7 +186,6 @@ public class PersonaServiceImpl implements PersonaService {
                     throw GuardianException.conflicto(MensajesGlobales.DOCUMENTO_YA_REGISTRADO);
                 });
         exigirTelefonoLibre(request.getTelefono(), id);
-        exigirCorreoLibre(request.getEmail(), id);
 
         persona.setDocumento(documento);
         aplicar(persona, request);
@@ -300,21 +298,18 @@ public class PersonaServiceImpl implements PersonaService {
      *
      * @param idPersona la persona que se esta editando, o null en un alta.
      */
-    /**
-     * El correo es la LLAVE DE RECUPERACION de la cuenta: si dos personas
-     * comparten uno, el codigo para restablecer llega al buzon equivocado.
-     */
-    private void exigirCorreoLibre(String email, Long idPersona) {
-        String normalizado = CorreoUtil.normalizar(email);
-        if (normalizado == null) {
-            return;
-        }
-        personaRepository.findByEmail(normalizado)
-                .filter(otra -> idPersona == null || !otra.getId().equals(idPersona))
-                .ifPresent(otra -> {
-                    throw GuardianException.conflicto(MensajesGlobales.CORREO_YA_REGISTRADO);
-                });
-    }
+    // NO se exige que el correo sea unico, y es a proposito.
+    //
+    // Se penso al reves —"si dos personas comparten uno, el codigo de
+    // recuperacion llega al buzon equivocado"— y esta mal: la recuperacion
+    // busca por DOCUMENTO y solo lee el correo para enviar. Nada en el sistema
+    // usa el correo como llave, asi que el codigo siempre sale al buzon de su
+    // dueno aunque ese buzon sea compartido.
+    //
+    // Y compartirlo es lo normal en un conjunto: el hijo menor con tarjeta de
+    // identidad que tiene cuenta usa el correo de la mama, y al adulto mayor
+    // se lo maneja un familiar. Exigir uno distinto por persona los obligaria
+    // a inventarse correos que nadie revisa — y ahi si se pierde el codigo.
 
     private void exigirTelefonoLibre(String telefono, Long idPersona) {
         if (telefono == null || telefono.trim().isEmpty()) {
