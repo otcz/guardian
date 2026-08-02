@@ -58,6 +58,9 @@ export class InvitadosComponent implements OnInit {
 
   cargar(): void {
     this.cargando = true;
+    // El aviso de error se limpia al reintentar: si sobrevive a una carga
+    // buena, queda un banner rojo encima de una lista que si cargo.
+    this.error = null;
     this.residente.invitaciones().subscribe({
       next: invitaciones => {
         this.invitaciones = invitaciones;

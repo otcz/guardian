@@ -73,6 +73,9 @@ export class PersonasComponent implements OnInit {
 
   cargar(texto = ''): void {
     this.cargando = true;
+    // El aviso de error se limpia al reintentar: si sobrevive a una carga
+    // buena, queda un banner rojo encima de una lista que si cargo.
+    this.error = null;
     this.admin.personas(texto).subscribe({
       next: pagina => {
         this.personas = pagina.content;
