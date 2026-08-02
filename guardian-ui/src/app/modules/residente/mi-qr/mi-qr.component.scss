@@ -173,3 +173,35 @@ h1 {
     padding: 0;
   }
 }
+
+/* ── Falta la foto ───────────────────────────────────────────────────────
+   No es un aviso de error: es una tarea corta con su herramienta al lado. */
+.sin-foto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-3);
+  max-width: 340px;
+  margin: var(--e-6) auto;
+  padding: var(--e-5) var(--e-4);
+  text-align: center;
+  background: var(--bg-surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+
+  > i {
+    font-size: 2rem;
+    color: var(--accent);
+  }
+
+  h1 {
+    font-size: var(--t-xl);
+  }
+
+  p {
+    margin: 0;
+    font-size: var(--t-sm);
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+}

@@ -24,6 +24,7 @@ import guardian.repository.spec.PersonaSpecs;
 import guardian.security.UsuarioAutenticado;
 import guardian.service.acceso.CredencialQrService;
 import guardian.util.EdadUtil;
+import guardian.util.FotoUrlUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -313,19 +314,8 @@ public class PersonaServiceImpl implements PersonaService {
         return persona;
     }
 
-    /**
-     * La foto solo puede ser una subida por la propia aplicacion. Aceptar una
-     * URL arbitraria dejaria colar una imagen externa — o un enlace roto — en
-     * el control de seguridad central del sistema.
-     */
-    private static final Pattern FOTO_URL_VALIDA =
-            Pattern.compile(Pattern.quote(ApiEndpoint.PUBLICO_FOTOS)
-                    + "/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
-                    + "\\.[a-z0-9]{2,5}");
-
     private void aplicar(GdPersona persona, PersonaRequest request) {
-        if (request.getFotoUrl() != null && !request.getFotoUrl().trim().isEmpty()
-                && !FOTO_URL_VALIDA.matcher(request.getFotoUrl().trim()).matches()) {
+        if (!FotoUrlUtil.esValida(request.getFotoUrl())) {
             throw GuardianException.solicitudInvalida(MensajesGlobales.FOTO_URL_INVALIDA);
         }
         // El tipo identifica el documento fisico que la porteria va a comparar:
@@ -404,7 +394,7 @@ public class PersonaServiceImpl implements PersonaService {
     }
 
     private boolean tieneFoto(GdPersona persona) {
-        return persona.getFotoUrl() != null && !persona.getFotoUrl().trim().isEmpty();
+        return FotoUrlUtil.tieneFoto(persona.getFotoUrl());
     }
 
     private PersonaResponse mapear(GdPersona persona) {

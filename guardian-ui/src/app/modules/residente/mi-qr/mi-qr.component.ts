@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { AccesoService } from '../../../core/services/acceso.service';
+import { ResidenteService } from '../../../core/services/residente.service';
 import { LLAVE_CACHE_MI_QR as LLAVE_CACHE, MiQr } from '../../../core/models/acceso.model';
 
 /** Tope del QR en pantalla. Más allá no gana legibilidad y sí recorte. */
@@ -49,7 +50,10 @@ export class MiQrComponent implements OnInit, OnDestroy {
     }
   };
 
-  constructor(private readonly acceso: AccesoService) {}
+  constructor(
+    private readonly acceso: AccesoService,
+    private readonly residente: ResidenteService
+  ) {}
 
   ngOnInit(): void {
     this.anchoQr = this.anchoParaElModo();
@@ -60,7 +64,7 @@ export class MiQrComponent implements OnInit, OnDestroy {
         this.credencial = credencial;
         this.desdeCache = false;
         this.cargando = false;
-        localStorage.setItem(LLAVE_CACHE, JSON.stringify(credencial));
+        this.guardarEnCache(credencial);
       },
       error: (fallo: HttpErrorResponse) => {
         this.cargando = false;
@@ -80,6 +84,56 @@ export class MiQrComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     document.removeEventListener('visibilitychange', this.alVolver);
     this.liberarBloqueoPantalla();
+  }
+
+  subiendoFoto = false;
+
+  /**
+   * El payload ya resuelto para la librería del QR, que exige un string.
+   * Cuando falta la foto no hay código y esa rama de la plantilla ni se
+   * dibuja; el vacío es solo para que el tipo cuadre.
+   */
+  get payloadQr(): string {
+    return this.credencial?.payload ?? '';
+  }
+
+  /**
+   * El residente sube su propia foto y el backend le emite la credencial en
+   * la misma respuesta: sube la foto y ya tiene su código, sin recargar y sin
+   * depender de que el administrador se acuerde.
+   */
+  guardarMiFoto(fotoUrl: string | null): void {
+    if (!fotoUrl || this.subiendoFoto) {
+      return;
+    }
+
+    this.subiendoFoto = true;
+    this.error = null;
+
+    this.residente.fijarMiFoto(fotoUrl).subscribe({
+      next: credencial => {
+        this.subiendoFoto = false;
+        this.credencial = credencial;
+        this.guardarEnCache(credencial);
+      },
+      error: (fallo: HttpErrorResponse) => {
+        this.subiendoFoto = false;
+        this.error = fallo.error?.mensaje ?? 'No pudimos guardar tu foto.';
+      }
+    });
+  }
+
+  /**
+   * Sin credencial no hay nada que cachear: guardar una ficha con
+   * necesitaFoto dejaría al residente viendo "falta tu foto" sin conexión
+   * aunque ya la hubiera subido.
+   */
+  private guardarEnCache(credencial: MiQr): void {
+    if (credencial.necesitaFoto || !credencial.payload) {
+      localStorage.removeItem(LLAVE_CACHE);
+      return;
+    }
+    localStorage.setItem(LLAVE_CACHE, JSON.stringify(credencial));
   }
 
   /**

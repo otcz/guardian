@@ -9,7 +9,7 @@ import {
   Vehiculo,
   VehiculoResidenteRequest
 } from '../models/admin.model';
-import { Invitacion, InvitacionRequest } from '../models/acceso.model';
+import { Invitacion, InvitacionRequest, MiQr } from '../models/acceso.model';
 
 /**
  * Autogestión de "Mi hogar". Solo activar/inactivar: la eliminación es
@@ -21,6 +21,15 @@ export class ResidenteService {
   private readonly base = `${environment.apiUrl}/residente`;
 
   constructor(private readonly http: HttpClient) {}
+
+  /**
+   * El residente pone su propia foto y con eso se le emite la credencial.
+   * Sin esto, quien quedo registrado sin foto dependia de que el
+   * administrador se acordara de subirsela.
+   */
+  fijarMiFoto(fotoUrl: string): Observable<MiQr> {
+    return this.http.put<MiQr>(`${this.base}/mi-foto`, { fotoUrl });
+  }
 
   familia(): Observable<Familiar[]> {
     return this.http.get<Familiar[]>(`${this.base}/familia`);

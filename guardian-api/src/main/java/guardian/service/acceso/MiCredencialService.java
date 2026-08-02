@@ -12,5 +12,14 @@ public interface MiCredencialService {
      */
     MiQrResponse miQr(UsuarioAutenticado usuario);
 
+    /**
+     * El residente pone su propia foto y con eso se emite su credencial.
+     *
+     * <p>Sin esto, alguien registrado sin foto quedaba en un callejon: veia un
+     * aviso rojo en su pantalla y dependia de que el administrador se acordara
+     * de subirsela.</p>
+     */
+    MiQrResponse fijarMiFoto(UsuarioAutenticado usuario, String fotoUrl);
+
     byte[] miQrPng(UsuarioAutenticado usuario, int tamanoPx);
 }

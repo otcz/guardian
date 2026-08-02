@@ -104,7 +104,12 @@ export interface InvitacionPublica {
 }
 
 export interface MiQr {
-  payload: string;
+  /** Null mientras falte la foto: sin ella no hay credencial que emitir. */
+  payload: string | null;
+
+  /** true cuando lo unico que falta es la foto. Es un estado, no un error. */
+  necesitaFoto: boolean;
+
   nombreCompleto: string;
   tipoDocumento: string;
   documento: string;

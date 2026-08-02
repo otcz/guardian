@@ -27,6 +27,7 @@ public final class ApiEndpoint {
     public static final String RESIDENTE = API + "/residente";
     public static final String RESIDENTE_MI_QR = "/mi-qr";
     public static final String RESIDENTE_MI_QR_PNG = "/mi-qr.png";
+    public static final String RESIDENTE_MI_FOTO = "/mi-foto";
     public static final String RESIDENTE_FAMILIA = "/familia";
     public static final String RESIDENTE_VEHICULOS = "/vehiculos";
     public static final String RESIDENTE_INVITACIONES = "/invitaciones";

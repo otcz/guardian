@@ -7,7 +7,24 @@
 
   <div class="aviso-error" *ngIf="error">{{ error }}</div>
 
-  <div class="credencial" *ngIf="credencial">
+  <!-- Falta la foto: no es un error del sistema, es un paso que le falta a
+       esta persona y que puede resolver aquí mismo. La credencial se emite
+       sola en cuanto la sube. -->
+  <div class="sin-foto" *ngIf="credencial?.necesitaFoto">
+    <i class="pi pi-camera"></i>
+    <h1>Falta tu foto</h1>
+    <p>
+      El guardia compara tu cara con la foto de tu credencial, así que sin
+      ella no podemos emitirla. Súbela y tu código queda listo.
+    </p>
+
+    <gd-foto-upload [fotoUrl]="null" (fotoUrlChange)="guardarMiFoto($event)">
+    </gd-foto-upload>
+
+    <p class="gd-muted" *ngIf="subiendoFoto">Guardando…</p>
+  </div>
+
+  <div class="credencial" *ngIf="credencial && !credencial.necesitaFoto">
     <!-- Identidad en una fila: el QR es lo que importa y se lleva el resto. -->
     <div class="identidad">
       <div class="retrato" *ngIf="credencial.fotoUrl">
@@ -30,7 +47,7 @@
     <!-- Un toque: pantalla completa en blanco y sin apagarse. -->
     <button type="button" class="qr" (click)="alternarSol()"
             [attr.aria-label]="sol ? 'Salir de pantalla completa' : 'Ver en pantalla completa'">
-      <qrcode [qrdata]="credencial.payload"
+      <qrcode [qrdata]="payloadQr"
               [width]="anchoQr"
               [margin]="1"
               errorCorrectionLevel="H"

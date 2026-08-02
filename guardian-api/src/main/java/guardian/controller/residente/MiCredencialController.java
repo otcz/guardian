@@ -1,6 +1,7 @@
 package guardian.controller.residente;
 
 import guardian.constant.ApiEndpoint;
+import guardian.dto.residente.MiFotoRequest;
 import guardian.dto.residente.MiQrResponse;
 import guardian.security.UsuarioActual;
 import guardian.service.acceso.MiCredencialService;
@@ -9,9 +10,13 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
 
 /**
  * Autogestion del residente. Cualquier usuario autenticado puede consultar
@@ -30,6 +35,13 @@ public class MiCredencialController {
     @GetMapping(ApiEndpoint.RESIDENTE_MI_QR)
     public ResponseEntity<MiQrResponse> miQr() {
         return ResponseEntity.ok(miCredencialService.miQr(usuarioActual.obtener()));
+    }
+
+    /** Su propia foto, para desbloquear su credencial sin depender del admin. */
+    @PutMapping(ApiEndpoint.RESIDENTE_MI_FOTO)
+    public ResponseEntity<MiQrResponse> fijarMiFoto(@Valid @RequestBody MiFotoRequest request) {
+        return ResponseEntity.ok(
+                miCredencialService.fijarMiFoto(usuarioActual.obtener(), request.getFotoUrl()));
     }
 
     @GetMapping(value = ApiEndpoint.RESIDENTE_MI_QR_PNG, produces = MediaType.IMAGE_PNG_VALUE)
