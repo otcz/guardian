@@ -164,6 +164,8 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .nombreCompleto(persona.getNombreCompleto())
                 .rol(usuario.getRol())
                 .activo(usuario.getActivo())
+                .bloqueado(usuario.getBloqueado())
+                .motivoBloqueo(usuario.getMotivoBloqueo())
                 .requiereCambioClave(usuario.debeCambiarClave())
                 .fechaUltimoIngreso(usuario.getFechaUltimoIngreso())
                 .build();

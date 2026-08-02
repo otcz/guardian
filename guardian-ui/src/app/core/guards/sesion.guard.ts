@@ -40,6 +40,30 @@ export const rolGuard = (...roles: Rol[]): CanActivateFn => () => {
   return true;
 };
 
+/**
+ * Panel de administración: el ADMIN de la sede siempre, y el super
+ * administrador solo DENTRO de una sede.
+ *
+ * Sin sede elegida su token no lleva conjunto, así que cada endpoint de
+ * /api/admin le responde 403. Dejarlo entrar sería abrirle una pantalla que
+ * solo puede mostrarle errores.
+ */
+export const panelAdminGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+
+  if (!auth.autenticado) {
+    return router.createUrlTree(['/ingreso']);
+  }
+  if (auth.requiereCambioClave) {
+    return router.createUrlTree(['/cambiar-clave']);
+  }
+  if (auth.tieneRol('ADMIN') || (auth.tieneRol('SUPER_ADMIN') && auth.sedeSuplantada)) {
+    return true;
+  }
+  return router.createUrlTree([auth.rutaInicial()]);
+};
+
 /** Impide volver al login con sesión abierta. */
 export const invitadoGuard: CanActivateFn = () => {
   const auth = inject(AuthService);

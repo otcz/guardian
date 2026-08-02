@@ -54,6 +54,18 @@ export class AuthService {
     this.router.navigate(['/ingreso']);
   }
 
+  /**
+   * Reemplaza la sesión completa con la que devuelve el backend.
+   *
+   * Público a propósito: entrar y salir de una sede cambian el token, no solo
+   * un dato de pantalla. Si solo se actualizara la sesión guardada, el token
+   * seguiría apuntando a la sede anterior y el panel mostraría una sede
+   * mientras el API opera sobre otra.
+   */
+  aplicarSesion(respuesta: LoginResponse): void {
+    this.guardarSesion(respuesta);
+  }
+
   private guardarSesion(respuesta: LoginResponse): void {
     localStorage.setItem(LLAVE_TOKEN, respuesta.token);
     localStorage.setItem(LLAVE_SESION, JSON.stringify(respuesta.usuario));
@@ -82,6 +94,11 @@ export class AuthService {
     return rol !== undefined && roles.includes(rol);
   }
 
+  /** true mientras el super administrador opera dentro de una sede ajena. */
+  get sedeSuplantada(): boolean {
+    return this.sesion?.sedeSuplantada === true;
+  }
+
   /** Panel de arranque según el rol. Cada quien aterriza en el suyo. */
   rutaInicial(): string {
     switch (this.sesion?.rol) {
@@ -89,6 +106,10 @@ export class AuthService {
         return '/porteria';
       case 'ADMIN':
         return '/admin';
+      case 'SUPER_ADMIN':
+        // Dentro de una sede aterriza en el back-office de esa sede; fuera,
+        // en el listado de sedes, que es lo único que puede hacer sin elegir.
+        return this.sedeSuplantada ? '/admin' : '/sedes';
       default:
         return '/app';
     }

@@ -15,6 +15,10 @@ public class UsuarioResponse {
     private String nombreCompleto;
     private String rol;
     private String activo;
+
+    /** Llave del administrador: gana sobre "activo". */
+    private String bloqueado;
+    private String motivoBloqueo;
     private boolean requiereCambioClave;
     private Date fechaUltimoIngreso;
 }

@@ -132,6 +132,8 @@ public class CasaServiceImpl implements CasaService {
                 .numero(casa.getNumero())
                 .cuposParqueadero(casa.getCuposParqueadero())
                 .activo(casa.getActivo())
+                .bloqueado(casa.getBloqueado())
+                .motivoBloqueo(casa.getMotivoBloqueo())
                 .residentes(residenteCasaRepository
                         .findByCasaIdAndActivo(casa.getId(), Codigos.SI).size())
                 .vehiculos(vehiculoRepository

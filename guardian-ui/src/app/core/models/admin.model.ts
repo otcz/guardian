@@ -5,6 +5,8 @@ export interface Casa {
   numero: string;
   cuposParqueadero: number | null;
   activo: string;
+  bloqueado: string;
+  motivoBloqueo: string | null;
   residentes: number;
   vehiculos: number;
 }
@@ -29,6 +31,8 @@ export interface Persona {
   telefono: string | null;
   email: string | null;
   activo: string;
+  bloqueado: string;
+  motivoBloqueo: string | null;
   casaId: number | null;
   casaIdentificador: string | null;
   parentesco: string | null;
@@ -80,6 +84,8 @@ export interface Usuario {
   nombreCompleto: string;
   rol: string;
   activo: string;
+  bloqueado: string;
+  motivoBloqueo: string | null;
   requiereCambioClave: boolean;
   fechaUltimoIngreso: string | null;
 }
@@ -94,6 +100,8 @@ export interface Familiar {
   fotoUrl: string | null;
   edad: number | null;
   activo: string;
+  bloqueado: string;
+  motivoBloqueo: string | null;
   tieneCredencial: boolean;
   esUsuarioActual: boolean;
 }
@@ -129,6 +137,8 @@ export interface Vehiculo {
   marca: string | null;
   color: string | null;
   activo: string;
+  bloqueado: string;
+  motivoBloqueo: string | null;
   casaId: number;
   casaIdentificador: string;
 }

@@ -6,6 +6,7 @@ import guardian.security.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -69,7 +70,14 @@ public class SecurityConfig {
                 .antMatchers(ApiEndpoint.SUPER + "/**")
                 .hasRole(Codigos.ROL_SUPER_ADMIN)
 
-                // La porteria NO la opera el super administrador.
+                // La bitacora SI la lee el super administrador: es la auditoria
+                // de la sede y es justo lo que el operador de la plataforma
+                // necesita revisar. Va ANTES del matcher general de /acceso.
+                .antMatchers(HttpMethod.GET, ApiEndpoint.ACCESO + ApiEndpoint.ACCESO_EVENTOS)
+                .hasAnyRole(Codigos.ROL_GUARDIA, Codigos.ROL_ADMIN, Codigos.ROL_SUPER_ADMIN)
+
+                // Abrir la porteria es otra cosa: eso NO lo hace el super
+                // administrador. Verificar y registrar quedan fuera de su alcance.
                 .antMatchers(ApiEndpoint.ACCESO + "/**")
                 .hasAnyRole(Codigos.ROL_GUARDIA, Codigos.ROL_ADMIN)
 

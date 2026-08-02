@@ -6,10 +6,12 @@ import guardian.dto.auth.CambiarClaveRequest;
 import guardian.dto.auth.LoginRequest;
 import guardian.dto.auth.LoginResponse;
 import guardian.dto.auth.SesionResponse;
+import guardian.entity.conjunto.GdConjunto;
 import guardian.entity.persona.GdPersona;
 import guardian.entity.persona.GdResidenteCasa;
 import guardian.entity.persona.GdUsuario;
 import guardian.exception.GuardianException;
+import guardian.repository.GdConjuntoRepository;
 import guardian.repository.GdResidenteCasaRepository;
 import guardian.repository.GdUsuarioRepository;
 import guardian.security.EstadoUsuarioService;
@@ -31,6 +33,7 @@ public class AutenticacionServiceImpl implements AutenticacionService {
 
     private final GdUsuarioRepository usuarioRepository;
     private final GdResidenteCasaRepository residenteCasaRepository;
+    private final GdConjuntoRepository conjuntoRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final IntentosLoginService intentosLoginService;
@@ -149,6 +152,22 @@ public class AutenticacionServiceImpl implements AutenticacionService {
         Optional<GdResidenteCasa> vinculo = residenteCasaRepository
                 .findFirstByPersonaIdAndActivoOrderByIdAsc(persona.getId(), Codigos.SI);
 
+        // Mientras un super administrador esta suplantando, la sede que manda
+        // es la del token, no la de su persona. Sin esto, refrescar la pagina
+        // dentro de una sede devolveria "sin sede" y el banner desapareceria
+        // justo cuando mas hace falta.
+        GdConjunto sede = persona.getConjunto();
+        Long sedeDelToken = identidad.getConjuntoId();
+        if (sedeDelToken != null && !sedeDelToken.equals(sede.getId())) {
+            sede = conjuntoRepository.findById(sedeDelToken).orElse(null);
+        }
+
+        // La fila de plataforma no es una sede: al super administrador recien
+        // entrado hay que mostrarle "sin sede", no el nombre tecnico de la
+        // fila que lo hospeda.
+        boolean tieneSede = sede != null && !sede.esPlataforma();
+        final GdConjunto resuelta = sede;
+
         return SesionResponse.builder()
                 .usuarioId(usuario.getId())
                 .personaId(persona.getId())
@@ -159,6 +178,9 @@ public class AutenticacionServiceImpl implements AutenticacionService {
                 .casaIdentificador(vinculo
                         .map(v -> v.getCasa().getIdentificador())
                         .orElse(null))
+                .sedeId(tieneSede ? resuelta.getId() : null)
+                .sedeNombre(tieneSede ? resuelta.getNombre() : null)
+                .sedeSuplantada(identidad.isSedeSuplantada())
                 .build();
     }
 }

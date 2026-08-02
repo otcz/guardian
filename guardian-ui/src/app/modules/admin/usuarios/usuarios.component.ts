@@ -159,7 +159,78 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
+  // ── Bloqueo administrativo ───────────────────────────────────────────────
+
+  /** Cuenta a la que se le va a poner el candado. Null = hoja cerrada. */
+  bloqueando: Usuario | null = null;
+
+  alternarBloqueo(usuario: Usuario): void {
+    if (this.bloqueado(usuario)) {
+      this.desbloquear(usuario);
+    } else {
+      this.bloqueando = usuario;
+    }
+  }
+
+  confirmarBloqueo(motivo: string): void {
+    const usuario = this.bloqueando;
+    if (!usuario) {
+      return;
+    }
+
+    this.error = null;
+    this.aviso = null;
+    this.admin.bloquear('usuarios', usuario.id, motivo).subscribe({
+      next: () => {
+        this.bloqueando = null;
+        this.aviso = `${usuario.nombreCompleto} quedó bloqueado. `
+          + 'Si tenía la aplicación abierta, ya salió de ella.';
+        this.cargar();
+      },
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos bloquear la cuenta.';
+        this.bloqueando = null;
+      }
+    });
+  }
+
+  private desbloquear(usuario: Usuario): void {
+    const seguro = window.confirm(
+      `${usuario.nombreCompleto} está bloqueado por: ` +
+      `${usuario.motivoBloqueo || 'sin motivo registrado'}.\n\n` +
+      '¿Levantar el bloqueo? Podrá volver a entrar si su cuenta está habilitada.');
+    if (!seguro) {
+      return;
+    }
+
+    this.error = null;
+    this.admin.desbloquear('usuarios', usuario.id).subscribe({
+      next: () => this.cargar(),
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos levantar el bloqueo.';
+      }
+    });
+  }
+
+  // ── Estado de pantalla ───────────────────────────────────────────────────
+
   activo(usuario: Usuario): boolean {
     return usuario.activo === 'S';
+  }
+
+  bloqueado(usuario: Usuario): boolean {
+    return usuario.bloqueado === 'S';
+  }
+
+  /** El bloqueo gana: una cuenta bloqueada no entra aunque esté habilitada. */
+  estado(usuario: Usuario): string {
+    if (this.bloqueado(usuario)) {
+      return 'Bloqueado';
+    }
+    return this.activo(usuario) ? 'Habilitado' : 'Inhabilitado';
+  }
+
+  operativo(usuario: Usuario): boolean {
+    return this.activo(usuario) && !this.bloqueado(usuario);
   }
 }

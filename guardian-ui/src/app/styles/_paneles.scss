@@ -153,12 +153,53 @@
     color: var(--deny);
     background: var(--deny-soft);
   }
+
+  /* Con candado la pastilla lleva icono: "Bloqueada" e "Inactiva" comparten
+     color y a un vistazo se confunden. */
+  &.candado {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
 }
 
 .acciones {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: 0.35rem;
+}
+
+/* Las dos llaves no se mezclan: activar/inactivar es del dueño del registro,
+   el candado es de la administración. Sin esta división visual, el
+   administrador levanta un bloqueo creyendo que solo está reactivando. */
+.separador {
+  flex: 0 0 auto;
+  width: 1px;
+  height: 20px;
+  margin: 0 0.15rem;
+  background: var(--border-default);
+}
+
+.accion.candado {
+  &.puesto {
+    color: var(--deny);
+    background: var(--deny-soft);
+  }
+
+  @media (hover: hover) {
+    &:hover:not(:disabled) {
+      color: var(--deny);
+      background: var(--deny-soft);
+    }
+  }
+}
+
+/* El tooltip va en el envoltorio y no en el botón: un <button disabled> no
+   emite mouseenter, así que la explicación de por qué está apagado nunca
+   llegaría a verse justo cuando hace falta. */
+.envoltura-accion {
+  display: inline-flex;
 }
 
 /* 40px y no 32: 32 es medida de cursor, no de dedo. El icono se ve igual;
@@ -179,13 +220,21 @@
     transform: scale(0.9);
   }
 
+  /* Un botón deshabilitado tiene que VERSE deshabilitado. Sin esto se pinta
+     igual que uno activo, responde al hover y ofrece cursor de mano para no
+     hacer nada. */
+  &:disabled {
+    opacity: var(--opacidad-deshabilitado);
+    cursor: not-allowed;
+  }
+
   @media (hover: hover) {
-    &:hover {
+    &:hover:not(:disabled) {
       color: var(--text-strong);
       background: var(--bg-soft);
     }
 
-    &.peligro:hover {
+    &.peligro:hover:not(:disabled) {
       color: var(--deny);
       background: var(--deny-soft);
     }

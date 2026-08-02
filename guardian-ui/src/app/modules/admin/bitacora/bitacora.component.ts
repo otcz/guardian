@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 
 import { AccesoService } from '../../../core/services/acceso.service';
+import { AdminService } from '../../../core/services/admin.service';
 import { AccesoEvento, Resultado } from '../../../core/models/acceso.model';
+import { Parametro } from '../../../core/models/admin.model';
 
 /**
  * Bitácora de accesos: la auditoría del conjunto. Todo intento queda —
@@ -25,10 +27,21 @@ export class BitacoraComponent implements OnInit {
   cargando = true;
   error: string | null = null;
 
-  constructor(private readonly acceso: AccesoService) {}
+  /**
+   * Catálogo de motivos, para traducir el código a texto legible. Se pide una
+   * vez y se le pasa al pipe: sin él la tabla mostraría PERSONA_BLOQUEADA en
+   * crudo, que es un dato de base de datos, no una explicación.
+   */
+  motivos: Parametro[] = [];
+
+  constructor(
+    private readonly acceso: AccesoService,
+    private readonly admin: AdminService
+  ) {}
 
   ngOnInit(): void {
     this.cargar();
+    this.admin.parametros('MOTIVO_DENEGACION').subscribe(m => (this.motivos = m));
   }
 
   cargar(): void {

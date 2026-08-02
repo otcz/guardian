@@ -415,6 +415,8 @@ public class PersonaServiceImpl implements PersonaService {
                 .telefono(persona.getTelefono())
                 .email(persona.getEmail())
                 .activo(persona.getActivo())
+                .bloqueado(persona.getBloqueado())
+                .motivoBloqueo(persona.getMotivoBloqueo())
                 .casaId(vinculo.map(v -> v.getCasa().getId()).orElse(null))
                 .casaIdentificador(vinculo.map(v -> v.getCasa().getIdentificador()).orElse(null))
                 .parentesco(vinculo.map(GdResidenteCasa::getParentesco).orElse(null))

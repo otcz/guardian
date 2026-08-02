@@ -176,6 +176,8 @@ public class VehiculoServiceImpl implements VehiculoService {
                 .marca(vehiculo.getMarca())
                 .color(vehiculo.getColor())
                 .activo(vehiculo.getActivo())
+                .bloqueado(vehiculo.getBloqueado())
+                .motivoBloqueo(vehiculo.getMotivoBloqueo())
                 .casaId(vehiculo.getCasa().getId())
                 .casaIdentificador(vehiculo.getCasa().getIdentificador())
                 .build();

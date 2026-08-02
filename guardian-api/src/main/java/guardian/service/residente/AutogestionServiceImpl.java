@@ -199,6 +199,8 @@ public class AutogestionServiceImpl implements AutogestionService {
                 .fotoUrl(persona.getFotoUrl())
                 .edad(EdadUtil.calcular(persona.getFechaNacimiento()))
                 .activo(persona.getActivo())
+                .bloqueado(persona.getBloqueado())
+                .motivoBloqueo(persona.getMotivoBloqueo())
                 .tieneCredencial(tieneCredencial)
                 .esUsuarioActual(persona.getId().equals(usuario.getPersonaId()))
                 .build();

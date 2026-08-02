@@ -132,7 +132,75 @@ export class VehiculosComponent implements OnInit {
     });
   }
 
+  // ── Bloqueo administrativo ───────────────────────────────────────────────
+
+  /** Vehículo al que se le va a poner el candado. Null = hoja cerrada. */
+  bloqueando: Vehiculo | null = null;
+
+  alternarBloqueo(vehiculo: Vehiculo): void {
+    if (this.bloqueado(vehiculo)) {
+      this.desbloquear(vehiculo);
+    } else {
+      this.bloqueando = vehiculo;
+    }
+  }
+
+  confirmarBloqueo(motivo: string): void {
+    const vehiculo = this.bloqueando;
+    if (!vehiculo) {
+      return;
+    }
+
+    this.error = null;
+    this.admin.bloquear('vehiculos', vehiculo.id, motivo).subscribe({
+      next: () => {
+        this.bloqueando = null;
+        this.cargar();
+      },
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos bloquear el vehículo.';
+        this.bloqueando = null;
+      }
+    });
+  }
+
+  private desbloquear(vehiculo: Vehiculo): void {
+    const seguro = window.confirm(
+      `${vehiculo.placa} está bloqueado por: ` +
+      `${vehiculo.motivoBloqueo || 'sin motivo registrado'}.\n\n` +
+      '¿Levantar el bloqueo? Volverá a aparecer en la portería.');
+    if (!seguro) {
+      return;
+    }
+
+    this.error = null;
+    this.admin.desbloquear('vehiculos', vehiculo.id).subscribe({
+      next: () => this.cargar(),
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos levantar el bloqueo.';
+      }
+    });
+  }
+
+  // ── Estado de pantalla ───────────────────────────────────────────────────
+
   activo(vehiculo: Vehiculo): boolean {
     return vehiculo.activo === 'S';
+  }
+
+  bloqueado(vehiculo: Vehiculo): boolean {
+    return vehiculo.bloqueado === 'S';
+  }
+
+  /** El bloqueo gana: un carro bloqueado no sale aunque esté habilitado. */
+  estado(vehiculo: Vehiculo): string {
+    if (this.bloqueado(vehiculo)) {
+      return 'Bloqueado';
+    }
+    return this.activo(vehiculo) ? 'Habilitado' : 'Inhabilitado';
+  }
+
+  operativo(vehiculo: Vehiculo): boolean {
+    return this.activo(vehiculo) && !this.bloqueado(vehiculo);
   }
 }

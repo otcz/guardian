@@ -101,14 +101,22 @@
   padding-top: 0.75rem;
   border-top: 1px solid var(--border-default);
 
-  a {
+  /* El botón se peina igual que los enlaces: "Todas las sedes" tiene que
+     leerse como un atajo más aunque por dentro cambie el token. */
+  a,
+  button {
     display: flex;
     align-items: center;
     gap: 0.65rem;
+    width: 100%;
     padding: 0.45rem 0.75rem;
+    border: none;
     border-radius: 9px;
     font-size: 0.82rem;
+    text-align: left;
     color: var(--text-muted);
+    background: none;
+    cursor: pointer;
 
     i {
       font-size: 0.82rem;
@@ -119,6 +127,11 @@
     &:hover {
       color: var(--text-default);
       background: var(--bg-soft);
+    }
+
+    &:disabled {
+      opacity: var(--opacidad-deshabilitado);
+      cursor: not-allowed;
     }
   }
 }
@@ -181,6 +194,50 @@ main {
   min-width: 0;
 }
 
+/* Ámbar y pegada arriba: es un estado peligroso pero legítimo. En rojo se
+   leería como un error y el operador la ignoraría a los dos días. */
+.banda-sede {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  flex-wrap: wrap;
+  padding: 0.5rem 1rem;
+  font-size: var(--t-sm);
+  color: var(--warn);
+  background: var(--warn-soft);
+  border-bottom: 1px solid var(--warn);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-cabecera);
+
+  .texto {
+    min-width: 0;
+
+    strong {
+      color: var(--text-strong);
+    }
+  }
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-left: auto;
+    padding: 0.3rem 0.7rem;
+    font-size: var(--t-xs);
+    font-weight: 600;
+    color: var(--warn);
+    background: var(--bg-surface);
+    border: 1px solid var(--warn);
+    border-radius: var(--r-full);
+    cursor: pointer;
+
+    &:disabled {
+      opacity: var(--opacidad-deshabilitado);
+    }
+  }
+}
+
 /* En pantallas angostas el sidebar pasa a barra superior con scroll. */
 @media (max-width: 820px) {
   .oficina {
@@ -215,7 +272,9 @@ main {
     padding: 0;
     border: none;
 
-    a {
+    a,
+    button {
+      width: auto;
       border-left: none;
       white-space: nowrap;
     }

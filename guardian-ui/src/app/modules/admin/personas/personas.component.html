@@ -145,8 +145,12 @@
              [ngClass]="persona.tieneCredencial ? 'pi-qrcode ok' : 'pi-minus sin'"></i>
         </td>
         <td>
-          <span class="pastilla" [class.si]="activa(persona)" [class.no]="!activa(persona)">
-            {{ activa(persona) ? 'Activa' : 'Inactiva' }}
+          <span class="pastilla" [class.si]="operativa(persona)" [class.no]="!operativa(persona)"
+                [class.candado]="bloqueada(persona)"
+                [attr.tabindex]="bloqueada(persona) ? 0 : null"
+                [pTooltip]="persona.motivoBloqueo || ''" tooltipPosition="top">
+            <i class="pi pi-lock" *ngIf="bloqueada(persona)"></i>
+            {{ estado(persona) }}
           </span>
         </td>
         <td class="derecha acciones">
@@ -169,10 +173,28 @@
           </button>
           <button type="button" class="accion"
                   (click)="alternarEstado(persona)"
-                  [pTooltip]="activa(persona) ? 'Deshabilitar ingreso' : 'Habilitar ingreso'"
+                  [attr.aria-label]="(activa(persona) ? 'Inactivar a ' : 'Activar a ')
+                    + persona.nombreCompleto"
+                  [pTooltip]="activa(persona) ? 'Inactivar registro' : 'Activar registro'"
                   tooltipPosition="left">
             <i class="pi" [ngClass]="activa(persona) ? 'pi-ban' : 'pi-check'"></i>
           </button>
+
+          <!-- Separado a propósito: activar/inactivar es la llave del
+               residente; el candado es la de la administración, y confundirlas
+               es lo que hace que un bloqueo se levante sin querer. -->
+          <span class="separador" aria-hidden="true"></span>
+
+          <button type="button" class="accion candado"
+                  [class.puesto]="bloqueada(persona)"
+                  (click)="alternarBloqueo(persona)"
+                  [attr.aria-label]="(bloqueada(persona) ? 'Levantar el bloqueo de ' : 'Bloquear a ')
+                    + persona.nombreCompleto"
+                  [pTooltip]="bloqueada(persona) ? 'Levantar bloqueo' : 'Bloquear'"
+                  tooltipPosition="left">
+            <i class="pi" [ngClass]="bloqueada(persona) ? 'pi-lock-open' : 'pi-lock'"></i>
+          </button>
+
           <button type="button" class="accion peligro"
                   (click)="eliminar(persona)"
                   pTooltip="Eliminar" tooltipPosition="left">
@@ -186,4 +208,10 @@
       </tr>
     </tbody>
   </table>
+
+  <gd-bloqueo [abierta]="!!bloqueando"
+              [objetivo]="bloqueando?.nombreCompleto || ''"
+              (confirmar)="confirmarBloqueo($event)"
+              (cerrar)="bloqueando = null">
+  </gd-bloqueo>
 </div>

@@ -60,22 +60,40 @@
         <td>{{ casa.vehiculos }}</td>
         <td>{{ casa.cuposParqueadero ?? '—' }}</td>
         <td>
-          <span class="pastilla" [class.si]="activa(casa)" [class.no]="!activa(casa)">
-            {{ activa(casa) ? 'Activa' : 'Inactiva' }}
+          <span class="pastilla" [class.si]="operativa(casa)" [class.no]="!operativa(casa)"
+                [class.candado]="bloqueada(casa)"
+                [attr.tabindex]="bloqueada(casa) ? 0 : null"
+                [pTooltip]="casa.motivoBloqueo || ''" tooltipPosition="top">
+            <i class="pi pi-lock" *ngIf="bloqueada(casa)"></i>
+            {{ estado(casa) }}
           </span>
         </td>
         <td class="derecha acciones">
           <button type="button" class="accion"
                   (click)="editar(casa)"
+                  [attr.aria-label]="'Editar ' + casa.identificador"
                   pTooltip="Editar" tooltipPosition="left">
             <i class="pi pi-pencil"></i>
           </button>
           <button type="button"
                   class="accion"
                   (click)="alternarEstado(casa)"
-                  [pTooltip]="activa(casa) ? 'Deshabilitar la casa completa' : 'Habilitar'"
+                  [attr.aria-label]="(activa(casa) ? 'Inactivar ' : 'Activar ') + casa.identificador"
+                  [pTooltip]="activa(casa) ? 'Inactivar la casa completa' : 'Activar'"
                   tooltipPosition="left">
             <i class="pi" [ngClass]="activa(casa) ? 'pi-ban' : 'pi-check'"></i>
+          </button>
+
+          <span class="separador" aria-hidden="true"></span>
+
+          <button type="button" class="accion candado"
+                  [class.puesto]="bloqueada(casa)"
+                  (click)="alternarBloqueo(casa)"
+                  [attr.aria-label]="(bloqueada(casa) ? 'Levantar el bloqueo de ' : 'Bloquear ')
+                    + casa.identificador"
+                  [pTooltip]="bloqueada(casa) ? 'Levantar bloqueo' : 'Bloquear'"
+                  tooltipPosition="left">
+            <i class="pi" [ngClass]="bloqueada(casa) ? 'pi-lock-open' : 'pi-lock'"></i>
           </button>
         </td>
       </tr>
@@ -85,4 +103,13 @@
       </tr>
     </tbody>
   </table>
+
+  <gd-bloqueo [abierta]="!!bloqueando"
+              [objetivo]="bloqueando?.identificador || ''"
+              [descripcion]="'Nadie de ' + (bloqueando?.identificador || '') + ' podrá ingresar '
+                + 'al conjunto —ni sus residentes ni sus vehículos— hasta que la administración '
+                + 'levante el bloqueo.'"
+              (confirmar)="confirmarBloqueo($event)"
+              (cerrar)="bloqueando = null">
+  </gd-bloqueo>
 </div>

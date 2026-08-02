@@ -18,6 +18,15 @@ public class FamiliarResponse {
     private String fotoUrl;
     private Integer edad;
     private String activo;
+
+    /**
+     * Llave del administrador. La pantalla del residente la necesita para
+     * mostrar un candado en vez de un interruptor: sin esto, el titular ve un
+     * boton que promete algo que el backend le va a negar.
+     */
+    private String bloqueado;
+    private String motivoBloqueo;
+
     private boolean tieneCredencial;
 
     /** Marca al propio solicitante para que la UI no le ofrezca inactivarse. */

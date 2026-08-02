@@ -104,13 +104,25 @@
             </span>
           </div>
 
-          <span class="pastilla no" *ngIf="!activo(familiar.activo)">Inactivo</span>
+          <span class="pastilla no" *ngIf="bloqueado(familiar)">Bloqueado</span>
+          <span class="pastilla no" *ngIf="!bloqueado(familiar) && !activo(familiar.activo)">
+            Inactivo
+          </span>
+
+          <!-- Candado y no interruptor: lo que puso la administración no lo
+               levanta el celular del residente. -->
+          <button type="button" class="accion candado"
+                  *ngIf="bloqueado(familiar)"
+                  (click)="explicarBloqueo(familiar.nombreCompleto, familiar.motivoBloqueo)"
+                  [attr.aria-label]="'Por qué está bloqueado ' + familiar.nombreCompleto">
+            <i class="pi pi-lock"></i>
+          </button>
 
           <!-- aria-label y no solo pTooltip: en un celular no hay "por
                encima", así que un tooltip como única etiqueta es un nombre
                que nadie llega a leer. -->
           <button type="button" class="accion"
-                  *ngIf="!familiar.esUsuarioActual"
+                  *ngIf="!familiar.esUsuarioActual && !bloqueado(familiar)"
                   (click)="alternarEstadoFamiliar(familiar)"
                   [attr.aria-label]="(activo(familiar.activo) ? 'Inactivar a ' : 'Activar a ')
                     + familiar.nombreCompleto"
@@ -195,9 +207,20 @@
             </span>
           </div>
 
-          <span class="pastilla no" *ngIf="!activo(vehiculo.activo)">Inhabilitado</span>
+          <span class="pastilla no" *ngIf="bloqueado(vehiculo)">Bloqueado</span>
+          <span class="pastilla no" *ngIf="!bloqueado(vehiculo) && !activo(vehiculo.activo)">
+            Inhabilitado
+          </span>
+
+          <button type="button" class="accion candado"
+                  *ngIf="bloqueado(vehiculo)"
+                  (click)="explicarBloqueo(vehiculo.placa, vehiculo.motivoBloqueo)"
+                  [attr.aria-label]="'Por qué está bloqueado ' + vehiculo.placa">
+            <i class="pi pi-lock"></i>
+          </button>
 
           <button type="button" class="accion"
+                  *ngIf="!bloqueado(vehiculo)"
                   (click)="alternarEstadoVehiculo(vehiculo)"
                   [attr.aria-label]="(activo(vehiculo.activo) ? 'Inhabilitar ' : 'Habilitar ')
                     + vehiculo.placa"
@@ -233,6 +256,19 @@
         <button type="button" class="gd-fila gd-presionable centrada"
                 (click)="aConfirmar = null">
           Cancelar
+        </button>
+      </div>
+    </gd-hoja>
+
+    <!-- El candado no se negocia desde acá: la hoja solo explica por qué. -->
+    <gd-hoja [abierta]="!!bloqueoInfo" [titulo]="bloqueoInfo?.titulo || ''"
+             (cerrar)="bloqueoInfo = null">
+      <p class="detalle-confirmar">{{ bloqueoInfo?.detalle }}</p>
+
+      <div class="gd-lista">
+        <button type="button" class="gd-fila gd-presionable centrada"
+                (click)="bloqueoInfo = null">
+          Entendido
         </button>
       </div>
     </gd-hoja>

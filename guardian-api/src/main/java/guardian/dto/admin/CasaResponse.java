@@ -14,6 +14,10 @@ public class CasaResponse {
     private Integer cuposParqueadero;
     private String activo;
 
+    /** Llave del administrador: gana sobre "activo". */
+    private String bloqueado;
+    private String motivoBloqueo;
+
     /** Cuantas personas viven ahi. Evita que el administrador tenga que abrir la casa para saberlo. */
     private long residentes;
     private long vehiculos;

@@ -1,0 +1,204 @@
+<div class="plataforma">
+
+  <header class="barra">
+    <div class="marca">
+      <i class="pi pi-sitemap"></i>
+      <div class="textos">
+        <strong>GUARDIAN</strong>
+        <small>Plataforma</small>
+      </div>
+    </div>
+
+    <div class="quien" *ngIf="sesion">
+      <span class="nombre">{{ sesion.nombreCompleto }}</span>
+      <button type="button" class="accion" (click)="tema.alternar()"
+              [attr.aria-label]="tema.oscuro ? 'Modo claro' : 'Modo oscuro'">
+        <i class="pi" [ngClass]="tema.oscuro ? 'pi-sun' : 'pi-moon'"></i>
+      </button>
+      <button type="button" class="accion" (click)="salir()" aria-label="Salir"
+              pTooltip="Salir" tooltipPosition="bottom">
+        <i class="pi pi-sign-out"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="gd-page">
+    <div class="encabezado">
+      <h1>Sedes</h1>
+      <button type="button" class="principal" (click)="mostrarAlta ? cancelar() : abrirAlta()">
+        <i class="pi" [ngClass]="mostrarAlta ? 'pi-times' : 'pi-plus'"></i>
+        {{ mostrarAlta ? 'Cancelar' : 'Nueva sede' }}
+      </button>
+    </div>
+
+    <form class="alta gd-card" *ngIf="mostrarAlta"
+          [formGroup]="formulario" (ngSubmit)="guardar()">
+      <div class="campo">
+        <label for="s-nombre">Nombre</label>
+        <input id="s-nombre" type="text" formControlName="nombre"
+               placeholder="Ej: Torres del Parque">
+        <small class="error"
+               *ngIf="formulario.controls.nombre.invalid && formulario.controls.nombre.touched">
+          Escribe el nombre de la sede
+        </small>
+      </div>
+
+      <div class="campo">
+        <label for="s-nit">NIT</label>
+        <input id="s-nit" type="text" formControlName="nit" placeholder="Ej: 900123456-7">
+      </div>
+
+      <div class="campo">
+        <label for="s-direccion">Dirección</label>
+        <input id="s-direccion" type="text" formControlName="direccion">
+      </div>
+
+      <div class="campo">
+        <label for="s-telefono">Teléfono</label>
+        <input id="s-telefono" type="tel" formControlName="telefono">
+      </div>
+
+      <button type="submit" class="principal" [disabled]="guardando">
+        <i class="pi pi-check"></i>
+        {{ editando ? 'Guardar cambios' : 'Crear sede' }}
+      </button>
+    </form>
+
+    <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+    <p class="gd-muted" *ngIf="cargando">Cargando…</p>
+
+    <!-- Tarjetas y no tabla: la decisión acá es "a cuál entro", y para eso
+         pesan el tamaño de la sede y si ya tiene quien la administre. -->
+    <div class="rejilla" *ngIf="!cargando">
+      <article class="sede gd-card" *ngFor="let sede of sedes"
+               [class.inactiva]="!activa(sede)">
+
+        <div class="titulo">
+          <h2>{{ sede.nombre }}</h2>
+          <span class="pastilla" [class.si]="activa(sede)" [class.no]="!activa(sede)">
+            {{ activa(sede) ? 'Activa' : 'Inactiva' }}
+          </span>
+        </div>
+
+        <p class="datos" *ngIf="sede.nit || sede.direccion">
+          <ng-container *ngIf="sede.nit">NIT {{ sede.nit }}</ng-container>
+          <ng-container *ngIf="sede.nit && sede.direccion"> · </ng-container>
+          <ng-container *ngIf="sede.direccion">{{ sede.direccion }}</ng-container>
+        </p>
+
+        <div class="contadores">
+          <div class="contador">
+            <strong>{{ sede.casas }}</strong>
+            <span>Casas</span>
+          </div>
+          <div class="contador">
+            <strong>{{ sede.personas }}</strong>
+            <span>Personas</span>
+          </div>
+          <div class="contador">
+            <strong>{{ sede.usuarios }}</strong>
+            <span>Cuentas</span>
+          </div>
+        </div>
+
+        <!-- Una sede sin administrador no la puede operar nadie de adentro.
+             Es lo primero que hay que resolver, así que se dice, no se
+             esconde en un menú. -->
+        <div class="sin-admin" *ngIf="!sede.tieneAdministrador">
+          <i class="pi pi-exclamation-triangle"></i>
+          <span>Todavía no tiene administrador</span>
+        </div>
+
+        <div class="botones">
+          <button type="button" class="principal" (click)="entrar(sede)"
+                  [disabled]="!activa(sede)">
+            <i class="pi pi-sign-in"></i>
+            Entrar
+          </button>
+
+          <button type="button" class="accion" (click)="editar(sede)"
+                  [attr.aria-label]="'Editar ' + sede.nombre"
+                  pTooltip="Editar" tooltipPosition="top">
+            <i class="pi pi-pencil"></i>
+          </button>
+
+          <button type="button" class="accion" *ngIf="!sede.tieneAdministrador"
+                  (click)="abrirAdministrador(sede)"
+                  [attr.aria-label]="'Nombrar administrador de ' + sede.nombre"
+                  pTooltip="Nombrar administrador" tooltipPosition="top">
+            <i class="pi pi-user-plus"></i>
+          </button>
+
+          <button type="button" class="accion" [class.peligro]="activa(sede)"
+                  (click)="alternarEstado(sede)"
+                  [attr.aria-label]="(activa(sede) ? 'Desactivar ' : 'Activar ') + sede.nombre"
+                  [pTooltip]="activa(sede) ? 'Desactivar' : 'Activar'"
+                  tooltipPosition="top">
+            <i class="pi" [ngClass]="activa(sede) ? 'pi-ban' : 'pi-check'"></i>
+          </button>
+        </div>
+      </article>
+
+      <div class="gd-vacio" *ngIf="sedes.length === 0">
+        <i class="pi pi-sitemap"></i>
+        <p>Todavía no hay sedes</p>
+        <button type="button" class="principal" (click)="abrirAlta()">
+          Crear la primera
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Primer administrador de una sede. Nace ACTIVO porque no hay nadie
+       adentro que pueda habilitarlo. -->
+  <gd-hoja [abierta]="!!nombrandoAdmin"
+           [titulo]="'Administrador de ' + (nombrandoAdmin?.nombre || '')"
+           (cerrar)="nombrandoAdmin = null">
+
+    <form id="forma-admin" class="alta-admin"
+          [formGroup]="formularioAdmin" (ngSubmit)="guardarAdministrador()">
+      <div class="campo">
+        <label for="a-documento">
+          Documento
+          <i class="pi pi-info-circle ayuda"
+             pTooltip="Será su usuario y su clave inicial" tooltipPosition="top"></i>
+        </label>
+        <input id="a-documento" type="text" formControlName="documento"
+               placeholder="Ej: 1020304050">
+      </div>
+
+      <div class="campo">
+        <label for="a-nombres">Nombres</label>
+        <input id="a-nombres" type="text" formControlName="nombres">
+      </div>
+
+      <div class="campo">
+        <label for="a-apellidos">Apellidos</label>
+        <input id="a-apellidos" type="text" formControlName="apellidos">
+      </div>
+
+      <div class="campo">
+        <label for="a-telefono">Teléfono</label>
+        <input id="a-telefono" type="tel" formControlName="telefono">
+      </div>
+
+      <div class="campo">
+        <label for="a-email">Correo</label>
+        <input id="a-email" type="email" formControlName="email"
+               placeholder="Ej: nombre@correo.com">
+        <small class="error"
+               *ngIf="formularioAdmin.controls.email.invalid && formularioAdmin.controls.email.touched">
+          El correo no parece válido
+        </small>
+      </div>
+    </form>
+
+    <div pie>
+      <button type="button" class="alterno" (click)="nombrandoAdmin = null">Cancelar</button>
+      <button type="submit" form="forma-admin" class="principal" [disabled]="guardando">
+        Crear administrador
+      </button>
+    </div>
+  </gd-hoja>
+</div>

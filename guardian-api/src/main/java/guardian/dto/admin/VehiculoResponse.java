@@ -14,6 +14,10 @@ public class VehiculoResponse {
     private String color;
     private String activo;
 
+    /** Llave del administrador: gana sobre "activo". */
+    private String bloqueado;
+    private String motivoBloqueo;
+
     private Long casaId;
     private String casaIdentificador;
 }

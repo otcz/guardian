@@ -4,7 +4,7 @@
       <i class="pi pi-shield"></i>
       <div class="textos">
         <strong>GUARDIAN</strong>
-        <small>Administración</small>
+        <small>{{ sesion?.sedeNombre || 'Administración' }}</small>
       </div>
     </div>
 
@@ -18,14 +18,22 @@
     </nav>
 
     <div class="atajos">
-      <a routerLink="/porteria">
+      <a routerLink="/porteria" *ngIf="!suplantando">
         <i class="pi pi-shield"></i>
         <span>Portería</span>
       </a>
-      <a routerLink="/app">
+      <a routerLink="/app" *ngIf="!suplantando">
         <i class="pi pi-user"></i>
         <span>Mi cuenta</span>
       </a>
+      <!-- Botón y no routerLink: irse a /sedes con un enlace dejaría la
+           suplantación viva en el token, y el siguiente panel que se abriera
+           seguiría operando sobre esta sede sin decirlo. -->
+      <button type="button" *ngIf="suplantando"
+              (click)="salirDeSede()" [disabled]="saliendo">
+        <i class="pi pi-sitemap"></i>
+        <span>Todas las sedes</span>
+      </button>
     </div>
 
     <div class="pie" *ngIf="sesion">
@@ -47,6 +55,20 @@
   </aside>
 
   <main>
+    <!-- Permanente y pegada arriba, no un aviso que se cierra: el operador de
+         la plataforma está editando datos de OTRO conjunto. Si olvida en cuál
+         está, borra la casa equivocada de la sede equivocada. -->
+    <div class="banda-sede" *ngIf="suplantando" role="status">
+      <i class="pi pi-eye"></i>
+      <span class="texto">
+        Estás dentro de <strong>{{ sesion?.sedeNombre }}</strong>
+      </span>
+      <button type="button" (click)="salirDeSede()" [disabled]="saliendo">
+        <i class="pi pi-sign-out"></i>
+        Salir de la sede
+      </button>
+    </div>
+
     <router-outlet></router-outlet>
   </main>
 </div>

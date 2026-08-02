@@ -57,33 +57,63 @@
         <td class="fuerte">{{ usuario.nombreCompleto }}</td>
         <td>{{ usuario.documento }}</td>
         <td>
+          <!-- ngModel y no [value]: sobre un <select>, [value] se asigna antes
+               de que existan las <option> y el control se queda en la primera.
+               La tabla mostraba a TODOS como administradores. -->
           <select class="rol-en-linea"
-                  [value]="usuario.rol"
+                  [ngModel]="usuario.rol"
+                  [ngModelOptions]="{ standalone: true }"
                   [disabled]="esMiCuenta(usuario)"
                   [pTooltip]="esMiCuenta(usuario) ? 'Tu propia cuenta' : ''"
                   tooltipPosition="top"
-                  (change)="cambiarRol(usuario, $any($event.target).value)">
+                  (ngModelChange)="cambiarRol(usuario, $event)">
             <option *ngFor="let rol of roles" [value]="rol.codigo">{{ rol.valor }}</option>
           </select>
         </td>
         <td>{{ (usuario.fechaUltimoIngreso | date:'dd/MM/yyyy HH:mm') ?? 'Nunca' }}</td>
         <td>
-          <span class="pastilla" [class.si]="activo(usuario)" [class.no]="!activo(usuario)">
-            {{ activo(usuario) ? 'Habilitado' : 'Inhabilitado' }}
+          <span class="pastilla" [class.si]="operativo(usuario)" [class.no]="!operativo(usuario)"
+                [class.candado]="bloqueado(usuario)"
+                [attr.tabindex]="bloqueado(usuario) ? 0 : null"
+                [pTooltip]="usuario.motivoBloqueo || ''" tooltipPosition="top">
+            <i class="pi pi-lock" *ngIf="bloqueado(usuario)"></i>
+            {{ estado(usuario) }}
           </span>
         </td>
         <td class="derecha acciones">
           <button type="button" class="accion"
                   (click)="restablecerClave(usuario)"
+                  [attr.aria-label]="'Restablecer la contraseña de ' + usuario.nombreCompleto"
                   pTooltip="Restablecer contraseña" tooltipPosition="left">
             <i class="pi pi-refresh"></i>
           </button>
           <button type="button" class="accion"
                   (click)="alternarEstado(usuario)"
+                  [attr.aria-label]="(activo(usuario) ? 'Inhabilitar a ' : 'Habilitar a ')
+                    + usuario.nombreCompleto"
                   [pTooltip]="activo(usuario) ? 'Inhabilitar' : 'Habilitar'"
                   tooltipPosition="left">
             <i class="pi" [ngClass]="activo(usuario) ? 'pi-ban' : 'pi-check'"></i>
           </button>
+
+          <!-- Inhabilitar deja la cuenta apagada; el candado además corta la
+               sesión que el guardia ya tiene abierta en la tablet. -->
+          <span class="separador" aria-hidden="true"></span>
+
+          <span class="envoltura-accion"
+                [pTooltip]="esMiCuenta(usuario)
+                  ? 'Tu propia cuenta'
+                  : (bloqueado(usuario) ? 'Levantar bloqueo' : 'Bloquear')"
+                tooltipPosition="left">
+            <button type="button" class="accion candado"
+                    [class.puesto]="bloqueado(usuario)"
+                    [disabled]="esMiCuenta(usuario)"
+                    (click)="alternarBloqueo(usuario)"
+                    [attr.aria-label]="(bloqueado(usuario) ? 'Levantar el bloqueo de ' : 'Bloquear a ')
+                      + usuario.nombreCompleto">
+              <i class="pi" [ngClass]="bloqueado(usuario) ? 'pi-lock-open' : 'pi-lock'"></i>
+            </button>
+          </span>
         </td>
       </tr>
 
@@ -92,4 +122,13 @@
       </tr>
     </tbody>
   </table>
+
+  <gd-bloqueo [abierta]="!!bloqueando"
+              [objetivo]="bloqueando?.nombreCompleto || ''"
+              [descripcion]="(bloqueando?.nombreCompleto || '') + ' no podrá entrar a la '
+                + 'aplicación. Si tiene una sesión abierta —la tablet de la portería, por '
+                + 'ejemplo— se cierra en cuanto guardes.'"
+              (confirmar)="confirmarBloqueo($event)"
+              (cerrar)="bloqueando = null">
+  </gd-bloqueo>
 </div>

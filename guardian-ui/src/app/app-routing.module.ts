@@ -4,7 +4,12 @@ import { RouterModule, Routes } from '@angular/router';
 import { ResidenteLayoutComponent } from './layout/residente-layout/residente-layout.component';
 import { PorteriaLayoutComponent } from './layout/porteria-layout/porteria-layout.component';
 import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
-import { invitadoGuard, rolGuard, sesionGuard } from './core/guards/sesion.guard';
+import {
+  invitadoGuard,
+  panelAdminGuard,
+  rolGuard,
+  sesionGuard
+} from './core/guards/sesion.guard';
 
 /**
  * Tres paneles, tres layouts. Cada rol aterriza en el suyo y los cruces son
@@ -70,11 +75,21 @@ const routes: Routes = [
     ]
   },
 
+  // ── Panel de la plataforma (multisede) ───────────────────────────────────
+  {
+    // Sin layout propio: es UNA pantalla, y la barra lateral de secciones del
+    // back-office no aplica acá — desde la plataforma no se gestionan casas
+    // ni personas, se entra a una sede para hacerlo.
+    path: 'sedes',
+    canActivate: [rolGuard('SUPER_ADMIN')],
+    loadChildren: () => import('./modules/super/super.module').then(m => m.SuperModule)
+  },
+
   // ── Back-office de administración ────────────────────────────────────────
   {
     path: 'admin',
     component: AdminLayoutComponent,
-    canActivate: [rolGuard('ADMIN')],
+    canActivate: [panelAdminGuard],
     children: [
       {
         path: '',

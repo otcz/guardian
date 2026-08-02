@@ -244,13 +244,23 @@ section {
   cursor: pointer;
   transition: background var(--transicion), color var(--transicion);
 
+  /* En rojo desde el primer vistazo: es un estado que el residente no puede
+     cambiar, y confundirlo con "inactivo" lo deja esperando a que se
+     resuelva solo. */
+  &.candado {
+    color: var(--deny);
+    background: var(--deny-soft);
+  }
+
   &:active {
     background: var(--presionado);
     transform: scale(0.9);
   }
 
+  /* :not(.candado) — sin esto el hover gris gana por venir después con la
+     misma especificidad, y el candado pierde su rojo justo al tocarlo. */
   @media (hover: hover) {
-    &:hover {
+    &:hover:not(.candado) {
       color: var(--text-strong);
       background: var(--bg-soft);
     }

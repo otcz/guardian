@@ -22,6 +22,10 @@ public class PersonaResponse {
     private String email;
     private String activo;
 
+    /** Llave del administrador: gana sobre "activo". */
+    private String bloqueado;
+    private String motivoBloqueo;
+
     private Long casaId;
     private String casaIdentificador;
     private String parentesco;

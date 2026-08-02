@@ -207,8 +207,76 @@ export class PersonasComponent implements OnInit {
     });
   }
 
+  // ── Bloqueo administrativo ───────────────────────────────────────────────
+
+  /** Persona a la que se le va a poner el candado. Null = hoja cerrada. */
+  bloqueando: Persona | null = null;
+
+  alternarBloqueo(persona: Persona): void {
+    if (this.bloqueada(persona)) {
+      this.desbloquear(persona);
+    } else {
+      this.bloqueando = persona;
+    }
+  }
+
+  confirmarBloqueo(motivo: string): void {
+    const persona = this.bloqueando;
+    if (!persona) {
+      return;
+    }
+
+    this.error = null;
+    this.admin.bloquear('personas', persona.id, motivo).subscribe({
+      next: () => {
+        this.bloqueando = null;
+        this.cargar(this.texto);
+      },
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos bloquear a la persona.';
+        this.bloqueando = null;
+      }
+    });
+  }
+
+  private desbloquear(persona: Persona): void {
+    const seguro = window.confirm(
+      `${persona.nombreCompleto} está bloqueada por: ` +
+      `${persona.motivoBloqueo || 'sin motivo registrado'}.\n\n` +
+      '¿Levantar el bloqueo? Volverá a ingresar si su registro está activo.');
+    if (!seguro) {
+      return;
+    }
+
+    this.error = null;
+    this.admin.desbloquear('personas', persona.id).subscribe({
+      next: () => this.cargar(this.texto),
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos levantar el bloqueo.';
+      }
+    });
+  }
+
+  // ── Estado de pantalla ───────────────────────────────────────────────────
+
   activa(persona: Persona): boolean {
     return persona.activo === 'S';
+  }
+
+  bloqueada(persona: Persona): boolean {
+    return persona.bloqueado === 'S';
+  }
+
+  /** El bloqueo gana sobre "activa": es la llave que el residente no levanta. */
+  estado(persona: Persona): string {
+    if (this.bloqueada(persona)) {
+      return 'Bloqueada';
+    }
+    return this.activa(persona) ? 'Activa' : 'Inactiva';
+  }
+
+  operativa(persona: Persona): boolean {
+    return this.activa(persona) && !this.bloqueada(persona);
   }
 
   /** El parentesco solo aplica si la persona vive en una casa. */

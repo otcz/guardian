@@ -36,6 +36,8 @@ public final class MensajesGlobales {
             "Ya existe una sede con ese nombre.";
     public static final String SEDE_YA_TIENE_ADMIN =
             "Esa sede ya tiene un administrador.";
+    public static final String SEDE_NO_OPERATIVA =
+            "Esa sede esta desactivada. Activala antes de entrar.";
     public static final String ROL_NO_ASIGNABLE =
             "Ese rol no se puede asignar desde aca.";
 

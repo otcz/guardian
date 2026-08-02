@@ -17,6 +17,9 @@ import {
   VehiculoRequest
 } from '../models/admin.model';
 
+/** Entidades sobre las que la administración puede echar el candado. */
+export type RecursoBloqueable = 'personas' | 'vehiculos' | 'casas' | 'usuarios';
+
 @Injectable({ providedIn: 'root' })
 export class AdminService {
 
@@ -136,6 +139,20 @@ export class AdminService {
 
   restablecerClave(id: number): Observable<Usuario> {
     return this.http.patch<Usuario>(`${this.base}/usuarios/${id}/restablecer-clave`, {});
+  }
+
+  // ── Bloqueos ─────────────────────────────────────────────────────────────
+
+  /**
+   * La OTRA llave. Activar/desactivar es del dueño; bloquear es del conjunto,
+   * y por eso vive en un recurso propio y no como una acción más de cada panel.
+   */
+  bloquear(recurso: RecursoBloqueable, id: number, motivo: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/bloqueos/${recurso}/${id}`, { motivo });
+  }
+
+  desbloquear(recurso: RecursoBloqueable, id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/bloqueos/${recurso}/${id}`);
   }
 
   // ── Invitaciones ─────────────────────────────────────────────────────────

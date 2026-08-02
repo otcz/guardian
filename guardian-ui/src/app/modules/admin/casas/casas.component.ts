@@ -106,7 +106,75 @@ export class CasasComponent implements OnInit {
     });
   }
 
+  // ── Bloqueo administrativo ───────────────────────────────────────────────
+
+  /** Casa a la que se le va a poner el candado. Null = hoja cerrada. */
+  bloqueando: Casa | null = null;
+
+  alternarBloqueo(casa: Casa): void {
+    if (this.bloqueada(casa)) {
+      this.desbloquear(casa);
+    } else {
+      this.bloqueando = casa;
+    }
+  }
+
+  confirmarBloqueo(motivo: string): void {
+    const casa = this.bloqueando;
+    if (!casa) {
+      return;
+    }
+
+    this.error = null;
+    this.admin.bloquear('casas', casa.id, motivo).subscribe({
+      next: () => {
+        this.bloqueando = null;
+        this.cargar();
+      },
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos bloquear la casa.';
+        this.bloqueando = null;
+      }
+    });
+  }
+
+  private desbloquear(casa: Casa): void {
+    const seguro = window.confirm(
+      `${casa.identificador} está bloqueada por: ` +
+      `${casa.motivoBloqueo || 'sin motivo registrado'}.\n\n` +
+      '¿Levantar el bloqueo? Sus residentes vuelven a ingresar.');
+    if (!seguro) {
+      return;
+    }
+
+    this.error = null;
+    this.admin.desbloquear('casas', casa.id).subscribe({
+      next: () => this.cargar(),
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos levantar el bloqueo.';
+      }
+    });
+  }
+
+  // ── Estado de pantalla ───────────────────────────────────────────────────
+
   activa(casa: Casa): boolean {
     return casa.activo === 'S';
+  }
+
+  bloqueada(casa: Casa): boolean {
+    return casa.bloqueado === 'S';
+  }
+
+  /** El bloqueo gana: una casa bloqueada deja fuera a todos sus residentes. */
+  estado(casa: Casa): string {
+    if (this.bloqueada(casa)) {
+      return 'Bloqueada';
+    }
+    return this.activa(casa) ? 'Activa' : 'Inactiva';
+  }
+
+  operativa(casa: Casa): boolean {
+    return this.activa(casa) && !this.bloqueada(casa);
   }
 }

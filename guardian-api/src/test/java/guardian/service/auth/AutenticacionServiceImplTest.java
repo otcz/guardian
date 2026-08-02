@@ -46,6 +46,7 @@ class AutenticacionServiceImplTest {
 
     @Mock private GdUsuarioRepository usuarioRepository;
     @Mock private GdResidenteCasaRepository residenteCasaRepository;
+    @Mock private guardian.repository.GdConjuntoRepository conjuntoRepository;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private JwtService jwtService;
     @Mock private IntentosLoginService intentosLoginService;

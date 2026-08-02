@@ -1,0 +1,49 @@
+@use '../../styles/paneles';
+
+:host {
+  display: contents;
+}
+
+.explicacion {
+  margin: 0 0 var(--e-4);
+  color: var(--text-default);
+  font-size: var(--t-sm);
+  line-height: 1.5;
+}
+
+.campo {
+  position: relative;
+
+  .contador {
+    align-self: flex-end;
+    font-size: var(--t-xs);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+[pie] {
+  display: flex;
+  gap: var(--e-2);
+
+  button {
+    flex: 1 1 0;
+  }
+
+  .alterno {
+    min-height: var(--tactil);
+    font-size: var(--t-md);
+    font-weight: 600;
+    color: var(--text-strong);
+    background: none;
+    border: 1px solid var(--border-default);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+  }
+
+  /* Rojo y no azul: bloquear le quita el ingreso a alguien que hoy lo tiene.
+     Con el color de "guardar", se confirma sin leer. */
+  .principal.peligro {
+    background: var(--deny);
+  }
+}

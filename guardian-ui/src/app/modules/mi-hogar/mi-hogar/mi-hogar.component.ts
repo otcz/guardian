@@ -225,4 +225,28 @@ export class MiHogarComponent implements OnInit {
   activo(estado: string): boolean {
     return estado === 'S';
   }
+
+  /**
+   * Bloqueado por la administración. El residente no puede levantarlo, así que
+   * en su lugar ve un candado y no un interruptor: ofrecerle un botón que el
+   * backend le va a negar es prometerle algo que no se cumple.
+   */
+  bloqueado(entidad: { bloqueado: string }): boolean {
+    return entidad.bloqueado === 'S';
+  }
+
+  /**
+   * Explicación del candado. Hoja aparte y no la de confirmar: esa ofrece una
+   * acción destructiva en rojo, y acá no hay nada que hacer más que leer.
+   */
+  bloqueoInfo: { titulo: string; detalle: string } | null = null;
+
+  explicarBloqueo(nombre: string, motivo: string | null): void {
+    this.bloqueoInfo = {
+      titulo: nombre,
+      detalle: motivo
+        ? `La administración lo bloqueó: ${motivo}. Comunícate con ella para levantarlo.`
+        : 'La administración lo bloqueó. Comunícate con ella para levantarlo.'
+    };
+  }
 }

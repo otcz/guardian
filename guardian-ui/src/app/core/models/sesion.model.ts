@@ -1,4 +1,4 @@
-export type Rol = 'ADMIN' | 'GUARDIA' | 'RESIDENTE';
+export type Rol = 'SUPER_ADMIN' | 'ADMIN' | 'GUARDIA' | 'RESIDENTE';
 
 export interface Sesion {
   usuarioId: number;
@@ -8,6 +8,13 @@ export interface Sesion {
   rol: Rol;
   fotoUrl: string | null;
   casaIdentificador: string | null;
+
+  /** Sede sobre la que se está operando. Null para el super sin sede elegida. */
+  sedeId: number | null;
+  sedeNombre: string | null;
+
+  /** true mientras un super administrador opera dentro de una sede ajena. */
+  sedeSuplantada: boolean;
 }
 
 export interface LoginRequest {

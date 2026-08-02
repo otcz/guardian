@@ -188,6 +188,13 @@ public class SedeServiceImpl implements SedeService {
     public LoginResponse entrar(Long sedeId, UsuarioAutenticado ejecutor) {
         GdConjunto sede = sedeReal(sedeId);
 
+        // Sin esto el token nace muerto: el filtro revisa la sede en CADA
+        // peticion, asi que entrar a una sede apagada devolveria una sesion
+        // valida que responde 401 a todo. Es peor que negar la entrada.
+        if (!sede.puedeOperar()) {
+            throw GuardianException.solicitudInvalida(MensajesGlobales.SEDE_NO_OPERATIVA);
+        }
+
         UsuarioAutenticado dentro = new UsuarioAutenticado(
                 ejecutor.getUsuarioId(), ejecutor.getPersonaId(), sede.getId(),
                 ejecutor.getDocumento(), ejecutor.getNombreCompleto(),

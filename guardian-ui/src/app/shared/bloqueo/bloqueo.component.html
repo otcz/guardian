@@ -1,0 +1,21 @@
+<gd-hoja [abierta]="visible" titulo="Bloquear" (cerrar)="cerrar.emit()">
+
+  <p class="explicacion">{{ texto }}</p>
+
+  <form id="forma-bloqueo" (ngSubmit)="aceptar()">
+    <div class="campo">
+      <label for="motivo-bloqueo">Motivo</label>
+      <input id="motivo-bloqueo" type="text" name="motivo" maxlength="200"
+             [(ngModel)]="motivo" placeholder="Ej: Cartera vencida">
+      <span class="contador">{{ motivo.length }}/200</span>
+    </div>
+  </form>
+
+  <div pie>
+    <button type="button" class="alterno" (click)="cerrar.emit()">Cancelar</button>
+    <button type="submit" form="forma-bloqueo" class="principal peligro"
+            [disabled]="!motivo.trim()">
+      Bloquear
+    </button>
+  </div>
+</gd-hoja>
