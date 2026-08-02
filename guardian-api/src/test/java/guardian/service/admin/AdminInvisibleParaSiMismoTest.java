@@ -219,9 +219,11 @@ class AdminInvisibleParaSiMismoTest {
         verify(passwordEncoder, never()).encode("1099887766");
 
         assertThat(capturado.getValue().getClaveHash()).isEqualTo("$inicial");
-        // Y sigue naciendo inactiva y con el cambio forzado: eso es lo que
-        // hace que una clave adivinable no sea un riesgo.
-        assertThat(capturado.getValue().getActivo()).isEqualTo(Codigos.NO);
+        // HABILITADA desde el alta: activarla en un segundo paso se olvidaba y
+        // la persona rebotaba en el login con su clave en la mano.
+        assertThat(capturado.getValue().getActivo()).isEqualTo(Codigos.SI);
+        // El cambio forzado es lo unico que queda entre la clave inicial y una
+        // cuenta de verdad, asi que no se negocia.
         assertThat(capturado.getValue().debeCambiarClave()).isTrue();
     }
 

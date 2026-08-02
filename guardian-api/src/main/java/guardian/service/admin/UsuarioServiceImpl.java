@@ -71,11 +71,14 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setRol(request.getRol());
         usuario.setClaveHash(passwordEncoder.encode(Codigos.CLAVE_INICIAL));
         usuario.setRequiereCambioClave(Codigos.SI);
-        usuario.setActivo(Codigos.NO);
+        // Nace HABILITADA: el paso de activarla aparte se olvidaba, y el
+        // resultado era una persona con su clave en la mano rebotando en el
+        // login sin que nadie supiera por que.
+        usuario.setActivo(Codigos.SI);
         usuario.setUsuarioCreador(ejecutor.getDocumento());
 
         GdUsuario guardado = usuarioRepository.save(usuario);
-        log.info("[admin] usuario creado id={} personaId={} rol={} (inactivo)",
+        log.info("[admin] usuario creado id={} personaId={} rol={} (habilitado)",
                 guardado.getId(), persona.getId(), request.getRol());
 
         return mapear(guardado);

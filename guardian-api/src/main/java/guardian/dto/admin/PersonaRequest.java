@@ -50,7 +50,7 @@ public class PersonaRequest {
 
     /**
      * Codigo del grupo ROL. Si viene, el alta tambien crea la cuenta de acceso
-     * (clave inicial 0000, inactiva hasta que el admin la habilite).
+     * (habilitada, clave inicial 0000 y cambio forzado al entrar).
      * Null = persona sin cuenta, p. ej. un menor que solo necesita QR.
      */
     private String rolUsuario;

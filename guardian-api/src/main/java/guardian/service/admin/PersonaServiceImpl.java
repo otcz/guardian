@@ -129,8 +129,8 @@ public class PersonaServiceImpl implements PersonaService {
 
     /**
      * La "tarjeta completa": si el alta trae rol, la cuenta se crea en el
-     * mismo paso. Nace INACTIVA y con la clave inicial + cambio forzado,
-     * igual que cualquier cuenta creada desde el panel de usuarios.
+     * mismo paso — habilitada, con la clave inicial y cambio forzado, igual
+     * que cualquier cuenta creada desde el panel de usuarios.
      */
     private void crearCuentaSiCorresponde(GdPersona persona, PersonaRequest request,
                                           UsuarioAutenticado ejecutor) {
@@ -150,7 +150,7 @@ public class PersonaServiceImpl implements PersonaService {
         usuario.setRol(request.getRolUsuario());
         usuario.setClaveHash(passwordEncoder.encode(Codigos.CLAVE_INICIAL));
         usuario.setRequiereCambioClave(Codigos.SI);
-        usuario.setActivo(Codigos.NO);
+        usuario.setActivo(Codigos.SI);
         usuario.setUsuarioCreador(ejecutor.getDocumento());
         usuarioRepository.save(usuario);
     }

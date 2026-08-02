@@ -85,7 +85,7 @@ export class UsuariosComponent implements OnInit {
         this.mostrarAlta = false;
         this.formulario.reset();
         this.aviso = `Cuenta creada para ${creado.nombreCompleto}. `
-          + 'Nace inactiva: habilítala cuando entregues el acceso. '
+          + 'Ya puede entrar. '
           + `La contraseña inicial es ${CLAVE_INICIAL}.`;
         this.cargar();
       },

@@ -15,11 +15,16 @@ public interface UsuarioService {
     List<UsuarioResponse> listar(UsuarioAutenticado ejecutor);
 
     /**
-     * Da de alta la cuenta de una persona con la clave inicial del sistema.
+     * Da de alta la cuenta de una persona, habilitada y con la clave inicial
+     * del sistema.
      *
-     * <p>Nace <b>inactiva</b>: si naciera activa, cualquiera que conozca la
-     * cedula de un vecino podria tomar la cuenta antes que su dueno. El
-     * administrador la habilita cuando entrega el acceso en mano.</p>
+     * <p>Nacia inhabilitada para que nadie pudiera tomarla antes que su dueno,
+     * pero el paso de activarla aparte se olvidaba y la persona rebotaba en el
+     * login con su clave en la mano. La contrapartida es real y hay que
+     * conocerla: entre el alta y el primer ingreso, quien sepa la cedula de esa
+     * persona puede entrar con la clave inicial y ponerle otra. Lo que queda
+     * para detectarlo es la columna "ultimo ingreso" del panel — si alguien
+     * dice que no ha entrado nunca y ahi figura una fecha, la cuenta se tomo.</p>
      */
     UsuarioResponse crear(UsuarioRequest request, UsuarioAutenticado ejecutor);
 
