@@ -153,9 +153,14 @@ export interface PersonaRegistrada {
 export interface Vehiculo {
   id: number;
   placa: string;
+  /** Códigos del catálogo: son lo que se manda de vuelta al editar. */
   tipo: string;
   marca: string | null;
   color: string | null;
+  /** Los mismos, ya traducidos por el backend. Es lo que se muestra. */
+  tipoNombre: string | null;
+  marcaNombre: string | null;
+  colorNombre: string | null;
   activo: string;
   bloqueado: string;
   motivoBloqueo: string | null;
@@ -177,7 +182,19 @@ export interface Parametro {
   codigo: string;
   valor: string;
   orden: number;
+  /** El sistema la referencia por código: se renombra, no se desactiva. */
   protegido: boolean;
+  activo: boolean;
+}
+
+/** Un grupo del catálogo tal como lo lista la pantalla de Configuración. */
+export interface GrupoParametro {
+  grupo: string;
+  nombre: string;
+  descripcion: string;
+  opciones: number;
+  /** false = solo se pueden renombrar sus opciones, no agregar ni quitar. */
+  ampliable: boolean;
 }
 
 /** El código con el que el titular invita a su familia a registrarse sola. */

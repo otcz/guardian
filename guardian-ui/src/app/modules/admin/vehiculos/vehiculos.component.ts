@@ -18,6 +18,8 @@ export class VehiculosComponent implements OnInit {
   vehiculos: Vehiculo[] = [];
   casas: Casa[] = [];
   tipos: Parametro[] = [];
+  marcas: Parametro[] = [];
+  colores: Parametro[] = [];
 
   cargando = true;
   guardando = false;
@@ -41,6 +43,8 @@ export class VehiculosComponent implements OnInit {
     this.cargar();
     this.admin.casas().subscribe(casas => (this.casas = casas));
     this.admin.parametros('TIPO_VEHICULO').subscribe(tipos => (this.tipos = tipos));
+    this.admin.parametros('MARCA_VEHICULO').subscribe(marcas => (this.marcas = marcas));
+    this.admin.parametros('COLOR_VEHICULO').subscribe(colores => (this.colores = colores));
   }
 
   cargar(): void {

@@ -30,6 +30,8 @@ export class MiHogarComponent implements OnInit {
   vehiculos: Vehiculo[] = [];
   parentescos: Parametro[] = [];
   tiposVehiculo: Parametro[] = [];
+  marcasVehiculo: Parametro[] = [];
+  coloresVehiculo: Parametro[] = [];
   tiposDocumento: Parametro[] = [];
 
   cargando = true;
@@ -78,6 +80,8 @@ export class MiHogarComponent implements OnInit {
       this.parentescos = parametros.filter(p => p.codigo !== 'TITULAR');
     });
     this.admin.parametros('TIPO_VEHICULO').subscribe(tipos => (this.tiposVehiculo = tipos));
+    this.admin.parametros('MARCA_VEHICULO').subscribe(m => (this.marcasVehiculo = m));
+    this.admin.parametros('COLOR_VEHICULO').subscribe(c => (this.coloresVehiculo = c));
     this.admin.parametros('TIPO_DOCUMENTO').subscribe(t => (this.tiposDocumento = t));
   }
 

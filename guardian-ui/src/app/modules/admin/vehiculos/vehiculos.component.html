@@ -31,13 +31,24 @@
     </div>
 
     <div class="campo">
-      <label for="marca">Marca</label>
-      <input id="marca" type="text" formControlName="marca">
+      <label for="marca">
+        Marca
+        <i class="pi pi-info-circle ayuda"
+           pTooltip="¿Falta alguna? Agrégala en Configuración"
+           tooltipPosition="top"></i>
+      </label>
+      <select id="marca" formControlName="marca">
+        <option value="">Sin marca</option>
+        <option *ngFor="let m of marcas" [value]="m.codigo">{{ m.valor }}</option>
+      </select>
     </div>
 
     <div class="campo">
       <label for="color">Color</label>
-      <input id="color" type="text" formControlName="color">
+      <select id="color" formControlName="color">
+        <option value="">Sin color</option>
+        <option *ngFor="let c of colores" [value]="c.codigo">{{ c.valor }}</option>
+      </select>
     </div>
 
     <button type="submit" class="principal" [disabled]="guardando">
@@ -66,9 +77,9 @@
       <tr *ngFor="let vehiculo of vehiculos" [class.inactiva]="!activo(vehiculo)">
         <td class="fuerte">{{ vehiculo.placa }}</td>
         <td>{{ vehiculo.casaIdentificador }}</td>
-        <td>{{ vehiculo.tipo }}</td>
-        <td>{{ vehiculo.marca ?? '—' }}</td>
-        <td>{{ vehiculo.color ?? '—' }}</td>
+        <td>{{ vehiculo.tipoNombre ?? vehiculo.tipo }}</td>
+        <td>{{ vehiculo.marcaNombre ?? '—' }}</td>
+        <td>{{ vehiculo.colorNombre ?? '—' }}</td>
         <td>
           <span class="pastilla" [class.si]="operativo(vehiculo)" [class.no]="!operativo(vehiculo)"
                 [class.candado]="bloqueado(vehiculo)"

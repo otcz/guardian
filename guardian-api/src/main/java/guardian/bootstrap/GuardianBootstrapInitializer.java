@@ -167,6 +167,46 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
                 new Opcion("BICICLETA", "Bicicleta"),
                 new Opcion("OTRO", "Otro")));
 
+        // Marcas y colores como catalogo y no como texto libre: escritos a
+        // mano, el mismo carro entra como "Mazda", "MAZDA" y "mazda", y la
+        // busqueda del guardia no encuentra ninguno. Son las marcas que
+        // circulan en un conjunto colombiano; el administrador agrega las que
+        // le falten desde Configuracion. SIN marcas de bicicleta: el que llega
+        // en bici no se identifica por la marca.
+        creados += sembrarGrupo(Codigos.GRUPO_MARCA_VEHICULO, false, Arrays.asList(
+                new Opcion("CHEVROLET", "Chevrolet"),
+                new Opcion("RENAULT", "Renault"),
+                new Opcion("MAZDA", "Mazda"),
+                new Opcion("TOYOTA", "Toyota"),
+                new Opcion("NISSAN", "Nissan"),
+                new Opcion("KIA", "Kia"),
+                new Opcion("HYUNDAI", "Hyundai"),
+                new Opcion("FORD", "Ford"),
+                new Opcion("VOLKSWAGEN", "Volkswagen"),
+                new Opcion("SUZUKI", "Suzuki"),
+                new Opcion("HONDA", "Honda"),
+                new Opcion("YAMAHA", "Yamaha"),
+                new Opcion("BAJAJ", "Bajaj"),
+                new Opcion("AKT", "AKT"),
+                new Opcion("OTRA", "Otra")));
+
+        // Colores basicos y distinguibles de noche. Un catalogo largo —"gris
+        // grafito", "plata metalizado"— no ayuda al guardia: a esa hora y a esa
+        // distancia solo se distingue la familia del color.
+        creados += sembrarGrupo(Codigos.GRUPO_COLOR_VEHICULO, false, Arrays.asList(
+                new Opcion("BLANCO", "Blanco"),
+                new Opcion("NEGRO", "Negro"),
+                new Opcion("GRIS", "Gris"),
+                new Opcion("PLATA", "Plata"),
+                new Opcion("ROJO", "Rojo"),
+                new Opcion("AZUL", "Azul"),
+                new Opcion("VERDE", "Verde"),
+                new Opcion("AMARILLO", "Amarillo"),
+                new Opcion("NARANJA", "Naranja"),
+                new Opcion("VINOTINTO", "Vinotinto"),
+                new Opcion("BEIGE", "Beige"),
+                new Opcion("OTRO", "Otro")));
+
         creados += sembrarGrupo(Codigos.GRUPO_TIPO_CREDENCIAL, true, Arrays.asList(
                 new Opcion(Codigos.CREDENCIAL_PERMANENTE, "Permanente"),
                 new Opcion(Codigos.CREDENCIAL_TEMPORAL, "Temporal")));

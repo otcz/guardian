@@ -21,6 +21,7 @@ import guardian.repository.GdResidenteCasaRepository;
 import guardian.repository.GdVehiculoRepository;
 import guardian.repository.spec.AccesoEventoSpecs;
 import guardian.security.UsuarioAutenticado;
+import guardian.service.admin.EtiquetaCatalogoService;
 import guardian.util.EdadUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +56,7 @@ public class AccesoServiceImpl implements AccesoService {
     private final GdCredencialQrRepository credencialRepository;
     private final GdResidenteCasaRepository residenteCasaRepository;
     private final GdVehiculoRepository vehiculoRepository;
+    private final EtiquetaCatalogoService etiquetaCatalogoService;
     private final PresenciaService presenciaService;
     private final InvitacionService invitacionService;
     private final AccesoInvitadoService accesoInvitadoService;
@@ -424,9 +426,12 @@ public class AccesoServiceImpl implements AccesoService {
                 .map(v -> VehiculoResumen.builder()
                         .id(v.getId())
                         .placa(v.getPlaca())
-                        .tipo(v.getTipo())
-                        .marca(v.getMarca())
-                        .color(v.getColor())
+                        .tipo(etiquetaCatalogoService
+                                .etiqueta(Codigos.GRUPO_TIPO_VEHICULO, v.getTipo()))
+                        .marca(etiquetaCatalogoService
+                                .etiqueta(Codigos.GRUPO_MARCA_VEHICULO, v.getMarca()))
+                        .color(etiquetaCatalogoService
+                                .etiqueta(Codigos.GRUPO_COLOR_VEHICULO, v.getColor()))
                         .build())
                 .collect(Collectors.toList());
     }

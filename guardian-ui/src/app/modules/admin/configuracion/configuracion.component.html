@@ -1,0 +1,109 @@
+<div class="gd-page">
+  <div class="encabezado">
+    <h1>Configuración</h1>
+  </div>
+
+  <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+  <p class="gd-muted" *ngIf="cargando">Cargando…</p>
+
+  <div class="catalogo" *ngIf="!cargando">
+
+    <!-- Izquierda: qué catálogos existen. -->
+    <nav class="grupos gd-card" aria-label="Catálogos">
+      <button type="button" class="grupo"
+              *ngFor="let grupo of grupos"
+              [class.activo]="grupo.grupo === seleccionado?.grupo"
+              (click)="seleccionar(grupo)">
+        <span class="nombre">{{ grupo.nombre }}</span>
+        <span class="conteo">{{ grupo.opciones }}</span>
+      </button>
+    </nav>
+
+    <!-- Derecha: las opciones del catálogo abierto. -->
+    <section class="opciones gd-card" *ngIf="seleccionado">
+      <header>
+        <div class="titulo">
+          <h2>{{ seleccionado.nombre }}</h2>
+          <p class="gd-muted">{{ seleccionado.descripcion }}</p>
+        </div>
+        <button type="button" class="principal"
+                *ngIf="seleccionado.ampliable"
+                (click)="abrirAlta()">
+          <i class="pi pi-plus"></i>
+          Agregar
+        </button>
+      </header>
+
+      <p class="gd-muted" *ngIf="cargandoOpciones">Cargando…</p>
+
+      <ul class="lista" *ngIf="!cargandoOpciones">
+        <li *ngFor="let opcion of opciones" [class.apagada]="!opcion.activo">
+          <span class="valor">{{ opcion.valor }}</span>
+
+          <span class="pastilla no" *ngIf="!opcion.activo">Oculta</span>
+          <span class="pastilla candado" *ngIf="opcion.protegido"
+                tabindex="0"
+                pTooltip="La usa el sistema" tooltipPosition="top">
+            <i class="pi pi-lock"></i>
+          </span>
+
+          <span class="acciones">
+            <button type="button" class="accion"
+                    (click)="abrirEdicion(opcion)"
+                    [attr.aria-label]="'Cambiar el nombre de ' + opcion.valor"
+                    pTooltip="Cambiar el nombre" tooltipPosition="left">
+              <i class="pi pi-pencil"></i>
+            </button>
+            <button type="button" class="accion"
+                    [disabled]="!opcion.activo ? false : !puedeDesactivar(opcion)"
+                    (click)="alternarEstado(opcion)"
+                    [attr.aria-label]="(opcion.activo ? 'Ocultar ' : 'Mostrar ') + opcion.valor"
+                    [pTooltip]="opcion.activo
+                      ? (puedeDesactivar(opcion) ? 'Ocultar' : motivoNoDesactivable(opcion))
+                      : 'Mostrar'"
+                    tooltipPosition="left">
+              <i class="pi" [ngClass]="opcion.activo ? 'pi-eye-slash' : 'pi-eye'"></i>
+            </button>
+          </span>
+        </li>
+
+        <li class="vacio" *ngIf="opciones.length === 0">
+          Este catálogo todavía no tiene opciones.
+        </li>
+      </ul>
+
+      <p class="nota" *ngIf="inactivas > 0">
+        Las opciones ocultas dejan de ofrecerse en los formularios. Lo que ya
+        estaba registrado con ellas no cambia.
+      </p>
+    </section>
+  </div>
+
+  <gd-hoja [abierta]="mostrarHoja"
+           [titulo]="tituloHoja"
+           [subtitulo]="subtituloHoja"
+           (cerrar)="cerrarHoja()">
+    <form [formGroup]="formulario" (ngSubmit)="guardar()">
+      <div class="campo">
+        <label for="c-valor">
+          Nombre
+          <i class="pi pi-info-circle field-help"
+             pTooltip="Así lo verá quien llene el formulario"
+             tooltipPosition="top"></i>
+        </label>
+        <input id="c-valor" type="text" formControlName="valor"
+               placeholder="Ej: Camioneta" autocomplete="off">
+        <small class="error"
+               *ngIf="formulario.controls.valor.touched && formulario.controls.valor.invalid">
+          Escribe un nombre de hasta 100 caracteres.
+        </small>
+      </div>
+
+      <button type="submit" class="principal" [disabled]="guardando">
+        <i class="pi" [ngClass]="guardando ? 'pi-spinner pi-spin' : 'pi-check'"></i>
+        {{ guardando ? 'Guardando…' : 'Guardar' }}
+      </button>
+    </form>
+  </gd-hoja>
+</div>

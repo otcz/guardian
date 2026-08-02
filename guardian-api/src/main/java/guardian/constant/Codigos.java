@@ -1,5 +1,9 @@
 package guardian.constant;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Codigos estructurales del dominio.
  *
@@ -84,9 +88,27 @@ public final class Codigos {
     public static final String GRUPO_ROL = "ROL";
     public static final String GRUPO_PARENTESCO = "PARENTESCO";
     public static final String GRUPO_TIPO_VEHICULO = "TIPO_VEHICULO";
+    public static final String GRUPO_MARCA_VEHICULO = "MARCA_VEHICULO";
+    public static final String GRUPO_COLOR_VEHICULO = "COLOR_VEHICULO";
     public static final String GRUPO_MOTIVO_DENEGACION = "MOTIVO_DENEGACION";
     public static final String GRUPO_TIPO_CREDENCIAL = "TIPO_CREDENCIAL";
     public static final String GRUPO_TIPO_DOCUMENTO = "TIPO_DOCUMENTO";
+
+    /**
+     * Los grupos que el administrador puede ampliar desde el panel.
+     *
+     * <p>Los que NO estan aca —ROL, MOTIVO_DENEGACION, TIPO_CREDENCIAL— son
+     * estructurales: el codigo ramifica sobre sus codigos exactos. Cambiarles
+     * la ETIQUETA es inofensivo y se permite; agregar o quitar opciones romperia
+     * validaciones que no tienen como enterarse.</p>
+     */
+    public static final List<String> GRUPOS_ABIERTOS = Collections
+            .unmodifiableList(Arrays.asList(
+                    GRUPO_PARENTESCO,
+                    GRUPO_TIPO_DOCUMENTO,
+                    GRUPO_TIPO_VEHICULO,
+                    GRUPO_MARCA_VEHICULO,
+                    GRUPO_COLOR_VEHICULO));
 
     /** Tipo de documento por defecto cuando el alta no lo especifica. */
     public static final String TIPO_DOCUMENTO_CC = "CC";

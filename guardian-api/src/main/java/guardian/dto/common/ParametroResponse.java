@@ -15,5 +15,13 @@ public class ParametroResponse {
     private String codigo;
     private String valor;
     private Integer orden;
+
+    /** El sistema la referencia por codigo: se renombra, no se desactiva. */
     private boolean protegido;
+
+    /**
+     * Siempre true en los listados que alimentan los desplegables —ahi solo
+     * viajan las activas—. Solo distingue algo en el panel de Configuracion.
+     */
+    private boolean activo;
 }

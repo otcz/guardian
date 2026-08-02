@@ -11,6 +11,7 @@ import { PersonasComponent } from './personas/personas.component';
 import { VehiculosComponent } from './vehiculos/vehiculos.component';
 import { InvitacionesComponent } from './invitaciones/invitaciones.component';
 import { BitacoraComponent } from './bitacora/bitacora.component';
+import { ConfiguracionComponent } from './configuracion/configuracion.component';
 
 // El marco (sidebar) lo pone AdminLayoutComponent a nivel de aplicación;
 // este módulo solo aporta las pantallas.
@@ -24,7 +25,8 @@ const routes: Routes = [
   // pantallas se fundieron. Redirige para no romper enlaces guardados.
   { path: 'usuarios', redirectTo: 'personas' },
   { path: 'invitaciones', component: InvitacionesComponent },
-  { path: 'bitacora', component: BitacoraComponent }
+  { path: 'bitacora', component: BitacoraComponent },
+  { path: 'configuracion', component: ConfiguracionComponent }
 ];
 
 @NgModule({
@@ -34,7 +36,8 @@ const routes: Routes = [
     PersonasComponent,
     VehiculosComponent,
     InvitacionesComponent,
-    BitacoraComponent
+    BitacoraComponent,
+    ConfiguracionComponent
   ],
   imports: [
     CommonModule,

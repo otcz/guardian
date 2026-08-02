@@ -7,6 +7,7 @@ import { Invitacion, Pagina } from '../models/acceso.model';
 import {
   Casa,
   CasaRequest,
+  GrupoParametro,
   Parametro,
   Persona,
   PersonaRegistrada,
@@ -181,5 +182,29 @@ export class AdminService {
     // de vehiculo) necesitan los catalogos igual que el back-office, y bajo
     // /admin recibian 403.
     return this.http.get<Parametro[]>(`${environment.apiUrl}/parametros`, { params });
+  }
+
+  // ── Configuración del catálogo (solo administrador) ──────────────────────
+
+  grupos(): Observable<GrupoParametro[]> {
+    return this.http.get<GrupoParametro[]>(`${this.base}/parametros/grupos`);
+  }
+
+  /** Activas e inactivas: apagar una opción no puede equivaler a perderla. */
+  opcionesDelGrupo(grupo: string): Observable<Parametro[]> {
+    return this.http.get<Parametro[]>(`${this.base}/parametros/grupos/${grupo}`);
+  }
+
+  crearOpcion(grupo: string, valor: string): Observable<Parametro> {
+    return this.http.post<Parametro>(`${this.base}/parametros/grupos/${grupo}`, { valor });
+  }
+
+  renombrarOpcion(id: number, valor: string): Observable<Parametro> {
+    return this.http.put<Parametro>(`${this.base}/parametros/${id}`, { valor });
+  }
+
+  cambiarEstadoOpcion(id: number, activo: boolean): Observable<Parametro> {
+    const params = new HttpParams().set('activo', activo);
+    return this.http.put<Parametro>(`${this.base}/parametros/${id}/estado`, {}, { params });
   }
 }

@@ -11,6 +11,7 @@ import guardian.repository.GdAccesoEventoRepository;
 import guardian.repository.GdCasaRepository;
 import guardian.repository.GdVehiculoRepository;
 import guardian.security.UsuarioAutenticado;
+import guardian.util.CatalogoVehiculo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class VehiculoServiceImpl implements VehiculoService {
     private final GdCasaRepository casaRepository;
     private final GdAccesoEventoRepository eventoRepository;
     private final ParametroService parametroService;
+    private final EtiquetaCatalogoService etiquetaCatalogoService;
 
     @Override
     @Transactional(readOnly = true)
@@ -62,7 +64,7 @@ public class VehiculoServiceImpl implements VehiculoService {
     @Transactional
     public VehiculoResponse crear(VehiculoRequest request, UsuarioAutenticado ejecutor) {
         String placa = normalizarPlaca(request.getPlaca());
-        parametroService.exigirCodigoValido(Codigos.GRUPO_TIPO_VEHICULO, request.getTipo());
+        validarCatalogo(request.getTipo(), request.getMarca(), request.getColor());
 
         // Placa unica en TODO el sistema: el mismo carro no puede estar en dos
         // sedes ni en dos casas, o la bitacora deja de ser confiable.
@@ -91,7 +93,7 @@ public class VehiculoServiceImpl implements VehiculoService {
     public VehiculoResponse actualizar(Long id, VehiculoRequest request, UsuarioAutenticado ejecutor) {
         GdVehiculo vehiculo = obtener(id, ejecutor.getConjuntoId());
         String placa = normalizarPlaca(request.getPlaca());
-        parametroService.exigirCodigoValido(Codigos.GRUPO_TIPO_VEHICULO, request.getTipo());
+        validarCatalogo(request.getTipo(), request.getMarca(), request.getColor());
 
         vehiculoRepository.findByPlaca(placa)
                 .filter(otro -> !otro.getId().equals(id))
@@ -164,8 +166,12 @@ public class VehiculoServiceImpl implements VehiculoService {
 
     private void aplicar(GdVehiculo vehiculo, VehiculoRequest request) {
         vehiculo.setTipo(request.getTipo());
-        vehiculo.setMarca(request.getMarca());
-        vehiculo.setColor(request.getColor());
+        vehiculo.setMarca(CatalogoVehiculo.limpiar(request.getMarca()));
+        vehiculo.setColor(CatalogoVehiculo.limpiar(request.getColor()));
+    }
+
+    private void validarCatalogo(String tipo, String marca, String color) {
+        CatalogoVehiculo.exigir(parametroService, tipo, marca, color);
     }
 
     private VehiculoResponse mapear(GdVehiculo vehiculo) {
@@ -175,6 +181,12 @@ public class VehiculoServiceImpl implements VehiculoService {
                 .tipo(vehiculo.getTipo())
                 .marca(vehiculo.getMarca())
                 .color(vehiculo.getColor())
+                .tipoNombre(etiquetaCatalogoService
+                        .etiqueta(Codigos.GRUPO_TIPO_VEHICULO, vehiculo.getTipo()))
+                .marcaNombre(etiquetaCatalogoService
+                        .etiqueta(Codigos.GRUPO_MARCA_VEHICULO, vehiculo.getMarca()))
+                .colorNombre(etiquetaCatalogoService
+                        .etiqueta(Codigos.GRUPO_COLOR_VEHICULO, vehiculo.getColor()))
                 .activo(vehiculo.getActivo())
                 .bloqueado(vehiculo.getBloqueado())
                 .motivoBloqueo(vehiculo.getMotivoBloqueo())

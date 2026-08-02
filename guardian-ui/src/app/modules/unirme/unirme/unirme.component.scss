@@ -68,10 +68,19 @@
 form {
   display: flex;
   flex-direction: column;
-  gap: var(--e-3);
+  gap: var(--e-4);
 }
 
-/* flex-wrap: en un teléfono angosto los pares se apilan solos. */
+/* _paneles trae `.campo { flex: 1 1 150px }`, pensado para filas. Dentro de un
+   contenedor en COLUMNA ese 150px es la ALTURA de base y el grow lo estira:
+   cada campo medía 150px de alto y el formulario parecía desarmado. */
+form > .campo,
+form > .fila {
+  flex: 0 0 auto;
+}
+
+/* flex-wrap y no columnas fijas: en un teléfono angosto los pares se apilan
+   solos, sin una consulta de medios. */
 .fila {
   display: flex;
   flex-wrap: wrap;
@@ -81,8 +90,9 @@ form {
     flex: 1 1 140px;
   }
 
+  /* "Cédula de ciudadanía" no cabe en 110px y salía cortado a "Cedula de". */
   .campo.tipo {
-    flex: 0 1 110px;
+    flex: 1 1 150px;
   }
 }
 

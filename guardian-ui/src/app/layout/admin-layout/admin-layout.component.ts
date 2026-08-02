@@ -33,7 +33,10 @@ export class AdminLayoutComponent {
     // persona, en Personas. Dos pantallas para el mismo ser humano eran la
     // causa de que una dijera "Activa" y la otra le negara la entrada.
     { ruta: 'invitaciones', etiqueta: 'Invitaciones', icono: 'pi-ticket' },
-    { ruta: 'bitacora', etiqueta: 'Bitácora', icono: 'pi-history' }
+    { ruta: 'bitacora', etiqueta: 'Bitácora', icono: 'pi-history' },
+    // De último: es lo que menos se toca, y va después de las pantallas de
+    // trabajo diario porque configura lo que aparece en ellas.
+    { ruta: 'configuracion', etiqueta: 'Configuración', icono: 'pi-sliders-h' }
   ];
 
   constructor(

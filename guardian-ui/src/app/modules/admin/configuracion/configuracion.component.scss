@@ -1,0 +1,158 @@
+@use '../../../styles/paneles';
+
+/* Dos columnas mientras quepan, apiladas cuando no. Sin @media: el ancho que
+   importa es el del contenedor, no el del navegador — la barra lateral del
+   administrador cambia el espacio disponible sin que cambie el viewport. */
+.catalogo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--e-4);
+}
+
+.grupos {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 240px;
+  min-width: 0;
+  padding: var(--e-2);
+}
+
+.grupo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-2);
+  min-height: var(--tactil);
+  padding: var(--e-2) var(--e-3);
+  text-align: left;
+  color: var(--text-default);
+  background: transparent;
+  border: 0;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bg-soft);
+  }
+
+  /* Barra a la izquierda y no solo un fondo: en modo oscuro la diferencia de
+     fondo entre seleccionado y no seleccionado casi no se ve. */
+  &.activo {
+    color: var(--text-strong);
+    background: var(--bg-soft);
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+
+  .nombre {
+    font-weight: 600;
+    min-width: 0;
+  }
+
+  .conteo {
+    flex: 0 0 auto;
+    padding: 0.1rem 0.45rem;
+    font-size: var(--t-xs);
+    font-weight: 700;
+    color: var(--text-muted);
+    background: var(--bg-base);
+    border-radius: 999px;
+  }
+}
+
+.opciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  flex: 3 1 380px;
+  min-width: 0;
+  padding: var(--e-4);
+
+  header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--e-3);
+    flex-wrap: wrap;
+  }
+
+  .titulo {
+    min-width: 0;
+
+    h2 {
+      font-size: var(--t-lg);
+    }
+
+    p {
+      margin: 2px 0 0;
+      font-size: var(--t-sm);
+    }
+  }
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: var(--e-2);
+    min-height: var(--tactil);
+    padding: var(--e-2) 0;
+    border-bottom: 1px solid var(--border-subtle);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  /* Atenuada, no tachada: sigue siendo una opción válida en los registros
+     viejos, solo que ya no se ofrece. */
+  .apagada .valor {
+    color: var(--text-muted);
+  }
+
+  .valor {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: var(--text-strong);
+  }
+
+  .acciones {
+    flex: 0 0 auto;
+  }
+
+  .vacio {
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: var(--t-sm);
+  }
+}
+
+.nota {
+  margin: 0;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* La hoja es angosta y el formulario va en columna: aquí el `flex: 1 1 150px`
+   de `.campo` sería una ALTURA de base, no un ancho. */
+gd-hoja form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+
+  > .campo {
+    flex: 0 0 auto;
+  }
+
+  .error {
+    font-size: var(--t-xs);
+    color: var(--deny);
+  }
+}

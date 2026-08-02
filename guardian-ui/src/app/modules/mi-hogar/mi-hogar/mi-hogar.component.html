@@ -177,11 +177,17 @@
           </div>
           <div class="campo">
             <label for="v-marca">Marca</label>
-            <input id="v-marca" type="text" formControlName="marca">
+            <select id="v-marca" formControlName="marca">
+              <option value="">Sin marca</option>
+              <option *ngFor="let m of marcasVehiculo" [value]="m.codigo">{{ m.valor }}</option>
+            </select>
           </div>
           <div class="campo">
             <label for="v-color">Color</label>
-            <input id="v-color" type="text" formControlName="color">
+            <select id="v-color" formControlName="color">
+              <option value="">Sin color</option>
+              <option *ngFor="let c of coloresVehiculo" [value]="c.codigo">{{ c.valor }}</option>
+            </select>
           </div>
         </div>
 
@@ -208,8 +214,8 @@
           <div class="datos">
             <strong class="placa">{{ vehiculo.placa }}</strong>
             <span class="detalle">
-              {{ vehiculo.marca || 'Sin marca' }}
-              <ng-container *ngIf="vehiculo.color"> · {{ vehiculo.color }}</ng-container>
+              {{ vehiculo.marcaNombre || 'Sin marca' }}
+              <ng-container *ngIf="vehiculo.colorNombre"> · {{ vehiculo.colorNombre }}</ng-container>
             </span>
           </div>
 
