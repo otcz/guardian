@@ -1,24 +1,29 @@
 <div class="plataforma">
 
+  <!-- El contenido de la barra se alinea con el de la página. Cuando el logo
+       arrancaba en el borde y la tabla 270px adentro, la pantalla se leía
+       como si le faltara la mitad. -->
   <header class="barra">
-    <div class="marca">
-      <i class="pi pi-sitemap"></i>
-      <div class="textos">
-        <strong>GUARDIAN</strong>
-        <small>Plataforma</small>
+    <div class="barra-contenido">
+      <div class="marca">
+        <i class="pi pi-sitemap"></i>
+        <div class="textos">
+          <strong>GUARDIAN</strong>
+          <small>Plataforma</small>
+        </div>
       </div>
-    </div>
 
-    <div class="quien" *ngIf="sesion">
-      <span class="nombre">{{ sesion.nombreCompleto }}</span>
-      <button type="button" class="accion" (click)="tema.alternar()"
-              [attr.aria-label]="tema.oscuro ? 'Modo claro' : 'Modo oscuro'">
-        <i class="pi" [ngClass]="tema.oscuro ? 'pi-sun' : 'pi-moon'"></i>
-      </button>
-      <button type="button" class="accion" (click)="salir()" aria-label="Salir"
-              pTooltip="Salir" tooltipPosition="bottom">
-        <i class="pi pi-sign-out"></i>
-      </button>
+      <div class="quien" *ngIf="sesion">
+        <span class="nombre">{{ sesion.nombreCompleto }}</span>
+        <button type="button" class="accion" (click)="tema.alternar()"
+                [attr.aria-label]="tema.oscuro ? 'Modo claro' : 'Modo oscuro'">
+          <i class="pi" [ngClass]="tema.oscuro ? 'pi-sun' : 'pi-moon'"></i>
+        </button>
+        <button type="button" class="accion" (click)="salir()" aria-label="Salir"
+                pTooltip="Salir" tooltipPosition="bottom">
+          <i class="pi pi-sign-out"></i>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -70,37 +75,34 @@
 
     <ng-container *ngIf="!cargando && sedes.length > 0">
 
-      <!-- La plataforma de un vistazo. El super administrador entra a decidir
-           dónde meterse, y para eso primero necesita saber qué hay. -->
-      <section class="fila">
-        <article class="kpi">
-          <i class="pi pi-sitemap"></i>
+      <!-- La plataforma de un vistazo. Una sola pieza dividida y no cuatro
+           tarjetas sueltas: son cifras del MISMO total, y separadas en cajas
+           independientes ocupaban media pantalla para mostrar cuatro dígitos. -->
+      <section class="resumen gd-card">
+        <div class="segmento">
           <span class="valor">{{ total.activas }}</span>
           <span class="titulo">Sedes activas</span>
           <span class="detalle">de {{ sedes.length }}</span>
-        </article>
-        <article class="kpi">
-          <i class="pi pi-building"></i>
+        </div>
+        <div class="segmento">
           <span class="valor">{{ total.casas }}</span>
           <span class="titulo">Casas</span>
-        </article>
-        <article class="kpi">
-          <i class="pi pi-users"></i>
+        </div>
+        <div class="segmento">
           <span class="valor">{{ total.personas }}</span>
           <span class="titulo">Personas</span>
-        </article>
-        <article class="kpi">
-          <i class="pi pi-key"></i>
+        </div>
+        <div class="segmento">
           <span class="valor">{{ total.cuentas }}</span>
           <span class="titulo">Cuentas</span>
-        </article>
+        </div>
         <!-- Solo aparece cuando hay algo que resolver: una sede sin
              administrador no la puede operar nadie de adentro. -->
-        <article class="kpi alerta" *ngIf="total.sinAdministrador > 0">
-          <i class="pi pi-exclamation-triangle"></i>
+        <div class="segmento alerta" *ngIf="total.sinAdministrador > 0">
           <span class="valor">{{ total.sinAdministrador }}</span>
           <span class="titulo">Sin administrador</span>
-        </article>
+          <span class="detalle">requiere atención</span>
+        </div>
       </section>
 
       <table class="tabla gd-card">

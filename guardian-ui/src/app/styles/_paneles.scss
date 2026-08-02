@@ -166,6 +166,15 @@
     border-bottom: none;
   }
 
+  /* La fila responde al puntero. En una tabla de datos sin respuesta al
+     ratón no se sabe sobre qué registro se está actuando, y con las
+     acciones al extremo derecho el ojo pierde el renglón a medio camino. */
+  @media (hover: hover) {
+    tbody tr:hover td {
+      background: var(--bg-soft);
+    }
+  }
+
   .inactiva td {
     color: var(--text-muted);
   }

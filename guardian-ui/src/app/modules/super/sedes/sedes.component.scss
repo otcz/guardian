@@ -11,17 +11,27 @@
 /* ── Barra superior ─────────────────────────────────────────────────────── */
 
 .barra {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--e-4);
-  padding: var(--e-3) var(--e-4);
+  padding: var(--e-3) 0;
   padding-top: calc(var(--e-3) + var(--seguro-arriba));
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border-default);
   position: sticky;
   top: 0;
   z-index: var(--z-cabecera);
+
+  /* Tope, centrado Y padding iguales a .gd-page. El padding va acá dentro y
+     no en .barra porque box-sizing es border-box: el tope de la página
+     incluye su propio relleno, así que sin repetirlo la marca queda 16px
+     corrida respecto del título. */
+  .barra-contenido {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--e-4);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-inline: var(--e-4);
+  }
 
   .marca {
     display: flex;
@@ -71,47 +81,42 @@ main {
   width: 100%;
 }
 
-/* ── Rejilla de sedes ───────────────────────────────────────────────────── */
-
 /* ── Resumen de la plataforma ───────────────────────────────────────────── */
 
-/* Mismas fichas que el Resumen del back-office. La plataforma no necesita un
-   lenguaje visual propio: necesita el mismo, para que quien administra una
-   sede y la plataforma no cambie de idioma al cruzar la puerta. */
-.fila {
+/* Una sola pieza dividida por filetes, no cuatro tarjetas flotando. Cuatro
+   cifras del mismo total no necesitan cuatro bordes, cuatro sombras y cuatro
+   esquinas redondeadas para leerse. */
+.resumen {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  padding: 0;
   margin-bottom: var(--e-4);
+  overflow: hidden;
 }
 
-.kpi {
+.segmento {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
-  flex: 1 1 160px;
+  gap: 0.1rem;
+  flex: 1 1 140px;
   min-width: 0;
-  padding: 0.9rem 1rem;
-  background: var(--bg-surface);
-  border: 2px solid var(--border-default);
-  border-radius: 14px;
+  padding: 0.85rem 1.1rem;
 
-  > i {
-    font-size: 1rem;
-    color: var(--text-muted);
-    margin-bottom: 0.2rem;
+  /* El filete entre segmentos y no un gap: los separa sin partir la pieza. */
+  & + .segmento {
+    border-left: 1px solid var(--border-default);
   }
 
   .valor {
-    font-size: 1.9rem;
-    font-weight: 800;
-    line-height: 1.1;
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.15;
     color: var(--text-strong);
     font-variant-numeric: tabular-nums;
   }
 
   .titulo {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.07em;
     color: var(--text-muted);
@@ -119,19 +124,28 @@ main {
   }
 
   .detalle {
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
   }
 
   /* Solo se pinta cuando hay algo que hacer, así que puede permitirse gritar. */
   &.alerta {
-    border-color: var(--warn);
     background: var(--warn-soft);
 
-    > i,
-    .titulo {
+    .valor,
+    .titulo,
+    .detalle {
       color: var(--warn);
     }
+  }
+}
+
+/* En pantalla angosta el filete vertical parte la pieza en columnas
+   desiguales; ahí separa por filas. */
+@media (max-width: 700px) {
+  .segmento + .segmento {
+    border-left: none;
+    border-top: 1px solid var(--border-default);
   }
 }
 
