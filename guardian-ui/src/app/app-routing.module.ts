@@ -54,6 +54,15 @@ const routes: Routes = [
     ]
   },
 
+  // ── Registro en un hogar por codigo (sin sesion) ─────────────────────────
+  {
+    // Quien llega aquí todavía no existe en el sistema: sale con cuenta
+    // propia. El código de un solo uso es la única llave.
+    path: 'unirme',
+    loadChildren: () =>
+      import('./modules/unirme/unirme.module').then(m => m.UnirmeModule)
+  },
+
   // ── Pagina publica del invitado (link compartido, sin sesion) ────────────
   {
     path: 'invitado',

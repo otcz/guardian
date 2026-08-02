@@ -14,6 +14,12 @@
     <section>
       <div class="encabezado">
         <h2 class="gd-titulo-seccion">Mi familia</h2>
+        <!-- Dos caminos: lo registro yo, o le paso un enlace y se registra
+             solo. El segundo es el que evita pedirle la cédula por teléfono. -->
+        <button type="button" class="agregar" (click)="abrirInvitacion()"
+                aria-label="Invitar a alguien a mi hogar">
+          <i class="pi pi-share-alt"></i>
+        </button>
         <button type="button" class="agregar"
                 (click)="mostrarAltaFamiliar = true"
                 aria-label="Agregar persona">
@@ -256,6 +262,55 @@
         <button type="button" class="gd-fila gd-presionable centrada"
                 (click)="aConfirmar = null">
           Cancelar
+        </button>
+      </div>
+    </gd-hoja>
+
+    <!-- Invitar a alguien a registrarse solo en este hogar. -->
+    <gd-hoja [abierta]="mostrarInvitacion" titulo="Invitar a mi hogar"
+             (cerrar)="mostrarInvitacion = false">
+
+      <p class="detalle-confirmar">
+        Pásale este enlace a tu familiar. Con él crea su propia cuenta y queda
+        registrado en tu casa, sin que tengas que digitar sus datos.
+      </p>
+
+      <!-- Ya se usó: el enlace no sirve más y hay que decir quién lo usó. -->
+      <div class="codigo-usado" *ngIf="codigoHogar?.usadoPor as quien">
+        <i class="pi pi-check-circle"></i>
+        <span><strong>{{ quien }}</strong> ya usó el enlace anterior.</span>
+      </div>
+
+      <ng-container *ngIf="codigoHogar?.vigente">
+        <div class="enlace">
+          <code class="gd-seleccionable">{{ enlaceInvitacion }}</code>
+        </div>
+
+        <p class="vence">
+          Vence el {{ codigoHogar?.vigenciaHasta | date:'dd/MM/yyyy HH:mm' }} y
+          sirve para <strong>una sola persona</strong>.
+        </p>
+
+        <div class="gd-lista">
+          <button type="button" class="gd-fila gd-presionable" (click)="copiarEnlace()">
+            <i class="pi" [ngClass]="copiado ? 'pi-check' : 'pi-copy'"></i>
+            <span class="etiqueta">{{ copiado ? 'Copiado' : 'Copiar el enlace' }}</span>
+          </button>
+          <button type="button" class="gd-fila gd-presionable gd-fila--destructiva"
+                  (click)="revocarCodigo()">
+            <i class="pi pi-ban"></i>
+            <span class="etiqueta">Anular el enlace</span>
+          </button>
+        </div>
+      </ng-container>
+
+      <div class="gd-lista" *ngIf="!codigoHogar?.vigente">
+        <button type="button" class="gd-fila gd-presionable centrada"
+                (click)="generarCodigo()" [disabled]="guardando">
+          <i class="pi pi-link"></i>
+          <span class="etiqueta">
+            {{ codigoHogar ? 'Generar un enlace nuevo' : 'Generar el enlace' }}
+          </span>
         </button>
       </div>
     </gd-hoja>

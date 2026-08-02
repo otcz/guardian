@@ -59,6 +59,9 @@ public class SecurityConfig {
                 .antMatchers(ApiEndpoint.PUBLICO_FOTOS + "/**").permitAll()
                 // El invitado abre su link sin cuenta; el codigo UUID es la llave.
                 .antMatchers(ApiEndpoint.PUBLICO_INVITACIONES + "/**").permitAll()
+                // Quien se une a un hogar todavia no tiene cuenta: la llave es
+                // el codigo UUID, de un solo uso y con vencimiento.
+                .antMatchers(ApiEndpoint.PUBLICO_HOGAR + "/**").permitAll()
 
                 // Los endpoints de autenticacion aceptan tambien la autoridad
                 // degradada CLAVE_PENDIENTE: cambiar la clave y consultar la

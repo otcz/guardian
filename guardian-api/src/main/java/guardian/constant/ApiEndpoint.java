@@ -31,6 +31,8 @@ public final class ApiEndpoint {
     public static final String RESIDENTE_FAMILIA = "/familia";
     public static final String RESIDENTE_VEHICULOS = "/vehiculos";
     public static final String RESIDENTE_INVITACIONES = "/invitaciones";
+    /** Codigo con el que un familiar se registra dentro de este hogar. */
+    public static final String RESIDENTE_CODIGO_HOGAR = "/hogar/codigo";
 
     /** Fotos: subida autenticada, lectura publica por nombre UUID. */
     public static final String FOTOS = API + "/fotos";
@@ -45,6 +47,9 @@ public final class ApiEndpoint {
 
     /** Pagina del invitado: abre el link sin cuenta, protegido por codigo UUID. */
     public static final String PUBLICO_INVITACIONES = API + "/publico/invitaciones";
+
+    /** Registro dentro de un hogar existente: sin cuenta, el codigo es la llave. */
+    public static final String PUBLICO_HOGAR = API + "/publico/hogar";
 
     /** Administracion del conjunto — rol ADMIN. */
     public static final String ADMIN = API + "/admin";

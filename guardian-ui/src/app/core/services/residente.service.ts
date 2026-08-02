@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import {
+  CodigoHogar,
   Familiar,
   FamiliarRequest,
   Vehiculo,
@@ -29,6 +30,21 @@ export class ResidenteService {
    */
   fijarMiFoto(fotoUrl: string): Observable<MiQr> {
     return this.http.put<MiQr>(`${this.base}/mi-foto`, { fotoUrl });
+  }
+
+  // ── Código para unirse al hogar ──────────────────────────────────────────
+
+  /** Null cuando el hogar nunca ha generado uno. */
+  codigoHogar(): Observable<CodigoHogar | null> {
+    return this.http.get<CodigoHogar | null>(`${this.base}/hogar/codigo`);
+  }
+
+  generarCodigoHogar(): Observable<CodigoHogar> {
+    return this.http.post<CodigoHogar>(`${this.base}/hogar/codigo`, {});
+  }
+
+  revocarCodigoHogar(): Observable<void> {
+    return this.http.delete<void>(`${this.base}/hogar/codigo`);
   }
 
   familia(): Observable<Familiar[]> {

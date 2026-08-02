@@ -1,0 +1,174 @@
+@use '../../../styles/paneles';
+
+/* Misma gramática que el login: es la otra puerta de entrada al sistema y
+   quien llega no tiene sesión ni sabe qué es GUARDIAN todavía. */
+.pantalla {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: var(--e-4);
+  padding-top: calc(var(--e-4) + var(--seguro-arriba));
+  padding-bottom: calc(var(--e-4) + var(--seguro-abajo));
+  background: var(--bg-base);
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  width: 100%;
+  max-width: 420px;
+  padding: var(--e-5);
+  background: var(--bg-surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-2);
+  color: var(--accent);
+
+  strong {
+    letter-spacing: 0.12em;
+    color: var(--text-strong);
+  }
+}
+
+/* ── A dónde se está uniendo ────────────────────────────────────────────── */
+
+.destino {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: center;
+
+  .etiqueta {
+    font-size: var(--t-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  h1 {
+    font-size: var(--t-xl);
+  }
+
+  .donde {
+    font-size: var(--t-sm);
+    color: var(--text-muted);
+  }
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+/* flex-wrap: en un teléfono angosto los pares se apilan solos. */
+.fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+
+  .campo {
+    flex: 1 1 140px;
+  }
+
+  .campo.tipo {
+    flex: 0 1 110px;
+  }
+}
+
+.principal {
+  width: 100%;
+}
+
+/* ── Desenlaces ─────────────────────────────────────────────────────────── */
+
+.fallo,
+.exito {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-2);
+  text-align: center;
+
+  > i {
+    font-size: 2.4rem;
+  }
+
+  h1 {
+    font-size: var(--t-xl);
+  }
+
+  p {
+    margin: 0;
+    font-size: var(--t-sm);
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+}
+
+.fallo > i {
+  color: var(--deny);
+}
+
+.exito {
+  > i {
+    color: var(--ok);
+  }
+
+  .nota {
+    font-size: var(--t-xs);
+  }
+
+  .principal {
+    margin-top: var(--e-2);
+  }
+}
+
+/* Las credenciales son lo único que importa en esa pantalla: grandes y
+   seleccionables, porque lo primero que hace la gente es copiarlas. */
+.credencial {
+  display: flex;
+  gap: var(--e-2);
+  width: 100%;
+  margin: var(--e-2) 0;
+
+  .dato {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: var(--e-3);
+    background: var(--bg-soft);
+    border-radius: var(--r-md);
+  }
+
+  .etiqueta {
+    font-size: var(--t-xs);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  code {
+    font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+    font-size: var(--t-lg);
+    font-weight: 700;
+    color: var(--text-strong);
+    -webkit-user-select: all;
+    user-select: all;
+    word-break: break-all;
+  }
+}

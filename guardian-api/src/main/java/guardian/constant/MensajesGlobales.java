@@ -114,6 +114,17 @@ public final class MensajesGlobales {
     public static final String SOLO_TITULAR_FAMILIA =
             "Solo el titular de la casa administra la familia.";
 
+    // ── Codigo para unirse a un hogar ────────────────────────────────────────
+    /**
+     * Un mensaje unico para vencido, revocado y ya usado. Quien esta al otro
+     * lado no necesita distinguirlos, y a quien prueba codigos no hay por que
+     * decirle cual de los tres acerto.
+     */
+    public static final String CODIGO_HOGAR_NO_VALIDO =
+            "Ese codigo ya no sirve. Pidele uno nuevo al titular de la casa.";
+    public static final String PARENTESCO_TITULAR_NO =
+            "Esa casa ya tiene titular. Elige tu parentesco con el.";
+
     // ── Invitaciones ─────────────────────────────────────────────────────────
     public static final String INVITACION_VIGENCIA_INVALIDA =
             "La vigencia debe terminar despues de empezar.";

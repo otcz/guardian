@@ -311,3 +311,38 @@ section {
   background: var(--deny-soft);
   border-radius: var(--r-md);
 }
+
+/* ── Enlace para unirse al hogar ─────────────────────────────────────────── */
+
+.enlace {
+  padding: var(--e-3);
+  margin-bottom: var(--e-2);
+  background: var(--bg-soft);
+  border-radius: var(--r-md);
+
+  code {
+    font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+    font-size: var(--t-xs);
+    color: var(--text-strong);
+    word-break: break-all;
+  }
+}
+
+.vence {
+  margin: 0 0 var(--e-3);
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+
+/* Verde: el enlace cumplió su función, no es un problema. */
+.codigo-usado {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  margin-bottom: var(--e-3);
+  padding: var(--e-3);
+  font-size: var(--t-sm);
+  color: var(--ok);
+  background: var(--ok-soft);
+  border-radius: var(--r-md);
+}

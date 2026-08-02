@@ -179,3 +179,34 @@ export interface Parametro {
   orden: number;
   protegido: boolean;
 }
+
+/** El código con el que el titular invita a su familia a registrarse sola. */
+export interface CodigoHogar {
+  codigo: string;
+  vigenciaHasta: string;
+  /** Sin usar y dentro de su vigencia. Solo entonces vale la pena compartirlo. */
+  vigente: boolean;
+  /** Quién lo usó, si ya se usó. Null mientras sigue esperando. */
+  usadoPor: string | null;
+}
+
+/** Lo que ve quien abre el enlace, antes de registrarse. */
+export interface HogarPublico {
+  conjuntoNombre: string;
+  casaIdentificador: string;
+  titularNombre: string;
+  vigente: boolean;
+  /** Opciones del formulario: la pantalla no tiene sesión para pedirlas. */
+  parentescos: Parametro[];
+  tiposDocumento: Parametro[];
+}
+
+export interface RegistroHogarRequest {
+  tipoDocumento?: string | null;
+  documento: string;
+  nombres: string;
+  apellidos: string;
+  fechaNacimiento?: string | null;
+  telefono?: string | null;
+  parentesco: string;
+}

@@ -5,6 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ResidenteService } from '../../../core/services/residente.service';
 import { AdminService } from '../../../core/services/admin.service';
 import {
+  CodigoHogar,
   Familiar,
   Parametro,
   Vehiculo
@@ -236,6 +237,72 @@ export class MiHogarComponent implements OnInit {
    */
   bloqueado(entidad: { bloqueado: string }): boolean {
     return entidad.bloqueado === 'S';
+  }
+
+  // ── Invitar a alguien al hogar ───────────────────────────────────────────
+  //
+  // La otra vía para armar un núcleo: en vez de que el titular digite a cada
+  // familiar, le pasa un enlace y cada uno crea su propia cuenta.
+
+  codigoHogar: CodigoHogar | null = null;
+  mostrarInvitacion = false;
+  copiado = false;
+
+  abrirInvitacion(): void {
+    this.mostrarInvitacion = true;
+    this.copiado = false;
+    this.residente.codigoHogar().subscribe({
+      next: codigo => (this.codigoHogar = codigo),
+      error: () => (this.codigoHogar = null)
+    });
+  }
+
+  generarCodigo(): void {
+    if (this.guardando) {
+      return;
+    }
+    this.guardando = true;
+    this.error = null;
+    this.copiado = false;
+
+    this.residente.generarCodigoHogar().subscribe({
+      next: codigo => {
+        this.guardando = false;
+        this.codigoHogar = codigo;
+      },
+      error: (fallo: HttpErrorResponse) => {
+        this.guardando = false;
+        this.error = fallo.error?.mensaje ?? 'No pudimos generar el código.';
+      }
+    });
+  }
+
+  revocarCodigo(): void {
+    const seguro = window.confirm(
+      '¿Anular el enlace? Quien lo tenga dejará de poder registrarse con él.');
+    if (!seguro) {
+      return;
+    }
+
+    this.residente.revocarCodigoHogar().subscribe({
+      next: () => (this.codigoHogar = null),
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos anular el código.';
+      }
+    });
+  }
+
+  /** El enlace completo: es lo que se pega en WhatsApp, no el código suelto. */
+  get enlaceInvitacion(): string {
+    return this.codigoHogar
+      ? `${window.location.origin}/unirme/${this.codigoHogar.codigo}`
+      : '';
+  }
+
+  copiarEnlace(): void {
+    navigator.clipboard?.writeText(this.enlaceInvitacion)
+      .then(() => (this.copiado = true))
+      .catch(() => undefined);
   }
 
   /**

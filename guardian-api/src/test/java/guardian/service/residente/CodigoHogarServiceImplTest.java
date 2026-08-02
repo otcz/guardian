@@ -1,0 +1,282 @@
+package guardian.service.residente;
+
+import guardian.constant.Codigos;
+import guardian.constant.MensajesGlobales;
+import guardian.dto.residente.CodigoHogarResponse;
+import guardian.dto.residente.RegistroHogarRequest;
+import guardian.entity.conjunto.GdCasa;
+import guardian.entity.conjunto.GdConjunto;
+import guardian.entity.persona.GdCodigoHogar;
+import guardian.entity.persona.GdPersona;
+import guardian.entity.persona.GdResidenteCasa;
+import guardian.entity.persona.GdUsuario;
+import guardian.exception.GuardianException;
+import guardian.repository.GdCodigoHogarRepository;
+import guardian.repository.GdPersonaRepository;
+import guardian.repository.GdResidenteCasaRepository;
+import guardian.repository.GdUsuarioRepository;
+import guardian.security.UsuarioAutenticado;
+import guardian.service.admin.ParametroService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.util.Date;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+/**
+ * El codigo con el que un familiar se registra dentro de un hogar existente.
+ *
+ * <p>Este codigo no abre una puerta: CREA una persona dentro del conjunto, y
+ * esa persona termina con credencial para entrar. Por eso todo lo que se
+ * prueba aca es lo que acota el dano si se filtra — un solo uso, vencimiento,
+ * y que solo el titular pueda emitirlo.</p>
+ */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class CodigoHogarServiceImplTest {
+
+    @Mock private GdCodigoHogarRepository codigoRepository;
+    @Mock private GdResidenteCasaRepository residenteCasaRepository;
+    @Mock private GdPersonaRepository personaRepository;
+    @Mock private GdUsuarioRepository usuarioRepository;
+    @Mock private ParametroService parametroService;
+    @Mock private PasswordEncoder passwordEncoder;
+
+    @InjectMocks
+    private CodigoHogarServiceImpl servicio;
+
+    private GdCasa casa;
+    private GdPersona titular;
+    private UsuarioAutenticado sesionTitular;
+    private UsuarioAutenticado sesionHijo;
+
+    @BeforeEach
+    void preparar() {
+        ReflectionTestUtils.setField(servicio, "horasVigencia", 24L);
+
+        GdConjunto sede = new GdConjunto();
+        sede.setId(1L);
+        sede.setNombre("Santa Barbara");
+
+        casa = new GdCasa();
+        casa.setId(5L);
+        casa.setConjunto(sede);
+        casa.setIdentificador("M1-C5");
+
+        titular = new GdPersona();
+        titular.setId(10L);
+        titular.setConjunto(sede);
+        titular.setDocumento("1074");
+        titular.setNombres("Oscar");
+        titular.setApellidos("Carrillo");
+
+        sesionTitular = new UsuarioAutenticado(1L, 10L, 1L, "1074", "Oscar Carrillo",
+                Codigos.ROL_RESIDENTE);
+        sesionHijo = new UsuarioAutenticado(2L, 20L, 1L, "1075", "Tomas Carrillo",
+                Codigos.ROL_RESIDENTE);
+
+        lenient().when(personaRepository.findById(10L)).thenReturn(Optional.of(titular));
+        lenient().when(personaRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        lenient().when(codigoRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        lenient().when(passwordEncoder.encode(anyString())).thenReturn("$hash");
+
+        lenient().when(residenteCasaRepository
+                .findFirstByPersonaIdAndActivoOrderByIdAsc(any(), anyString()))
+                .thenReturn(Optional.of(vinculo(titular, Codigos.PARENTESCO_TITULAR)));
+        lenient().when(residenteCasaRepository.findByPersonaIdAndCasaId(10L, 5L))
+                .thenReturn(Optional.of(vinculo(titular, Codigos.PARENTESCO_TITULAR)));
+        lenient().when(residenteCasaRepository.findByPersonaIdAndCasaId(20L, 5L))
+                .thenReturn(Optional.of(vinculo(titular, "HIJO")));
+    }
+
+    private GdResidenteCasa vinculo(GdPersona persona, String parentesco) {
+        GdResidenteCasa v = new GdResidenteCasa();
+        v.setPersona(persona);
+        v.setCasa(casa);
+        v.setParentesco(parentesco);
+        v.setActivo(Codigos.SI);
+        return v;
+    }
+
+    private GdCodigoHogar codigoVivo() {
+        GdCodigoHogar c = new GdCodigoHogar();
+        c.setCasa(casa);
+        c.setTitular(titular);
+        c.setCodigo("uuid-de-prueba");
+        c.setVigenciaHasta(new Date(System.currentTimeMillis() + 3_600_000L));
+        c.setActivo(Codigos.SI);
+        c.setBloqueado(Codigos.NO);
+        return c;
+    }
+
+    // ── Quien puede emitirlo ────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("el titular genera un codigo con vencimiento")
+    void elTitularGenera() {
+        CodigoHogarResponse respuesta = servicio.generar(sesionTitular);
+
+        assertThat(respuesta.getCodigo()).isNotBlank();
+        assertThat(respuesta.isVigente()).isTrue();
+        assertThat(respuesta.getVigenciaHasta()).isAfter(new Date());
+    }
+
+    @Test
+    @DisplayName("un miembro que NO es titular no puede invitar")
+    void soloElTitularInvita() {
+        // Cualquier miembro podria meter gente en la casa de otro, y quien
+        // responde por ese hogar es uno solo.
+        assertThatThrownBy(() -> servicio.generar(sesionHijo))
+                .isInstanceOf(GuardianException.class)
+                .hasMessage(MensajesGlobales.SOLO_TITULAR_FAMILIA);
+
+        verify(codigoRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("generar uno nuevo invalida el anterior sin usar")
+    void unoVivoALaVez() {
+        GdCodigoHogar anterior = codigoVivo();
+        when(codigoRepository.findFirstByCasaIdOrderByIdDesc(5L))
+                .thenReturn(Optional.of(anterior));
+
+        servicio.generar(sesionTitular);
+
+        // Si quedaran varios, revocar el que se compartio por error no
+        // serviria: los otros seguirian abiertos.
+        assertThat(anterior.getActivo()).isEqualTo(Codigos.NO);
+    }
+
+    // ── Quien lo usa ────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("registrarse crea persona, vinculo con la casa y cuenta")
+    void registrarseArmaTodo() {
+        when(codigoRepository.findByCodigo("uuid-de-prueba"))
+                .thenReturn(Optional.of(codigoVivo()));
+        when(personaRepository.findByDocumento("1099")).thenReturn(Optional.empty());
+
+        servicio.registrar("uuid-de-prueba", solicitud("1099", "HIJO"));
+
+        ArgumentCaptor<GdPersona> persona = ArgumentCaptor.forClass(GdPersona.class);
+        verify(personaRepository).save(persona.capture());
+        assertThat(persona.getValue().getDocumento()).isEqualTo("1099");
+        // Entra al conjunto del hogar al que se unio, no a otro.
+        assertThat(persona.getValue().getConjunto().getId()).isEqualTo(1L);
+
+        ArgumentCaptor<GdResidenteCasa> enCasa = ArgumentCaptor.forClass(GdResidenteCasa.class);
+        verify(residenteCasaRepository).save(enCasa.capture());
+        assertThat(enCasa.getValue().getCasa().getId()).isEqualTo(5L);
+        assertThat(enCasa.getValue().getParentesco()).isEqualTo("HIJO");
+
+        ArgumentCaptor<GdUsuario> cuenta = ArgumentCaptor.forClass(GdUsuario.class);
+        verify(usuarioRepository).save(cuenta.capture());
+        assertThat(cuenta.getValue().getRol()).isEqualTo(Codigos.ROL_RESIDENTE);
+        assertThat(cuenta.getValue().getActivo()).isEqualTo(Codigos.SI);
+        assertThat(cuenta.getValue().debeCambiarClave()).isTrue();
+        verify(passwordEncoder).encode(Codigos.CLAVE_INICIAL);
+    }
+
+    @Test
+    @DisplayName("el codigo se quema: sirve UNA sola vez")
+    void unSoloUso() {
+        GdCodigoHogar codigo = codigoVivo();
+        when(codigoRepository.findByCodigo("uuid-de-prueba")).thenReturn(Optional.of(codigo));
+
+        servicio.registrar("uuid-de-prueba", solicitud("1099", "HIJO"));
+        assertThat(codigo.estaUsado()).isTrue();
+
+        // El segundo intento con el mismo enlace ya no pasa.
+        assertThatThrownBy(() -> servicio.registrar("uuid-de-prueba", solicitud("1100", "HIJO")))
+                .hasMessage(MensajesGlobales.CODIGO_HOGAR_NO_VALIDO);
+    }
+
+    @Test
+    @DisplayName("un codigo vencido no sirve")
+    void vencidoNoSirve() {
+        GdCodigoHogar viejo = codigoVivo();
+        viejo.setVigenciaHasta(new Date(System.currentTimeMillis() - 1_000L));
+        when(codigoRepository.findByCodigo("uuid-de-prueba")).thenReturn(Optional.of(viejo));
+
+        assertThatThrownBy(() -> servicio.registrar("uuid-de-prueba", solicitud("1099", "HIJO")))
+                .hasMessage(MensajesGlobales.CODIGO_HOGAR_NO_VALIDO);
+
+        verify(personaRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("un codigo revocado no sirve")
+    void revocadoNoSirve() {
+        GdCodigoHogar anulado = codigoVivo();
+        anulado.setActivo(Codigos.NO);
+        when(codigoRepository.findByCodigo("uuid-de-prueba")).thenReturn(Optional.of(anulado));
+
+        assertThatThrownBy(() -> servicio.registrar("uuid-de-prueba", solicitud("1099", "HIJO")))
+                .hasMessage(MensajesGlobales.CODIGO_HOGAR_NO_VALIDO);
+    }
+
+    @Test
+    @DisplayName("nadie se registra como TITULAR: esa casa ya tiene uno")
+    void noSePuedeEntrarComoTitular() {
+        when(codigoRepository.findByCodigo("uuid-de-prueba"))
+                .thenReturn(Optional.of(codigoVivo()));
+
+        assertThatThrownBy(() -> servicio.registrar(
+                "uuid-de-prueba", solicitud("1099", Codigos.PARENTESCO_TITULAR)))
+                .hasMessage(MensajesGlobales.PARENTESCO_TITULAR_NO);
+
+        verify(personaRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("un documento que ya existe no se duplica")
+    void documentoUnico() {
+        when(codigoRepository.findByCodigo("uuid-de-prueba"))
+                .thenReturn(Optional.of(codigoVivo()));
+        when(personaRepository.findByDocumento("1074")).thenReturn(Optional.of(titular));
+
+        assertThatThrownBy(() -> servicio.registrar("uuid-de-prueba", solicitud("1074", "HIJO")))
+                .hasMessage(MensajesGlobales.DOCUMENTO_YA_REGISTRADO);
+    }
+
+    @Test
+    @DisplayName("la pantalla publica muestra a donde se une, y nada mas")
+    void laConsultaPublicaNoFiltraDeMas() {
+        when(codigoRepository.findByCodigo("uuid-de-prueba"))
+                .thenReturn(Optional.of(codigoVivo()));
+
+        assertThat(servicio.consultar("uuid-de-prueba").getCasaIdentificador()).isEqualTo("M1-C5");
+        assertThat(servicio.consultar("uuid-de-prueba").getConjuntoNombre())
+                .isEqualTo("Santa Barbara");
+        assertThat(servicio.consultar("uuid-de-prueba").getTitularNombre())
+                .isEqualTo("Oscar Carrillo");
+    }
+
+    private RegistroHogarRequest solicitud(String documento, String parentesco) {
+        RegistroHogarRequest r = new RegistroHogarRequest();
+        r.setDocumento(documento);
+        r.setNombres("Tomas");
+        r.setApellidos("Carrillo");
+        r.setParentesco(parentesco);
+        return r;
+    }
+}

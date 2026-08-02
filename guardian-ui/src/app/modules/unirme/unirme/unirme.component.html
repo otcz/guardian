@@ -1,0 +1,117 @@
+<div class="pantalla">
+  <div class="tarjeta">
+
+    <div class="marca">
+      <i class="pi pi-shield"></i>
+      <strong>GUARDIAN</strong>
+    </div>
+
+    <p class="gd-muted" *ngIf="cargando">Verificando el código…</p>
+
+    <!-- Código malo, vencido o ya usado: un solo mensaje, sin distinguir. -->
+    <div class="fallo" *ngIf="!cargando && (error && !hogar)">
+      <i class="pi pi-times-circle"></i>
+      <h1>Este enlace no sirve</h1>
+      <p>{{ error }}</p>
+    </div>
+
+    <ng-container *ngIf="hogar && !listo">
+      <div class="fallo" *ngIf="!hogar.vigente">
+        <i class="pi pi-clock"></i>
+        <h1>El código ya venció</h1>
+        <p>Pídele uno nuevo a {{ hogar.titularNombre }}.</p>
+      </div>
+
+      <ng-container *ngIf="hogar.vigente">
+        <!-- A dónde se está uniendo, antes de pedirle un solo dato. -->
+        <div class="destino">
+          <span class="etiqueta">Te estás uniendo al hogar de</span>
+          <h1>{{ hogar.titularNombre }}</h1>
+          <span class="donde">
+            {{ hogar.casaIdentificador }} · {{ hogar.conjuntoNombre }}
+          </span>
+        </div>
+
+        <form [formGroup]="formulario" (ngSubmit)="registrarme()">
+          <div class="fila">
+            <div class="campo tipo">
+              <label for="u-tipo">Tipo</label>
+              <select id="u-tipo" formControlName="tipoDocumento">
+                <option *ngFor="let t of tiposDocumento" [value]="t.codigo">{{ t.valor }}</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label for="u-documento">Documento</label>
+              <input id="u-documento" type="text" formControlName="documento"
+                     placeholder="Ej: 1020304050">
+            </div>
+          </div>
+
+          <div class="campo">
+            <label for="u-nombres">Nombres</label>
+            <input id="u-nombres" type="text" formControlName="nombres">
+          </div>
+
+          <div class="campo">
+            <label for="u-apellidos">Apellidos</label>
+            <input id="u-apellidos" type="text" formControlName="apellidos">
+          </div>
+
+          <div class="campo">
+            <label for="u-parentesco">Parentesco</label>
+            <select id="u-parentesco" formControlName="parentesco">
+              <option value="">Selecciona…</option>
+              <option *ngFor="let p of parentescos" [value]="p.codigo">{{ p.valor }}</option>
+            </select>
+          </div>
+
+          <div class="fila">
+            <div class="campo">
+              <label for="u-nacimiento">Nacimiento</label>
+              <input id="u-nacimiento" type="date" formControlName="fechaNacimiento">
+            </div>
+            <div class="campo">
+              <label for="u-telefono">Teléfono</label>
+              <input id="u-telefono" type="tel" formControlName="telefono">
+            </div>
+          </div>
+
+          <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+          <button type="submit" class="principal" [disabled]="guardando">
+            <i class="pi" [ngClass]="guardando ? 'pi-spinner pi-spin' : 'pi-check'"></i>
+            {{ guardando ? 'Registrando…' : 'Crear mi cuenta' }}
+          </button>
+        </form>
+      </ng-container>
+    </ng-container>
+
+    <!-- Listo: sus credenciales a la vista, que es lo único que necesita ahora. -->
+    <div class="exito" *ngIf="listo">
+      <i class="pi pi-check-circle"></i>
+      <h1>Listo</h1>
+      <p>Ya haces parte del hogar. Entra con:</p>
+
+      <div class="credencial">
+        <div class="dato">
+          <span class="etiqueta">Usuario</span>
+          <code>{{ miUsuario }}</code>
+        </div>
+        <div class="dato">
+          <span class="etiqueta">Contraseña</span>
+          <code>{{ claveInicial }}</code>
+        </div>
+      </div>
+
+      <p class="nota">
+        Te vamos a pedir que cambies la contraseña al entrar, y una foto para
+        emitir tu código de la portería.
+      </p>
+
+      <button type="button" class="principal" (click)="irAlLogin()">
+        <i class="pi pi-sign-in"></i>
+        Entrar
+      </button>
+    </div>
+  </div>
+</div>
