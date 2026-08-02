@@ -57,18 +57,9 @@
       </div>
 
       <div class="campo">
-        <label for="s-nit">NIT</label>
-        <input id="s-nit" type="text" formControlName="nit" placeholder="Ej: 900123456-7">
-      </div>
-
-      <div class="campo">
         <label for="s-direccion">Dirección</label>
-        <input id="s-direccion" type="text" formControlName="direccion">
-      </div>
-
-      <div class="campo">
-        <label for="s-telefono">Teléfono</label>
-        <input id="s-telefono" type="tel" formControlName="telefono">
+        <input id="s-direccion" type="text" formControlName="direccion"
+               placeholder="Ej: Calle 55 #12-30">
       </div>
 
       <button type="submit" class="principal" [disabled]="guardando">
@@ -128,11 +119,7 @@
           <tr *ngFor="let sede of sedes" [class.inactiva]="!activa(sede)">
             <td>
               <span class="nombre-sede">{{ sede.nombre }}</span>
-              <span class="datos-sede" *ngIf="sede.nit || sede.direccion">
-                <ng-container *ngIf="sede.nit">NIT {{ sede.nit }}</ng-container>
-                <ng-container *ngIf="sede.nit && sede.direccion"> · </ng-container>
-                <ng-container *ngIf="sede.direccion">{{ sede.direccion }}</ng-container>
-              </span>
+              <span class="datos-sede" *ngIf="sede.direccion">{{ sede.direccion }}</span>
             </td>
             <td class="numero">{{ sede.casas }}</td>
             <td class="numero">{{ sede.personas }}</td>

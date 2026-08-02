@@ -29,14 +29,12 @@ public class GdConjunto extends BaseEntity {
     @Column(name = "NOMBRE", nullable = false, length = 150)
     private String nombre;
 
-    @Column(name = "NIT", length = 30)
-    private String nit;
-
     @Column(name = "DIRECCION", length = 200)
     private String direccion;
 
-    @Column(name = "TELEFONO", length = 30)
-    private String telefono;
+    // NIT y TELEFONO se quitaron: una sede se identifica por su nombre y se
+    // ubica por su direccion, y nadie los consultaba. Las columnas siguen en
+    // la base porque ddl-auto=update no borra nada; quedan vacias y sin uso.
 
     /**
      * Fila tecnica de la que cuelga el super administrador.

@@ -77,9 +77,7 @@ public class SedeServiceImpl implements SedeService {
         sede.setUsuarioCreador(ejecutor);
 
         if (datos != null) {
-            sede.setNit(datos.getNit());
             sede.setDireccion(datos.getDireccion());
-            sede.setTelefono(datos.getTelefono());
         }
 
         GdConjunto guardada = conjuntoRepository.save(sede);
@@ -112,9 +110,7 @@ public class SedeServiceImpl implements SedeService {
                 });
 
         sede.setNombre(limpio);
-        sede.setNit(request.getNit());
         sede.setDireccion(request.getDireccion());
-        sede.setTelefono(request.getTelefono());
         sede.setUsuarioModificador(ejecutor.getDocumento());
 
         return mapear(conjuntoRepository.save(sede));
@@ -249,9 +245,7 @@ public class SedeServiceImpl implements SedeService {
         return SedeResponse.builder()
                 .id(sede.getId())
                 .nombre(sede.getNombre())
-                .nit(sede.getNit())
                 .direccion(sede.getDireccion())
-                .telefono(sede.getTelefono())
                 .activo(sede.getActivo())
                 .bloqueado(sede.getBloqueado())
                 .casas(casaRepository.countByConjuntoId(sede.getId()))

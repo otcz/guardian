@@ -2,9 +2,7 @@
 export interface Sede {
   id: number;
   nombre: string;
-  nit: string | null;
   direccion: string | null;
-  telefono: string | null;
   activo: string;
   bloqueado: string;
   casas: number;
@@ -16,9 +14,7 @@ export interface Sede {
 
 export interface SedeRequest {
   nombre: string;
-  nit?: string | null;
   direccion?: string | null;
-  telefono?: string | null;
 }
 
 /** El primer administrador de una sede. Nace activo y con cambio de clave. */

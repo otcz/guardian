@@ -12,12 +12,6 @@ public class SedeRequest {
     @Size(max = 150)
     private String nombre;
 
-    @Size(max = 30)
-    private String nit;
-
     @Size(max = 200)
     private String direccion;
-
-    @Size(max = 30)
-    private String telefono;
 }

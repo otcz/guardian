@@ -44,9 +44,7 @@ export class SedesComponent implements OnInit {
 
   readonly formulario = this.fb.nonNullable.group({
     nombre: ['', [Validators.required]],
-    nit: [''],
-    direccion: [''],
-    telefono: ['']
+    direccion: ['']
   });
 
   readonly formularioAdmin = this.fb.nonNullable.group({
@@ -99,9 +97,7 @@ export class SedesComponent implements OnInit {
     this.editando = sede;
     this.formulario.setValue({
       nombre: sede.nombre,
-      nit: sede.nit ?? '',
-      direccion: sede.direccion ?? '',
-      telefono: sede.telefono ?? ''
+      direccion: sede.direccion ?? ''
     });
     this.mostrarAlta = true;
   }
@@ -124,9 +120,7 @@ export class SedesComponent implements OnInit {
     const datos = this.formulario.getRawValue();
     const request = {
       nombre: datos.nombre,
-      nit: datos.nit || null,
-      direccion: datos.direccion || null,
-      telefono: datos.telefono || null
+      direccion: datos.direccion || null
     };
 
     const peticion: Observable<Sede> = this.editando

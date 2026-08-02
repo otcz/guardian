@@ -10,9 +10,7 @@ public class SedeResponse {
 
     private Long id;
     private String nombre;
-    private String nit;
     private String direccion;
-    private String telefono;
     private String activo;
     private String bloqueado;
 
