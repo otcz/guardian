@@ -1,3 +1,13 @@
+/**
+ * Clave con la que nace toda cuenta creada desde un panel — espejo de
+ * `Codigos.CLAVE_INICIAL` en el backend.
+ *
+ * Vive acá porque las pantallas se la tienen que DECIR al administrador antes
+ * de guardar: si el texto y el backend se separan, el administrador dicta una
+ * clave que no funciona y la persona no entra.
+ */
+export const CLAVE_INICIAL = '0000';
+
 export interface Casa {
   id: number;
   identificador: string;

@@ -15,7 +15,7 @@ public interface UsuarioService {
     List<UsuarioResponse> listar(UsuarioAutenticado ejecutor);
 
     /**
-     * Da de alta la cuenta de una persona con clave inicial igual a su documento.
+     * Da de alta la cuenta de una persona con la clave inicial del sistema.
      *
      * <p>Nace <b>inactiva</b>: si naciera activa, cualquiera que conozca la
      * cedula de un vecino podria tomar la cuenta antes que su dueno. El
@@ -27,14 +27,14 @@ public interface UsuarioService {
 
     UsuarioResponse cambiarEstado(Long id, boolean activo, UsuarioAutenticado ejecutor);
 
-    /** Devuelve la clave al documento y vuelve a exigir el cambio en el proximo ingreso. */
+    /** Devuelve la clave inicial y vuelve a exigir el cambio en el proximo ingreso. */
     UsuarioResponse restablecerClave(Long id, UsuarioAutenticado ejecutor);
 
     /**
      * Asigna una clave elegida por la administracion.
      *
      * <p>Es lo que hace falta cuando el guardia esta parado en la porteria sin
-     * poder entrar: restablecer al documento no sirve si el documento es
+     * poder entrar: devolver la clave inicial no sirve si es
      * justamente lo que no recuerda, o si esa clave ya se filtro.</p>
      *
      * <p>La cuenta queda con cambio obligatorio en el proximo ingreso. Quien

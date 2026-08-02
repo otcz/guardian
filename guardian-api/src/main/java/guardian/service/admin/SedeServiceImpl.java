@@ -165,7 +165,7 @@ public class SedeServiceImpl implements SedeService {
         GdUsuario usuario = new GdUsuario();
         usuario.setPersona(guardada);
         usuario.setRol(Codigos.ROL_ADMIN);
-        usuario.setClaveHash(passwordEncoder.encode(documento));
+        usuario.setClaveHash(passwordEncoder.encode(Codigos.CLAVE_INICIAL));
         usuario.setRequiereCambioClave(Codigos.SI);
         // ACTIVO, al reves que toda otra cuenta del sistema: no hay nadie en
         // esa sede que pueda habilitarlo. Es la misma razon por la que el

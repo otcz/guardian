@@ -60,6 +60,22 @@ public final class Codigos {
     /** Tope de BCrypt: ignora en silencio todo byte despues del 72. */
     public static final int CLAVE_LONGITUD_MAXIMA = 72;
 
+    /**
+     * Clave con la que nace toda cuenta creada desde un panel.
+     *
+     * <p>Antes era el documento de la persona. Cuatro ceros es mejor por dos
+     * razones: el administrador puede decirla de memoria al entregar el acceso
+     * —no tiene que buscar la cedula de cada quien— y se lee como lo que es,
+     * un valor de paso, mientras que una clave que ES tu documento invita a
+     * dejarla puesta.</p>
+     *
+     * <p>Que sea trivial de adivinar no la vuelve un riesgo: la cuenta nace
+     * INACTIVA y no sirve hasta que el administrador la habilita, y el cambio
+     * es obligatorio en el primer ingreso. Ademas es mas corta que
+     * {@link #CLAVE_LONGITUD_MINIMA}, asi que nadie puede volver a elegirla.</p>
+     */
+    public static final String CLAVE_INICIAL = "0000";
+
     /** Tipos de credencial QR. */
     public static final String CREDENCIAL_PERMANENTE = "PERMANENTE";
     public static final String CREDENCIAL_TEMPORAL = "TEMPORAL";

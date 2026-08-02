@@ -142,8 +142,8 @@ export class AdminService {
   }
 
   /**
-   * Clave elegida por la administración. Restablecer al documento no sirve
-   * cuando el documento es justamente lo que la persona no recuerda.
+   * Clave elegida por la administración, para cuando volver a la inicial no
+   * alcanza — por ejemplo si ya se supo cuál era y hay que cortar por lo sano.
    */
   asignarClave(id: number, claveNueva: string): Observable<Usuario> {
     return this.http.patch<Usuario>(`${this.base}/usuarios/${id}/clave`, { claveNueva });

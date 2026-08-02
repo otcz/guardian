@@ -7,6 +7,7 @@ import { Observable } from 'rxjs';
 import { SedeService } from '../../../core/services/sede.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { TemaService } from '../../../core/services/tema.service';
+import { CLAVE_INICIAL } from '../../../core/models/admin.model';
 import { Sede } from '../../../core/models/sede.model';
 import { Sesion } from '../../../core/models/sesion.model';
 
@@ -232,6 +233,8 @@ export class SedesComponent implements OnInit {
   get documentoAdmin(): string {
     return this.formularioAdmin.controls.documento.value.trim().toUpperCase();
   }
+
+  readonly claveInicial = CLAVE_INICIAL;
 
   /**
    * Totales de la plataforma. Se calculan acá y no en el template: la regla

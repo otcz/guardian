@@ -69,7 +69,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         GdUsuario usuario = new GdUsuario();
         usuario.setPersona(persona);
         usuario.setRol(request.getRol());
-        usuario.setClaveHash(passwordEncoder.encode(persona.getDocumento()));
+        usuario.setClaveHash(passwordEncoder.encode(Codigos.CLAVE_INICIAL));
         usuario.setRequiereCambioClave(Codigos.SI);
         usuario.setActivo(Codigos.NO);
         usuario.setUsuarioCreador(ejecutor.getDocumento());
@@ -115,7 +115,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     public UsuarioResponse restablecerClave(Long id, UsuarioAutenticado ejecutor) {
         GdUsuario usuario = obtener(id, ejecutor);
 
-        usuario.setClaveHash(passwordEncoder.encode(usuario.getPersona().getDocumento()));
+        usuario.setClaveHash(passwordEncoder.encode(Codigos.CLAVE_INICIAL));
         usuario.setRequiereCambioClave(Codigos.SI);
         usuario.setUsuarioModificador(ejecutor.getDocumento());
 

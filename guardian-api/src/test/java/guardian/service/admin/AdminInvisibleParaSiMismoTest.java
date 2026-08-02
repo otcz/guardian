@@ -2,6 +2,7 @@ package guardian.service.admin;
 
 import guardian.constant.Codigos;
 import guardian.constant.MensajesGlobales;
+import guardian.dto.admin.UsuarioRequest;
 import guardian.entity.conjunto.GdConjunto;
 import guardian.entity.persona.GdPersona;
 import guardian.entity.persona.GdUsuario;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -175,11 +177,58 @@ class AdminInvisibleParaSiMismoTest {
     }
 
     @Test
-    @DisplayName("restablecer al documento tambien corta la sesion abierta")
+    @DisplayName("restablecer devuelve la clave inicial y corta la sesion abierta")
     void restablecerTambienInvalida() {
+        when(passwordEncoder.encode(Codigos.CLAVE_INICIAL)).thenReturn("$inicial");
+
         usuarioService.restablecerClave(7L, admin);
 
+        assertThat(ajena.getClaveHash()).isEqualTo("$inicial");
         verify(estadoUsuarioService).invalidar(7L);
         assertThat(ajena.debeCambiarClave()).isTrue();
+    }
+
+    // ── Clave con la que nace una cuenta ────────────────────────────────────
+
+    @Test
+    @DisplayName("una cuenta nueva nace con la clave inicial, NO con el documento")
+    void laCuentaNaceConLaClaveInicial() {
+        GdPersona persona = new GdPersona();
+        persona.setId(60L);
+        persona.setDocumento("1099887766");
+        GdConjunto sede = new GdConjunto();
+        sede.setId(1L);
+        persona.setConjunto(sede);
+
+        when(personaRepository.findById(60L)).thenReturn(Optional.of(persona));
+        when(usuarioRepository.existsByPersonaId(60L)).thenReturn(false);
+        when(passwordEncoder.encode(Codigos.CLAVE_INICIAL)).thenReturn("$inicial");
+
+        UsuarioRequest alta = new UsuarioRequest();
+        alta.setPersonaId(60L);
+        alta.setRol(Codigos.ROL_RESIDENTE);
+
+        usuarioService.crear(alta, admin);
+
+        ArgumentCaptor<GdUsuario> capturado = ArgumentCaptor.forClass(GdUsuario.class);
+        verify(usuarioRepository).save(capturado.capture());
+
+        // La clave que se cifra es la inicial del sistema. Si alguien vuelve a
+        // poner el documento, el administrador dictaria "0000" y no entraria.
+        verify(passwordEncoder).encode(Codigos.CLAVE_INICIAL);
+        verify(passwordEncoder, never()).encode("1099887766");
+
+        assertThat(capturado.getValue().getClaveHash()).isEqualTo("$inicial");
+        // Y sigue naciendo inactiva y con el cambio forzado: eso es lo que
+        // hace que una clave adivinable no sea un riesgo.
+        assertThat(capturado.getValue().getActivo()).isEqualTo(Codigos.NO);
+        assertThat(capturado.getValue().debeCambiarClave()).isTrue();
+    }
+
+    @Test
+    @DisplayName("la clave inicial es mas corta que el minimo: nadie puede volver a elegirla")
+    void laClaveInicialNoSePuedeReelegir() {
+        assertThat(Codigos.CLAVE_INICIAL.length())
+                .isLessThan(Codigos.CLAVE_LONGITUD_MINIMA);
     }
 }

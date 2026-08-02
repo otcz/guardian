@@ -3,7 +3,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { AdminService } from '../../../core/services/admin.service';
-import { Parametro, Persona, Usuario } from '../../../core/models/admin.model';
+import { CLAVE_INICIAL, Parametro, Persona, Usuario } from '../../../core/models/admin.model';
 
 /**
  * Cuentas de acceso: guardias, administradores y residentes con app. Habilitar
@@ -86,7 +86,7 @@ export class UsuariosComponent implements OnInit {
         this.formulario.reset();
         this.aviso = `Cuenta creada para ${creado.nombreCompleto}. `
           + 'Nace inactiva: habilítala cuando entregues el acceso. '
-          + `La clave inicial es el documento (${creado.documento}).`;
+          + `La contraseña inicial es ${CLAVE_INICIAL}.`;
         this.cargar();
       },
       error: (fallo: HttpErrorResponse) => {
@@ -186,7 +186,7 @@ export class UsuariosComponent implements OnInit {
   restablecerClave(usuario: Usuario): void {
     const seguro = window.confirm(
       `¿Restablecer la contraseña de ${usuario.nombreCompleto}? ` +
-      'Volverá a ser su documento y deberá cambiarla al entrar.');
+      `Volverá a ser ${CLAVE_INICIAL} y deberá cambiarla al entrar.`);
     if (!seguro) {
       return;
     }
@@ -194,7 +194,7 @@ export class UsuariosComponent implements OnInit {
     this.error = null;
     this.admin.restablecerClave(usuario.id).subscribe({
       next: () => {
-        this.aviso = `Contraseña de ${usuario.nombreCompleto} restablecida a su documento.`;
+        this.aviso = `Contraseña de ${usuario.nombreCompleto} restablecida a ${CLAVE_INICIAL}.`;
         this.cargar();
       },
       error: (fallo: HttpErrorResponse) => {
