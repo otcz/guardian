@@ -2,14 +2,12 @@ package guardian.bootstrap;
 
 import guardian.constant.Codigos;
 import guardian.entity.conjunto.GdConjunto;
-import guardian.entity.conjunto.GdPuntoAcceso;
 import guardian.entity.parametro.GdParametro;
 import guardian.entity.persona.GdPersona;
 import guardian.entity.persona.GdUsuario;
 import guardian.repository.GdConjuntoRepository;
 import guardian.repository.GdParametroRepository;
 import guardian.repository.GdPersonaRepository;
-import guardian.repository.GdPuntoAccesoRepository;
 import guardian.repository.GdUsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,21 +37,11 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
 
     private final GdConjuntoRepository conjuntoRepository;
     private final GdParametroRepository parametroRepository;
-    private final GdPuntoAccesoRepository puntoAccesoRepository;
     private final GdPersonaRepository personaRepository;
     private final GdUsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
 
     private static final String EJECUTOR = "SYSTEM";
-
-    @Value("${guardian.bootstrap.admin-documento}")
-    private String adminDocumento;
-
-    @Value("${guardian.bootstrap.admin-clave}")
-    private String adminClave;
-
-    @Value("${guardian.bootstrap.conjunto-nombre}")
-    private String conjuntoNombre;
 
     @Value("${guardian.bootstrap.super-admin-documento}")
     private String superAdminDocumento;
@@ -61,36 +49,24 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
     @Value("${guardian.bootstrap.super-admin-clave}")
     private String superAdminClave;
 
+    /**
+     * Un sistema recien instalado arranca VACIO: solo el catalogo y el super
+     * administrador.
+     *
+     * <p>Antes se sembraba tambien una sede "Conjunto Residencial" con su
+     * porteria y su administrador. Eso era de la epoca de un solo conjunto; hoy
+     * las sedes las crea el super administrador desde el panel de plataforma, y
+     * una sede fantasma sembrada sola aparece en su listado, cuenta como sede
+     * real y hay que borrarla a mano de la base.</p>
+     */
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        GdConjunto conjunto = sembrarConjunto();
         sembrarParametros();
-        sembrarPuntoAcceso(conjunto);
-        sembrarAdministrador(conjunto);
         sembrarSuperAdministrador();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-
-    private GdConjunto sembrarConjunto() {
-        return conjuntoRepository
-                .findByEsPlataformaOrderByNombreAsc(Codigos.NO)
-                .stream()
-                .findFirst()
-                .orElseGet(() -> {
-                    GdConjunto conjunto = new GdConjunto();
-                    conjunto.setNombre(conjuntoNombre);
-                    conjunto.setEsPlataforma(Codigos.NO);
-                    conjunto.setActivo(Codigos.SI);
-                    conjunto.setUsuarioCreador(EJECUTOR);
-
-                    GdConjunto guardado = conjuntoRepository.save(conjunto);
-                    log.info("[bootstrap] sede creada id={} nombre={}",
-                            guardado.getId(), conjuntoNombre);
-                    return guardado;
-                });
-    }
 
     /**
      * Super administrador de la plataforma.
@@ -219,69 +195,6 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
             orden++;
         }
         return creados;
-    }
-
-    private void sembrarPuntoAcceso(GdConjunto conjunto) {
-        if (puntoAccesoRepository.countByConjuntoId(conjunto.getId()) > 0) {
-            return;
-        }
-
-        GdPuntoAcceso porteria = new GdPuntoAcceso();
-        porteria.setConjunto(conjunto);
-        porteria.setNombre("Porteria principal");
-        porteria.setPermiteVehiculo(Codigos.SI);
-        porteria.setActivo(Codigos.SI);
-        porteria.setUsuarioCreador(EJECUTOR);
-
-        puntoAccesoRepository.save(porteria);
-        log.info("[bootstrap] punto de acceso creado nombre={}", porteria.getNombre());
-    }
-
-    /**
-     * Administrador inicial. Sin el no habria forma de entrar a un sistema
-     * recien instalado.
-     *
-     * <p>Es la unica cuenta que nace <b>activa</b>: el resto nace inactiva y la
-     * habilita un administrador, pero aca no hay ninguno todavia. Solo se
-     * fuerza el cambio de clave cuando la clave configurada es igual al
-     * usuario — el caso degenerado que cualquiera adivina. Una clave propia
-     * definida por configuracion entra directo.</p>
-     */
-    private void sembrarAdministrador(GdConjunto conjunto) {
-        if (personaRepository.existsByConjuntoIdAndDocumento(conjunto.getId(), adminDocumento)) {
-            return;
-        }
-
-        GdPersona persona = new GdPersona();
-        persona.setConjunto(conjunto);
-        persona.setTipoDocumento(Codigos.TIPO_DOCUMENTO_CC);
-        persona.setDocumento(adminDocumento);
-        persona.setNombres("Administrador");
-        persona.setApellidos("del conjunto");
-        persona.setActivo(Codigos.SI);
-        persona.setUsuarioCreador(EJECUTOR);
-
-        GdPersona guardada = personaRepository.save(persona);
-
-        boolean claveDegenerada = adminClave.equals(adminDocumento);
-
-        GdUsuario usuario = new GdUsuario();
-        usuario.setPersona(guardada);
-        usuario.setRol(Codigos.ROL_ADMIN);
-        usuario.setClaveHash(passwordEncoder.encode(adminClave));
-        usuario.setRequiereCambioClave(claveDegenerada ? Codigos.SI : Codigos.NO);
-        usuario.setActivo(Codigos.SI);
-        usuario.setUsuarioCreador(EJECUTOR);
-
-        usuarioRepository.save(usuario);
-
-        if (claveDegenerada) {
-            log.warn("[bootstrap] administrador inicial creado usuario={} "
-                    + "— la clave es igual al usuario y debe cambiarse en el primer ingreso",
-                    adminDocumento);
-        } else {
-            log.info("[bootstrap] administrador inicial creado usuario={}", adminDocumento);
-        }
     }
 
     /** Par codigo/valor para sembrar el catalogo sin repetir estructura. */

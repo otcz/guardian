@@ -21,19 +21,23 @@ public class AlertaSecretosPorDefecto implements ApplicationRunner {
 
     private static final String JWT_DEFAULT = "guardian-local-dev-secret-change-me-32b!";
     private static final String QR_DEFAULT = "guardian-local-qr-hmac-change-me-32bytes!";
-    private static final String ADMIN_CLAVE_DEFAULT = "230614";
+    /**
+     * La clave del super administrador es hoy el secreto MAS sensible del
+     * repositorio: esa cuenta ve todas las sedes, no solo una.
+     */
+    private static final String SUPER_ADMIN_CLAVE_DEFAULT = "2306";
 
     private final String jwtSecret;
     private final String qrSecret;
-    private final String adminClave;
+    private final String superAdminClave;
 
     public AlertaSecretosPorDefecto(
             @Value("${guardian.security.jwt-secret}") String jwtSecret,
             @Value("${guardian.security.qr-hmac-secret}") String qrSecret,
-            @Value("${guardian.bootstrap.admin-clave}") String adminClave) {
+            @Value("${guardian.bootstrap.super-admin-clave}") String superAdminClave) {
         this.jwtSecret = jwtSecret;
         this.qrSecret = qrSecret;
-        this.adminClave = adminClave;
+        this.superAdminClave = superAdminClave;
     }
 
     @Override
@@ -46,9 +50,9 @@ public class AlertaSecretosPorDefecto implements ApplicationRunner {
             log.warn("[config] GUARDIAN_QR_HMAC_SECRET es el default del repo — "
                     + "cualquiera podria fabricar credenciales QR validas");
         }
-        if (ADMIN_CLAVE_DEFAULT.equals(adminClave)) {
-            log.warn("[config] la clave del administrador inicial es la default del repo — "
-                    + "cambiala con GUARDIAN_ADMIN_CLAVE");
+        if (SUPER_ADMIN_CLAVE_DEFAULT.equals(superAdminClave)) {
+            log.warn("[config] la clave del super administrador es la default del repo — "
+                    + "esa cuenta ve TODAS las sedes; cambiala con GUARDIAN_SUPER_ADMIN_CLAVE");
         }
     }
 }
