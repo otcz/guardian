@@ -1,0 +1,132 @@
+@use '../../../styles/paneles';
+
+/* Misma gramática que el login y que /unirme: son las tres puertas de entrada
+   al sistema y quien llega a cualquiera de ellas no tiene sesión. */
+.pantalla {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: var(--e-4);
+  padding-top: calc(var(--e-4) + var(--seguro-arriba));
+  padding-bottom: calc(var(--e-4) + var(--seguro-abajo));
+  background: var(--bg-base);
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  width: 100%;
+  max-width: 420px;
+  padding: var(--e-5);
+  background: var(--bg-surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-2);
+  color: var(--accent);
+
+  strong {
+    letter-spacing: 0.12em;
+    color: var(--text-strong);
+  }
+}
+
+.titulo {
+  text-align: center;
+
+  h1 {
+    font-size: var(--t-xl);
+  }
+
+  p {
+    margin: var(--e-2) 0 0;
+    font-size: var(--t-sm);
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+/* `.campo` de _paneles trae `flex: 1 1 150px`, pensado para filas. En un
+   contenedor en COLUMNA ese 150px es la ALTURA de base y el grow lo estira. */
+form > .campo {
+  flex: 0 0 auto;
+}
+
+/* El código se lee de un correo y se transcribe: grande, espaciado y
+   monoespaciado para no confundir un 0 con una O al teclearlo. */
+.codigo {
+  font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+  font-size: var(--t-xl);
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  text-align: center;
+}
+
+.error {
+  font-size: var(--t-xs);
+  color: var(--deny);
+}
+
+.principal {
+  width: 100%;
+}
+
+.volver {
+  display: block;
+  width: 100%;
+  padding: var(--e-2);
+  text-align: center;
+  font-size: var(--t-sm);
+  color: var(--text-muted);
+  background: transparent;
+  border: 0;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--text-default);
+    text-decoration: underline;
+  }
+}
+
+.exito {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-2);
+  text-align: center;
+
+  > i {
+    font-size: 2.4rem;
+    color: var(--ok);
+  }
+
+  h1 {
+    font-size: var(--t-xl);
+  }
+
+  p {
+    margin: 0;
+    font-size: var(--t-sm);
+    color: var(--text-muted);
+  }
+
+  .principal {
+    margin-top: var(--e-2);
+  }
+}

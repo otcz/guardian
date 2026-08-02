@@ -16,6 +16,7 @@ import guardian.repository.GdPersonaRepository;
 import guardian.repository.GdResidenteCasaRepository;
 import guardian.repository.GdUsuarioRepository;
 import guardian.security.UsuarioAutenticado;
+import guardian.util.CorreoUtil;
 import guardian.service.admin.ParametroService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -163,6 +164,7 @@ public class CodigoHogarServiceImpl implements CodigoHogarService {
         persona.setApellidos(request.getApellidos().trim());
         persona.setFechaNacimiento(request.getFechaNacimiento());
         persona.setTelefono(request.getTelefono());
+        persona.setEmail(CorreoUtil.normalizar(request.getEmail()));
         persona.setActivo(Codigos.SI);
         persona.setBloqueado(Codigos.NO);
         // El auditor deja escrito que entro por un codigo y de quien era, no

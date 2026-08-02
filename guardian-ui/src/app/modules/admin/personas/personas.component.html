@@ -52,12 +52,19 @@
       </div>
 
       <div class="campo">
-        <label for="email">Correo</label>
+        <label for="email">
+          Correo
+          <i class="pi pi-info-circle ayuda" *ngIf="exigeCorreo"
+             pTooltip="Por aquí recupera su contraseña"
+             tooltipPosition="top"></i>
+        </label>
         <input id="email" type="email" formControlName="email"
                placeholder="Ej: nombre@correo.com">
         <small class="error"
                *ngIf="formulario.controls.email.invalid && formulario.controls.email.touched">
-          El correo no parece válido
+          {{ formulario.controls.email.hasError('required')
+             ? 'La cuenta necesita correo para poder recuperar la contraseña'
+             : 'El correo no parece válido' }}
         </small>
       </div>
 

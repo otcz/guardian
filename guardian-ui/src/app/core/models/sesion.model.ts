@@ -32,3 +32,22 @@ export interface CambiarClaveRequest {
   claveActual: string;
   claveNueva: string;
 }
+
+/** Paso 1 de "olvidé mi contraseña". Se pide el documento, no el correo:
+ *  es el dato con el que la persona ya inicia sesión. */
+export interface SolicitarCodigoRequest {
+  documento: string;
+}
+
+/** Respuesta idéntica exista o no la cuenta — a propósito, para que esta
+ *  pantalla no sirva para averiguar qué cédulas viven en el conjunto. */
+export interface SolicitudCodigoResponse {
+  mensaje: string;
+  minutosVigencia: number;
+}
+
+export interface RestablecerClaveRequest {
+  documento: string;
+  codigo: string;
+  claveNueva: string;
+}

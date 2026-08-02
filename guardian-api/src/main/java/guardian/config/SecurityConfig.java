@@ -62,6 +62,9 @@ public class SecurityConfig {
                 // Quien se une a un hogar todavia no tiene cuenta: la llave es
                 // el codigo UUID, de un solo uso y con vencimiento.
                 .antMatchers(ApiEndpoint.PUBLICO_HOGAR + "/**").permitAll()
+                // Recuperar la clave es, por definicion, algo que se hace sin
+                // poder entrar. La llave es el codigo que llega al correo.
+                .antMatchers(ApiEndpoint.PUBLICO_RECUPERACION + "/**").permitAll()
 
                 // Los endpoints de autenticacion aceptan tambien la autoridad
                 // degradada CLAVE_PENDIENTE: cambiar la clave y consultar la

@@ -25,6 +25,7 @@ import guardian.security.Autoridad;
 import guardian.security.UsuarioAutenticado;
 import guardian.service.acceso.CredencialQrService;
 import guardian.util.EdadUtil;
+import guardian.util.CorreoUtil;
 import guardian.util.FotoUrlUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -98,6 +99,7 @@ public class PersonaServiceImpl implements PersonaService {
             throw GuardianException.conflicto(MensajesGlobales.DOCUMENTO_YA_REGISTRADO);
         }
         exigirTelefonoLibre(request.getTelefono(), null);
+        exigirCorreoLibre(request.getEmail(), null);
 
         GdConjunto conjunto = conjuntoRepository.findById(ejecutor.getConjuntoId())
                 .orElseThrow(() -> GuardianException.noEncontrado(MensajesGlobales.NO_ENCONTRADO));
@@ -139,6 +141,12 @@ public class PersonaServiceImpl implements PersonaService {
         if (request.getRolUsuario() == null || request.getRolUsuario().trim().isEmpty()) {
             return;
         }
+        // El ROL se valida PRIMERO. Una regla de completitud —falta el correo—
+        // no puede colarse delante de una de seguridad: si lo hiciera, un
+        // intento de escalar a SUPER_ADMIN sin correo respondería "escribe el
+        // correo", y el segundo intento, ya con correo, encontraria la puerta
+        // que este chequeo debia cerrar.
+        //
         // La via menos obvia de escalada: el alta de persona acepta el rol en
         // el mismo request y crea la cuenta de un tiron. Quien blinde solo
         // UsuarioServiceImpl deja esta puerta abierta.
@@ -146,6 +154,16 @@ public class PersonaServiceImpl implements PersonaService {
             throw GuardianException.sinPermiso(MensajesGlobales.ROL_NO_ASIGNABLE);
         }
         parametroService.exigirCodigoValido(Codigos.GRUPO_ROL, request.getRolUsuario());
+
+        // Sin correo la cuenta nace sin salida: quien olvide su clave solo
+        // podra recuperarla llamando a la administracion. Se exige aca y no en
+        // el DTO porque la mayoria de personas del conjunto NO tienen cuenta
+        // —los ninos, los que solo pasan por la porteria— y a esas el correo no
+        // les hace falta.
+        if (CorreoUtil.normalizar(request.getEmail()) == null) {
+            throw GuardianException.solicitudInvalida(
+                    MensajesGlobales.CORREO_REQUERIDO_CON_CUENTA);
+        }
 
         GdUsuario usuario = new GdUsuario();
         usuario.setPersona(persona);
@@ -169,6 +187,7 @@ public class PersonaServiceImpl implements PersonaService {
                     throw GuardianException.conflicto(MensajesGlobales.DOCUMENTO_YA_REGISTRADO);
                 });
         exigirTelefonoLibre(request.getTelefono(), id);
+        exigirCorreoLibre(request.getEmail(), id);
 
         persona.setDocumento(documento);
         aplicar(persona, request);
@@ -281,6 +300,22 @@ public class PersonaServiceImpl implements PersonaService {
      *
      * @param idPersona la persona que se esta editando, o null en un alta.
      */
+    /**
+     * El correo es la LLAVE DE RECUPERACION de la cuenta: si dos personas
+     * comparten uno, el codigo para restablecer llega al buzon equivocado.
+     */
+    private void exigirCorreoLibre(String email, Long idPersona) {
+        String normalizado = CorreoUtil.normalizar(email);
+        if (normalizado == null) {
+            return;
+        }
+        personaRepository.findByEmail(normalizado)
+                .filter(otra -> idPersona == null || !otra.getId().equals(idPersona))
+                .ifPresent(otra -> {
+                    throw GuardianException.conflicto(MensajesGlobales.CORREO_YA_REGISTRADO);
+                });
+    }
+
     private void exigirTelefonoLibre(String telefono, Long idPersona) {
         if (telefono == null || telefono.trim().isEmpty()) {
             return;
@@ -334,7 +369,10 @@ public class PersonaServiceImpl implements PersonaService {
         persona.setFechaNacimiento(request.getFechaNacimiento());
         persona.setFotoUrl(request.getFotoUrl());
         persona.setTelefono(request.getTelefono());
-        persona.setEmail(request.getEmail());
+        // Minusculas y sin espacios: el correo se usa despues para buscar a
+        // quien pide restablecer su clave, y "Ana@X.com" no encontraria la fila
+        // guardada como "ana@x.com".
+        persona.setEmail(CorreoUtil.normalizar(request.getEmail()));
     }
 
     /**

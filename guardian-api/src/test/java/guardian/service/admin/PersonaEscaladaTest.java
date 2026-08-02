@@ -85,7 +85,35 @@ class PersonaEscaladaTest {
         request.setNombres("Colado");
         request.setApellidos("Por Atras");
         request.setRolUsuario(rolUsuario);
+        // Toda cuenta exige correo: es por donde su duena recupera la clave.
+        request.setEmail("colado@correo.com");
         return request;
+    }
+
+    @Test
+    @DisplayName("el rol se valida ANTES que el correo")
+    void elRolSeValidaAntesQueElCorreo() {
+        // Una regla de completitud no puede colarse delante de una de
+        // seguridad: si respondiera "escribe el correo", el segundo intento
+        // —ya con correo— encontraria abierta la puerta que este chequeo
+        // cierra.
+        PersonaRequest sinCorreo = alta(Codigos.ROL_SUPER_ADMIN);
+        sinCorreo.setEmail(null);
+
+        assertThatThrownBy(() -> servicio.crear(sinCorreo, admin))
+                .hasMessage(MensajesGlobales.ROL_NO_ASIGNABLE);
+    }
+
+    @Test
+    @DisplayName("una cuenta sin correo no se crea: nace sin forma de recuperarse")
+    void laCuentaExigeCorreo() {
+        PersonaRequest sinCorreo = alta(Codigos.ROL_RESIDENTE);
+        sinCorreo.setEmail("   ");
+
+        assertThatThrownBy(() -> servicio.crear(sinCorreo, admin))
+                .hasMessage(MensajesGlobales.CORREO_REQUERIDO_CON_CUENTA);
+
+        verify(usuarioRepository, never()).save(any());
     }
 
     @Test

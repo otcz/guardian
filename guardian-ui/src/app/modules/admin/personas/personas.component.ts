@@ -72,6 +72,10 @@ export class PersonasComponent implements OnInit {
     this.busqueda$
       .pipe(debounceTime(300), distinctUntilChanged())
       .subscribe(texto => this.cargar(texto));
+
+    // Elegir un rol vuelve el correo obligatorio; quitarlo lo suelta.
+    this.formulario.controls.rolUsuario.valueChanges
+      .subscribe(() => this.sincronizarValidadorDeCorreo());
   }
 
   buscar(texto: string): void {
@@ -533,5 +537,29 @@ export class PersonasComponent implements OnInit {
   /** El parentesco solo aplica si la persona vive en una casa. */
   get pideParentesco(): boolean {
     return !!this.formulario.controls.casaId.value;
+  }
+
+  /**
+   * El correo es obligatorio SOLO cuando el alta incluye cuenta: es por donde
+   * esa persona recuperará su contraseña. La mayoría de personas del conjunto
+   * no tienen cuenta —los niños, quienes solo pasan por la portería— y a esas
+   * pedirles correo sería inventar un dato que nadie va a usar.
+   */
+  get exigeCorreo(): boolean {
+    return !this.editando && !!this.formulario.controls.rolUsuario.value;
+  }
+
+  /**
+   * El validador se enciende y apaga con el rol. Dejarlo fijo bloquearía el
+   * alta de todas las personas sin cuenta; no ponerlo dejaría que el formulario
+   * se enviara para que el backend lo rechace, que es peor: el error llega
+   * después de perder lo digitado.
+   */
+  private sincronizarValidadorDeCorreo(): void {
+    const correo = this.formulario.controls.email;
+    correo.setValidators(this.exigeCorreo
+      ? [Validators.required, Validators.email]
+      : [Validators.email]);
+    correo.updateValueAndValidity({ emitEvent: false });
   }
 }

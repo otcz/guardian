@@ -1,0 +1,96 @@
+<div class="pantalla">
+  <div class="tarjeta">
+
+    <div class="marca">
+      <i class="pi pi-shield"></i>
+      <strong>GUARDIAN</strong>
+    </div>
+
+    <!-- PASO 1: quién eres -->
+    <ng-container *ngIf="paso === 'documento'">
+      <div class="titulo">
+        <h1>Recuperar contraseña</h1>
+        <p>Te enviamos un código al correo que tienes registrado.</p>
+      </div>
+
+      <form [formGroup]="formularioDocumento" (ngSubmit)="solicitar()">
+        <div class="campo">
+          <label for="r-documento">Documento</label>
+          <input id="r-documento" type="text" inputmode="numeric"
+                 formControlName="documento" placeholder="Ej: 1020304050"
+                 autocomplete="username">
+          <small class="error" *ngIf="campoInvalido(formularioDocumento.controls.documento)">
+            Escribe tu número de documento
+          </small>
+        </div>
+
+        <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+        <button type="submit" class="principal" [disabled]="cargando">
+          <i class="pi" [ngClass]="cargando ? 'pi-spinner pi-spin' : 'pi-envelope'"></i>
+          {{ cargando ? 'Enviando…' : 'Enviarme el código' }}
+        </button>
+      </form>
+
+      <a class="volver" routerLink="/">Volver</a>
+    </ng-container>
+
+    <!-- PASO 2: el código y la contraseña nueva, en una sola pantalla para no
+         obligar a memorizar el código entre dos pasos. -->
+    <ng-container *ngIf="paso === 'codigo'">
+      <div class="titulo">
+        <h1>Revisa tu correo</h1>
+        <p>{{ aviso }}</p>
+      </div>
+
+      <form [formGroup]="formularioCodigo" (ngSubmit)="restablecer()">
+        <div class="campo">
+          <label for="r-codigo">
+            Código
+            <i class="pi pi-info-circle ayuda"
+               [pTooltip]="'Vence en ' + minutosVigencia + ' minutos'"
+               tooltipPosition="top"></i>
+          </label>
+          <input id="r-codigo" type="text" inputmode="numeric" maxlength="6"
+                 formControlName="codigo" placeholder="000000"
+                 autocomplete="one-time-code" class="codigo">
+          <small class="error" *ngIf="campoInvalido(formularioCodigo.controls.codigo)">
+            El código tiene 6 dígitos
+          </small>
+        </div>
+
+        <div class="campo">
+          <label for="r-clave">Nueva contraseña</label>
+          <input id="r-clave" type="password" formControlName="claveNueva"
+                 autocomplete="new-password">
+          <small class="error" *ngIf="campoInvalido(formularioCodigo.controls.claveNueva)">
+            Debe tener al menos 8 caracteres
+          </small>
+        </div>
+
+        <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+        <button type="submit" class="principal" [disabled]="cargando">
+          <i class="pi" [ngClass]="cargando ? 'pi-spinner pi-spin' : 'pi-check'"></i>
+          {{ cargando ? 'Cambiando…' : 'Cambiar mi contraseña' }}
+        </button>
+      </form>
+
+      <button type="button" class="volver" (click)="pedirOtro()">
+        No me llegó, pedir otro código
+      </button>
+    </ng-container>
+
+    <!-- LISTO -->
+    <div class="exito" *ngIf="paso === 'listo'">
+      <i class="pi pi-check-circle"></i>
+      <h1>Listo</h1>
+      <p>Tu contraseña quedó cambiada. Ya puedes entrar con ella.</p>
+
+      <button type="button" class="principal" (click)="irAlLogin()">
+        <i class="pi pi-sign-in"></i>
+        Entrar
+      </button>
+    </div>
+  </div>
+</div>

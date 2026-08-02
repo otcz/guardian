@@ -8,8 +8,11 @@ import {
   CambiarClaveRequest,
   LoginRequest,
   LoginResponse,
+  RestablecerClaveRequest,
   Rol,
-  Sesion
+  Sesion,
+  SolicitarCodigoRequest,
+  SolicitudCodigoResponse
 } from '../models/sesion.model';
 import { LLAVE_CACHE_MI_QR } from '../models/acceso.model';
 
@@ -41,6 +44,21 @@ export class AuthService {
     return this.http
       .post<LoginResponse>(`${environment.apiUrl}/auth/cambiar-clave`, request)
       .pipe(tap(respuesta => this.guardarSesion(respuesta)));
+  }
+
+  // ── Olvidé mi contraseña ─────────────────────────────────────────────────
+  //
+  // Bajo /publico y no bajo /auth: quien las usa no tiene sesión, que es
+  // justamente el problema que viene a resolver.
+
+  solicitarCodigo(request: SolicitarCodigoRequest): Observable<SolicitudCodigoResponse> {
+    return this.http.post<SolicitudCodigoResponse>(
+      `${environment.apiUrl}/publico/recuperacion/solicitar`, request);
+  }
+
+  restablecerClave(request: RestablecerClaveRequest): Observable<void> {
+    return this.http.post<void>(
+      `${environment.apiUrl}/publico/recuperacion/restablecer`, request);
   }
 
   cerrarSesion(): void {

@@ -162,3 +162,20 @@
   font-size: 0.78rem;
   color: var(--text-muted);
 }
+
+/* Separado del texto de ayuda y con área táctil propia: es una acción, no una
+   línea más del párrafo que explica la contraseña inicial. */
+.olvide {
+  display: block;
+  padding: var(--e-2);
+  text-align: center;
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+  }
+}

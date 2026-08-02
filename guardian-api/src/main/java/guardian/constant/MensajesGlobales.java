@@ -29,6 +29,17 @@ public final class MensajesGlobales {
             "La nueva contrasena no puede ser tu numero de documento.";
     public static final String CLAVE_MUY_CORTA =
             "La contrasena debe tener al menos 8 caracteres.";
+    /**
+     * UN SOLO mensaje para codigo equivocado, vencido, ya usado, agotado y
+     * documento inexistente. Distinguirlos le diria a quien prueba codigos
+     * cual de las cinco cosas acerto.
+     */
+    public static final String CODIGO_RECUPERACION_NO_VALIDO =
+            "Ese codigo no sirve. Pide uno nuevo.";
+    /** Identico exista o no la cuenta: ver SolicitudCodigoResponse. */
+    public static final String CODIGO_RECUPERACION_ENVIADO =
+            "Si ese documento tiene una cuenta con correo registrado, "
+            + "te enviamos un codigo.";
     public static final String SESION_REQUERIDA =
             "Necesitas iniciar sesion para continuar.";
     public static final String SIN_PERMISO =
@@ -94,6 +105,10 @@ public final class MensajesGlobales {
             "Ya existe una persona con ese numero de documento.";
     public static final String TELEFONO_YA_REGISTRADO =
             "Ese telefono ya esta registrado por otra persona.";
+    public static final String CORREO_YA_REGISTRADO =
+            "Ese correo ya esta registrado por otra persona.";
+    public static final String CORREO_REQUERIDO_CON_CUENTA =
+            "Escribe el correo: es por donde la persona recupera su contrasena.";
     public static final String PLACA_YA_REGISTRADA =
             "Ya existe un vehiculo con esa placa.";
     public static final String PERSONA_YA_EN_UNA_CASA =

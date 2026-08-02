@@ -59,6 +59,17 @@
           </div>
 
           <div class="campo">
+            <label for="u-correo">
+              Correo
+              <i class="pi pi-info-circle field-help"
+                 pTooltip="Por aquí recuperas tu contraseña"
+                 tooltipPosition="top"></i>
+            </label>
+            <input id="u-correo" type="email" formControlName="email"
+                   placeholder="Ej: nombre@correo.com" autocomplete="email">
+          </div>
+
+          <div class="campo">
             <label for="u-parentesco">Parentesco</label>
             <select id="u-parentesco" formControlName="parentesco">
               <option value="">Selecciona…</option>

@@ -39,6 +39,9 @@ export class UnirmeComponent implements OnInit {
     apellidos: ['', [Validators.required]],
     fechaNacimiento: [''],
     telefono: [''],
+    // Obligatorio: quien se registra por acá SIEMPRE sale con cuenta, y sin
+    // correo esa cuenta nace sin forma de recuperar la contraseña.
+    email: ['', [Validators.required, Validators.email]],
     parentesco: ['', [Validators.required]]
   });
 

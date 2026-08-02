@@ -51,6 +51,13 @@ public final class ApiEndpoint {
     /** Registro dentro de un hogar existente: sin cuenta, el codigo es la llave. */
     public static final String PUBLICO_HOGAR = API + "/publico/hogar";
 
+    /**
+     * Recuperacion de clave. Va bajo /publico y no bajo /auth porque quien la
+     * usa NO tiene sesion —ese es el problema que viene a resolver— y /auth
+     * exige estar autenticado.
+     */
+    public static final String PUBLICO_RECUPERACION = API + "/publico/recuperacion";
+
     /** Administracion del conjunto — rol ADMIN. */
     public static final String ADMIN = API + "/admin";
     public static final String ADMIN_RESUMEN = ADMIN + "/resumen";
