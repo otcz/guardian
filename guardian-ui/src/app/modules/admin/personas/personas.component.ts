@@ -4,6 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { AdminService } from '../../../core/services/admin.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { CLAVE_INICIAL, Casa, Parametro, Persona } from '../../../core/models/admin.model';
 
 @Component({
@@ -14,6 +15,7 @@ import { CLAVE_INICIAL, Casa, Parametro, Persona } from '../../../core/models/ad
 })
 export class PersonasComponent implements OnInit {
 
+  private readonly auth = inject(AuthService);
   private readonly fb = inject(FormBuilder);
 
   personas: Persona[] = [];
@@ -46,6 +48,15 @@ export class PersonasComponent implements OnInit {
     parentesco: [''],
     rolUsuario: ['']
   });
+
+  /**
+   * Borrar es del operador de la plataforma y de nadie más. El administrador
+   * de la sede desactiva, bloquea y revoca — todo eso deja rastro. Borrar no:
+   * la fila desaparece y con ella el registro que podría resolver una disputa.
+   * El backend lo exige igual; esto solo evita ofrecer un botón que va a
+   * responder 403.
+   */
+  readonly puedeEliminar = this.auth.tieneRol('SUPER_ADMIN');
 
   constructor(private readonly admin: AdminService) {}
 

@@ -1,16 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { AdminService } from '../../../core/services/admin.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { EstadoInvitacion, Invitacion } from '../../../core/models/acceso.model';
 
 /**
  * Todas las invitaciones del conjunto.
  *
- * <p>Las mismas tres acciones que tiene el residente sobre las suyas, porque
- * la administración es quien atiende cuando el residente no está: copiar el
- * link, revocar —su palanca ante un QR que circula de más— y eliminar. La
- * bitácora no se toca con ninguna.</p>
+ * <p>Copiar el link y revocar, porque la administración es quien atiende
+ * cuando el residente no está. Revocar es su palanca ante un QR que circula
+ * de más.</p>
+ *
+ * <p>Eliminar solo lo ve el super administrador: una invitación borrada es un
+ * hueco en la auditoría — alguien pudo entrar por ese código y no quedaría
+ * registro de quién lo emitió.</p>
  */
 @Component({
   selector: 'gd-admin-invitaciones',
@@ -20,10 +24,21 @@ import { EstadoInvitacion, Invitacion } from '../../../core/models/acceso.model'
 })
 export class InvitacionesComponent implements OnInit {
 
+  private readonly auth = inject(AuthService);
+
   invitaciones: Invitacion[] = [];
   cargando = true;
   error: string | null = null;
   aviso: string | null = null;
+
+  /**
+   * Borrar es del operador de la plataforma y de nadie más. El administrador
+   * de la sede desactiva, bloquea y revoca — todo eso deja rastro. Borrar no:
+   * la fila desaparece y con ella el registro que podría resolver una disputa.
+   * El backend lo exige igual; esto solo evita ofrecer un botón que va a
+   * responder 403.
+   */
+  readonly puedeEliminar = this.auth.tieneRol('SUPER_ADMIN');
 
   constructor(private readonly admin: AdminService) {}
 

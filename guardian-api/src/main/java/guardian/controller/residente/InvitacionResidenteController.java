@@ -8,7 +8,6 @@ import guardian.service.acceso.InvitacionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,11 +22,10 @@ import java.util.List;
 /**
  * Invitaciones de MI casa.
  *
- * <p>Revocar y eliminar no son lo mismo y las dos hacen falta. Revocar mata el
- * codigo de inmediato —es la palanca para un QR que circula de mas— y deja la
- * fila a la vista. Eliminar la saca de la lista, que despues de un mes
- * invitando gente son cuarenta filas vencidas. La bitacora no se toca en
- * ninguno de los dos casos.</p>
+ * <p>No hay eliminar. Una invitacion comprometida se revoca: el codigo muere
+ * de inmediato y la fila se queda con su estado a la vista. Borrarla dejaria un
+ * hueco en la auditoria —alguien pudo entrar por ese codigo y no quedaria
+ * registro de quien lo emitio— y eso no lo decide quien lo emitio.</p>
  */
 @RestController
 @RequestMapping(ApiEndpoint.RESIDENTE + ApiEndpoint.RESIDENTE_INVITACIONES)
@@ -52,11 +50,5 @@ public class InvitacionResidenteController {
     @PatchMapping("/{id}/revocar")
     public ResponseEntity<InvitacionResponse> revocar(@PathVariable Long id) {
         return ResponseEntity.ok(invitacionService.revocar(id, usuarioActual.obtener()));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        invitacionService.eliminar(id, usuarioActual.obtener());
-        return ResponseEntity.noContent().build();
     }
 }

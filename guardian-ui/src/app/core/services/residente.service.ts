@@ -83,12 +83,8 @@ export class ResidenteService {
     return this.http.post<Invitacion>(`${this.base}/invitaciones`, request);
   }
 
+  /** Lo único que puede hacer el residente: eliminar es del super admin. */
   revocarInvitacion(id: number): Observable<Invitacion> {
     return this.http.patch<Invitacion>(`${this.base}/invitaciones/${id}/revocar`, {});
-  }
-
-  /** La saca de la lista. La bitácora conserva los ingresos que permitió. */
-  eliminarInvitacion(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.base}/invitaciones/${id}`);
   }
 }

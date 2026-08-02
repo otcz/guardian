@@ -23,8 +23,10 @@ public interface VehiculoService {
     VehiculoResponse cambiarEstado(Long id, boolean activo, UsuarioAutenticado ejecutor);
 
     /**
-     * Eliminacion FISICA — exclusiva del administrador; los residentes solo
-     * inactivan. La bitacora conserva la placa copiada en cada evento.
+     * Eliminacion FISICA — exclusiva del super administrador. El residente y
+     * el administrador de la sede solo inactivan, que deja rastro.
+     *
+     * <p>La bitacora conserva la placa copiada en cada evento.</p>
      */
     void eliminar(Long id, UsuarioAutenticado ejecutor);
 }

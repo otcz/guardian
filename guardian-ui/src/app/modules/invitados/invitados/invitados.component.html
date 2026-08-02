@@ -74,16 +74,9 @@
     <!-- Código del invitado -->
     <gd-hoja [abierta]="!!qrAbierto" (cerrar)="qrAbierto = null">
       <div class="codigo" *ngIf="qrAbierto">
-        <!-- El QR solo mientras sirva. Una invitación vencida o revocada se
-             abre para eliminarla, no para volver a mostrar un código muerto. -->
-        <div class="qr-cuadro" *ngIf="esVigente(qrAbierto)">
+        <div class="qr-cuadro">
           <qrcode [qrdata]="qrAbierto.payload" [width]="200" [margin]="1"
                   errorCorrectionLevel="H" elementType="canvas"></qrcode>
-        </div>
-
-        <div class="qr-cuadro apagado" *ngIf="!esVigente(qrAbierto)">
-          <i class="pi pi-ticket"></i>
-          <span>{{ etiquetaEstado(qrAbierto.estado) }}</span>
         </div>
 
         <strong class="qr-nombre">{{ qrAbierto.nombreInvitado }}</strong>
@@ -93,42 +86,37 @@
           {{ qrAbierto.usosMaximos - qrAbierto.usosRealizados }} ingreso(s)
         </span>
 
-        <p class="instruccion" *ngIf="esVigente(qrAbierto)">
+        <p class="instruccion">
           El invitado abre el link y muestra el código en la portería.
         </p>
 
         <div class="qr-acciones">
-          <button type="button" class="principal" *ngIf="esVigente(qrAbierto)"
-                  (click)="compartir(qrAbierto)">
+          <button type="button" class="principal" (click)="compartir(qrAbierto)">
             <i class="pi pi-share-alt"></i> Compartir link
           </button>
-          <button type="button" class="peligro-texto" *ngIf="esVigente(qrAbierto)"
-                  (click)="revocar(qrAbierto)">
+          <button type="button" class="peligro-texto" (click)="revocar(qrAbierto)">
             Revocar invitación
-          </button>
-          <button type="button" class="peligro-texto" (click)="eliminar(qrAbierto)">
-            Eliminar invitación
           </button>
         </div>
       </div>
     </gd-hoja>
 
-    <!-- Confirmación de revocar o eliminar. Antes era un window.confirm, que
-         dibuja el dominio del sitio y los botones del navegador. -->
-    <gd-hoja [abierta]="!!confirmacion"
-             [titulo]="tituloConfirmacion"
-             (cerrar)="confirmacion = null">
-      <p class="instruccion">{{ avisoConfirmacion }}</p>
+    <!-- Confirmación de revocar. Antes era un window.confirm, que dibuja el
+         dominio del sitio y los botones del navegador. -->
+    <gd-hoja [abierta]="!!invitacionARevocar"
+             [titulo]="invitacionARevocar?.nombreInvitado || ''"
+             (cerrar)="invitacionARevocar = null">
+      <p class="instruccion">El código dejará de servir de inmediato.</p>
 
       <div class="gd-lista">
         <button type="button" class="gd-fila gd-presionable gd-fila--destructiva"
-                (click)="confirmar()">
-          {{ botonConfirmacion }}
+                (click)="confirmarRevocar()">
+          Revocar invitación
         </button>
       </div>
       <div class="gd-lista separada">
         <button type="button" class="gd-fila gd-presionable centrada"
-                (click)="confirmacion = null">
+                (click)="invitacionARevocar = null">
           Cancelar
         </button>
       </div>
@@ -162,12 +150,11 @@
           {{ etiquetaEstado(invitacion.estado) }}
         </span>
 
-        <!-- Un solo toque en la fila abre el panel, y ahí están las tres
-             acciones. También en las vencidas: es donde se eliminan. -->
-        <button type="button" class="accion"
+        <!-- Una sola acción destacada: compartir es lo que se hace el 90% de
+             las veces. Ver el QR y revocar salen del panel del código. -->
+        <button type="button" class="accion" *ngIf="esVigente(invitacion)"
                 (click)="qrAbierto = invitacion"
-                [attr.aria-label]="'Abrir la invitación de ' + invitacion.nombreInvitado"
-                pTooltip="Abrir" tooltipPosition="left">
+                pTooltip="Ver código" tooltipPosition="left" aria-label="Ver código">
           <i class="pi pi-chevron-right"></i>
         </button>
       </article>

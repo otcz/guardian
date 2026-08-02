@@ -34,9 +34,14 @@ public interface PersonaService {
     void revocarCredencial(Long id, UsuarioAutenticado ejecutor);
 
     /**
-     * Eliminacion FISICA — exclusiva del administrador; los residentes solo
-     * inactivan. La bitacora sobrevive: los eventos conservan nombre y
-     * documento copiados y solo se anula la FK.
+     * Eliminacion FISICA — exclusiva del super administrador.
+     *
+     * <p>El administrador de la sede desactiva y bloquea, que deja rastro.
+     * Borrar no lo deja: la persona, su cuenta y sus vinculos desaparecen, y
+     * quien borra suele ser parte de la disputa que ese registro resolveria.</p>
+     *
+     * <p>La bitacora sobrevive igual: los eventos conservan nombre y documento
+     * copiados y solo se anula la FK.</p>
      */
     void eliminar(Long id, UsuarioAutenticado ejecutor);
 }

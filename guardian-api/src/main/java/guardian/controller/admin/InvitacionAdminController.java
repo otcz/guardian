@@ -33,9 +33,10 @@ public class InvitacionAdminController {
         return ResponseEntity.ok(invitacionService.revocarComoAdmin(id, usuarioActual.obtener()));
     }
 
+    /** Borrado fisico. El service exige super administrador. */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        invitacionService.eliminarComoAdmin(id, usuarioActual.obtener());
+        invitacionService.eliminarComoSuperAdmin(id, usuarioActual.obtener());
         return ResponseEntity.noContent().build();
     }
 }

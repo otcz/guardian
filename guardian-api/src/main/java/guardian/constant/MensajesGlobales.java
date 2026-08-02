@@ -33,6 +33,8 @@ public final class MensajesGlobales {
             "Necesitas iniciar sesion para continuar.";
     public static final String SIN_PERMISO =
             "No tienes permiso para realizar esta accion.";
+    public static final String BORRADO_SOLO_SUPER_ADMIN =
+            "Solo el super administrador puede eliminar. Puedes desactivar en su lugar.";
 
     // ── Sedes ────────────────────────────────────────────────────────────────
     public static final String SIN_SEDE_ELEGIDA =

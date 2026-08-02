@@ -55,7 +55,10 @@
                   pTooltip="Revocar" tooltipPosition="left">
             <i class="pi pi-ban"></i>
           </button>
-          <button type="button" class="accion peligro"
+          <!-- Solo el super administrador. Una invitación borrada es un hueco
+               en la auditoría: alguien pudo entrar por ese código y no quedaría
+               registro de quién lo emitió. El backend lo exige igual. -->
+          <button type="button" class="accion peligro" *ngIf="puedeEliminar"
                   (click)="eliminar(invitacion)"
                   [attr.aria-label]="'Eliminar la invitación de ' + invitacion.nombreInvitado"
                   pTooltip="Eliminar" tooltipPosition="left">

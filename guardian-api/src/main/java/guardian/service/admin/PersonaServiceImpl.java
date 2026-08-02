@@ -21,6 +21,7 @@ import guardian.repository.GdPersonaRepository;
 import guardian.repository.GdResidenteCasaRepository;
 import guardian.repository.GdUsuarioRepository;
 import guardian.repository.spec.PersonaSpecs;
+import guardian.security.Autoridad;
 import guardian.security.UsuarioAutenticado;
 import guardian.service.acceso.CredencialQrService;
 import guardian.util.EdadUtil;
@@ -231,6 +232,8 @@ public class PersonaServiceImpl implements PersonaService {
     @Override
     @Transactional
     public void eliminar(Long id, UsuarioAutenticado ejecutor) {
+        Autoridad.exigirSuperAdmin(ejecutor);
+
         GdPersona persona = obtenerEntidad(id, ejecutor);
 
         // Eliminar la propia persona dejaria al admin con una sesion valida

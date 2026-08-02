@@ -118,8 +118,12 @@
             <i class="pi" [ngClass]="bloqueado(vehiculo) ? 'pi-lock-open' : 'pi-lock'"></i>
           </button>
 
-          <button type="button" class="accion peligro"
+          <!-- Solo el super administrador. Borrar deja un hueco en la
+               auditoria y quien borra suele ser parte de la disputa que ese
+               registro resolveria. El backend lo exige igual. -->
+          <button type="button" class="accion peligro" *ngIf="puedeEliminar"
                   (click)="eliminar(vehiculo)"
+                  [attr.aria-label]="'Eliminar ' + vehiculo.placa"
                   pTooltip="Eliminar" tooltipPosition="left">
             <i class="pi pi-trash"></i>
           </button>

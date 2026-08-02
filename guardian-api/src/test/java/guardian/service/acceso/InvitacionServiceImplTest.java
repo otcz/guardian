@@ -191,19 +191,44 @@ class InvitacionServiceImplTest {
         assertThat(servicio.resolver(null)).isEmpty();
     }
 
-    // ── Eliminar ─────────────────────────────────────────────────────────────
+    // ── Eliminar: solo el super administrador ────────────────────────────────
 
     @Test
-    @DisplayName("eliminar desvincula la bitacora antes de borrar, no la borra")
-    void eliminarConservaLaBitacora() {
-        // Los ingresos que esa invitacion permitio son del conjunto, no del
-        // residente. El evento guarda nombre y documento del invitado copiados
-        // encima, asi que sobrevive perfectamente sin la fila.
+    @DisplayName("el residente y el administrador NO pueden eliminar")
+    void borradoVedadoAlResidenteYAlAdmin() {
+        // El punto de toda la regla: si el anfitrion pudiera borrar su propia
+        // invitacion, desapareceria el registro de quien dejo entrar a alguien
+        // — y eso es exactamente lo que una disputa necesita saber.
         GdInvitacion invitacion = invitacionVigente();
         invitacion.setId(20L);
+        invitacion.setConjuntoId(1L);
+        lenient().when(invitacionRepository.findById(20L)).thenReturn(Optional.of(invitacion));
+
+        UsuarioAutenticado admin = new UsuarioAutenticado(2L, 60L, 1L, "1074", "Admin", "ADMIN");
+
+        assertThatThrownBy(() -> servicio.eliminarComoSuperAdmin(20L, anfitrion))
+                .isInstanceOf(GuardianException.class)
+                .hasMessage(MensajesGlobales.BORRADO_SOLO_SUPER_ADMIN);
+        assertThatThrownBy(() -> servicio.eliminarComoSuperAdmin(20L, admin))
+                .isInstanceOf(GuardianException.class)
+                .hasMessage(MensajesGlobales.BORRADO_SOLO_SUPER_ADMIN);
+
+        verify(invitacionRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("el super administrador elimina, y la bitacora se desvincula antes de borrar")
+    void superAdminEliminaConservandoLaBitacora() {
+        // Los ingresos que esa invitacion permitio son del conjunto. El evento
+        // guarda nombre y documento del invitado copiados encima, asi que
+        // sobrevive sin la fila — pero el orden importa: al reves, la FK
+        // rechaza el borrado.
+        GdInvitacion invitacion = invitacionVigente();
+        invitacion.setId(20L);
+        invitacion.setConjuntoId(1L);
         when(invitacionRepository.findById(20L)).thenReturn(Optional.of(invitacion));
 
-        servicio.eliminar(20L, anfitrion);
+        servicio.eliminarComoSuperAdmin(20L, superAdmin(1L));
 
         InOrder orden = inOrder(eventoRepository, invitacionRepository);
         orden.verify(eventoRepository).desvincularInvitacion(20L);
@@ -211,37 +236,26 @@ class InvitacionServiceImplTest {
     }
 
     @Test
-    @DisplayName("un residente no puede eliminar la invitacion de otra casa")
-    void noEliminaLaDeOtraCasa() {
-        GdCasa ajena = new GdCasa();
-        ajena.setId(99L);
-        GdInvitacion invitacion = invitacionVigente();
-        invitacion.setId(21L);
-        invitacion.setCasa(ajena);
-        when(invitacionRepository.findById(21L)).thenReturn(Optional.of(invitacion));
-
-        assertThatThrownBy(() -> servicio.eliminar(21L, anfitrion))
-                .isInstanceOf(GuardianException.class);
-
-        verify(invitacionRepository, never()).delete(any());
-    }
-
-    @Test
-    @DisplayName("el administrador no elimina invitaciones de otra sede")
-    void adminNoEliminaDeOtraSede() {
+    @DisplayName("ni el super administrador elimina invitaciones de otra sede")
+    void noEliminaDeOtraSede() {
         // El filtro por conjunto es lo unico que separa una sede de otra
-        // cuando el super administrador entra a una: sin el, un id adivinado
-        // borraria en la sede equivocada.
-        UsuarioAutenticado admin = new UsuarioAutenticado(2L, 60L, 7L, "1074", "Admin", "ADMIN");
+        // mientras esta adentro: sin el, un id adivinado borraria en la sede
+        // equivocada.
         GdInvitacion invitacion = invitacionVigente();
         invitacion.setId(22L);
         invitacion.setConjuntoId(1L);
         when(invitacionRepository.findById(22L)).thenReturn(Optional.of(invitacion));
 
-        assertThatThrownBy(() -> servicio.eliminarComoAdmin(22L, admin))
+        assertThatThrownBy(() -> servicio.eliminarComoSuperAdmin(22L, superAdmin(7L)))
                 .isInstanceOf(GuardianException.class);
 
         verify(invitacionRepository, never()).delete(any());
+    }
+
+    /** Operador de la plataforma, ya metido en la sede indicada. */
+    private UsuarioAutenticado superAdmin(Long conjuntoId) {
+        return new UsuarioAutenticado(9L, 90L, conjuntoId, "SUPERADMIN", "Plataforma",
+                Codigos.ROL_SUPER_ADMIN);
     }
 
     // ── Pagina publica ───────────────────────────────────────────────────────

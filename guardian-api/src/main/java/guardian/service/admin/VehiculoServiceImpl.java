@@ -10,6 +10,7 @@ import guardian.exception.GuardianException;
 import guardian.repository.GdAccesoEventoRepository;
 import guardian.repository.GdCasaRepository;
 import guardian.repository.GdVehiculoRepository;
+import guardian.security.Autoridad;
 import guardian.security.UsuarioAutenticado;
 import guardian.util.CatalogoVehiculo;
 import lombok.RequiredArgsConstructor;
@@ -124,6 +125,8 @@ public class VehiculoServiceImpl implements VehiculoService {
     @Override
     @Transactional
     public void eliminar(Long id, UsuarioAutenticado ejecutor) {
+        Autoridad.exigirSuperAdmin(ejecutor);
+
         GdVehiculo vehiculo = obtener(id, ejecutor.getConjuntoId());
 
         eventoRepository.desvincularVehiculo(id);

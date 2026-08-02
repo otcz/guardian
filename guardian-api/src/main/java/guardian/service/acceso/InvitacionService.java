@@ -17,31 +17,34 @@ public interface InvitacionService {
     /** Invitaciones de MI casa — las ve cualquier residente de ella. */
     List<InvitacionResponse> listarDeMiCasa(UsuarioAutenticado usuario);
 
-    /** Revocacion por un residente de la casa. */
-    InvitacionResponse revocar(Long id, UsuarioAutenticado usuario);
-
     /**
-     * Borra la invitacion de la lista del residente.
+     * Revocacion por un residente de la casa.
      *
-     * <p>Distinto de revocar. Revocar mata el codigo y deja la fila a la vista
-     * con su estado; eliminar la saca de la lista. Despues de un mes invitando
-     * gente, la pantalla del residente son cuarenta filas vencidas y encontrar
-     * la de hoy cuesta mas que crear una nueva.</p>
-     *
-     * <p>Lo que no se borra es la bitacora: los ingresos que esa invitacion
-     * permitio son del conjunto, no del residente. Los eventos se desvinculan y
-     * conservan el nombre y el documento del invitado, que ya venian
-     * denormalizados justamente para esto.</p>
+     * <p>Es lo unico que puede hacer: la fila se queda con su estado a la
+     * vista. Borrarla es del super administrador — ver
+     * {@link #eliminarComoSuperAdmin}.</p>
      */
-    void eliminar(Long id, UsuarioAutenticado usuario);
+    InvitacionResponse revocar(Long id, UsuarioAutenticado usuario);
 
     /** Todas las del conjunto — panel del administrador. */
     List<InvitacionResponse> listarDelConjunto(Long conjuntoId);
 
     InvitacionResponse revocarComoAdmin(Long id, UsuarioAutenticado admin);
 
-    /** Mismo borrado, sobre cualquier invitacion de la sede. */
-    void eliminarComoAdmin(Long id, UsuarioAutenticado admin);
+    /**
+     * Borrado fisico. Solo el super administrador.
+     *
+     * <p>Que una invitacion desaparezca es un hueco en la auditoria: alguien
+     * pudo entrar al conjunto por un codigo del que despues no queda registro
+     * de quien lo emitio. Por eso el residente y el administrador solo revocan
+     * —el estado queda a la vista— y borrar es del operador de la plataforma,
+     * que no tiene interes en la disputa que ese registro pueda resolver.</p>
+     *
+     * <p>La bitacora nunca se va con el: los eventos se desvinculan y conservan
+     * el nombre y el documento del invitado, que ya venian denormalizados
+     * justamente para esto.</p>
+     */
+    void eliminarComoSuperAdmin(Long id, UsuarioAutenticado ejecutor);
 
     /** Datos para la pagina publica que abre el invitado desde el link. */
     InvitacionPublicaResponse publica(String codigoPublico);

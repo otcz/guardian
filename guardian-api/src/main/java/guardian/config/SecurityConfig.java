@@ -88,6 +88,24 @@ public class SecurityConfig {
                 .antMatchers(ApiEndpoint.RESIDENTE + "/**")
                 .hasAnyRole(Codigos.ROL_ADMIN, Codigos.ROL_GUARDIA, Codigos.ROL_RESIDENTE)
 
+                // Borrar es del operador de la plataforma y de nadie mas. El
+                // administrador de la sede desactiva, bloquea y revoca — todo
+                // eso deja rastro. Borrar no: la fila que explicaba un ingreso,
+                // una cuenta o un vehiculo desaparece, y quien la borra suele
+                // ser parte de la disputa que ese registro resolveria.
+                //
+                // El `*` no cruza barras, asi que esto NO alcanza a
+                // /personas/{id}/credencial —revocar, que si es del admin— ni a
+                // /bloqueos/**, que usa DELETE para levantar un bloqueo.
+                //
+                // Los services lo exigen ademas por su cuenta: esta linea da un
+                // 403 seco y el service da el mensaje que explica que hacer.
+                .antMatchers(HttpMethod.DELETE,
+                        ApiEndpoint.ADMIN_PERSONAS + "/*",
+                        ApiEndpoint.ADMIN_VEHICULOS + "/*",
+                        ApiEndpoint.ADMIN_INVITACIONES + "/*")
+                .hasRole(Codigos.ROL_SUPER_ADMIN)
+
                 // El back-office lo usa tambien el super administrador cuando
                 // entra a una sede: su token lleva la sede y todo lo de abajo
                 // sigue filtrando por ella sin cambiar una sola firma.

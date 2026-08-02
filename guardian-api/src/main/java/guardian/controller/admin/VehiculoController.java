@@ -63,7 +63,7 @@ public class VehiculoController {
         return ResponseEntity.ok(vehiculoService.cambiarEstado(id, false, usuarioActual.obtener()));
     }
 
-    /** Eliminacion fisica. Los residentes solo inactivan; esto es exclusivo del admin. */
+    /** Eliminacion fisica. Solo el super administrador: ver Autoridad.exigirSuperAdmin. */
     @DeleteMapping(ApiEndpoint.POR_ID)
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         vehiculoService.eliminar(id, usuarioActual.obtener());

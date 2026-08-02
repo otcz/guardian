@@ -14,6 +14,7 @@ import guardian.repository.GdAccesoEventoRepository;
 import guardian.repository.GdInvitacionRepository;
 import guardian.repository.GdPersonaRepository;
 import guardian.repository.GdResidenteCasaRepository;
+import guardian.security.Autoridad;
 import guardian.security.UsuarioAutenticado;
 import guardian.util.HmacUtil;
 import lombok.RequiredArgsConstructor;
@@ -153,18 +154,6 @@ public class InvitacionServiceImpl implements InvitacionService {
         return revocarInterno(invitacion, usuario.getDocumento());
     }
 
-    @Override
-    @Transactional
-    public void eliminar(Long id, UsuarioAutenticado usuario) {
-        GdInvitacion invitacion = invitacionRepository.findById(id)
-                .orElseThrow(() -> GuardianException.noEncontrado(MensajesGlobales.NO_ENCONTRADO));
-
-        if (!invitacion.getCasa().getId().equals(miCasa(usuario).getId())) {
-            throw GuardianException.sinPermiso(MensajesGlobales.FAMILIAR_AJENO);
-        }
-        eliminarInterno(invitacion, usuario.getDocumento());
-    }
-
     // ── Administrador ────────────────────────────────────────────────────────
 
     @Override
@@ -188,12 +177,14 @@ public class InvitacionServiceImpl implements InvitacionService {
 
     @Override
     @Transactional
-    public void eliminarComoAdmin(Long id, UsuarioAutenticado admin) {
+    public void eliminarComoSuperAdmin(Long id, UsuarioAutenticado ejecutor) {
+        Autoridad.exigirSuperAdmin(ejecutor);
+
         GdInvitacion invitacion = invitacionRepository.findById(id)
-                .filter(i -> i.getConjuntoId().equals(admin.getConjuntoId()))
+                .filter(i -> i.getConjuntoId().equals(ejecutor.getConjuntoId()))
                 .orElseThrow(() -> GuardianException.noEncontrado(MensajesGlobales.NO_ENCONTRADO));
 
-        eliminarInterno(invitacion, admin.getDocumento());
+        eliminarInterno(invitacion, ejecutor.getDocumento());
     }
 
     // ── Invitado (publico) y porteria ────────────────────────────────────────
