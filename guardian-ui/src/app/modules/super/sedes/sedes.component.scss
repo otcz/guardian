@@ -175,35 +175,90 @@ main {
   }
 }
 
-/* ── Hoja del administrador ─────────────────────────────────────────────── */
+/* ── Diálogo del administrador ──────────────────────────────────────────── */
 
-.alta-admin {
+.formulario {
   display: flex;
   flex-direction: column;
+  gap: var(--e-5);
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+/* Agrupar rompe la lista plana de cinco campos iguales: identificación es
+   obligatorio, contacto no, y el ojo lo distingue antes de leer. */
+.grupo-titulo {
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* flex-wrap y no columnas fijas: en el diálogo ancho caben dos por fila y en
+   el móvil se apilan solas, sin una consulta de medios por medio. */
+.campos {
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--e-3);
 
   .campo {
-    flex: 1 1 auto;
+    flex: 1 1 200px;
+    min-width: 0;
+  }
+
+  /* El documento manda: es la identidad y además la credencial. */
+  .campo--ancho {
+    flex: 1 1 100%;
   }
 }
 
-[pie] {
+/* Lo que va a quedar creado, con el dato real ya escrito. */
+.credencial {
   display: flex;
-  gap: var(--e-2);
+  align-items: flex-start;
+  gap: var(--e-3);
+  padding: var(--e-3);
+  background: var(--bg-soft);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-md);
 
-  button {
-    flex: 1 1 0;
+  > i {
+    color: var(--accent);
+    margin-top: 2px;
   }
 
-  .alterno {
-    min-height: var(--tactil);
-    font-size: var(--t-md);
-    font-weight: 600;
+  .detalle {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .linea {
+    font-size: var(--t-sm);
+    color: var(--text-default);
+  }
+
+  code {
+    padding: 1px 6px;
+    font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+    font-size: var(--t-sm);
+    font-weight: 700;
     color: var(--text-strong);
-    background: none;
+    background: var(--bg-surface);
     border: 1px solid var(--border-default);
     border-radius: var(--r-sm);
-    cursor: pointer;
+    word-break: break-all;
+  }
+
+  .nota {
+    font-size: var(--t-xs);
+    color: var(--text-muted);
   }
 }
 

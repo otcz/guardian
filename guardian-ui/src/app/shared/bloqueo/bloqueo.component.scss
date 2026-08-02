@@ -22,28 +22,8 @@
   }
 }
 
-[pie] {
-  display: flex;
-  gap: var(--e-2);
-
-  button {
-    flex: 1 1 0;
-  }
-
-  .alterno {
-    min-height: var(--tactil);
-    font-size: var(--t-md);
-    font-weight: 600;
-    color: var(--text-strong);
-    background: none;
-    border: 1px solid var(--border-default);
-    border-radius: var(--r-sm);
-    cursor: pointer;
-  }
-
-  /* Rojo y no azul: bloquear le quita el ingreso a alguien que hoy lo tiene.
-     Con el color de "guardar", se confirma sin leer. */
-  .principal.peligro {
-    background: var(--deny);
-  }
+/* Rojo y no azul: bloquear le quita el ingreso a alguien que hoy lo tiene.
+   Con el color de "guardar", se confirma sin leer. */
+[pie] .principal.peligro {
+  background: var(--deny);
 }

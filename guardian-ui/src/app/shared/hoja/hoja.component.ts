@@ -36,6 +36,9 @@ export class HojaComponent implements OnChanges, OnDestroy {
   @Input() abierta = false;
   @Input() titulo = '';
 
+  /** Contexto bajo el título: la sede, la casa, a quién pertenece lo que se edita. */
+  @Input() subtitulo = '';
+
   @Output() cerrar = new EventEmitter<void>();
 
   /** Nivel de apilamiento de ESTA hoja, para que dos superpuestas no empaten. */
@@ -120,7 +123,13 @@ export class HojaComponent implements OnChanges, OnDestroy {
 
     this.focoPrevio = document.activeElement as HTMLElement | null;
     // Tras el render: el contenido proyectado todavía no existe en ngOnChanges.
-    setTimeout(() => this.focoables()[0]?.focus());
+    // El primero SIN data-no-autofoco: la X del encabezado es focoable para el
+    // tabulador, pero abrir un formulario con el foco en "cerrar" no sirve.
+    setTimeout(() => {
+      const candidatos = this.focoables();
+      const destino = candidatos.find(el => !el.hasAttribute('data-no-autofoco'));
+      (destino ?? candidatos[0])?.focus();
+    });
   }
 
   private liberar(): void {

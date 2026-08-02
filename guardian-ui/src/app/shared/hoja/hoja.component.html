@@ -7,10 +7,26 @@
          aria-modal="true"
          [attr.aria-label]="titulo"
          [style.z-index]="'calc(var(--z-hoja) + ' + (nivel + 1) + ')'">
-  <!-- El tirador dice "esto se cierra arrastrando" sin una sola palabra. -->
+  <!-- El tirador dice "esto se cierra arrastrando" sin una sola palabra.
+       En escritorio no aplica: ahí no se arrastra, se hace clic fuera. -->
   <div class="tirador"></div>
 
-  <h2 class="titulo" *ngIf="titulo">{{ titulo }}</h2>
+  <header class="encabezado" *ngIf="titulo">
+    <div class="textos">
+      <h2 class="titulo">{{ titulo }}</h2>
+      <!-- El contexto va en su propia línea y no dentro del título: en el
+           back-office los títulos como "Administrador de SANTA BARBARA"
+           crecen con el nombre y terminan cortados o en dos renglones. -->
+      <p class="subtitulo" *ngIf="subtitulo">{{ subtitulo }}</p>
+    </div>
+
+    <!-- data-no-autofoco: sin esto el foco al abrir cae en la X en vez del
+         primer campo, y quien escribe a teclado empieza en el botón de salir. -->
+    <button type="button" class="cerrar" data-no-autofoco
+            (click)="cerrar.emit()" aria-label="Cerrar">
+      <i class="pi pi-times"></i>
+    </button>
+  </header>
 
   <div class="cuerpo">
     <ng-content></ng-content>

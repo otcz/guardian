@@ -225,6 +225,11 @@ export class SedesComponent implements OnInit {
     return sede.activo === 'S';
   }
 
+  /** Documento en vivo, para previsualizar la credencial que se va a crear. */
+  get documentoAdmin(): string {
+    return this.formularioAdmin.controls.documento.value.trim().toUpperCase();
+  }
+
   get tituloFormulario(): string {
     return this.editando ? 'Editar sede' : 'Nueva sede';
   }

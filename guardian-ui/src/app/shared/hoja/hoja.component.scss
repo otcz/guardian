@@ -46,10 +46,57 @@
   border-radius: var(--r-full);
 }
 
+.encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--e-3);
+  flex: 0 0 auto;
+  margin-bottom: var(--e-4);
+
+  .textos {
+    min-width: 0;
+  }
+}
+
 .titulo {
-  margin: 0 0 var(--e-3);
+  margin: 0;
   font-size: var(--t-lg);
   font-weight: 700;
+  line-height: 1.25;
+}
+
+.subtitulo {
+  margin: 2px 0 0;
+  font-size: var(--t-sm);
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Afordancia de escritorio: en el móvil se cierra arrastrando o tocando
+   fuera, y una X ahí solo compite con el pulgar. */
+.cerrar {
+  display: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  margin: -4px -4px 0 0;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background var(--transicion), color var(--transicion);
+
+  @media (hover: hover) {
+    &:hover {
+      color: var(--text-strong);
+      background: var(--bg-soft);
+    }
+  }
 }
 
 .cuerpo {
@@ -71,5 +118,54 @@
 
   &:empty {
     display: none;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Escritorio: diálogo centrado, no hoja.
+
+   Este @media es del CASCARÓN, no de un layout interno — la misma excepción
+   que ya hace admin-layout. Una hoja que sube desde abajo es gramática de
+   móvil; en un back-office con ratón, un formulario anclado al borde
+   inferior de un monitor de 27" obliga a bajar la vista para escribir.
+   El mismo componente, la presentación que corresponde a cada entorno.
+   ───────────────────────────────────────────────────────────────────────── */
+@media (min-width: 821px) {
+  .hoja {
+    /* Centrado por margin auto entre los cuatro insets, NO por translate:
+       el transform se lo queda la animación de entrada. */
+    inset: 0;
+    margin: auto;
+    height: fit-content;
+    max-width: 560px;
+    max-height: 85dvh;
+    padding: var(--e-5);
+    border-radius: var(--r-lg);
+    animation: gd-entrada-modal var(--dur-media) var(--curva-estandar);
+  }
+
+  .tirador {
+    display: none;
+  }
+
+  .cerrar {
+    display: grid;
+  }
+
+  .pie {
+    padding-top: var(--e-5);
+  }
+}
+
+/* Escala apenas perceptible: da la sensación de que el diálogo "aparece
+   encima" sin el rebote de un modal animado de más. */
+@keyframes gd-entrada-modal {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }

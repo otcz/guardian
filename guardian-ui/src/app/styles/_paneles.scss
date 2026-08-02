@@ -90,6 +90,56 @@
   }
 }
 
+/* Botón secundario de un diálogo: mismo peso y altura que el principal, pero
+   sin relleno — cancelar no compite con confirmar. */
+.alterno {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tactil);
+  padding: 0 1.1rem;
+  font-size: var(--t-md);
+  font-weight: 600;
+  color: var(--text-strong);
+  background: none;
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  white-space: nowrap;
+
+  @media (hover: hover) {
+    &:hover {
+      background: var(--bg-soft);
+    }
+  }
+}
+
+/* Pie de un gd-hoja.
+
+   En el móvil los botones ocupan todo el ancho porque se tocan con el pulgar;
+   en el diálogo de escritorio se agrupan a la derecha con su ancho natural,
+   que es donde el ojo busca las acciones de un cuadro modal. Un "Cancelar"
+   estirado a media pantalla en un monitor pesa lo mismo que el "Guardar", y
+   no debería. */
+[pie] {
+  display: flex;
+  gap: var(--e-2);
+  width: 100%;
+
+  button {
+    flex: 1 1 0;
+  }
+
+  @media (min-width: 821px) {
+    justify-content: flex-end;
+
+    button {
+      flex: 0 0 auto;
+      padding-inline: var(--e-5);
+    }
+  }
+}
+
 .tabla {
   width: 100%;
   border-collapse: collapse;
