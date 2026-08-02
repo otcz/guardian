@@ -74,6 +74,13 @@ services:
       GUARDIAN_SUPER_ADMIN_DOCUMENTO: ${GUARDIAN_SUPER_ADMIN_DOCUMENTO:-SUPERADMIN}
       GUARDIAN_SUPER_ADMIN_CLAVE: ${GUARDIAN_SUPER_ADMIN_CLAVE:-2306}
 
+      # La aplicacion fija esta zona ANTES de arrancar Spring. Las columnas de
+      # fecha guardan hora de PARED, no el instante: si el proceso corriera en
+      # UTC, lo ya guardado se leeria cinco horas corrido. TZ ademas alinea la
+      # hora de los logs del contenedor con la de la aplicacion.
+      GUARDIAN_ZONA_HORARIA: ${GUARDIAN_ZONA_HORARIA:-America/Bogota}
+      TZ: ${GUARDIAN_ZONA_HORARIA:-America/Bogota}
+
       # Correo: unico canal de recuperacion de clave. SIN configurar, el
       # sistema arranca igual y el codigo se escribe en el log en vez de
       # enviarse — el flujo se prueba completo sin una cuenta SMTP.
