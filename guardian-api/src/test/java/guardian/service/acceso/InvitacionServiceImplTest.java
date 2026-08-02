@@ -10,6 +10,7 @@ import guardian.entity.conjunto.GdConjunto;
 import guardian.entity.persona.GdPersona;
 import guardian.entity.persona.GdResidenteCasa;
 import guardian.exception.GuardianException;
+import guardian.repository.GdAccesoEventoRepository;
 import guardian.repository.GdInvitacionRepository;
 import guardian.repository.GdPersonaRepository;
 import guardian.repository.GdResidenteCasaRepository;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -33,7 +35,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -50,6 +55,7 @@ class InvitacionServiceImplTest {
     @Mock private GdInvitacionRepository invitacionRepository;
     @Mock private GdResidenteCasaRepository residenteCasaRepository;
     @Mock private GdPersonaRepository personaRepository;
+    @Mock private GdAccesoEventoRepository eventoRepository;
 
     @InjectMocks
     private InvitacionServiceImpl servicio;
@@ -183,6 +189,59 @@ class InvitacionServiceImplTest {
 
         assertThat(servicio.resolver("GRD1.codigo-x.firma")).isEmpty();
         assertThat(servicio.resolver(null)).isEmpty();
+    }
+
+    // ── Eliminar ─────────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("eliminar desvincula la bitacora antes de borrar, no la borra")
+    void eliminarConservaLaBitacora() {
+        // Los ingresos que esa invitacion permitio son del conjunto, no del
+        // residente. El evento guarda nombre y documento del invitado copiados
+        // encima, asi que sobrevive perfectamente sin la fila.
+        GdInvitacion invitacion = invitacionVigente();
+        invitacion.setId(20L);
+        when(invitacionRepository.findById(20L)).thenReturn(Optional.of(invitacion));
+
+        servicio.eliminar(20L, anfitrion);
+
+        InOrder orden = inOrder(eventoRepository, invitacionRepository);
+        orden.verify(eventoRepository).desvincularInvitacion(20L);
+        orden.verify(invitacionRepository).delete(invitacion);
+    }
+
+    @Test
+    @DisplayName("un residente no puede eliminar la invitacion de otra casa")
+    void noEliminaLaDeOtraCasa() {
+        GdCasa ajena = new GdCasa();
+        ajena.setId(99L);
+        GdInvitacion invitacion = invitacionVigente();
+        invitacion.setId(21L);
+        invitacion.setCasa(ajena);
+        when(invitacionRepository.findById(21L)).thenReturn(Optional.of(invitacion));
+
+        assertThatThrownBy(() -> servicio.eliminar(21L, anfitrion))
+                .isInstanceOf(GuardianException.class);
+
+        verify(invitacionRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("el administrador no elimina invitaciones de otra sede")
+    void adminNoEliminaDeOtraSede() {
+        // El filtro por conjunto es lo unico que separa una sede de otra
+        // cuando el super administrador entra a una: sin el, un id adivinado
+        // borraria en la sede equivocada.
+        UsuarioAutenticado admin = new UsuarioAutenticado(2L, 60L, 7L, "1074", "Admin", "ADMIN");
+        GdInvitacion invitacion = invitacionVigente();
+        invitacion.setId(22L);
+        invitacion.setConjuntoId(1L);
+        when(invitacionRepository.findById(22L)).thenReturn(Optional.of(invitacion));
+
+        assertThatThrownBy(() -> servicio.eliminarComoAdmin(22L, admin))
+                .isInstanceOf(GuardianException.class);
+
+        verify(invitacionRepository, never()).delete(any());
     }
 
     // ── Pagina publica ───────────────────────────────────────────────────────

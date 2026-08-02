@@ -1,1 +1,13 @@
 @use '../../../styles/paneles';
+
+/* Confirmación de que el link quedó en el portapapeles. _paneles trae la
+   variante de error, no la de éxito: esta pantalla es la primera que la
+   necesita. */
+.aviso-ok {
+  margin-bottom: var(--e-3);
+  padding: var(--e-3);
+  font-size: var(--t-sm);
+  color: var(--ok);
+  background: var(--ok-soft);
+  border-radius: var(--r-md);
+}

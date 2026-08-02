@@ -5,8 +5,12 @@ import { AdminService } from '../../../core/services/admin.service';
 import { EstadoInvitacion, Invitacion } from '../../../core/models/acceso.model';
 
 /**
- * Todas las invitaciones del conjunto. El administrador puede revocar
- * cualquiera — es su palanca ante un QR de invitado que circula de más.
+ * Todas las invitaciones del conjunto.
+ *
+ * <p>Las mismas tres acciones que tiene el residente sobre las suyas, porque
+ * la administración es quien atiende cuando el residente no está: copiar el
+ * link, revocar —su palanca ante un QR que circula de más— y eliminar. La
+ * bitácora no se toca con ninguna.</p>
  */
 @Component({
   selector: 'gd-admin-invitaciones',
@@ -19,6 +23,7 @@ export class InvitacionesComponent implements OnInit {
   invitaciones: Invitacion[] = [];
   cargando = true;
   error: string | null = null;
+  aviso: string | null = null;
 
   constructor(private readonly admin: AdminService) {}
 
@@ -57,6 +62,37 @@ export class InvitacionesComponent implements OnInit {
       error: (fallo: HttpErrorResponse) => {
         this.error = fallo.error?.mensaje ?? 'No pudimos revocar la invitación.';
       }
+    });
+  }
+
+  eliminar(invitacion: Invitacion): void {
+    const seguro = window.confirm(
+      `¿Eliminar la invitación de ${invitacion.nombreInvitado} `
+      + `(casa ${invitacion.casaIdentificador})? La bitácora conservará los `
+      + 'ingresos que permitió.');
+    if (!seguro) {
+      return;
+    }
+
+    this.error = null;
+    this.admin.eliminarInvitacion(invitacion.id).subscribe({
+      next: () => this.cargar(),
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos eliminar la invitación.';
+      }
+    });
+  }
+
+  /**
+   * El administrador no tiene el teléfono del invitado, así que no hay nada
+   * que "compartir": copia el link para pegarlo donde haga falta. Por eso el
+   * botón dice copiar y no usa el diálogo del sistema.
+   */
+  compartir(invitacion: Invitacion): void {
+    const link = `${location.origin}/invitado/${invitacion.codigoPublico}`;
+    navigator.clipboard.writeText(link).then(() => {
+      this.aviso = `Link de ${invitacion.nombreInvitado} copiado.`;
+      setTimeout(() => (this.aviso = null), 4000);
     });
   }
 

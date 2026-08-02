@@ -86,4 +86,9 @@ export class ResidenteService {
   revocarInvitacion(id: number): Observable<Invitacion> {
     return this.http.patch<Invitacion>(`${this.base}/invitaciones/${id}/revocar`, {});
   }
+
+  /** La saca de la lista. La bitácora conserva los ingresos que permitió. */
+  eliminarInvitacion(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/invitaciones/${id}`);
+  }
 }

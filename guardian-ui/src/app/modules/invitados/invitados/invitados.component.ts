@@ -1,13 +1,22 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 import { ResidenteService } from '../../../core/services/residente.service';
 import { EstadoInvitacion, Invitacion } from '../../../core/models/acceso.model';
 
+/** Las dos acciones sin vuelta atrás sobre una invitación. */
+type AccionDestructiva = 'revocar' | 'eliminar';
+
 /**
- * Invitaciones de mi casa: QR de un solo uso (o pocos usos) que se comparte
- * por link. Solo revocar — el historial de ingresos pertenece al conjunto.
+ * Invitaciones de mi casa: QR de pocos usos que se comparte por link.
+ *
+ * <p>Tres acciones sobre cada una. Compartir es la del 90% de las veces.
+ * Revocar mata el código de inmediato y deja la fila a la vista. Eliminar la
+ * saca de la lista, que después de un mes invitando gente son cuarenta filas
+ * vencidas y encontrar la de hoy cuesta más que crear una nueva. El historial
+ * de ingresos no se va con ninguna de las dos: pertenece al conjunto.</p>
  */
 @Component({
   selector: 'gd-invitados',
@@ -31,8 +40,11 @@ export class InvitadosComponent implements OnInit {
   /** Invitación cuyo QR está desplegado en pantalla. */
   qrAbierto: Invitacion | null = null;
 
-  /** Invitación pendiente de confirmar su revocación. */
-  invitacionARevocar: Invitacion | null = null;
+  /**
+   * Lo que está pendiente de confirmar. Una sola hoja para las dos acciones
+   * destructivas: son el mismo gesto y el mismo riesgo, cambia el texto.
+   */
+  confirmacion: { invitacion: Invitacion; accion: AccionDestructiva } | null = null;
 
   /** Piso del selector de fecha: una visita no puede agendarse en el pasado. */
   readonly hoy = this.hoyIso();
@@ -123,30 +135,61 @@ export class InvitadosComponent implements OnInit {
       });
   }
 
+  // ── Revocar y eliminar ───────────────────────────────────────────────────
+
   revocar(invitacion: Invitacion): void {
-    this.invitacionARevocar = invitacion;
+    this.confirmacion = { invitacion, accion: 'revocar' };
   }
 
-  confirmarRevocar(): void {
-    const invitacion = this.invitacionARevocar;
-    if (!invitacion) {
+  eliminar(invitacion: Invitacion): void {
+    this.confirmacion = { invitacion, accion: 'eliminar' };
+  }
+
+  confirmar(): void {
+    const pendiente = this.confirmacion;
+    if (!pendiente) {
       return;
     }
 
     this.error = null;
-    this.residente.revocarInvitacion(invitacion.id).subscribe({
+    // `unknown` y no la unión de los dos tipos de respuesta: revocar devuelve
+    // la invitación y eliminar no devuelve nada, y aquí no se usa ninguno de
+    // los dos — después de cualquiera de las dos se recarga la lista.
+    const peticion: Observable<unknown> = pendiente.accion === 'revocar'
+      ? this.residente.revocarInvitacion(pendiente.invitacion.id)
+      : this.residente.eliminarInvitacion(pendiente.invitacion.id);
+
+    peticion.subscribe({
       next: () => {
         // Las dos hojas se cierran: la de confirmar porque terminó, y la del
         // código porque muestra un QR que acaba de morir.
-        this.invitacionARevocar = null;
+        this.confirmacion = null;
         this.qrAbierto = null;
         this.cargar();
       },
       error: (fallo: HttpErrorResponse) => {
-        this.invitacionARevocar = null;
-        this.error = fallo.error?.mensaje ?? 'No pudimos revocar la invitación.';
+        const accion = pendiente.accion === 'revocar' ? 'revocar' : 'eliminar';
+        this.confirmacion = null;
+        this.error = fallo.error?.mensaje ?? `No pudimos ${accion} la invitación.`;
       }
     });
+  }
+
+  get tituloConfirmacion(): string {
+    return this.confirmacion?.invitacion.nombreInvitado ?? '';
+  }
+
+  /** El aviso dice qué se pierde, que es lo único que hay que decidir. */
+  get avisoConfirmacion(): string {
+    if (this.confirmacion?.accion === 'revocar') {
+      return 'El código dejará de servir de inmediato.';
+    }
+    return 'La invitación sale de tu lista. Los ingresos que ya permitió quedan '
+      + 'en el registro del conjunto.';
+  }
+
+  get botonConfirmacion(): string {
+    return this.confirmacion?.accion === 'revocar' ? 'Revocar invitación' : 'Eliminar invitación';
   }
 
   // ── Compartir ────────────────────────────────────────────────────────────

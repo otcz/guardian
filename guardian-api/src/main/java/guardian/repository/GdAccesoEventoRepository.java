@@ -102,6 +102,10 @@ public interface GdAccesoEventoRepository
             + "(SELECT i.id FROM GdInvitacion i WHERE i.anfitrion.id = :personaId)")
     int desvincularInvitacionesDeAnfitrion(@Param("personaId") Long personaId);
 
+    @Modifying
+    @Query("UPDATE GdAccesoEvento e SET e.invitacion = null WHERE e.invitacion.id = :invitacionId")
+    int desvincularInvitacion(@Param("invitacionId") Long invitacionId);
+
     // La busqueda con filtros opcionales vive en
     // guardian.repository.spec.AccesoEventoSpecs — ver ahi por que no es un @Query.
 }

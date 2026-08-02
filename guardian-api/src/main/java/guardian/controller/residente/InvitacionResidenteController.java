@@ -8,6 +8,7 @@ import guardian.service.acceso.InvitacionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,8 +21,13 @@ import javax.validation.Valid;
 import java.util.List;
 
 /**
- * Invitaciones de MI casa. No hay eliminar: una invitacion comprometida se
- * revoca, y el historial de sus ingresos queda en la bitacora.
+ * Invitaciones de MI casa.
+ *
+ * <p>Revocar y eliminar no son lo mismo y las dos hacen falta. Revocar mata el
+ * codigo de inmediato —es la palanca para un QR que circula de mas— y deja la
+ * fila a la vista. Eliminar la saca de la lista, que despues de un mes
+ * invitando gente son cuarenta filas vencidas. La bitacora no se toca en
+ * ninguno de los dos casos.</p>
  */
 @RestController
 @RequestMapping(ApiEndpoint.RESIDENTE + ApiEndpoint.RESIDENTE_INVITACIONES)
@@ -46,5 +52,11 @@ public class InvitacionResidenteController {
     @PatchMapping("/{id}/revocar")
     public ResponseEntity<InvitacionResponse> revocar(@PathVariable Long id) {
         return ResponseEntity.ok(invitacionService.revocar(id, usuarioActual.obtener()));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        invitacionService.eliminar(id, usuarioActual.obtener());
+        return ResponseEntity.noContent().build();
     }
 }

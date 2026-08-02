@@ -174,6 +174,11 @@ export class AdminService {
     return this.http.patch<Invitacion>(`${this.base}/invitaciones/${id}/revocar`, {});
   }
 
+  /** La saca de la lista. La bitácora conserva los ingresos que permitió. */
+  eliminarInvitacion(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/invitaciones/${id}`);
+  }
+
   // ── Catálogo ─────────────────────────────────────────────────────────────
 
   parametros(grupo: string): Observable<Parametro[]> {

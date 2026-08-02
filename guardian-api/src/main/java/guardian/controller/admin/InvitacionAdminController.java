@@ -6,6 +6,7 @@ import guardian.security.UsuarioActual;
 import guardian.service.acceso.InvitacionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,5 +31,11 @@ public class InvitacionAdminController {
     @PatchMapping("/{id}/revocar")
     public ResponseEntity<InvitacionResponse> revocar(@PathVariable Long id) {
         return ResponseEntity.ok(invitacionService.revocarComoAdmin(id, usuarioActual.obtener()));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        invitacionService.eliminarComoAdmin(id, usuarioActual.obtener());
+        return ResponseEntity.noContent().build();
     }
 }

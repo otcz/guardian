@@ -7,6 +7,7 @@
     </button>
   </div>
 
+  <div class="aviso-ok" *ngIf="aviso">{{ aviso }}</div>
   <div class="aviso-error" *ngIf="error">{{ error }}</div>
   <p class="gd-muted" *ngIf="cargando">Cargando…</p>
 
@@ -41,11 +42,24 @@
             {{ etiquetaEstado(invitacion.estado) }}
           </span>
         </td>
-        <td class="derecha">
+        <td class="derecha acciones">
+          <button type="button" class="accion" *ngIf="revocable(invitacion)"
+                  (click)="compartir(invitacion)"
+                  [attr.aria-label]="'Copiar el link de ' + invitacion.nombreInvitado"
+                  pTooltip="Copiar link" tooltipPosition="left">
+            <i class="pi pi-share-alt"></i>
+          </button>
           <button type="button" class="accion peligro" *ngIf="revocable(invitacion)"
                   (click)="revocar(invitacion)"
+                  [attr.aria-label]="'Revocar la invitación de ' + invitacion.nombreInvitado"
                   pTooltip="Revocar" tooltipPosition="left">
             <i class="pi pi-ban"></i>
+          </button>
+          <button type="button" class="accion peligro"
+                  (click)="eliminar(invitacion)"
+                  [attr.aria-label]="'Eliminar la invitación de ' + invitacion.nombreInvitado"
+                  pTooltip="Eliminar" tooltipPosition="left">
+            <i class="pi pi-trash"></i>
           </button>
         </td>
       </tr>

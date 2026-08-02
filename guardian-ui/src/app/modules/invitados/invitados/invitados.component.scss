@@ -200,6 +200,30 @@
   line-height: 0;
 }
 
+/* El sustituto del QR cuando ya no sirve. Ocupa el mismo lugar y el mismo
+   tamaño: si la caja se encogiera, el panel saltaría al abrir una vencida. */
+.qr-cuadro.apagado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-2);
+  width: 214px;
+  height: 214px;
+  line-height: normal;
+  color: var(--text-muted);
+  background: var(--bg-soft);
+
+  i {
+    font-size: 2.4rem;
+  }
+
+  span {
+    font-size: var(--t-sm);
+    font-weight: 600;
+  }
+}
+
 .qr-nombre {
   margin-top: var(--e-2);
   font-size: var(--t-lg);
