@@ -143,17 +143,27 @@ public class AccesoServiceImpl implements AccesoService {
                 credencialQrService.resolver(request.getPayload());
 
         if (!credencialResuelta.isPresent()) {
-            GdInvitacion invitacion = invitacionService.resolver(request.getPayload())
-                    .orElseThrow(() -> GuardianException.solicitudInvalida(
-                            MensajesGlobales.QR_NO_RECONOCIDO));
-            return accesoInvitadoService.registrar(invitacion, request, guardia);
+            Optional<GdInvitacion> invitacion = invitacionService.resolver(request.getPayload());
+            if (invitacion.isPresent()) {
+                return accesoInvitadoService.registrar(invitacion.get(), request, guardia);
+            }
+            // Antes lanzaba y no dejaba rastro. Un QR falsificado insistiendo en
+            // la porteria es exactamente lo que hay que poder mirar despues, y
+            // verificar ya lo registraba: registrar no tenia por que ser la
+            // puerta silenciosa de las dos.
+            return fabrica.mapear(registrarDenegacion(null, null,
+                    Codigos.MOTIVO_FIRMA_INVALIDA, guardia, request));
         }
 
         GdCredencialQr credencial = credencialResuelta.get();
         GdPersona persona = credencial.getPersona();
 
         if (deOtroConjunto(persona, guardia)) {
-            throw GuardianException.solicitudInvalida(MensajesGlobales.QR_NO_RECONOCIDO);
+            // Para esta porteria el codigo no existe, pero el intento si: que
+            // un QR de otra sede aparezca aca es justo lo que el operador de la
+            // plataforma necesita ver.
+            return fabrica.mapear(registrarDenegacion(null, null,
+                    Codigos.MOTIVO_FIRMA_INVALIDA, guardia, request));
         }
 
         Optional<GdCasa> casa = casaDe(persona);
@@ -166,9 +176,8 @@ public class AccesoServiceImpl implements AccesoService {
         String motivo = evaluarMotivoDenegacion(credencial, persona, casa.orElse(null));
 
         if (motivo != null && !adentro) {
-            GdAccesoEvento denegado = registrarDenegacion(credencial, casa.orElse(null), motivo,
-                    guardia, request.getPuntoAccesoId());
-            return fabrica.mapear(denegado);
+            return fabrica.mapear(registrarDenegacion(credencial, casa.orElse(null), motivo,
+                    guardia, request));
         }
 
         Optional<GdAccesoEvento> reciente = fabrica.lecturaReciente(credencial.getId());
@@ -185,8 +194,22 @@ public class AccesoServiceImpl implements AccesoService {
         boolean soloSalida = motivo != null;
         String sentido = resolverSentido(request, adentro, soloSalida, persona.getId());
 
+        // resolverSentido devuelve null cuando el guardia insiste en ENTRAR a
+        // alguien que solo puede salir. Es una entrada NEGADA, no un error de
+        // pantalla: va a la bitacora con el motivo que la dejo en solo-salida.
+        if (sentido == null) {
+            return fabrica.mapear(registrarDenegacion(credencial, casa.orElse(null),
+                    Codigos.MOTIVO_ENTRADA_TRAS_SALIDA, guardia, request));
+        }
+
         String modo = request.getModo();
-        GdVehiculo vehiculo = resolverVehiculo(request, casa.orElse(null), modo);
+        VehiculoResuelto delVehiculo = resolverVehiculo(request, casa.orElse(null), modo);
+
+        if (delVehiculo.motivo != null) {
+            return fabrica.mapear(registrarDenegacionDeVehiculo(credencial, casa.orElse(null),
+                    delVehiculo, sentido, guardia, request));
+        }
+        GdVehiculo vehiculo = delVehiculo.vehiculo;
 
         GdAccesoEvento evento = fabrica.nuevoEvento(guardia, request.getPuntoAccesoId());
         evento.setSentido(sentido);
@@ -301,6 +324,11 @@ public class AccesoServiceImpl implements AccesoService {
      * contradiga solo se acepta con {@code corregirSentido} — la correccion
      * consciente del guardia (CONTEXT.md seccion 4) — y nunca cuando la
      * credencial esta en estado de solo-salida.
+     *
+     * @return el sentido, o {@code null} si se pidio ENTRAR a alguien que solo
+     *         puede salir. Ese caso vuelve como null y no como excepcion porque
+     *         es una negacion que tiene que quedar en la bitacora, y una
+     *         excepcion tumbaria la transaccion que la escribe.
      */
     private String resolverSentido(RegistrarAccesoRequest request, boolean adentro,
                                    boolean soloSalida, Long personaId) {
@@ -310,7 +338,8 @@ public class AccesoServiceImpl implements AccesoService {
             return porPresencia;
         }
         if (soloSalida) {
-            throw GuardianException.conflicto(MensajesGlobales.SOLO_SALIDA);
+            log.warn("[acceso] reingreso negado personaId={} credencial en solo-salida", personaId);
+            return null;
         }
         if (Boolean.TRUE.equals(request.getCorregirSentido())) {
             log.warn("[acceso] sentido corregido por el guardia personaId={} de={} a={}",
@@ -332,10 +361,21 @@ public class AccesoServiceImpl implements AccesoService {
         return ajena;
     }
 
-    private GdVehiculo resolverVehiculo(RegistrarAccesoRequest request, GdCasa casa, String modo) {
+    /**
+     * El vehiculo del intento, o el motivo por el que no sale.
+     *
+     * <p>Devuelve el motivo en vez de lanzarlo porque estas negaciones tienen
+     * que quedar en la bitacora, y una excepcion tumbaria la transaccion que
+     * las escribe. El vehiculo viaja incluso cuando hay motivo: la placa del
+     * intento es justamente el dato que se quiere leer despues.</p>
+     */
+    private VehiculoResuelto resolverVehiculo(RegistrarAccesoRequest request, GdCasa casa,
+                                              String modo) {
         if (!Codigos.MODO_VEHICULO.equals(modo)) {
-            return null;
+            return VehiculoResuelto.ninguno();
         }
+        // Sin id no hubo intento de sacar NADA: es una peticion mal formada del
+        // cliente, no algo que pasara en la porteria. Esa si se rechaza seca.
         if (request.getVehiculoId() == null) {
             throw GuardianException.solicitudInvalida(MensajesGlobales.SELECCIONA_VEHICULO);
         }
@@ -345,39 +385,113 @@ public class AccesoServiceImpl implements AccesoService {
 
         // El vehiculo es de la CASA, no de una persona: cualquier miembro del
         // nucleo puede salir en cualquier vehiculo de su casa. Lo que se
-        // impide es usar el de otra casa mandando un id cualquiera.
+        // impide es usar el de otra casa mandando un id cualquiera — y eso,
+        // que antes moria en un 400 mudo, ahora queda escrito.
         if (casa == null || !vehiculo.getCasa().getId().equals(casa.getId())) {
-            throw GuardianException.solicitudInvalida(MensajesGlobales.VEHICULO_NO_PERTENECE);
+            return VehiculoResuelto.negado(vehiculo, Codigos.MOTIVO_VEHICULO_AJENO);
         }
-        // Las dos llaves, y con mensajes distintos. Un vehiculo deshabilitado
-        // por la administracion no sale aunque la familia lo tenga activo, y
-        // uno que la familia desactivo tampoco — pero al guardia le tienen que
-        // quedar claras las dos causas: una la levanta la administracion y la
-        // otra el titular desde su celular.
+        // Las dos llaves, y con motivos distintos. Uno deshabilitado por la
+        // administracion no sale aunque la familia lo tenga activo, y uno que
+        // la familia desactivo tampoco — pero al guardia le tienen que quedar
+        // claras las dos causas: una la levanta la administracion y la otra el
+        // titular desde su celular.
         if (vehiculo.estaBloqueado()) {
-            throw GuardianException.conflicto(MensajesGlobales.VEHICULO_BLOQUEADO);
+            return VehiculoResuelto.negado(vehiculo, Codigos.MOTIVO_VEHICULO_BLOQUEADO);
         }
-        // Decia VEHICULO_NO_PERTENECE, que es falso: el carro SI es de la casa,
-        // solo esta apagado. El guardia leia "no esta registrado para esa casa"
-        // y mandaba al residente a la administracion a corregir un dato que
-        // estaba bien.
         if (!vehiculo.estaActivo()) {
-            throw GuardianException.conflicto(MensajesGlobales.VEHICULO_INACTIVO);
+            return VehiculoResuelto.negado(vehiculo, Codigos.MOTIVO_VEHICULO_INACTIVO);
         }
-        return vehiculo;
+        return VehiculoResuelto.permitido(vehiculo);
+    }
+
+    /** Vehiculo del intento y, si no sale, por que. */
+    private static final class VehiculoResuelto {
+        private final GdVehiculo vehiculo;
+        private final String motivo;
+
+        private VehiculoResuelto(GdVehiculo vehiculo, String motivo) {
+            this.vehiculo = vehiculo;
+            this.motivo = motivo;
+        }
+
+        static VehiculoResuelto ninguno() {
+            return new VehiculoResuelto(null, null);
+        }
+
+        static VehiculoResuelto permitido(GdVehiculo vehiculo) {
+            return new VehiculoResuelto(vehiculo, null);
+        }
+
+        static VehiculoResuelto negado(GdVehiculo vehiculo, String motivo) {
+            return new VehiculoResuelto(vehiculo, motivo);
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
     // Escritura de eventos
     // ─────────────────────────────────────────────────────────────────────────
 
+    /** Denegacion desde la VERIFICACION, donde no hay peticion de registro. */
     private GdAccesoEvento registrarDenegacion(GdCredencialQr credencial, GdCasa casa,
                                                String motivo, UsuarioAutenticado guardia,
                                                Long puntoAccesoId) {
+        return escribirDenegacion(credencial, casa, motivo, guardia, puntoAccesoId,
+                Codigos.MODO_PEATON);
+    }
+
+    /**
+     * Denegacion desde el REGISTRO. Conserva el modo que el guardia toco: leer
+     * despues "se nego a pie" cuando el intento fue en carro convierte la
+     * bitacora en un relato distinto del que ocurrio.
+     */
+    private GdAccesoEvento registrarDenegacion(GdCredencialQr credencial, GdCasa casa,
+                                               String motivo, UsuarioAutenticado guardia,
+                                               RegistrarAccesoRequest request) {
+        String modo = request.getModo() != null ? request.getModo() : Codigos.MODO_PEATON;
+        return escribirDenegacion(credencial, casa, motivo, guardia,
+                request.getPuntoAccesoId(), modo);
+    }
+
+    /**
+     * Denegacion de un vehiculo. Deja la placa y el sentido del intento: sin la
+     * placa, la bitacora diria que se nego "un vehiculo" sin decir cual, y esa
+     * fila no sirve para responder la pregunta que motivo mirarla.
+     */
+    private GdAccesoEvento registrarDenegacionDeVehiculo(GdCredencialQr credencial, GdCasa casa,
+                                                         VehiculoResuelto delVehiculo,
+                                                         String sentido,
+                                                         UsuarioAutenticado guardia,
+                                                         RegistrarAccesoRequest request) {
+        GdAccesoEvento evento = construirDenegacion(credencial, casa, delVehiculo.motivo,
+                guardia, request.getPuntoAccesoId(), Codigos.MODO_VEHICULO);
+        evento.setSentido(sentido);
+
+        if (delVehiculo.vehiculo != null) {
+            evento.setVehiculoPlaca(delVehiculo.vehiculo.getPlaca());
+            // La FK solo cuando el carro ES de esta casa. El ajeno se nombra
+            // por su placa y nada mas: enlazarlo colgaria de la bitacora de una
+            // casa un vehiculo que pertenece a otra.
+            if (!Codigos.MOTIVO_VEHICULO_AJENO.equals(delVehiculo.motivo)) {
+                evento.setVehiculo(delVehiculo.vehiculo);
+            }
+        }
+        return fabrica.guardar(evento);
+    }
+
+    private GdAccesoEvento escribirDenegacion(GdCredencialQr credencial, GdCasa casa,
+                                              String motivo, UsuarioAutenticado guardia,
+                                              Long puntoAccesoId, String modo) {
+        return fabrica.guardar(construirDenegacion(credencial, casa, motivo, guardia,
+                puntoAccesoId, modo));
+    }
+
+    private GdAccesoEvento construirDenegacion(GdCredencialQr credencial, GdCasa casa,
+                                               String motivo, UsuarioAutenticado guardia,
+                                               Long puntoAccesoId, String modo) {
 
         GdAccesoEvento evento = fabrica.nuevoEvento(guardia, puntoAccesoId);
         evento.setSentido(Codigos.ENTRADA);
-        evento.setModo(Codigos.MODO_PEATON);
+        evento.setModo(modo);
         evento.setResultado(Codigos.RESULTADO_DENEGADO);
         evento.setMotivoDenegacion(motivo);
 

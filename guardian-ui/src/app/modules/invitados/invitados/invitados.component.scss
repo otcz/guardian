@@ -220,6 +220,20 @@
   gap: var(--e-1);
   width: 100%;
   margin-top: var(--e-3);
+
+  /* Compartir y copiar son la misma acción por dos vías, así que van pegados;
+     revocar es de otra naturaleza y se separa para que no se toque por error. */
+  .alterno {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--e-2);
+    min-height: var(--tactil);
+  }
+
+  .peligro-texto {
+    margin-top: var(--e-2);
+  }
 }
 
 /* ── Filas ───────────────────────────────────────────────────────────────── */

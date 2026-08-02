@@ -131,6 +131,19 @@ public final class Codigos {
     public static final String MOTIVO_CASA_BLOQUEADA = "CASA_BLOQUEADA";
     public static final String MOTIVO_VEHICULO_BLOQUEADO = "VEHICULO_BLOQUEADO";
 
+    /**
+     * Negaciones que antes solo lanzaban un error y no dejaban rastro.
+     *
+     * <p>Un vehiculo que la administracion deshabilito, alguien mandando el id
+     * de un carro de otra casa, un invitado que llega en carro sin placa
+     * declarada: todo eso pasaba por la porteria y la bitacora quedaba en
+     * blanco. Justamente lo que hay que poder mirar despues.</p>
+     */
+    public static final String MOTIVO_VEHICULO_INACTIVO = "VEHICULO_INACTIVO";
+    public static final String MOTIVO_VEHICULO_AJENO = "VEHICULO_AJENO";
+    public static final String MOTIVO_INVITADO_SIN_VEHICULO = "INVITADO_SIN_VEHICULO";
+    public static final String MOTIVO_ENTRADA_TRAS_SALIDA = "ENTRADA_TRAS_SALIDA";
+
     /** Parentescos con significado especial en la logica. */
     public static final String PARENTESCO_TITULAR = "TITULAR";
 }

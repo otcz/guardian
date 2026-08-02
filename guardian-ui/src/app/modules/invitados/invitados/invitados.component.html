@@ -91,8 +91,15 @@
         </p>
 
         <div class="qr-acciones">
-          <button type="button" class="principal" (click)="compartir(qrAbierto)">
+          <!-- Compartir abre WhatsApp y el resto; en un escritorio ese menú no
+               existe. Copiar está siempre y no depende de nada. -->
+          <button type="button" class="principal" *ngIf="puedeCompartir"
+                  (click)="compartir(qrAbierto)">
             <i class="pi pi-share-alt"></i> Compartir link
+          </button>
+          <button type="button" [class]="puedeCompartir ? 'alterno' : 'principal'"
+                  (click)="copiar(qrAbierto)">
+            <i class="pi pi-copy"></i> Copiar link
           </button>
           <button type="button" class="peligro-texto" (click)="revocar(qrAbierto)">
             Revocar invitación

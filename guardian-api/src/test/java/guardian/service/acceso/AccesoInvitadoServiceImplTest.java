@@ -204,14 +204,16 @@ class AccesoInvitadoServiceImplTest {
     }
 
     @Test
-    @DisplayName("modo VEHICULO sin placa declarada -> rechazado")
+    @DisplayName("modo VEHICULO sin placa declarada -> denegado y registrado")
     void rechazaVehiculoSinPlacaDeclarada() {
         when(presenciaService.estaAdentroInvitado(20L)).thenReturn(false);
 
-        assertThatThrownBy(() ->
-                servicio.registrar(invitacion, registrarRequest(Codigos.MODO_VEHICULO), guardia))
-                .isInstanceOf(GuardianException.class)
-                .hasMessage(MensajesGlobales.INVITADO_SIN_VEHICULO);
+        AccesoEventoResponse evento =
+                servicio.registrar(invitacion, registrarRequest(Codigos.MODO_VEHICULO), guardia);
+
+        assertThat(evento.getResultado()).isEqualTo(Codigos.RESULTADO_DENEGADO);
+        assertThat(evento.getMotivoDenegacion())
+                .isEqualTo(Codigos.MOTIVO_INVITADO_SIN_VEHICULO);
     }
 
     @Test

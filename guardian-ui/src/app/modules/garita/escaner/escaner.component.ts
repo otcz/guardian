@@ -3,8 +3,11 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Html5Qrcode } from 'html5-qrcode';
 
 import { AccesoService } from '../../../core/services/acceso.service';
+import { AdminService } from '../../../core/services/admin.service';
 import { FotoService } from '../../../core/services/foto.service';
+import { Parametro } from '../../../core/models/admin.model';
 import {
+  AccesoEvento,
   FichaVerificacion,
   Modo,
   Presencia,
@@ -51,17 +54,35 @@ export class EscanerComponent implements OnInit, OnDestroy {
   /** Evita el doble toque en "A pie"/placa: dos POST concurrentes duplicarían. */
   registrando = false;
 
+  /**
+   * Lo que quedó escrito en la bitácora. Es la fuente del veredicto final:
+   * el registro puede negar aunque la verificación de hace tres segundos
+   * hubiera dicho que sí.
+   */
+  eventoRegistrado: AccesoEvento | null = null;
+
+  /** Catálogo de motivos, para no mostrarle un código al guardia. */
+  motivos: Parametro[] = [];
+
+  get permitido(): boolean {
+    return this.eventoRegistrado?.resultado !== 'DENEGADO';
+  }
+
   private lector: Html5Qrcode | null = null;
   private procesando = false;
 
   constructor(
     private readonly acceso: AccesoService,
+    private readonly admin: AdminService,
     private readonly fotoService: FotoService
   ) {}
 
   ngOnInit(): void {
     this.cargarPresencia();
     this.iniciarCamara();
+    // El motivo se muestra con el texto del catálogo, no con el código:
+    // "VEHICULO_INACTIVO" no es algo que se le pueda leer a nadie de noche.
+    this.admin.parametros('MOTIVO_DENEGACION').subscribe(m => (this.motivos = m));
   }
 
   private cargarPresencia(): void {
@@ -159,11 +180,18 @@ export class EscanerComponent implements OnInit, OnDestroy {
         corregirSentido: this.sentidoCorregido !== null
       })
       .subscribe({
-        next: () => {
+        next: evento => {
+          // El registro puede volver DENEGADO con 200: entre el escaneo y el
+          // toque pasan segundos, y en esos segundos el administrador pudo
+          // deshabilitar el carro o revocar la credencial. Antes se pintaba
+          // verde igual — el guardia dejaba pasar justo el caso que motivó el
+          // bloqueo. Ahora el veredicto sale del evento, no del código HTTP.
+          this.eventoRegistrado = evento;
           this.etapa = 'registrado';
           this.cargarPresencia();
           // Vuelve solo a escanear: en hora pico nadie va a tocar "siguiente".
-          setTimeout(() => this.reiniciar(), 2000);
+          // El rojo se queda más tiempo: hay que leer POR QUÉ no entra.
+          setTimeout(() => this.reiniciar(), this.permitido ? 2000 : 5000);
         },
         error: (fallo: HttpErrorResponse) => {
           this.registrando = false;
@@ -188,6 +216,7 @@ export class EscanerComponent implements OnInit, OnDestroy {
     this.procesando = false;
     this.registrando = false;
     this.sentidoCorregido = null;
+    this.eventoRegistrado = null;
     this.etapa = 'escaneando';
 
     if (!this.modoManual) {

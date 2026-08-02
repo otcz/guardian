@@ -52,7 +52,10 @@ public class AccesoInvitadoServiceImpl implements AccesoInvitadoService {
                                           RegistrarAccesoRequest request,
                                           UsuarioAutenticado guardia) {
         if (deOtroConjunto(invitacion, guardia)) {
-            throw GuardianException.solicitudInvalida(MensajesGlobales.QR_NO_RECONOCIDO);
+            // Para esta porteria el codigo no existe, pero el intento si queda:
+            // sin invitacion enlazada, para no colgar de la bitacora de esta
+            // sede una fila que pertenece a otra.
+            return fabrica.mapear(registrarDenegacionAnonima(guardia, request));
         }
 
         // Se revalida igual que con credenciales: entre el escaneo y el toque
@@ -60,7 +63,7 @@ public class AccesoInvitadoServiceImpl implements AccesoInvitadoService {
         String motivo = motivoDenegacion(invitacion);
         if (motivo != null) {
             return fabrica.mapear(registrarDenegacion(
-                    invitacion, motivo, guardia, request.getPuntoAccesoId()));
+                    invitacion, motivo, guardia, request));
         }
 
         Optional<GdAccesoEvento> reciente = fabrica.lecturaRecienteInvitacion(invitacion.getId());
@@ -74,10 +77,13 @@ public class AccesoInvitadoServiceImpl implements AccesoInvitadoService {
         String sentido = resolverSentido(request, adentro, invitacion.getId());
 
         // El invitado no tiene vehiculos registrados en el conjunto: su unica
-        // placa valida es la declarada en la invitacion.
+        // placa valida es la declarada en la invitacion. Que llegue en carro
+        // sin haberla declarado es un intento negado, no un error de pantalla:
+        // va a la bitacora.
         String modo = request.getModo();
         if (Codigos.MODO_VEHICULO.equals(modo) && invitacion.getPlaca() == null) {
-            throw GuardianException.solicitudInvalida(MensajesGlobales.INVITADO_SIN_VEHICULO);
+            return fabrica.mapear(registrarDenegacion(invitacion,
+                    Codigos.MOTIVO_INVITADO_SIN_VEHICULO, guardia, request));
         }
 
         GdAccesoEvento evento = fabrica.nuevoEvento(guardia, request.getPuntoAccesoId());
@@ -184,11 +190,50 @@ public class AccesoInvitadoServiceImpl implements AccesoInvitadoService {
     // Escritura y fichas
     // ─────────────────────────────────────────────────────────────────────────
 
+    /** Denegacion desde la VERIFICACION, donde no hay peticion de registro. */
     private GdAccesoEvento registrarDenegacion(GdInvitacion invitacion, String motivo,
                                                UsuarioAutenticado guardia, Long puntoAccesoId) {
+        return escribirDenegacion(invitacion, motivo, guardia, puntoAccesoId,
+                Codigos.MODO_PEATON, null);
+    }
+
+    /**
+     * Denegacion desde el REGISTRO. Conserva el modo que el guardia toco y la
+     * placa declarada: leer despues "se nego a pie" cuando el intento fue en
+     * carro convierte la bitacora en un relato distinto del que ocurrio.
+     */
+    private GdAccesoEvento registrarDenegacion(GdInvitacion invitacion, String motivo,
+                                               UsuarioAutenticado guardia,
+                                               RegistrarAccesoRequest request) {
+        String modo = request.getModo() != null ? request.getModo() : Codigos.MODO_PEATON;
+        String placa = Codigos.MODO_VEHICULO.equals(modo) ? invitacion.getPlaca() : null;
+        return escribirDenegacion(invitacion, motivo, guardia, request.getPuntoAccesoId(),
+                modo, placa);
+    }
+
+    /**
+     * Intento que no se pudo atribuir a nadie de esta sede. Queda la fila con
+     * el guardia, la hora y el punto: es lo unico que se sabe, y es mas de lo
+     * que quedaba antes, que era nada.
+     */
+    private GdAccesoEvento registrarDenegacionAnonima(UsuarioAutenticado guardia,
+                                                      RegistrarAccesoRequest request) {
+        GdAccesoEvento evento = fabrica.nuevoEvento(guardia, request.getPuntoAccesoId());
+        evento.setSentido(Codigos.ENTRADA);
+        evento.setModo(request.getModo() != null ? request.getModo() : Codigos.MODO_PEATON);
+        evento.setResultado(Codigos.RESULTADO_DENEGADO);
+        evento.setMotivoDenegacion(Codigos.MOTIVO_FIRMA_INVALIDA);
+
+        log.info("[acceso] invitado de otra sede denegado guardiaId={}", guardia.getPersonaId());
+        return fabrica.guardar(evento);
+    }
+
+    private GdAccesoEvento escribirDenegacion(GdInvitacion invitacion, String motivo,
+                                              UsuarioAutenticado guardia, Long puntoAccesoId,
+                                              String modo, String placa) {
         GdAccesoEvento evento = fabrica.nuevoEvento(guardia, puntoAccesoId);
         evento.setSentido(Codigos.ENTRADA);
-        evento.setModo(Codigos.MODO_PEATON);
+        evento.setModo(modo);
         evento.setResultado(Codigos.RESULTADO_DENEGADO);
         evento.setMotivoDenegacion(motivo);
         evento.setInvitacion(invitacion);
@@ -196,6 +241,7 @@ public class AccesoInvitadoServiceImpl implements AccesoInvitadoService {
         evento.setPersonaDocumento(invitacion.getDocumentoInvitado());
         evento.setCasa(invitacion.getCasa());
         evento.setCasaIdentificador(invitacion.getCasa().getIdentificador());
+        evento.setVehiculoPlaca(placa);
 
         log.info("[acceso] invitado denegado motivo={} invitacionId={} guardiaId={}",
                 motivo, invitacion.getId(), guardia.getPersonaId());

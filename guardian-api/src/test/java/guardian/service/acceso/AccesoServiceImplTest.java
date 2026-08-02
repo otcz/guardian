@@ -234,14 +234,16 @@ class AccesoServiceImplTest {
     }
 
     @Test
-    @DisplayName("revocada y adentro: la correccion a ENTRADA se rechaza")
+    @DisplayName("revocada y adentro: la correccion a ENTRADA se rechaza y queda escrita")
     void soloSalidaNoAdmiteCorreccionAEntrada() {
         credencial.setActivo(Codigos.NO);
         when(presenciaService.estaAdentro(50L)).thenReturn(true);
 
-        assertThatThrownBy(() -> servicio.registrar(registrarRequest(Codigos.ENTRADA, true), guardia))
-                .isInstanceOf(GuardianException.class)
-                .hasMessage(MensajesGlobales.SOLO_SALIDA);
+        AccesoEventoResponse evento =
+                servicio.registrar(registrarRequest(Codigos.ENTRADA, true), guardia);
+
+        assertThat(evento.getResultado()).isEqualTo(Codigos.RESULTADO_DENEGADO);
+        assertThat(evento.getMotivoDenegacion()).isEqualTo(Codigos.MOTIVO_ENTRADA_TRAS_SALIDA);
     }
 
     @Test
@@ -301,9 +303,10 @@ class AccesoServiceImplTest {
         request.setModo(Codigos.MODO_VEHICULO);
         request.setVehiculoId(5L);
 
-        assertThatThrownBy(() -> servicio.registrar(request, guardia))
-                .isInstanceOf(GuardianException.class)
-                .hasMessage(MensajesGlobales.VEHICULO_NO_PERTENECE);
+        AccesoEventoResponse evento = servicio.registrar(request, guardia);
+
+        assertThat(evento.getResultado()).isEqualTo(Codigos.RESULTADO_DENEGADO);
+        assertThat(evento.getMotivoDenegacion()).isEqualTo(Codigos.MOTIVO_VEHICULO_AJENO);
     }
 
     @Test

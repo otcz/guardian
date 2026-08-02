@@ -140,9 +140,14 @@
     </button>
   </section>
 
-  <!-- CONFIRMACION -->
-  <section class="listo" *ngIf="etapa === 'registrado'">
-    <i class="pi pi-check-circle"></i>
-    <span>Registrado</span>
+  <!-- CONFIRMACION. Verde o rojo, sin matices: el resultado se lee en menos de
+       un segundo desde un metro. El registro puede negar aunque la ficha de
+       hace tres segundos hubiera dicho que sí. -->
+  <section class="listo" *ngIf="etapa === 'registrado'" [class.negado]="!permitido">
+    <i class="pi" [ngClass]="permitido ? 'pi-check-circle' : 'pi-times-circle'"></i>
+    <span>{{ permitido ? 'Registrado' : 'No puede pasar' }}</span>
+    <strong class="motivo" *ngIf="!permitido">
+      {{ eventoRegistrado?.motivoDenegacion | motivoAcceso:motivos }}
+    </strong>
   </section>
 </div>

@@ -151,23 +151,64 @@ export class InvitadosComponent implements OnInit {
 
   // ── Compartir ────────────────────────────────────────────────────────────
 
+  /**
+   * El menú del sistema —WhatsApp, mensajes, correo— solo existe en el
+   * teléfono. En un escritorio no hay nada que abrir, así que ahí el botón no
+   * se dibuja y copiar pasa a ser la acción principal.
+   */
+  readonly puedeCompartir = typeof navigator !== 'undefined' && !!navigator.share;
+
   linkDe(invitacion: Invitacion): string {
     return `${location.origin}/invitado/${invitacion.codigoPublico}`;
   }
 
-  compartir(invitacion: Invitacion): void {
-    const link = this.linkDe(invitacion);
-    const texto = `Hola ${invitacion.nombreInvitado}, te comparto tu código de ingreso `
-      + `al conjunto (casa ${invitacion.casaIdentificador}): ${link}`;
+  private mensajeDe(invitacion: Invitacion): string {
+    return `Hola ${invitacion.nombreInvitado}, te comparto tu código de ingreso `
+      + `al conjunto (casa ${invitacion.casaIdentificador}): ${this.linkDe(invitacion)}`;
+  }
 
-    if (navigator.share) {
-      navigator.share({ title: 'Invitación de ingreso', text: texto }).catch(() => undefined);
-      return;
+  compartir(invitacion: Invitacion): void {
+    navigator
+      .share({ title: 'Invitación de ingreso', text: this.mensajeDe(invitacion) })
+      // Cancelar el menú del sistema lanza AbortError. No es un fallo: es la
+      // persona diciendo "ahora no", y no merece un banner rojo.
+      .catch(() => undefined);
+  }
+
+  copiar(invitacion: Invitacion): void {
+    const mensaje = this.mensajeDe(invitacion);
+
+    navigator.clipboard.writeText(mensaje).then(
+      () => this.confirmarCopia(),
+      // Sin permiso de portapapeles —o sin HTTPS, que es el caso al probar
+      // desde otro dispositivo en la red local— queda el respaldo de toda la
+      // vida. Sin él, el botón no haría absolutamente nada y nadie sabría por qué.
+      () => this.copiarALaAntigua(mensaje)
+    );
+  }
+
+  private copiarALaAntigua(mensaje: string): void {
+    const area = document.createElement('textarea');
+    area.value = mensaje;
+    area.setAttribute('readonly', '');
+    area.style.position = 'fixed';
+    area.style.opacity = '0';
+    document.body.appendChild(area);
+    area.select();
+
+    const copiado = document.execCommand('copy');
+    document.body.removeChild(area);
+
+    if (copiado) {
+      this.confirmarCopia();
+    } else {
+      this.error = 'No pudimos copiar el link. Mantén presionado el código para copiarlo.';
     }
-    navigator.clipboard.writeText(texto).then(() => {
-      this.aviso = 'Link copiado. Pégalo en WhatsApp o donde prefieras.';
-      setTimeout(() => (this.aviso = null), 4000);
-    });
+  }
+
+  private confirmarCopia(): void {
+    this.aviso = 'Link copiado. Pégalo en WhatsApp o donde prefieras.';
+    setTimeout(() => (this.aviso = null), 4000);
   }
 
   // ── Presentación ─────────────────────────────────────────────────────────

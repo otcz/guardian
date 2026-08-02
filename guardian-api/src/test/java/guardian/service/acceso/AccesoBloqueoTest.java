@@ -129,6 +129,7 @@ class AccesoBloqueoTest {
                     .sentido(e.getSentido())
                     .resultado(e.getResultado())
                     .motivoDenegacion(e.getMotivoDenegacion())
+                    .modo(e.getModo())
                     .vehiculoPlaca(e.getVehiculoPlaca())
                     .build();
         });
@@ -209,9 +210,12 @@ class AccesoBloqueoTest {
         vehiculo.setBloqueado(Codigos.SI);
         when(presenciaService.estaAdentro(50L)).thenReturn(false);
 
-        assertThatThrownBy(() -> servicio.registrar(registrarEnVehiculo(), guardia))
-                .isInstanceOf(GuardianException.class)
-                .hasMessage(MensajesGlobales.VEHICULO_BLOQUEADO);
+        // Denegado, no excepcion: el intento tiene que quedar en la bitacora y
+        // una excepcion tumbaria la transaccion que lo escribe.
+        AccesoEventoResponse evento = servicio.registrar(registrarEnVehiculo(), guardia);
+
+        assertThat(evento.getResultado()).isEqualTo(Codigos.RESULTADO_DENEGADO);
+        assertThat(evento.getMotivoDenegacion()).isEqualTo(Codigos.MOTIVO_VEHICULO_BLOQUEADO);
     }
 
     @Test
@@ -222,9 +226,10 @@ class AccesoBloqueoTest {
         // carro: sale a pie y el vehiculo se queda.
         when(presenciaService.estaAdentro(50L)).thenReturn(true);
 
-        assertThatThrownBy(() -> servicio.registrar(registrarEnVehiculo(), guardia))
-                .isInstanceOf(GuardianException.class)
-                .hasMessage(MensajesGlobales.VEHICULO_BLOQUEADO);
+        AccesoEventoResponse evento = servicio.registrar(registrarEnVehiculo(), guardia);
+
+        assertThat(evento.getResultado()).isEqualTo(Codigos.RESULTADO_DENEGADO);
+        assertThat(evento.getMotivoDenegacion()).isEqualTo(Codigos.MOTIVO_VEHICULO_BLOQUEADO);
     }
 
     @Test
@@ -262,47 +267,101 @@ class AccesoBloqueoTest {
         vehiculo.setActivo(Codigos.NO);
         when(presenciaService.estaAdentro(50L)).thenReturn(false);
 
-        assertThatThrownBy(() -> servicio.registrar(registrarEnVehiculo(), guardia))
-                .isInstanceOf(GuardianException.class)
-                // Decia VEHICULO_NO_PERTENECE, que es falso: el carro SI es de
-                // la casa. El guardia leia "no esta registrado para esa casa" y
-                // mandaba al residente a la administracion a corregir un dato
-                // que estaba bien, cuando lo unico que hacia falta era que su
-                // hogar volviera a activarlo.
-                .hasMessage(MensajesGlobales.VEHICULO_INACTIVO);
+        AccesoEventoResponse evento = servicio.registrar(registrarEnVehiculo(), guardia);
+
+        // Antes salia VEHICULO_NO_PERTENECE, que es falso: el carro SI es de la
+        // casa. El guardia leia "no esta registrado para esa casa" y mandaba al
+        // residente a la administracion a corregir un dato que estaba bien,
+        // cuando lo unico que hacia falta era que su hogar volviera a activarlo.
+        assertThat(evento.getResultado()).isEqualTo(Codigos.RESULTADO_DENEGADO);
+        assertThat(evento.getMotivoDenegacion()).isEqualTo(Codigos.MOTIVO_VEHICULO_INACTIVO);
     }
 
     @Test
-    @DisplayName("las dos causas del vehiculo se distinguen: no es el mismo mensaje")
+    @DisplayName("las dos causas del vehiculo se distinguen: no es el mismo motivo")
     void lasDosLlavesDelVehiculoSeDistinguen() {
         // Una la levanta la administracion y la otra el titular desde su
-        // celular. Con un solo mensaje para las dos, el guardia manda a la
+        // celular. Con un solo motivo para las dos, el guardia manda a la
         // persona al sitio equivocado y vuelve a la fila igual de varada.
         when(presenciaService.estaAdentro(50L)).thenReturn(false);
 
         vehiculo.setActivo(Codigos.SI);
         vehiculo.setBloqueado(Codigos.SI);
-        assertThatThrownBy(() -> servicio.registrar(registrarEnVehiculo(), guardia))
-                .hasMessage(MensajesGlobales.VEHICULO_BLOQUEADO);
+        assertThat(servicio.registrar(registrarEnVehiculo(), guardia).getMotivoDenegacion())
+                .isEqualTo(Codigos.MOTIVO_VEHICULO_BLOQUEADO);
 
         vehiculo.setBloqueado(Codigos.NO);
         vehiculo.setActivo(Codigos.NO);
-        assertThatThrownBy(() -> servicio.registrar(registrarEnVehiculo(), guardia))
-                .hasMessage(MensajesGlobales.VEHICULO_INACTIVO);
+        assertThat(servicio.registrar(registrarEnVehiculo(), guardia).getMotivoDenegacion())
+                .isEqualTo(Codigos.MOTIVO_VEHICULO_INACTIVO);
     }
 
     @Test
-    @DisplayName("un vehiculo de OTRA casa si dice que no pertenece")
-    void vehiculoAjenoConservaSuMensaje() {
-        // El mensaje que se libero al darle uno propio al vehiculo inactivo
-        // sigue siendo el correcto para su caso real.
+    @DisplayName("un vehiculo de OTRA casa queda registrado como ajeno")
+    void vehiculoAjenoQuedaRegistrado() {
+        // Mandar el id de un carro que no es de la casa es lo que haria un
+        // cliente manipulado. Antes moria en un 400 mudo y no quedaba rastro.
         GdCasa otra = new GdCasa();
         otra.setId(99L);
         vehiculo.setCasa(otra);
         when(presenciaService.estaAdentro(50L)).thenReturn(false);
 
-        assertThatThrownBy(() -> servicio.registrar(registrarEnVehiculo(), guardia))
-                .hasMessage(MensajesGlobales.VEHICULO_NO_PERTENECE);
+        AccesoEventoResponse evento = servicio.registrar(registrarEnVehiculo(), guardia);
+
+        assertThat(evento.getResultado()).isEqualTo(Codigos.RESULTADO_DENEGADO);
+        assertThat(evento.getMotivoDenegacion()).isEqualTo(Codigos.MOTIVO_VEHICULO_AJENO);
+    }
+
+    // ── Todo intento queda escrito ───────────────────────────────────────────
+
+    @Test
+    @DisplayName("negar un vehiculo deja la PLACA del intento en la bitacora")
+    void laDenegacionDeVehiculoGuardaLaPlaca() {
+        // Sin la placa la fila diria que se nego "un vehiculo" sin decir cual,
+        // y no sirve para responder la pregunta que motivo mirarla.
+        vehiculo.setBloqueado(Codigos.SI);
+        when(presenciaService.estaAdentro(50L)).thenReturn(false);
+
+        AccesoEventoResponse evento = servicio.registrar(registrarEnVehiculo(), guardia);
+
+        assertThat(evento.getVehiculoPlaca()).isEqualTo("ABC123");
+        assertThat(evento.getModo()).isEqualTo(Codigos.MODO_VEHICULO);
+    }
+
+    @Test
+    @DisplayName("un QR que no resuelve tampoco pasa en silencio")
+    void qrDesconocidoQuedaRegistrado() {
+        // verificar ya lo registraba; registrar era la puerta muda de las dos.
+        lenient().when(credencialQrService.resolver("FALSO")).thenReturn(Optional.empty());
+        lenient().when(invitacionService.resolver("FALSO")).thenReturn(Optional.empty());
+
+        RegistrarAccesoRequest request = new RegistrarAccesoRequest();
+        request.setPayload("FALSO");
+        request.setModo(Codigos.MODO_PEATON);
+
+        AccesoEventoResponse evento = servicio.registrar(request, guardia);
+
+        assertThat(evento.getResultado()).isEqualTo(Codigos.RESULTADO_DENEGADO);
+        assertThat(evento.getMotivoDenegacion()).isEqualTo(Codigos.MOTIVO_FIRMA_INVALIDA);
+    }
+
+    @Test
+    @DisplayName("insistir en ENTRAR a quien solo puede salir queda escrito")
+    void reingresoNegadoQuedaRegistrado() {
+        // Credencial muerta y persona adentro: puede salir, no volver a entrar.
+        // Que el guardia lo intente igual es justo lo que hay que poder mirar.
+        credencial.setActivo(Codigos.NO);
+        when(presenciaService.estaAdentro(50L)).thenReturn(true);
+
+        RegistrarAccesoRequest request = new RegistrarAccesoRequest();
+        request.setPayload("QR");
+        request.setModo(Codigos.MODO_PEATON);
+        request.setSentido(Codigos.ENTRADA);
+
+        AccesoEventoResponse evento = servicio.registrar(request, guardia);
+
+        assertThat(evento.getResultado()).isEqualTo(Codigos.RESULTADO_DENEGADO);
+        assertThat(evento.getMotivoDenegacion()).isEqualTo(Codigos.MOTIVO_ENTRADA_TRAS_SALIDA);
     }
 
     @Test
