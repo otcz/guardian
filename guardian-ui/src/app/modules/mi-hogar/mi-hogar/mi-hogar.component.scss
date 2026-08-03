@@ -11,6 +11,32 @@ section {
   margin-bottom: var(--e-5);
 }
 
+/* No es un error —nadie hizo nada mal— así que ni rojo ni icono de alerta:
+   es el estado de esta casa, explicado antes de que alguien intente algo que
+   no va a poder terminar. */
+.solo-titular {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e-2);
+  margin: 0 0 var(--e-3);
+  padding: var(--e-3);
+  font-size: var(--t-sm);
+  line-height: 1.45;
+  color: var(--text-default);
+  background: var(--bg-soft);
+  border-radius: var(--r-md);
+
+  i {
+    flex: 0 0 auto;
+    margin-top: 0.15em;
+    color: var(--text-muted);
+  }
+
+  strong {
+    color: var(--text-strong);
+  }
+}
+
 .encabezado {
   display: flex;
   align-items: center;

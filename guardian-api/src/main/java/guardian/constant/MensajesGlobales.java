@@ -155,7 +155,8 @@ public final class MensajesGlobales {
     public static final String TITULAR_SOLO_ADMIN =
             "El titular de la casa solo lo asigna la administracion.";
     public static final String SOLO_TITULAR_FAMILIA =
-            "Solo el titular de la casa administra la familia.";
+            "Solo el titular de la casa puede agregar o quitar personas. "
+                    + "Pideselo a el, o escribe a la administracion del conjunto.";
 
     // ── Codigo para unirse a un hogar ────────────────────────────────────────
     /**

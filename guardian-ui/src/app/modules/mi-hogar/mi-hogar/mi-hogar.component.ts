@@ -27,6 +27,20 @@ export class MiHogarComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   familia: Familiar[] = [];
+
+  /**
+   * Solo el titular arma el núcleo. Se resuelve ACÁ y no esperando el 403:
+   * dejar que cualquiera abra el formulario, lo llene entero y recién ahí
+   * recibir "no puedes" es la peor forma de comunicar una regla.
+   */
+  get esTitular(): boolean {
+    return this.familia.some(f => f.esUsuarioActual && f.parentesco === 'TITULAR');
+  }
+
+  /** A quién hay que pedírselo. Sin el nombre, el aviso deja sin salida. */
+  get nombreDelTitular(): string | null {
+    return this.familia.find(f => f.parentesco === 'TITULAR')?.nombreCompleto ?? null;
+  }
   vehiculos: Vehiculo[] = [];
   parentescos: Parametro[] = [];
   tiposVehiculo: Parametro[] = [];

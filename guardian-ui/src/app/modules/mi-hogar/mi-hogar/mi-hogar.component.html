@@ -16,16 +16,33 @@
         <h2 class="gd-titulo-seccion">Mi familia</h2>
         <!-- Dos caminos: lo registro yo, o le paso un enlace y se registra
              solo. El segundo es el que evita pedirle la cédula por teléfono. -->
-        <button type="button" class="agregar" (click)="abrirInvitacion()"
-                aria-label="Invitar a alguien a mi hogar">
-          <i class="pi pi-share-alt"></i>
-        </button>
-        <button type="button" class="agregar"
-                (click)="mostrarAltaFamiliar = true"
-                aria-label="Agregar persona">
-          <i class="pi pi-plus"></i>
-        </button>
+        <ng-container *ngIf="esTitular">
+          <button type="button" class="agregar" (click)="abrirInvitacion()"
+                  aria-label="Invitar a alguien a mi hogar">
+            <i class="pi pi-share-alt"></i>
+          </button>
+          <button type="button" class="agregar"
+                  (click)="mostrarAltaFamiliar = true"
+                  aria-label="Agregar persona">
+            <i class="pi pi-plus"></i>
+          </button>
+        </ng-container>
       </div>
+
+      <!-- Se dice ANTES, no después de llenar el formulario. Y con el nombre
+           de quién sí puede: un "no tienes permiso" sin decir a quién pedírselo
+           deja a la persona sin ningún paso siguiente. -->
+      <p class="solo-titular" *ngIf="!esTitular && familia.length">
+        <i class="pi pi-info-circle" aria-hidden="true"></i>
+        <span *ngIf="nombreDelTitular">
+          Quien agrega personas a esta casa es <strong>{{ nombreDelTitular }}</strong>,
+          el titular. Pídeselo y aparecerán acá.
+        </span>
+        <span *ngIf="!nombreDelTitular">
+          Esta casa todavía no tiene titular. Escribe a la administración del
+          conjunto para que asigne uno.
+        </span>
+      </p>
 
       <gd-hoja [abierta]="mostrarAltaFamiliar" titulo="Agregar a mi familia"
                (cerrar)="mostrarAltaFamiliar = false">
