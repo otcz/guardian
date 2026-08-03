@@ -1,18 +1,23 @@
 @use '../../../styles/paneles';
 
-/* El formulario va en COLUMNA de grupos, no en una sola fila corrida: quien
-   registra a alguien tiene la cédula en la mano y llena de arriba abajo. */
+/* El formulario va en COLUMNA de grupos: quien registra a alguien tiene la
+   cédula en la mano y llena de arriba abajo. */
 .alta {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--e-4);
+  gap: var(--e-5);
+
+  /* El que manda es el ANCHO DEL FORMULARIO, no el de la ventana: la barra
+     lateral del administrador se pliega y despliega sin que el viewport
+     cambie, y una @media se equivocaría en los dos casos. */
+  container-type: inline-size;
 }
 
 .grupo {
   display: flex;
   flex-direction: column;
-  gap: var(--e-2);
+  gap: var(--e-3);
 
   /* El título nombra el grupo sin gritarlo: la jerarquía la da el separador,
      no el tamaño de letra. */
@@ -27,31 +32,74 @@
   }
 }
 
-/* La foto manda en la ficha de la portería, así que se pone junto a los datos
-   que el guardia va a comparar y no perdida al final del formulario. */
+/* La foto manda en la ficha de la portería, así que va junto a los datos que
+   el guardia va a comparar y no perdida al final del formulario. */
 .fila-foto {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  gap: var(--e-3);
-}
+  gap: var(--e-4);
 
-.campos {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 0.75rem;
-  flex: 1 1 300px;
-  min-width: 0;
-
-  /* "Cédula de ciudadanía" no cabe en el ancho base y salía cortado. */
-  .campo.tipo {
-    flex: 1 1 170px;
+  /* Ancho fijo: sin esto la foto se estira con el resto y se come media fila
+     en una pantalla ancha. */
+  gd-foto-upload {
+    flex: 0 0 auto;
   }
 
-  /* Un correo largo no se lee en 150px. */
-  .campo.ancho {
-    flex: 2 1 260px;
+  .campos {
+    flex: 1 1 420px;
+    min-width: 0;
+  }
+}
+
+/* RETÍCULA DE SEIS, con el ancho de cada campo DECLARADO.
+   ---------------------------------------------------------------------------
+   Tres intentos hasta llegar acá, y vale anotar por qué fallaron los otros dos:
+
+   1. `flex-wrap`: cada fila repartía el sobrante entre los campos que le
+      tocaran, así que las columnas no se alineaban de una fila a la siguiente
+      — Teléfono medía media pantalla y Nombres un tercio, sin razón visible.
+
+   2. `repeat(auto-fit, minmax(190px, 1fr))`: alinea, pero el número de
+      columnas depende del ancho, y con seis campos en cinco columnas la
+      segunda fila queda con un campo y cuatro huecos.
+
+   Seis divide en 2 y en 3, que es lo que piden estos grupos: pares (teléfono
+   y correo), ternas (casa, parentesco, cuenta) y la fila de identidad. Los
+   spans se eligieron para que ninguna fila quede coja.
+
+   Aparte: el `flex: 1 1 300px` que este contenedor tenía era el bug de los
+   huecos gigantes. Dentro de `.grupo`, que es una COLUMNA, ese 300px no es un
+   ancho: es una ALTURA de base, y cada grupo reservaba 300px de alto aunque
+   solo tuviera dos campos. */
+.campos {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--e-3) var(--e-4);
+  align-items: start;
+
+  /* Por defecto cada campo ocupa dos de las seis: tres por fila. */
+  > .campo {
+    grid-column: span 2;
+  }
+
+  /* Media fila. Para lo que se escribe largo —nombres, apellidos, correo— y
+     para lo que va en pareja. */
+  > .campo.medio {
+    grid-column: span 3;
+  }
+}
+
+/* Manda el ancho del FORMULARIO, no el de la ventana. A la mitad, tres
+   columnas: los pares siguen siendo pares y las ternas se apilan de a una. */
+@container (max-width: 720px) {
+  .campos {
+    grid-template-columns: repeat(3, 1fr);
+
+    > .campo,
+    > .campo.medio {
+      grid-column: span 3;
+    }
   }
 }
 
@@ -62,7 +110,7 @@
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: var(--e-2);
-  padding-top: var(--e-2);
+  padding-top: var(--e-3);
   border-top: 1px solid var(--border-subtle);
 }
 

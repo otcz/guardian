@@ -26,8 +26,21 @@
             (fotoUrlChange)="formulario.controls.fotoUrl.setValue($event)">
         </gd-foto-upload>
 
+        <!-- El nombre primero y el documento debajo: es el orden en que se
+             piensa a una persona, y el mismo de la tabla. Los anchos están
+             elegidos para que las dos filas cierren completas — ver el .scss. -->
         <div class="campos">
-          <div class="campo tipo">
+          <div class="campo medio">
+            <label for="nombres">Nombres</label>
+            <input id="nombres" type="text" formControlName="nombres">
+          </div>
+
+          <div class="campo medio">
+            <label for="apellidos">Apellidos</label>
+            <input id="apellidos" type="text" formControlName="apellidos">
+          </div>
+
+          <div class="campo">
             <label for="tipoDocumento">Tipo</label>
             <select id="tipoDocumento" formControlName="tipoDocumento">
               <option *ngFor="let t of tiposDocumento" [value]="t.codigo">{{ t.valor }}</option>
@@ -41,16 +54,6 @@
           </div>
 
           <div class="campo">
-            <label for="nombres">Nombres</label>
-            <input id="nombres" type="text" formControlName="nombres">
-          </div>
-
-          <div class="campo">
-            <label for="apellidos">Apellidos</label>
-            <input id="apellidos" type="text" formControlName="apellidos">
-          </div>
-
-          <div class="campo">
             <label for="nacimiento">Nacimiento</label>
             <input id="nacimiento" type="date" formControlName="fechaNacimiento">
           </div>
@@ -61,12 +64,12 @@
     <div class="grupo">
       <h3>Cómo contactarla</h3>
       <div class="campos">
-        <div class="campo">
+        <div class="campo medio">
           <label for="telefono">Teléfono</label>
           <input id="telefono" type="tel" formControlName="telefono">
         </div>
 
-        <div class="campo ancho">
+        <div class="campo medio">
           <label for="email">
             Correo
             <i class="pi pi-info-circle ayuda" *ngIf="exigeCorreo"
