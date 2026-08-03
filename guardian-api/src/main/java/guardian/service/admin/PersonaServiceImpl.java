@@ -427,6 +427,22 @@ public class PersonaServiceImpl implements PersonaService {
                     });
         }
 
+        // Y AL REVES: una casa NO puede quedarse sin titular. Cubre los dos
+        // caminos por los que pasaba: el primero que entra a una casa vacia
+        // —si no es el titular, nadie puede administrar esa familia y todos
+        // ven un boton que no funciona— y el titular al que le cambian el
+        // parentesco cuando no hay ningun otro.
+        if (!Codigos.PARENTESCO_TITULAR.equals(request.getParentesco())) {
+            boolean hayOtroTitular = residenteCasaRepository
+                    .findFirstByCasaIdAndParentescoAndActivo(
+                            casa.getId(), Codigos.PARENTESCO_TITULAR, Codigos.SI)
+                    .filter(otro -> !otro.getPersona().getId().equals(persona.getId()))
+                    .isPresent();
+            if (!hayOtroTitular) {
+                throw GuardianException.conflicto(MensajesGlobales.CASA_NECESITA_TITULAR);
+            }
+        }
+
         GdResidenteCasa vinculo = residenteCasaRepository
                 .findByPersonaIdAndCasaId(persona.getId(), casa.getId())
                 .orElseGet(GdResidenteCasa::new);

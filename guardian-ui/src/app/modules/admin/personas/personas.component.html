@@ -123,8 +123,15 @@
         </div>
 
         <div class="campo" *ngIf="pideCasa && pideParentesco">
-          <label for="parentesco">Parentesco</label>
-          <select id="parentesco" formControlName="parentesco">
+          <label for="parentesco">
+            Parentesco
+            <i class="pi pi-info-circle ayuda" *ngIf="casaVacia"
+               pTooltip="El primero de una casa es su titular"
+               tooltipPosition="top"></i>
+          </label>
+          <!-- En una casa vacía queda fijo en TITULAR: el primero tiene que
+               serlo, o esa familia nace sin quien la administre. -->
+          <select id="parentesco" formControlName="parentesco" [attr.disabled]="casaVacia || null">
             <option value="">Selecciona…</option>
             <option *ngFor="let p of parentescos" [value]="p.codigo">{{ p.valor }}</option>
           </select>

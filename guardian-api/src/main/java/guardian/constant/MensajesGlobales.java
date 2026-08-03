@@ -136,6 +136,13 @@ public final class MensajesGlobales {
             "Es la unica porteria activa. Activa otra antes de apagar esta.";
     public static final String PERSONA_SIN_FOTO =
             "La persona necesita una foto antes de que se le emita la credencial.";
+    /**
+     * El titular es quien administra la familia: una casa sin el deja a todos
+     * sus residentes viendo un boton que no funciona.
+     */
+    public static final String CASA_NECESITA_TITULAR =
+            "Toda casa necesita un titular, que es quien administra la familia. "
+                    + "Registra primero al titular de esta casa.";
     public static final String TITULAR_YA_EXISTE =
             "Esa casa ya tiene un titular asignado.";
 

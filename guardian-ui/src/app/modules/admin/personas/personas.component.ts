@@ -87,6 +87,11 @@ export class PersonasComponent implements OnInit {
       this.sincronizarValidadorDeCorreo();
       this.sincronizarCasaConElRol(rol);
     });
+
+    // Elegir una casa vacía deja el parentesco en TITULAR: el primero que
+    // entra tiene que serlo, o esa familia nace sin quien la administre.
+    this.formulario.controls.casaId.valueChanges
+      .subscribe(casaId => this.sincronizarParentescoConLaCasa(casaId));
   }
 
   buscar(texto: string): void {
@@ -513,6 +518,28 @@ export class PersonasComponent implements OnInit {
   /** El parentesco solo aplica si la persona vive en una casa. */
   get pideParentesco(): boolean {
     return !!this.formulario.controls.casaId.value;
+  }
+
+  /**
+   * En una casa vacía, el primero que entra ES el titular.
+   *
+   * <p>El backend lo exige —una casa sin titular deja a todos sus residentes
+   * viendo un botón que no funciona—, así que el formulario lo deja puesto en
+   * vez de esperar a rechazar el guardado. El selector se bloquea para que no
+   * quede la duda de si se podía elegir otra cosa.</p>
+   */
+  get casaVacia(): boolean {
+    const id = this.formulario.controls.casaId.value;
+    return !!id && (this.casas.find(c => c.id === id)?.residentes ?? 0) === 0;
+  }
+
+  private sincronizarParentescoConLaCasa(casaId: number | null): void {
+    if (!casaId) {
+      return;
+    }
+    if (this.casaVacia) {
+      this.formulario.controls.parentesco.setValue('TITULAR');
+    }
   }
 
   /**
