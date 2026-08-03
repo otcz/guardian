@@ -27,15 +27,21 @@ export class CasasComponent implements OnInit {
 
   readonly formulario = this.fb.nonNullable.group({
     torre: ['', [Validators.required]],
-    numero: ['', [Validators.required]],
-    cuposParqueadero: [0]
+    numero: ['', [Validators.required]]
   });
 
   constructor(private readonly admin: AdminService) {}
 
   ngOnInit(): void {
     this.cargar();
-    this.admin.parametros('TIPO_VIVIENDA').subscribe(t => (this.tiposVivienda = t));
+    this.admin.parametros('TIPO_VIVIENDA').subscribe(t => {
+      this.tiposVivienda = t;
+      // El default se aplica al LLEGAR el catalogo, no antes: el select no
+      // puede seleccionar una opcion que todavia no existe en el DOM.
+      if (!this.editando && !this.formulario.controls.torre.value) {
+        this.formulario.controls.torre.setValue(this.tipoPorDefecto());
+      }
+    });
   }
 
   cargar(): void {
@@ -89,14 +95,15 @@ export class CasasComponent implements OnInit {
     this.editando = casa;
     this.formulario.setValue({
       torre: casa.torre ?? '',
-      numero: casa.numero,
-      cuposParqueadero: casa.cuposParqueadero ?? 0
+      numero: casa.numero
     });
   }
 
   cancelarEdicion(): void {
     this.editando = null;
-    this.formulario.reset({ torre: '', numero: '', cuposParqueadero: 0 });
+    // Vuelve al tipo por defecto, no a vacio: casi todas las altas seguidas
+    // son del mismo tipo, y obligar a reelegirlo en cada una es un toque de mas.
+    this.formulario.reset({ torre: this.tipoPorDefecto(), numero: '' });
   }
 
   alternarEstado(casa: Casa): void {
@@ -160,6 +167,17 @@ export class CasasComponent implements OnInit {
         this.error = fallo.error?.mensaje ?? 'No pudimos habilitarla.';
       }
     });
+  }
+
+  /**
+   * CASA por defecto: es la mayoria en un conjunto de casas, y el nombre del
+   * modulo lo dice. Si el administrador la ocultara desde Configuracion, cae
+   * a la primera que quede — un default que apunta a una opcion inexistente
+   * dejaria el select en blanco y el formulario invalido sin decir por que.
+   */
+  private tipoPorDefecto(): string {
+    const casa = this.tiposVivienda.find(t => t.codigo === 'CASA');
+    return casa?.codigo ?? this.tiposVivienda[0]?.codigo ?? '';
   }
 
   // ── Estado de pantalla ───────────────────────────────────────────────────

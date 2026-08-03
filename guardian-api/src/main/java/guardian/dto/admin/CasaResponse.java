@@ -11,7 +11,6 @@ public class CasaResponse {
     private String identificador;
     private String torre;
     private String numero;
-    private Integer cuposParqueadero;
     private String activo;
 
     /** Llave del administrador: gana sobre "activo". */

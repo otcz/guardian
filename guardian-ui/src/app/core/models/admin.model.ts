@@ -13,7 +13,6 @@ export interface Casa {
   identificador: string;
   torre: string | null;
   numero: string;
-  cuposParqueadero: number | null;
   activo: string;
   bloqueado: string;
   motivoBloqueo: string | null;
@@ -24,7 +23,6 @@ export interface Casa {
 export interface CasaRequest {
   torre?: string | null;
   numero: string;
-  cuposParqueadero?: number | null;
   observaciones?: string | null;
 }
 
@@ -225,5 +223,7 @@ export interface RegistroHogarRequest {
   apellidos: string;
   fechaNacimiento?: string | null;
   telefono?: string | null;
+  /** Obligatorio: quien se registra por acá siempre sale con cuenta. */
+  email: string;
   parentesco: string;
 }

@@ -58,7 +58,15 @@ public class GdCasa extends BaseEntity {
     @Column(name = "NUMERO", nullable = false, length = 20)
     private String numero;
 
-    /** Cupos de parqueadero asignados. Se usara para el control de cupos en F4. */
+    /**
+     * Cupos de parqueadero asignados.
+     *
+     * <p>HOY NO SE EXPONE. Se saco del formulario y de los DTO porque nadie lo
+     * llenaba ni lo leia: pedirle un dato al administrador que el sistema no
+     * usa solo alarga el alta. El campo y su columna se quedan —ddl-auto no
+     * borra columnas— para el control de cupos de F4, que es cuando el dato
+     * empieza a significar algo.</p>
+     */
     @Column(name = "CUPOS_PARQUEADERO")
     private Integer cuposParqueadero;
 }

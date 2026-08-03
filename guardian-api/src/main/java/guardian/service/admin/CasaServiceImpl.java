@@ -127,7 +127,6 @@ public class CasaServiceImpl implements CasaService {
         casa.setTorre(request.getTorre().trim());
         casa.setNumero(request.getNumero().trim());
         casa.setIdentificador(identificador);
-        casa.setCuposParqueadero(request.getCuposParqueadero());
         casa.setObservaciones(request.getObservaciones());
     }
 
@@ -137,7 +136,6 @@ public class CasaServiceImpl implements CasaService {
                 .identificador(casa.getIdentificador())
                 .torre(casa.getTorre())
                 .numero(casa.getNumero())
-                .cuposParqueadero(casa.getCuposParqueadero())
                 .activo(casa.getActivo())
                 .bloqueado(casa.getBloqueado())
                 .motivoBloqueo(casa.getMotivoBloqueo())
