@@ -309,7 +309,8 @@
        persona que ya se está mirando. -->
   <!-- El título dice lo que la hoja hace ahora: cambiar el PIN. Cuando la
        persona todavía no tiene cuenta, dice lo que hace en ese caso. -->
-  <gd-hoja [abierta]="!!gestionandoAcceso"
+  <gd-hoja class="compacta"
+           [abierta]="!!gestionandoAcceso"
            [titulo]="gestionandoAcceso && tieneCuenta(gestionandoAcceso)
              ? 'Cambiar el PIN' : 'Dar acceso a la aplicación'"
            [subtitulo]="gestionandoAcceso?.nombreCompleto || ''"

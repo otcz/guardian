@@ -480,6 +480,16 @@ code {
   word-break: break-all;
 }
 
+/* El diálogo se ajusta a lo que pide: dos campos de cuatro dígitos y un botón.
+   Los 560px del resto de las hojas son para formularios con varios campos; acá
+   solo dejaban aire a los lados. En móvil NO aplica — ahí la hoja sube desde
+   abajo a todo el ancho, y estrecharla la volvería una tarjeta flotante. */
+@media (min-width: 821px) {
+  :host ::ng-deep gd-hoja.compacta .hoja {
+    max-width: 440px;
+  }
+}
+
 /* Los dos campos y el botón EN UNA FILA. Son cuatro dígitos cada uno: apilados
    dejaban dos cajas angostas con media hoja de vacío a la derecha. */
 .asignar-pin {
@@ -506,12 +516,20 @@ code {
      estado. La hoja tiene exactamente dos ejes y este no abre un tercero. */
   .principal {
     flex: 0 0 auto;
-    min-height: calc(var(--tactil) + var(--e-2));
+    min-height: var(--tactil);
   }
 
+  /* --tactil justo, sin el extra: 44px siguen siendo el dedo, y los 52 que
+     tenían hacían la fila más alta de lo que un PIN necesita. */
   input.pin {
     width: 100%;
-    min-height: calc(var(--tactil) + var(--e-2));
+    min-height: var(--tactil);
+    /* El 0.6em global está calculado para el campo a todo el ancho de una
+       tarjeta de login. En este diálogo estrecho, cuatro dígitos con ese
+       espaciado miden 136px dentro de una caja de 126 y el último se sale.
+       0.3em mantiene los dígitos separados y legibles, y caben. */
+    letter-spacing: 0.3em;
+    text-indent: 0.3em;
     padding: var(--e-2);
     color: var(--text-strong);
     background: var(--bg-soft);
