@@ -140,6 +140,8 @@ public final class MensajesGlobales {
      * El titular es quien administra la familia: una casa sin el deja a todos
      * sus residentes viendo un boton que no funciona.
      */
+    public static final String DOCUMENTO_NO_ENCONTRADO =
+            "No hay nadie registrado con ese documento en el conjunto.";
     public static final String CASA_NECESITA_TITULAR =
             "Toda casa necesita un titular, que es quien administra la familia. "
                     + "Registra primero al titular de esta casa.";

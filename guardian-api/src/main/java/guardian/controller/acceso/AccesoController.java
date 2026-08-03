@@ -6,6 +6,7 @@ import guardian.dto.acceso.FichaVerificacionResponse;
 import guardian.dto.acceso.PorteriasGaritaResponse;
 import guardian.dto.acceso.PresenciaResponse;
 import guardian.dto.acceso.RegistrarAccesoRequest;
+import guardian.dto.acceso.VerificarDocumentoRequest;
 import guardian.dto.acceso.VerificarQrRequest;
 import guardian.security.UsuarioActual;
 import guardian.service.acceso.AccesoService;
@@ -62,6 +63,20 @@ public class AccesoController {
     public ResponseEntity<FichaVerificacionResponse> verificar(
             @Valid @RequestBody VerificarQrRequest request) {
         return ResponseEntity.ok(accesoService.verificar(request, usuarioActual.obtener()));
+    }
+
+    /**
+     * Paso 1, por el otro camino: identificar por documento.
+     *
+     * <p>Lo usan los tres lectores de la porteria — el de codigo de barras, la
+     * cedula tecleada y la huella—, y devuelve la MISMA ficha: lo que cambia es
+     * como se llego a ella.</p>
+     */
+    @PostMapping(ApiEndpoint.ACCESO_VERIFICAR_DOCUMENTO)
+    public ResponseEntity<FichaVerificacionResponse> verificarPorDocumento(
+            @Valid @RequestBody VerificarDocumentoRequest request) {
+        return ResponseEntity.ok(
+                accesoService.verificarPorDocumento(request, usuarioActual.obtener()));
     }
 
     /** Paso 2: el guardia confirma a pie o con placa. */

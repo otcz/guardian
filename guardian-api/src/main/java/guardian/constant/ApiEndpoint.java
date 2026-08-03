@@ -20,6 +20,8 @@ public final class ApiEndpoint {
     /** Operacion de la garita — rol GUARDIA. */
     public static final String ACCESO = API + "/acceso";
     public static final String ACCESO_VERIFICAR = "/verificar";
+    /** Identificacion por documento: lector de codigo de barras, cedula tecleada o huella. */
+    public static final String ACCESO_VERIFICAR_DOCUMENTO = "/verificar-documento";
     public static final String ACCESO_REGISTRAR = "/registrar";
     public static final String ACCESO_EVENTOS = "/eventos";
     /** Las porterias que la tablet puede elegir, y cual le toca a quien entro. */

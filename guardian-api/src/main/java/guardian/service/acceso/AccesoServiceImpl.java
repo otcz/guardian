@@ -6,6 +6,7 @@ import guardian.dto.acceso.AccesoEventoResponse;
 import guardian.dto.acceso.FichaVerificacionResponse;
 import guardian.dto.acceso.RegistrarAccesoRequest;
 import guardian.dto.acceso.VehiculoResumen;
+import guardian.dto.acceso.VerificarDocumentoRequest;
 import guardian.dto.acceso.VerificarQrRequest;
 import guardian.entity.acceso.GdAccesoEvento;
 import guardian.entity.acceso.GdCredencialQr;
@@ -17,6 +18,7 @@ import guardian.entity.vehiculo.GdVehiculo;
 import guardian.exception.GuardianException;
 import guardian.repository.GdAccesoEventoRepository;
 import guardian.repository.GdCredencialQrRepository;
+import guardian.repository.GdPersonaRepository;
 import guardian.repository.GdResidenteCasaRepository;
 import guardian.repository.GdVehiculoRepository;
 import guardian.repository.spec.AccesoEventoSpecs;
@@ -54,6 +56,7 @@ public class AccesoServiceImpl implements AccesoService {
 
     private final CredencialQrService credencialQrService;
     private final GdCredencialQrRepository credencialRepository;
+    private final GdPersonaRepository personaRepository;
     private final GdResidenteCasaRepository residenteCasaRepository;
     private final GdVehiculoRepository vehiculoRepository;
     private final EtiquetaCatalogoService etiquetaCatalogoService;
@@ -128,6 +131,55 @@ public class AccesoServiceImpl implements AccesoService {
                 .vehiculos(vehiculosDe(casa.orElse(null)))
                 .payload(request.getPayload())
                 .build();
+    }
+
+    /**
+     * Identificacion por documento.
+     *
+     * <p>Resuelve a la persona y despues DELEGA en {@link #verificar}: las
+     * reglas de bloqueo, casa, presencia y registro del intento son las mismas
+     * y no pueden divergir. Reconstruir aca esa evaluacion seria tener dos
+     * porterias con criterios que se separan al primer cambio.</p>
+     */
+    @Override
+    @Transactional
+    public FichaVerificacionResponse verificarPorDocumento(VerificarDocumentoRequest request,
+                                                           UsuarioAutenticado guardia) {
+        String documento = request.getDocumento().trim();
+
+        Optional<GdPersona> encontrada = personaRepository
+                .findByConjuntoIdAndDocumento(guardia.getConjuntoId(), documento);
+
+        if (!encontrada.isPresent()) {
+            // Queda registrado igual: alguien probando cedulas en la porteria
+            // es exactamente lo que el administrador necesita poder ver.
+            registrarDenegacion(null, null, Codigos.MOTIVO_FIRMA_INVALIDA,
+                    guardia, request.getPuntoAccesoId());
+            return fichaDenegada(Codigos.MOTIVO_FIRMA_INVALIDA,
+                    MensajesGlobales.DOCUMENTO_NO_ENCONTRADO);
+        }
+
+        GdPersona persona = encontrada.get();
+
+        Optional<GdCredencialQr> credencial = credencialRepository
+                .findFirstByPersonaIdAndTipoAndActivoOrderByIdDesc(
+                        persona.getId(), Codigos.CREDENCIAL_PERMANENTE, Codigos.SI);
+
+        if (!credencial.isPresent()) {
+            // Existe en el sistema pero sin credencial vigente: casi siempre le
+            // falta la foto. Se muestra QUIEN es —el guardia ya lo tiene
+            // enfrente— y por que no pasa, en vez de un "no encontrado" que lo
+            // dejaria buscando de nuevo.
+            registrarDenegacion(null, casaDe(persona).orElse(null),
+                    Codigos.MOTIVO_CREDENCIAL_REVOCADA, guardia, request.getPuntoAccesoId());
+            return fichaDenegadaConIdentidad(persona, casaDe(persona).orElse(null),
+                    Codigos.MOTIVO_CREDENCIAL_REVOCADA);
+        }
+
+        VerificarQrRequest comoQr = new VerificarQrRequest();
+        comoQr.setPayload(credencialQrService.construirPayload(credencial.get()));
+        comoQr.setPuntoAccesoId(request.getPuntoAccesoId());
+        return verificar(comoQr, guardia);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
