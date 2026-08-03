@@ -3,7 +3,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { AdminService } from '../../../core/services/admin.service';
-import { Casa } from '../../../core/models/admin.model';
+import { Casa, Parametro } from '../../../core/models/admin.model';
 
 @Component({
   selector: 'gd-casas',
@@ -23,8 +23,10 @@ export class CasasComponent implements OnInit {
   /** Casa en edición. Null = el formulario está en modo alta. */
   editando: Casa | null = null;
 
+  tiposVivienda: Parametro[] = [];
+
   readonly formulario = this.fb.nonNullable.group({
-    torre: [''],
+    torre: ['', [Validators.required]],
     numero: ['', [Validators.required]],
     cuposParqueadero: [0]
   });
@@ -33,6 +35,7 @@ export class CasasComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargar();
+    this.admin.parametros('TIPO_VIVIENDA').subscribe(t => (this.tiposVivienda = t));
   }
 
   cargar(): void {

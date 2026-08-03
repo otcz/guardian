@@ -29,6 +29,7 @@ public class CasaServiceImpl implements CasaService {
     private final GdConjuntoRepository conjuntoRepository;
     private final GdResidenteCasaRepository residenteCasaRepository;
     private final GdVehiculoRepository vehiculoRepository;
+    private final ParametroService parametroService;
 
     @Override
     @Transactional(readOnly = true)
@@ -42,6 +43,7 @@ public class CasaServiceImpl implements CasaService {
     @Override
     @Transactional
     public CasaResponse crear(CasaRequest request, UsuarioAutenticado ejecutor) {
+        parametroService.exigirCodigoValido(Codigos.GRUPO_TIPO_VIVIENDA, request.getTorre());
         String identificador = construirIdentificador(request);
 
         if (casaRepository.existsByConjuntoIdAndIdentificador(ejecutor.getConjuntoId(), identificador)) {
@@ -66,6 +68,7 @@ public class CasaServiceImpl implements CasaService {
     @Transactional
     public CasaResponse actualizar(Long id, CasaRequest request, UsuarioAutenticado ejecutor) {
         GdCasa casa = obtener(id, ejecutor.getConjuntoId());
+        parametroService.exigirCodigoValido(Codigos.GRUPO_TIPO_VIVIENDA, request.getTorre());
         String identificador = construirIdentificador(request);
 
         casaRepository.findByConjuntoIdAndIdentificador(ejecutor.getConjuntoId(), identificador)
@@ -110,14 +113,18 @@ public class CasaServiceImpl implements CasaService {
      * ya formateado porque es lo que el guardia lee en pantalla, y armarlo en
      * cada consulta lo haria depender de que capa lo pinte.
      */
+    /**
+     * "CASA-101", "APARTAMENTO-301". Es lo que lee el guardia en la ficha, asi
+     * que se arma con el CODIGO del catalogo y no con su etiqueta: renombrar
+     * "Casa" a "Casa unifamiliar" desde Configuracion no puede reescribir el
+     * identificador de doscientas unidades ya emitidas.
+     */
     private String construirIdentificador(CasaRequest request) {
-        String torre = request.getTorre() == null ? "" : request.getTorre().trim();
-        String numero = request.getNumero().trim();
-        return torre.isEmpty() ? numero : torre + "-" + numero;
+        return request.getTorre().trim() + "-" + request.getNumero().trim();
     }
 
     private void aplicar(GdCasa casa, CasaRequest request, String identificador) {
-        casa.setTorre(request.getTorre() == null ? null : request.getTorre().trim());
+        casa.setTorre(request.getTorre().trim());
         casa.setNumero(request.getNumero().trim());
         casa.setIdentificador(identificador);
         casa.setCuposParqueadero(request.getCuposParqueadero());

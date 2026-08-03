@@ -5,12 +5,15 @@
         [class.editando]="editando">
     <div class="campo">
       <label for="torre">
-        Edificio
+        Tipo
         <i class="pi pi-info-circle ayuda"
-           pTooltip="Vacío si no hay torres"
+           pTooltip="¿Falta alguno? Agrégalo en Configuración"
            tooltipPosition="top"></i>
       </label>
-      <input id="torre" type="text" formControlName="torre" placeholder="Ej: Torre A">
+      <select id="torre" formControlName="torre">
+        <option value="">Selecciona…</option>
+        <option *ngFor="let t of tiposVivienda" [value]="t.codigo">{{ t.valor }}</option>
+      </select>
     </div>
 
     <div class="campo">

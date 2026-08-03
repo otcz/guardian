@@ -101,6 +101,7 @@ public final class Codigos {
     public static final String GRUPO_MOTIVO_DENEGACION = "MOTIVO_DENEGACION";
     public static final String GRUPO_TIPO_CREDENCIAL = "TIPO_CREDENCIAL";
     public static final String GRUPO_TIPO_DOCUMENTO = "TIPO_DOCUMENTO";
+    public static final String GRUPO_TIPO_VIVIENDA = "TIPO_VIVIENDA";
 
     /**
      * Los grupos que el administrador puede ampliar desde el panel.
@@ -114,6 +115,7 @@ public final class Codigos {
             .unmodifiableList(Arrays.asList(
                     GRUPO_PARENTESCO,
                     GRUPO_TIPO_DOCUMENTO,
+                    GRUPO_TIPO_VIVIENDA,
                     GRUPO_TIPO_VEHICULO,
                     GRUPO_MARCA_VEHICULO,
                     GRUPO_COLOR_VEHICULO));

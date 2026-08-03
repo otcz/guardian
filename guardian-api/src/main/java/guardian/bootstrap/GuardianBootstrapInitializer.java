@@ -163,6 +163,13 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
                 new Opcion("INVITADO", "Invitado"),
                 new Opcion("OTRO", "Otro")));
 
+        // Casa o apartamento. Es lo que antecede al numero en el identificador
+        // que lee el guardia — "CASA-101", "APARTAMENTO-301" — asi que los
+        // codigos se eligieron legibles: van a salir en pantalla tal cual.
+        creados += sembrarGrupo(Codigos.GRUPO_TIPO_VIVIENDA, false, Arrays.asList(
+                new Opcion("CASA", "Casa"),
+                new Opcion("APARTAMENTO", "Apartamento")));
+
         creados += sembrarGrupo(Codigos.GRUPO_TIPO_VEHICULO, false, Arrays.asList(
                 new Opcion("CARRO", "Carro"),
                 new Opcion("MOTO", "Moto"),

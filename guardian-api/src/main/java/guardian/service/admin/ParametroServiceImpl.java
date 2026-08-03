@@ -31,6 +31,9 @@ public class ParametroServiceImpl implements ParametroService {
 
     private static Map<String, String[]> catalogo() {
         Map<String, String[]> mapa = new LinkedHashMap<>();
+        mapa.put(Codigos.GRUPO_TIPO_VIVIENDA, new String[]{
+                "Tipos de vivienda",
+                "Casa o apartamento. Antecede al numero en el identificador."});
         mapa.put(Codigos.GRUPO_TIPO_VEHICULO, new String[]{
                 "Tipos de vehiculo",
                 "Que se declara al registrar un vehiculo del hogar."});
