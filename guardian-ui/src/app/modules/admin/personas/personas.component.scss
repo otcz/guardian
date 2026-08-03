@@ -14,6 +14,33 @@
   container-type: inline-size;
 }
 
+/* El formulario dice qué está haciendo antes de pedir el primer dato. Sin
+   título, alta y edición se ven idénticas y no hay forma de saber sobre quién
+   se está escribiendo. */
+.titulo-formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: var(--e-3);
+  border-bottom: 1px solid var(--border-default);
+
+  h2 {
+    font-size: var(--t-lg);
+  }
+
+  p {
+    margin: 0;
+    font-size: var(--t-sm);
+  }
+}
+
+/* El asterisco de siempre. No es texto de ayuda —de esos no lleva ninguno el
+   formulario— sino la marca que todo el mundo reconoce sin explicación. */
+.req {
+  color: var(--deny);
+  font-weight: 700;
+}
+
 .grupo {
   display: flex;
   flex-direction: column;

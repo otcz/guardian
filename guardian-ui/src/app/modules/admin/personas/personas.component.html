@@ -1,10 +1,10 @@
 <div class="gd-page">
   <div class="encabezado">
     <h1>Personas</h1>
-    <button type="button" class="principal"
-            (click)="mostrarAlta ? cancelarEdicion() : (mostrarAlta = true)">
-      <i class="pi" [ngClass]="mostrarAlta ? 'pi-times' : 'pi-user-plus'"></i>
-      {{ mostrarAlta ? 'Cancelar' : 'Registrar' }}
+    <button type="button" class="principal" *ngIf="!mostrarAlta"
+            (click)="mostrarAlta = true">
+      <i class="pi pi-user-plus"></i>
+      Registrar
     </button>
   </div>
 
@@ -17,6 +17,12 @@
        Con todo revuelto en una fila que se acomoda sola, el orden cambia con
        el ancho de la ventana y hay que buscar cada campo. -->
   <form class="alta gd-card" *ngIf="mostrarAlta" [formGroup]="formulario" (ngSubmit)="guardar()">
+
+    <header class="titulo-formulario">
+      <h2>{{ editando ? 'Editar persona' : 'Registrar persona' }}</h2>
+      <p class="gd-muted" *ngIf="editando">{{ editando.nombreCompleto }}</p>
+      <p class="gd-muted" *ngIf="!editando">Los campos con * son obligatorios.</p>
+    </header>
 
     <div class="grupo identidad">
       <h3>Quién es</h3>
@@ -31,24 +37,24 @@
              elegidos para que las dos filas cierren completas — ver el .scss. -->
         <div class="campos">
           <div class="campo medio">
-            <label for="nombres">Nombres</label>
+            <label for="nombres">Nombres <span class="req" aria-hidden="true">*</span></label>
             <input id="nombres" type="text" formControlName="nombres">
           </div>
 
           <div class="campo medio">
-            <label for="apellidos">Apellidos</label>
+            <label for="apellidos">Apellidos <span class="req" aria-hidden="true">*</span></label>
             <input id="apellidos" type="text" formControlName="apellidos">
           </div>
 
           <div class="campo">
-            <label for="tipoDocumento">Tipo</label>
+            <label for="tipoDocumento">Tipo <span class="req" aria-hidden="true">*</span></label>
             <select id="tipoDocumento" formControlName="tipoDocumento">
               <option *ngFor="let t of tiposDocumento" [value]="t.codigo">{{ t.valor }}</option>
             </select>
           </div>
 
           <div class="campo">
-            <label for="documento">Número</label>
+            <label for="documento">Número <span class="req" aria-hidden="true">*</span></label>
             <input id="documento" type="text" formControlName="documento"
                    placeholder="Ej: 1020304050">
           </div>
@@ -72,6 +78,7 @@
         <div class="campo medio">
           <label for="email">
             Correo
+            <span class="req" *ngIf="exigeCorreo" aria-hidden="true">*</span>
             <i class="pi pi-info-circle ayuda" *ngIf="exigeCorreo"
                pTooltip="Por aquí recupera su PIN"
                tooltipPosition="top"></i>

@@ -149,9 +149,7 @@ public class PersonaServiceImpl implements PersonaService {
         // La via menos obvia de escalada: el alta de persona acepta el rol en
         // el mismo request y crea la cuenta de un tiron. Quien blinde solo
         // UsuarioServiceImpl deja esta puerta abierta.
-        if (Codigos.ROL_SUPER_ADMIN.equals(request.getRolUsuario())) {
-            throw GuardianException.sinPermiso(MensajesGlobales.ROL_NO_ASIGNABLE);
-        }
+        Autoridad.exigirRolAsignablePor(ejecutor, request.getRolUsuario());
         parametroService.exigirCodigoValido(Codigos.GRUPO_ROL, request.getRolUsuario());
 
         // Sin correo la cuenta nace sin salida: quien olvide su clave solo

@@ -66,7 +66,7 @@ export class PersonasComponent implements OnInit {
 
     this.admin.casas().subscribe(casas => (this.casas = casas));
     this.admin.parametros('PARENTESCO').subscribe(p => (this.parentescos = p));
-    this.admin.parametros('ROL').subscribe(r => (this.roles = r));
+    this.admin.parametros('ROL').subscribe(r => (this.roles = this.asignables(r)));
     this.admin.parametros('TIPO_DOCUMENTO').subscribe(t => (this.tiposDocumento = t));
 
     // debounce para no disparar una consulta por cada tecla.
@@ -545,6 +545,23 @@ export class PersonasComponent implements OnInit {
 
   operativa(persona: Persona): boolean {
     return this.activa(persona) && !this.bloqueada(persona);
+  }
+
+  /**
+   * Los roles que ESTE administrador puede repartir. Espejo de
+   * `Autoridad.rolesAsignablesPor` en el backend, que es quien decide de
+   * verdad: acá solo se evita ofrecer una opción que va a responder 403
+   * después de llenar todo el formulario.
+   *
+   * Nadie nombra un par suyo: un administrador que puede crear otro
+   * administrador convierte una cuenta comprometida en varias, y quitarle el
+   * acceso al primero ya no cierra nada.
+   */
+  private asignables(roles: Parametro[]): Parametro[] {
+    if (this.auth.tieneRol('SUPER_ADMIN')) {
+      return roles;
+    }
+    return roles.filter(r => r.codigo !== 'ADMIN' && r.codigo !== 'SUPER_ADMIN');
   }
 
   /** El parentesco solo aplica si la persona vive en una casa. */

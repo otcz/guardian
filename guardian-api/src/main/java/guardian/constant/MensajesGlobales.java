@@ -68,6 +68,8 @@ public final class MensajesGlobales {
             "Esa sede esta desactivada. Activala antes de entrar.";
     public static final String ROL_NO_ASIGNABLE =
             "Ese rol no se puede asignar desde aca.";
+    public static final String ADMIN_SOLO_SUPER_ADMIN =
+            "Solo el super administrador puede nombrar administradores.";
 
     // ── Acceso ───────────────────────────────────────────────────────────────
     public static final String QR_NO_RECONOCIDO =

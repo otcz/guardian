@@ -148,10 +148,14 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
     private void sembrarParametros() {
         int creados = 0;
 
+        // Residente primero: es la inmensa mayoria de las cuentas de un
+        // conjunto. El orden de un combo no es cosmetico — lo que queda arriba
+        // es lo que se elige sin pensar, y equivocarse hacia "Administrador"
+        // reparte permisos que nadie queria dar.
         creados += sembrarGrupo(Codigos.GRUPO_ROL, true, Arrays.asList(
-                new Opcion(Codigos.ROL_ADMIN, "Administrador"),
+                new Opcion(Codigos.ROL_RESIDENTE, "Residente"),
                 new Opcion(Codigos.ROL_GUARDIA, "Guardia"),
-                new Opcion(Codigos.ROL_RESIDENTE, "Residente")));
+                new Opcion(Codigos.ROL_ADMIN, "Administrador")));
 
         creados += sembrarGrupo(Codigos.GRUPO_PARENTESCO, false, Arrays.asList(
                 // TITULAR va protegido: la validacion de titular unico por casa
@@ -261,7 +265,11 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
         int orden = 1;
 
         for (Opcion opcion : opciones) {
-            if (!parametroRepository.existsByGrupoAndCodigo(grupo, opcion.codigo)) {
+            GdParametro existente = parametroRepository
+                    .findByGrupoAndCodigo(grupo, opcion.codigo)
+                    .orElse(null);
+
+            if (existente == null) {
                 GdParametro parametro = new GdParametro();
                 parametro.setGrupo(grupo);
                 parametro.setCodigo(opcion.codigo);
@@ -274,6 +282,20 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
 
                 parametroRepository.save(parametro);
                 creados++;
+
+            } else if (!Integer.valueOf(orden).equals(existente.getOrden())) {
+                // El ORDEN se reconcilia en cada arranque. Es lo UNICO de una
+                // fila ya sembrada que este archivo pisa, y puede hacerlo
+                // porque no hay pantalla para reordenar: nunca va a estar
+                // borrando una decision del administrador. El texto si es suyo
+                // —lo puede renombrar desde Configuracion— y no se toca.
+                //
+                // Sin esto, cambiar el orden aca solo tendria efecto en
+                // instalaciones nuevas: las que ya existen se quedarian con el
+                // orden del dia que se sembraron.
+                existente.setOrden(orden);
+                existente.setUsuarioModificador(EJECUTOR);
+                parametroRepository.save(existente);
             }
             orden++;
         }

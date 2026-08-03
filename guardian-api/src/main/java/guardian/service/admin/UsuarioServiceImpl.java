@@ -9,6 +9,7 @@ import guardian.entity.persona.GdUsuario;
 import guardian.exception.GuardianException;
 import guardian.repository.GdPersonaRepository;
 import guardian.repository.GdUsuarioRepository;
+import guardian.security.Autoridad;
 import guardian.security.UsuarioAutenticado;
 import guardian.service.auth.ValidadorPin;
 import lombok.RequiredArgsConstructor;
@@ -41,24 +42,10 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * SUPER_ADMIN no se asigna desde ningun panel.
-     *
-     * <p>No basta con no sembrarlo en el catalogo: el dia que alguien lo
-     * agregue "para que aparezca en el combo", cualquier administrador de
-     * cualquier sede se asciende con un PATCH y pasa a ver todas las demas.
-     * Es un blindaje doble a proposito.</p>
-     */
-    private void exigirRolAsignable(String rol) {
-        if (Codigos.ROL_SUPER_ADMIN.equals(rol)) {
-            throw GuardianException.sinPermiso(MensajesGlobales.ROL_NO_ASIGNABLE);
-        }
-    }
-
     @Override
     @Transactional
     public UsuarioResponse crear(UsuarioRequest request, UsuarioAutenticado ejecutor) {
-        exigirRolAsignable(request.getRol());
+        Autoridad.exigirRolAsignablePor(ejecutor, request.getRol());
         parametroService.exigirCodigoValido(Codigos.GRUPO_ROL, request.getRol());
 
         GdPersona persona = obtenerPersona(request.getPersonaId(), ejecutor.getConjuntoId());
@@ -88,7 +75,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional
     public UsuarioResponse cambiarRol(Long id, String rol, UsuarioAutenticado ejecutor) {
-        exigirRolAsignable(rol);
+        Autoridad.exigirRolAsignablePor(ejecutor, rol);
         parametroService.exigirCodigoValido(Codigos.GRUPO_ROL, rol);
 
         // Sin chequeo de autogestion: obtener() ya devuelve 404 sobre la
