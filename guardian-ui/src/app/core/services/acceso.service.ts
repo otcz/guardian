@@ -12,20 +12,37 @@ import {
   RegistrarAccesoRequest,
   Resultado
 } from '../models/acceso.model';
+import { PorteriaActivaService } from './porteria-activa.service';
 
 @Injectable({ providedIn: 'root' })
 export class AccesoService {
 
   private readonly base = `${environment.apiUrl}/acceso`;
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly porteriaActiva: PorteriaActivaService
+  ) {}
 
   presencia(): Observable<Presencia> {
     return this.http.get<Presencia>(`${this.base}/presencia`);
   }
 
+  /**
+   * La portería de ESTA tablet viaja en cada llamada.
+   *
+   * <p>Se pone acá y no en cada componente para que no exista forma de mandar
+   * una verificación sin decir por dónde: con dos porterías activas, el evento
+   * que no la trae queda sin punto de acceso y la bitácora deja de poder
+   * responder por dónde pasó nadie.</p>
+   */
+  private get puntoAccesoId(): number | null {
+    return this.porteriaActiva.id;
+  }
+
   verificar(payload: string): Observable<FichaVerificacion> {
-    return this.http.post<FichaVerificacion>(`${this.base}/verificar`, { payload });
+    return this.http.post<FichaVerificacion>(
+      `${this.base}/verificar`, { payload, puntoAccesoId: this.puntoAccesoId });
   }
 
   /**
@@ -37,11 +54,12 @@ export class AccesoService {
    */
   verificarPorDocumento(documento: string): Observable<FichaVerificacion> {
     return this.http.post<FichaVerificacion>(
-      `${this.base}/verificar-documento`, { documento });
+      `${this.base}/verificar-documento`, { documento, puntoAccesoId: this.puntoAccesoId });
   }
 
   registrar(request: RegistrarAccesoRequest): Observable<AccesoEvento> {
-    return this.http.post<AccesoEvento>(`${this.base}/registrar`, request);
+    return this.http.post<AccesoEvento>(
+      `${this.base}/registrar`, { ...request, puntoAccesoId: this.puntoAccesoId });
   }
 
   eventos(filtros: {

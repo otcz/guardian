@@ -41,3 +41,45 @@
   font-size: 0.75rem;
   color: var(--deny);
 }
+
+/* La celda ES el botón: el número de guardias y la acción de cambiarlo son la
+   misma cosa. Un icono aparte en la columna de acciones obligaría a adivinar
+   cuál de los tres abre esto. */
+.guardias {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
+  min-height: var(--tactil);
+  padding: 0 var(--e-2);
+  font-size: var(--t-sm);
+  font-weight: 700;
+  color: var(--text-strong);
+  background: none;
+  border: none;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+
+  i {
+    color: var(--text-muted);
+  }
+
+  .ninguno {
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      background: var(--bg-soft);
+    }
+  }
+}
+
+/* Asignado pero ya sin cuenta de guardia. Va en su propia línea y en gris: es
+   el estado de esa fila, no una alarma. */
+.ya-no {
+  display: block;
+  font-size: var(--t-xs);
+  font-weight: 500;
+  color: var(--warn);
+}

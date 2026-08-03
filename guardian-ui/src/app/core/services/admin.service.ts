@@ -8,6 +8,7 @@ import {
   Casa,
   CasaRequest,
   GrupoParametro,
+  GuardiaPorteria,
   Parametro,
   Persona,
   PersonaRegistrada,
@@ -75,6 +76,19 @@ export class AdminService {
   cambiarEstadoPorteria(id: number, activar: boolean): Observable<Porteria> {
     const accion = activar ? 'activar' : 'desactivar';
     return this.http.patch<Porteria>(`${this.base}/porterias/${id}/${accion}`, {});
+  }
+
+  guardiasDePorteria(id: number): Observable<GuardiaPorteria[]> {
+    return this.http.get<GuardiaPorteria[]>(`${this.base}/porterias/${id}/guardias`);
+  }
+
+  /**
+   * Reemplazo total: quedan EXACTAMENTE los que se manden. Con altas y bajas
+   * sueltas, dos administradores editando a la vez dejan un estado que ninguno
+   * de los dos eligió.
+   */
+  asignarGuardias(id: number, personaIds: number[]): Observable<Porteria> {
+    return this.http.put<Porteria>(`${this.base}/porterias/${id}/guardias`, { personaIds });
   }
 
   // ── Personas ─────────────────────────────────────────────────────────────

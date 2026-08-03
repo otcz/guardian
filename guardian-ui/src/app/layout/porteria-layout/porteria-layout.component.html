@@ -9,10 +9,22 @@
       <div class="titulo">
         <i class="pi pi-shield"></i>
         <div class="textos">
-          <strong>PORTERÍA</strong>
+          <!-- El nombre de la puerta ES el título cuando hay más de una: el
+               guardia tiene que poder ver de reojo dónde está registrando, sin
+               abrir nada. Con una sola portería no aporta y no se muestra. -->
+          <strong>{{ porteria && puedeCambiar ? porteria.nombre : 'PORTERÍA' }}</strong>
           <small *ngIf="sesion">{{ sesion.nombreCompleto }}</small>
         </div>
       </div>
+
+      <!-- Cambiar de puerta a mitad de turno: dos toques, no uno. Es una
+           decisión rara y tocarla sin querer marcaría mal todo el turno. -->
+      <button type="button" class="cambiar-porteria" *ngIf="puedeCambiar"
+              (click)="abrirEleccion()"
+              pTooltip="Cambiar de portería" tooltipPosition="bottom"
+              aria-label="Cambiar de portería">
+        <i class="pi pi-sync"></i>
+      </button>
     </div>
 
     <div class="acciones">
@@ -33,4 +45,27 @@
   <main>
     <router-outlet></router-outlet>
   </main>
+
+  <!-- Se resuelve ANTES del primer escaneo, nunca entre el código y el
+       veredicto. Con una sola portería activa el guardia no ve esto jamás. -->
+  <gd-hoja [abierta]="eligiendo"
+           titulo="¿En qué portería estás?"
+           subtitulo="Queda fija en esta tablet"
+           (cerrar)="cerrarEleccion()">
+
+    <div class="gd-lista">
+      <button type="button" class="gd-fila gd-presionable"
+              *ngFor="let p of opciones"
+              (click)="elegir(p)">
+        <i class="pi pi-shield" aria-hidden="true"></i>
+        <span class="etiqueta">
+          {{ p.nombre }}
+          <small *ngIf="p.direccion">{{ p.direccion }}</small>
+        </span>
+        <!-- La suya va marcada: es la que le asignó la administración. -->
+        <i class="pi pi-star-fill marca" *ngIf="p.asignada"
+           pTooltip="Es la tuya" tooltipPosition="left" aria-hidden="true"></i>
+      </button>
+    </div>
+  </gd-hoja>
 </div>

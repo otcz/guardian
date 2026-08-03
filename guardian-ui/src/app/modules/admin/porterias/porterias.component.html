@@ -51,6 +51,7 @@
         <th>Portería</th>
         <th>Dirección</th>
         <th>Vehículos</th>
+        <th>Guardias</th>
         <th>Registros</th>
         <th>Estado</th>
         <th></th>
@@ -65,6 +66,18 @@
              [ngClass]="permiteVehiculos(porteria) ? 'pi-car' : 'pi-user'"
              [pTooltip]="permiteVehiculos(porteria) ? 'Entran vehículos' : 'Solo a pie'"
              tooltipPosition="top"></i>
+        </td>
+        <!-- La celda ES el botón: el número y la acción de cambiarlo son la
+             misma cosa, y un icono aparte en la columna de acciones obligaría
+             a buscar cuál de los tres abre esto. -->
+        <td>
+          <button type="button" class="guardias" (click)="abrirGuardias(porteria)"
+                  [attr.aria-label]="'Guardias de ' + porteria.nombre"
+                  pTooltip="Asignar guardias" tooltipPosition="top">
+            <i class="pi pi-users" aria-hidden="true"></i>
+            <span *ngIf="porteria.guardias">{{ porteria.guardias }}</span>
+            <span class="ninguno" *ngIf="!porteria.guardias">Sin asignar</span>
+          </button>
         </td>
         <td>{{ porteria.registros }}</td>
         <td>
@@ -91,8 +104,50 @@
       </tr>
 
       <tr *ngIf="porterias.length === 0">
-        <td colspan="6" class="vacio">Todavía no hay porterías registradas.</td>
+        <td colspan="7" class="vacio">Todavía no hay porterías registradas.</td>
       </tr>
     </tbody>
   </table>
+
+  <!-- Lista de chequeo y no dos listas: marcar y desmarcar es la misma acción,
+       y se guarda de una sola vez. -->
+  <gd-hoja [abierta]="!!asignando"
+           titulo="Guardias de la portería"
+           [subtitulo]="asignando?.nombre || ''"
+           (cerrar)="asignando = null">
+
+    <p class="gd-muted" *ngIf="cargandoGuardias">Cargando…</p>
+
+    <div class="gd-vacio" *ngIf="!cargandoGuardias && guardias.length === 0">
+      <i class="pi pi-users"></i>
+      <p>Este conjunto todavía no tiene guardias. Créalos en Personas, con cuenta de rol Guardia.</p>
+    </div>
+
+    <div class="gd-lista" *ngIf="!cargandoGuardias && guardias.length">
+      <button type="button" class="gd-fila gd-presionable"
+              *ngFor="let g of guardias"
+              (click)="alternarMarcado(g)"
+              [attr.aria-pressed]="marcado(g)">
+        <i class="pi" [ngClass]="marcado(g) ? 'pi-check-square' : 'pi-stop'"
+           [class.marca]="marcado(g)" aria-hidden="true"></i>
+        <span class="etiqueta">
+          {{ g.nombreCompleto }}
+          <!-- Asignado pero ya sin cuenta de guardia: se ve para poder
+               quitarlo. Filtrarlo lo volvería invisible e imposible de
+               corregir desde la pantalla. -->
+          <small class="ya-no" *ngIf="!g.esGuardia">ya no es guardia</small>
+        </span>
+        <span class="gd-muted">{{ g.documento }}</span>
+      </button>
+    </div>
+
+    <div pie>
+      <button type="button" class="alterno" (click)="asignando = null">Cancelar</button>
+      <button type="button" class="principal" (click)="guardarGuardias()"
+              [disabled]="guardando || cargandoGuardias">
+        <i class="pi pi-check"></i>
+        Guardar<span *ngIf="cuantosMarcados"> ({{ cuantosMarcados }})</span>
+      </button>
+    </div>
+  </gd-hoja>
 </div>

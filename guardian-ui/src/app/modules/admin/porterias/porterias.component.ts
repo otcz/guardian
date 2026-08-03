@@ -3,7 +3,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { AdminService } from '../../../core/services/admin.service';
-import { Porteria } from '../../../core/models/admin.model';
+import { GuardiaPorteria, Porteria } from '../../../core/models/admin.model';
 
 /**
  * Las porterías del conjunto: por dónde se entra y se sale.
@@ -141,5 +141,79 @@ export class PorteriasComponent implements OnInit {
   campoInvalido(nombre: 'nombre' | 'direccion'): boolean {
     const campo = this.formulario.controls[nombre];
     return campo.invalid && campo.touched;
+  }
+
+  // ── Guardias asignados ───────────────────────────────────────────────────
+  //
+  // La asignación es el valor POR DEFECTO de lo que la tablet le propone al
+  // guardia, NO un candado: puede operar una puerta que no es la suya y queda
+  // registrado. Impedírselo dejaría gente esperando a las dos de la mañana.
+
+  /** Portería cuya lista de guardias está abierta. Null = hoja cerrada. */
+  asignando: Porteria | null = null;
+
+  guardias: GuardiaPorteria[] = [];
+  cargandoGuardias = false;
+
+  /** Marcados en la hoja. Un Set porque la pregunta es siempre "¿está?". */
+  private readonly marcados = new Set<number>();
+
+  abrirGuardias(porteria: Porteria): void {
+    this.asignando = porteria;
+    this.guardias = [];
+    this.marcados.clear();
+    this.cargandoGuardias = true;
+    this.error = null;
+
+    this.admin.guardiasDePorteria(porteria.id).subscribe({
+      next: guardias => {
+        this.guardias = guardias;
+        guardias.filter(g => g.asignado).forEach(g => this.marcados.add(g.personaId));
+        this.cargandoGuardias = false;
+      },
+      error: () => {
+        this.error = 'No pudimos cargar los guardias.';
+        this.cargandoGuardias = false;
+        this.asignando = null;
+      }
+    });
+  }
+
+  marcado(guardia: GuardiaPorteria): boolean {
+    return this.marcados.has(guardia.personaId);
+  }
+
+  alternarMarcado(guardia: GuardiaPorteria): void {
+    if (this.marcados.has(guardia.personaId)) {
+      this.marcados.delete(guardia.personaId);
+    } else {
+      this.marcados.add(guardia.personaId);
+    }
+  }
+
+  get cuantosMarcados(): number {
+    return this.marcados.size;
+  }
+
+  guardarGuardias(): void {
+    const porteria = this.asignando;
+    if (!porteria || this.guardando) {
+      return;
+    }
+
+    this.guardando = true;
+    this.error = null;
+
+    this.admin.asignarGuardias(porteria.id, [...this.marcados]).subscribe({
+      next: actualizada => {
+        this.porterias = this.porterias.map(p => (p.id === actualizada.id ? actualizada : p));
+        this.asignando = null;
+        this.guardando = false;
+      },
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos guardar los guardias.';
+        this.guardando = false;
+      }
+    });
   }
 }

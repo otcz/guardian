@@ -38,12 +38,32 @@ export interface Porteria {
   activo: string;
   /** Pasos registrados por acá. Dice si la portería está en uso real. */
   registros: number;
+  /** Cuántos guardias tiene asignados. Los nombres se piden al abrir la hoja. */
+  guardias: number;
 }
 
 export interface PorteriaRequest {
   nombre: string;
   direccion?: string | null;
   permiteVehiculo?: string | null;
+}
+
+/**
+ * Una persona en la lista de guardias de una portería.
+ *
+ * <p>Es UNA sola lista con banderas y no dos —asignados y candidatos—: la
+ * pantalla es una lista de chequeo, y partirla obligaría a fusionarla acá.</p>
+ */
+export interface GuardiaPorteria {
+  personaId: number;
+  nombreCompleto: string;
+  documento: string;
+  asignado: boolean;
+  /**
+   * Puede ser false y estar asignado: a alguien le cambiaron el rol después.
+   * Se sigue viendo para poder quitarlo — filtrarlo lo volvería invisible.
+   */
+  esGuardia: boolean;
 }
 
 export interface Persona {

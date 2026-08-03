@@ -83,6 +83,29 @@
   }
 }
 
+/* Mismo tratamiento que los iconos de la derecha, pero acá pegado al nombre de
+   la puerta: lo que cambia es esa puerta, no una utilidad de la esquina. */
+.cambiar-porteria {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  color: inherit;
+  opacity: 0.65;
+  background: none;
+  border: none;
+  border-radius: var(--r-full);
+  cursor: pointer;
+  transition: opacity var(--transicion), background var(--transicion);
+
+  @media (hover: hover) {
+    &:hover {
+      opacity: 1;
+      background: rgba(128, 140, 160, 0.2);
+    }
+  }
+}
+
 main {
   flex: 1 1 auto;
   min-width: 0;
