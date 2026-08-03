@@ -35,6 +35,24 @@ export class ResidenteLayoutComponent {
     this.auth.sesion$.subscribe(sesion => (this.sesion = sesion));
   }
 
+  /**
+   * Un administrador o un guardia que entra acá por "Mi cuenta" quedaba sin
+   * salida: este layout no tiene barra lateral y sus tres pestañas son del
+   * residente. El residente NO ve este enlace — /app es su casa, y ofrecerle
+   * volver a la pantalla en la que ya está solo confunde.
+   */
+  get deVisita(): boolean {
+    return this.auth.estaDeVisitaEn('/app');
+  }
+
+  get panelPropio(): string {
+    return this.auth.rutaInicial();
+  }
+
+  get nombrePanelPropio(): string {
+    return this.auth.nombrePanelInicial();
+  }
+
   /** El nombre completo no cabe en una cabecera compacta; el de pila sí. */
   get primerNombre(): string {
     return this.sesion?.nombreCompleto?.trim().split(/\s+/)[0] ?? '';

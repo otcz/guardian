@@ -79,6 +79,10 @@ export class CambiarClaveComponent implements OnInit {
    * entró por su cuenta desde el menú viene de algún lado, y cerrarle la
    * sesión por pulsar "Salir" sería castigarlo por arrepentirse.</p>
    */
+  get nombrePanelPropio(): string {
+    return this.auth.nombrePanelInicial();
+  }
+
   salir(): void {
     if (this.obligatorio) {
       this.auth.cerrarSesion();

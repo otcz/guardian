@@ -78,8 +78,12 @@
       {{ cargando ? 'Guardando…' : 'Guardar' }}
     </button>
 
+    <!-- "Volver a X" y no "Cancelar": lo segundo se lee como descartar y deja
+         la duda de a dónde va. Cuando el cambio es OBLIGATORIO no hay a dónde
+         volver —esta es la única pantalla permitida— y ahí sí es salir. -->
     <button type="button" class="secundario" (click)="salir()">
-      {{ obligatorio ? 'Salir' : 'Cancelar' }}
+      <i class="pi" [ngClass]="obligatorio ? 'pi-sign-out' : 'pi-arrow-left'"></i>
+      {{ obligatorio ? 'Salir' : 'Volver a ' + nombrePanelPropio }}
     </button>
   </form>
 </div>

@@ -133,6 +133,36 @@ export class AuthService {
     }
   }
 
+  /**
+   * Cómo se llama el panel de `rutaInicial()`.
+   *
+   * <p>Para poner "Volver a Administración" y no un "←" pelado. Un icono solo
+   * obliga a adivinar a dónde lleva, y quien entró a Portería desde el panel
+   * de administración necesita saber que ese es el camino de vuelta.</p>
+   */
+  nombrePanelInicial(): string {
+    switch (this.sesion?.rol) {
+      case 'GUARDIA':
+        return 'Portería';
+      case 'ADMIN':
+        return 'Administración';
+      case 'SUPER_ADMIN':
+        return this.sedeSuplantada ? 'Administración' : 'Sedes';
+      default:
+        return 'Mi cuenta';
+    }
+  }
+
+  /**
+   * true cuando la pantalla actual NO es la casa de este usuario.
+   *
+   * <p>El residente vive en /app: ahí no hay "volver" que ofrecerle, y un
+   * enlace de vuelta a la pantalla en la que ya está solo confunde.</p>
+   */
+  estaDeVisitaEn(ruta: string): boolean {
+    return this.autenticado && this.rutaInicial() !== ruta;
+  }
+
   private leerSesion(): Sesion | null {
     const crudo = localStorage.getItem(LLAVE_SESION);
     if (!crudo) {

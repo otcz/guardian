@@ -9,12 +9,16 @@
     </div>
 
     <div class="acciones">
+      <!-- Con texto y no solo el engranaje: el administrador que entra a la
+           portería tiene que ver de un vistazo por dónde se devuelve. El
+           guardia vive acá y no lo ve. -->
+      <a class="volver" *ngIf="deVisita" [routerLink]="panelPropio">
+        <i class="pi pi-arrow-left"></i>
+        <span>{{ nombrePanelPropio }}</span>
+      </a>
+
       <a routerLink="/app" class="icono" pTooltip="Mi cuenta" tooltipPosition="bottom">
         <i class="pi pi-user"></i>
-      </a>
-      <a *ngIf="puedeIrAAdmin" routerLink="/admin" class="icono"
-         pTooltip="Administración" tooltipPosition="bottom">
-        <i class="pi pi-cog"></i>
       </a>
       <button type="button" class="icono" (click)="tema.alternar()"
               [attr.aria-label]="tema.oscuro ? 'Modo claro' : 'Modo oscuro'">

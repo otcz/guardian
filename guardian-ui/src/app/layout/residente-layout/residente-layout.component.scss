@@ -34,6 +34,9 @@
 .identidad {
   display: flex;
   flex-direction: column;
+  /* Absorbe el sobrante: con tres hijos, un space-between mandaria el saludo
+     al centro y dejaria "volver" solo en una esquina. */
+  flex: 1 1 auto;
   min-width: 0;
 
   .saludo {
@@ -188,4 +191,29 @@ main {
 
 :host ::ng-deep gd-hoja .gd-lista + .gd-titulo-seccion {
   margin-top: var(--e-4);
+}
+
+/* Volver al panel propio. Mismo tratamiento en los dos layouts: quien entra
+   de visita busca la salida en el mismo sitio en los dos. */
+.volver {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
+  flex: 0 0 auto;
+  min-height: var(--tactil);
+  padding: 0 var(--e-3);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-full);
+  white-space: nowrap;
+
+  @media (hover: hover) {
+    &:hover {
+      color: var(--text-strong);
+      border-color: currentColor;
+    }
+  }
 }
