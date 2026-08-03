@@ -14,20 +14,51 @@
 
   <!-- ESCANEO -->
   <section class="escaneo" *ngIf="etapa === 'escaneando' || etapa === 'verificando'">
-    <div id="gd-lector" class="lector" [class.oculto]="modoManual"></div>
 
-    <div class="manual" *ngIf="modoManual">
-      <label for="codigo">Código</label>
-      <input id="codigo"
-             type="text"
-             [(ngModel)]="payloadManual"
-             (keyup.enter)="verificarManual()"
-             placeholder="Pega o escribe el código del QR"
-             autocomplete="off">
-      <button type="button" class="principal" (click)="verificarManual()">Verificar</button>
+    <!-- Los tres lectores de la portería, uno al lado del otro y siempre a la
+         vista. Antes eran un botón que alternaba —había que leerlo para saber
+         en qué modo estabas— y otro apagado sin explicación. Va ARRIBA del
+         visor: entre el escaneo y el veredicto no puede aparecer nada. -->
+    <div class="modos" role="group" aria-label="Cómo identificar">
+      <button type="button"
+              *ngFor="let m of modos"
+              class="modo"
+              [class.activo]="modoEntrada === m.valor"
+              [disabled]="!m.disponible"
+              [attr.aria-pressed]="modoEntrada === m.valor"
+              [pTooltip]="m.disponible ? '' : 'Falta conectar el lector'"
+              tooltipPosition="bottom"
+              (click)="elegirModo(m.valor)">
+        <i class="pi" [ngClass]="m.icono" aria-hidden="true"></i>
+        <span>{{ m.etiqueta }}</span>
+      </button>
     </div>
 
-    <p class="pista" *ngIf="!modoManual && etapa === 'escaneando'">
+    <div id="gd-lector" class="lector" [class.oculto]="modoEntrada !== 'CAMARA'"></div>
+
+    <!-- UN solo campo: el lector USB teclea aquí lo que escanea —el código de
+         barras de la cédula o el QR— y el guardia también puede escribir la
+         cédula. El sistema distingue por el prefijo, no preguntando. -->
+    <div class="manual" *ngIf="modoEntrada === 'DOCUMENTO'">
+      <input id="codigo"
+             type="text"
+             inputmode="numeric"
+             [(ngModel)]="entradaManual"
+             (keyup.enter)="verificarEntradaManual()"
+             placeholder="Escanea la cédula o escribe el número"
+             autocomplete="off"
+             autofocus>
+      <button type="button" class="principal" (click)="verificarEntradaManual()">
+        <i class="pi pi-search"></i> Buscar
+      </button>
+    </div>
+
+    <div class="sin-lector" *ngIf="modoEntrada === 'HUELLA'">
+      <i class="pi pi-stop-circle" aria-hidden="true"></i>
+      <p>Esta portería todavía no tiene lector de huella conectado.</p>
+    </div>
+
+    <p class="pista" *ngIf="modoEntrada === 'CAMARA' && etapa === 'escaneando'">
       Apunta la cámara al código del residente
     </p>
 
@@ -36,19 +67,6 @@
     </p>
 
     <div class="aviso-error" *ngIf="error">{{ error }}</div>
-
-    <div class="alternos">
-      <button type="button" class="alterno" (click)="alternarManual()">
-        {{ modoManual ? 'Usar la cámara' : 'Escribir el código' }}
-      </button>
-      <button type="button"
-              class="alterno"
-              disabled
-              pTooltip="Requiere lector biométrico"
-              tooltipPosition="top">
-        <i class="pi pi-stop-circle"></i> Huella
-      </button>
-    </div>
   </section>
 
   <!-- FICHA -->

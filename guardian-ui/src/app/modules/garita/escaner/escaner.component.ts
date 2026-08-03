@@ -17,6 +17,22 @@ import {
 
 type Etapa = 'escaneando' | 'verificando' | 'ficha' | 'registrado';
 
+export type ModoEntrada = 'CAMARA' | 'DOCUMENTO' | 'HUELLA';
+
+interface OpcionModo {
+  valor: ModoEntrada;
+  etiqueta: string;
+  icono: string;
+  disponible: boolean;
+}
+
+/**
+ * Prefijo de los códigos de GUARDIAN: GRD1 para credenciales, GRDI para
+ * invitaciones. Sirve para que UN solo campo atienda al lector USB —que
+ * "teclea" lo que escanea— sin preguntarle al guardia qué acaba de leer.
+ */
+const PREFIJO_CODIGO = 'GRD';
+
 const ID_LECTOR = 'gd-lector';
 
 /**
@@ -41,9 +57,24 @@ export class EscanerComponent implements OnInit, OnDestroy {
   /** Contadores del encabezado. Se refrescan tras cada registro. */
   presencia: Presencia | null = null;
 
-  /** Alternativa cuando la cámara falla o la tablet no tiene uno decente. */
-  modoManual = false;
-  payloadManual = '';
+  /**
+   * Cómo se está identificando a quien llega. Son los tres lectores que hay en
+   * una portería de verdad, y NO tres formas de hacer lo mismo: la cámara lee
+   * el QR firmado; el documento cubre el lector de código de barras y la
+   * cédula tecleada; la huella espera hardware.
+   */
+  modoEntrada: ModoEntrada = 'CAMARA';
+
+  /** Lo que se escanea o se teclea en el modo Documento. */
+  entradaManual = '';
+
+  readonly modos: OpcionModo[] = [
+    { valor: 'CAMARA', etiqueta: 'Cámara', icono: 'pi-camera', disponible: true },
+    { valor: 'DOCUMENTO', etiqueta: 'Documento', icono: 'pi-id-card', disponible: true },
+    // Sin lector conectado no se puede prometer: se ve, se entiende que existe,
+    // y dice por qué no se puede usar todavía.
+    { valor: 'HUELLA', etiqueta: 'Huella', icono: 'pi-stop-circle', disponible: false }
+  ];
 
   /**
    * Sentido elegido por el guardia cuando corrige el inferido (CONTEXT.md §4).
@@ -112,8 +143,9 @@ export class EscanerComponent implements OnInit, OnDestroy {
         }
       )
       .catch(() => {
-        this.modoManual = true;
-        this.error = 'No pudimos abrir la cámara. Escribe el código a mano.';
+        // Caer al documento y no dejar la pantalla muerta: la fila sigue ahí.
+        this.modoEntrada = 'DOCUMENTO';
+        this.error = 'No pudimos abrir la cámara. Usa el documento.';
       });
   }
 
@@ -138,12 +170,57 @@ export class EscanerComponent implements OnInit, OnDestroy {
 
   // ── Flujo ────────────────────────────────────────────────────────────────
 
-  verificarManual(): void {
-    if (!this.payloadManual.trim()) {
+  /**
+   * Un solo campo para el lector de código de barras Y para la cédula tecleada.
+   *
+   * <p>Un lector USB "teclea" lo que escanea en el campo que tenga el foco, así
+   * que aquí puede caer el código de barras de una cédula o el QR de GUARDIAN.
+   * El prefijo distingue los dos mundos sin preguntarle nada al guardia, que es
+   * quien menos tiempo tiene para responder preguntas.</p>
+   */
+  verificarEntradaManual(): void {
+    const texto = this.entradaManual.trim();
+    if (!texto) {
       return;
     }
     this.procesando = true;
-    this.verificar(this.payloadManual.trim());
+
+    if (texto.toUpperCase().startsWith(PREFIJO_CODIGO)) {
+      this.verificar(texto);
+    } else {
+      this.verificarDocumento(texto);
+    }
+  }
+
+  private verificarDocumento(documento: string): void {
+    this.etapa = 'verificando';
+    this.error = null;
+
+    this.acceso.verificarPorDocumento(documento).subscribe({
+      next: ficha => {
+        this.ficha = ficha;
+        this.etapa = 'ficha';
+      },
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos verificar el documento.';
+        this.reiniciar();
+      }
+    });
+  }
+
+  elegirModo(modo: ModoEntrada): void {
+    if (modo === this.modoEntrada || !this.modos.find(m => m.valor === modo)?.disponible) {
+      return;
+    }
+    this.modoEntrada = modo;
+    this.error = null;
+    this.entradaManual = '';
+
+    if (modo === 'CAMARA') {
+      this.iniciarCamara();
+    } else {
+      this.detenerCamara();
+    }
   }
 
   private verificar(payload: string): void {
@@ -212,25 +289,16 @@ export class EscanerComponent implements OnInit, OnDestroy {
 
   reiniciar(): void {
     this.ficha = null;
-    this.payloadManual = '';
+    this.entradaManual = '';
     this.procesando = false;
     this.registrando = false;
     this.sentidoCorregido = null;
     this.eventoRegistrado = null;
     this.etapa = 'escaneando';
 
-    if (!this.modoManual) {
-      this.iniciarCamara();
-    }
-  }
-
-  alternarManual(): void {
-    this.modoManual = !this.modoManual;
-    this.error = null;
-
-    if (this.modoManual) {
-      this.detenerCamara();
-    } else {
+    // Vuelve al modo que el guardia venía usando: si eligió documento porque el
+    // lector de barras está en esa puerta, no tiene por qué reelegirlo cada vez.
+    if (this.modoEntrada === 'CAMARA') {
       this.iniciarCamara();
     }
   }

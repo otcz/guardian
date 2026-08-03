@@ -63,9 +63,82 @@
   }
 }
 
-.alternos {
+/* ── Los tres lectores ─────────────────────────────────────────────────────
+   Segmentado y no botones sueltos: los tres se ven a la vez, el activo se
+   distingue sin leer, y no hay que interpretar un botón que cambia de texto
+   para saber en qué modo se está. De noche y con fila, eso importa.
+
+   Se reparten el ancho a partes iguales para que el dedo no tenga que apuntar:
+   cada blanco mide un tercio de la consola. */
+.modos {
   display: flex;
-  gap: 0.5rem;
+  width: 100%;
+  padding: var(--e-1);
+  background: var(--bg-soft);
+  border-radius: var(--r-md);
+}
+
+.modo {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-2);
+  min-height: var(--tactil);
+  padding: 0 var(--e-2);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: color var(--transicion), background var(--transicion);
+
+  i {
+    font-size: var(--t-lg);
+  }
+
+  /* El activo se levanta del carril: color, peso y una superficie propia. */
+  &.activo {
+    color: var(--accent);
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Se ve y se entiende que existe, pero no promete lo que no hay. */
+  &:disabled {
+    opacity: var(--opacidad-deshabilitado);
+    cursor: not-allowed;
+  }
+}
+
+/* Ocupa el sitio del visor para que la consola no cambie de alto al elegir
+   este modo: una pantalla que salta distrae justo cuando hay gente esperando. */
+.sin-lector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-3);
+  width: 100%;
+  aspect-ratio: 1;
+  padding: var(--e-5);
+  text-align: center;
+  color: var(--text-muted);
+  background: var(--bg-soft);
+  border-radius: var(--r-lg);
+
+  i {
+    font-size: 2.5rem;
+    opacity: 0.6;
+  }
+
+  p {
+    margin: 0;
+    font-size: var(--t-md);
+    line-height: 1.45;
+  }
 }
 
 section {
