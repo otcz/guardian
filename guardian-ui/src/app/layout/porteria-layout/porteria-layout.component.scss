@@ -23,6 +23,16 @@
   color: var(--text-inverse);
 }
 
+/* Ranura de navegación: la salida y luego la identidad de la pantalla. Sin
+   separador — el aire ya distingue los dos bloques y una línea más en una
+   cabecera oscura solo agrega ruido. */
+.navegacion {
+  display: flex;
+  align-items: center;
+  gap: var(--e-4);
+  min-width: 0;
+}
+
 .titulo {
   display: flex;
   align-items: center;
@@ -76,31 +86,4 @@
 main {
   flex: 1 1 auto;
   min-width: 0;
-}
-
-/* Volver al panel propio. Mismo tratamiento en los dos layouts: quien entra
-   de visita busca la salida en el mismo sitio en los dos. */
-.volver {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--e-2);
-  flex: 0 0 auto;
-  min-height: var(--tactil);
-  padding: 0 var(--e-3);
-  font-size: var(--t-sm);
-  font-weight: 600;
-  /* La cabecera de la garita es oscura en los dos temas: los tokens de texto
-     normales desaparecerian sobre ella. */
-  color: var(--text-inverse);
-  opacity: 0.75;
-  text-decoration: none;
-  border: 1px solid currentColor;
-  border-radius: var(--r-full);
-  white-space: nowrap;
-
-  @media (hover: hover) {
-    &:hover {
-      opacity: 1;
-    }
-  }
 }

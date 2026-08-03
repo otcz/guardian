@@ -26,28 +26,6 @@ export class PorteriaLayoutComponent {
     this.auth.sesion$.subscribe(sesion => (this.sesion = sesion));
   }
 
-  /**
-   * El guardia vive acá; el administrador está de paso. Solo al segundo se le
-   * ofrece volver, y con el nombre del panel — un engranaje sin etiqueta
-   * obliga a adivinar a dónde lleva.
-   */
-  get deVisita(): boolean {
-    return this.auth.estaDeVisitaEn('/porteria');
-  }
-
-  get panelPropio(): string {
-    return this.auth.rutaInicial();
-  }
-
-  get nombrePanelPropio(): string {
-    return this.auth.nombrePanelInicial();
-  }
-
-
-  get puedeIrAAdmin(): boolean {
-    return this.auth.tieneRol('ADMIN');
-  }
-
   salir(): void {
     this.auth.cerrarSesion();
   }

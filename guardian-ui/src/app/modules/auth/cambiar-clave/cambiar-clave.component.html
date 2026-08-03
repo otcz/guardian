@@ -1,6 +1,14 @@
 <div class="pantalla">
   <form class="tarjeta" [formGroup]="formulario" (ngSubmit)="guardar()">
 
+    <!-- Arriba y no debajo de "Guardar": una salida puesta después del botón
+         principal compite con él, y es lo primero que se lee al bajar la
+         vista. Con el cambio OBLIGATORIO no hay a dónde volver —esta es la
+         única pantalla permitida— y por eso desaparece. -->
+    <div class="navegacion" *ngIf="!obligatorio">
+      <gd-volver></gd-volver>
+    </div>
+
     <div class="encabezado">
       <i class="pi pi-lock"></i>
       <h1>Cambia tu PIN</h1>
@@ -78,12 +86,11 @@
       {{ cargando ? 'Guardando…' : 'Guardar' }}
     </button>
 
-    <!-- "Volver a X" y no "Cancelar": lo segundo se lee como descartar y deja
-         la duda de a dónde va. Cuando el cambio es OBLIGATORIO no hay a dónde
-         volver —esta es la única pantalla permitida— y ahí sí es salir. -->
-    <button type="button" class="secundario" (click)="salir()">
-      <i class="pi" [ngClass]="obligatorio ? 'pi-sign-out' : 'pi-arrow-left'"></i>
-      {{ obligatorio ? 'Salir' : 'Volver a ' + nombrePanelPropio }}
+    <!-- Solo con el cambio obligatorio: ahí la única salida es cerrar sesión,
+         y llamarla "Cancelar" haría creer que se puede posponer. -->
+    <button type="button" class="secundario" *ngIf="obligatorio" (click)="salir()">
+      <i class="pi pi-sign-out"></i>
+      Salir
     </button>
   </form>
 </div>

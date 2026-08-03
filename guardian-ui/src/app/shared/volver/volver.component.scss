@@ -1,0 +1,44 @@
+/* El host no pinta nada: deja que el enlace sea hijo directo de la cabecera y
+   herede su alineación. Cuando no hay a dónde volver no queda ni el hueco ni
+   el gap de un elemento vacío. */
+:host {
+  display: contents;
+}
+
+/* Control discreto, NO un botón con borde: compite con el título de la
+   pantalla y con las acciones de la esquina, que sí son el trabajo. Se apoya
+   en currentColor para servir igual sobre la cabecera clara del residente y
+   sobre la oscura de la portería, sin un token por tema. */
+.volver {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
+  flex: 0 0 auto;
+  min-height: var(--tactil);
+  padding: 0 var(--e-3);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: inherit;
+  opacity: 0.7;
+  text-decoration: none;
+  border-radius: var(--r-full);
+  white-space: nowrap;
+  transition: opacity var(--transicion), background var(--transicion);
+
+  i {
+    font-size: 0.95rem;
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      opacity: 1;
+      /* Gris neutro y no un token de fondo: el mismo valor se ve sobre claro
+         y sobre oscuro. */
+      background: rgba(128, 140, 160, 0.18);
+    }
+  }
+
+  &:active {
+    opacity: 1;
+  }
+}

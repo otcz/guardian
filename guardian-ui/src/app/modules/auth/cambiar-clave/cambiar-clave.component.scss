@@ -20,6 +20,15 @@
   box-shadow: var(--shadow-card);
 }
 
+/* Pegada a la esquina de la tarjeta, como el cerrar de un diálogo: es cromo
+   de la ventana, no un paso más del formulario. El margen izquierdo negativo
+   vale exactamente el relleno del enlace, para que la flecha caiga sobre el
+   borde de contenido de la tarjeta y no medio centímetro adentro. */
+.navegacion {
+  display: flex;
+  margin: -0.75rem -0.75rem -0.5rem;
+}
+
 .encabezado {
   text-align: center;
 
@@ -76,30 +85,31 @@
   cursor: help;
 }
 
+/* A la medida de cuatro dígitos y no del ancho de la tarjeta: un campo de 400
+   px con cuatro puntos adentro se lee como una contraseña a medio escribir.
+   El ojo va al lado y no encima: dentro obligaría a un relleno derecho que
+   descuadra el centrado del PIN. */
 .clave-envoltura {
-  position: relative;
   display: flex;
+  align-items: center;
+  gap: 0.35rem;
 
   input {
-    flex: 1 1 auto;
+    flex: 0 1 9.5rem;
     min-width: 0;
-    padding-right: 2.6rem;
   }
 }
 
 .ver-clave {
-  position: absolute;
-  top: 50%;
-  right: 0.35rem;
-  transform: translateY(-50%);
+  flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
   color: var(--text-muted);
   background: none;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
 
   &:hover {

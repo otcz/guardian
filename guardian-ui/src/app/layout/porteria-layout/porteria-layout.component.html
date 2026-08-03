@@ -1,22 +1,21 @@
 <div class="consola">
   <header class="cabecera">
-    <div class="titulo">
-      <i class="pi pi-shield"></i>
-      <div class="textos">
-        <strong>PORTERÍA</strong>
-        <small *ngIf="sesion">{{ sesion.nombreCompleto }}</small>
+    <!-- Volver al principio, no entre los iconos de la derecha: es la ranura
+         de navegación de cualquier cabecera, y allá desequilibraba la esquina
+         de acciones con un botón del doble de tamaño. -->
+    <div class="navegacion">
+      <gd-volver></gd-volver>
+
+      <div class="titulo">
+        <i class="pi pi-shield"></i>
+        <div class="textos">
+          <strong>PORTERÍA</strong>
+          <small *ngIf="sesion">{{ sesion.nombreCompleto }}</small>
+        </div>
       </div>
     </div>
 
     <div class="acciones">
-      <!-- Con texto y no solo el engranaje: el administrador que entra a la
-           portería tiene que ver de un vistazo por dónde se devuelve. El
-           guardia vive acá y no lo ve. -->
-      <a class="volver" *ngIf="deVisita" [routerLink]="panelPropio">
-        <i class="pi pi-arrow-left"></i>
-        <span>{{ nombrePanelPropio }}</span>
-      </a>
-
       <a routerLink="/app" class="icono" pTooltip="Mi cuenta" tooltipPosition="bottom">
         <i class="pi pi-user"></i>
       </a>

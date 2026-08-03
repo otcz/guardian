@@ -4,6 +4,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 import { TooltipModule } from 'primeng/tooltip';
 
+import { SharedModule } from '../../shared/shared.module';
 import { CambiarClaveComponent } from './cambiar-clave/cambiar-clave.component';
 
 const routes: Routes = [{ path: '', component: CambiarClaveComponent }];
@@ -15,6 +16,7 @@ const routes: Routes = [{ path: '', component: CambiarClaveComponent }];
  */
 @NgModule({
   declarations: [CambiarClaveComponent],
-  imports: [CommonModule, ReactiveFormsModule, TooltipModule, RouterModule.forChild(routes)]
+  imports: [CommonModule, ReactiveFormsModule, TooltipModule, SharedModule,
+            RouterModule.forChild(routes)]
 })
 export class CambioClaveModule { }

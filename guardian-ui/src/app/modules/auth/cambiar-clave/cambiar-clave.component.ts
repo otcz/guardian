@@ -72,23 +72,13 @@ export class CambiarClaveComponent implements OnInit {
   }
 
   /**
-   * La salida depende de POR QUE se llegó acá.
-   *
-   * <p>Con el cambio obligatorio pendiente no hay a dónde volver —ninguna
-   * otra pantalla abre— así que la única salida es cerrar sesión. Pero quien
-   * entró por su cuenta desde el menú viene de algún lado, y cerrarle la
-   * sesión por pulsar "Salir" sería castigarlo por arrepentirse.</p>
+   * Cerrar sesión, la única salida cuando el cambio está pendiente: ninguna
+   * otra pantalla abre hasta que el PIN se cambie. Quien entró por su cuenta
+   * desde el menú no ve este botón sino el enlace de vuelta a su panel —
+   * cerrarle la sesión por arrepentirse sería un castigo.
    */
-  get nombrePanelPropio(): string {
-    return this.auth.nombrePanelInicial();
-  }
-
   salir(): void {
-    if (this.obligatorio) {
-      this.auth.cerrarSesion();
-      return;
-    }
-    this.router.navigate([this.auth.rutaInicial()]);
+    this.auth.cerrarSesion();
   }
 
   campoInvalido(nombre: 'claveActual' | 'claveNueva' | 'confirmacion'): boolean {

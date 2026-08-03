@@ -156,11 +156,20 @@ export class AuthService {
   /**
    * true cuando la pantalla actual NO es la casa de este usuario.
    *
-   * <p>El residente vive en /app: ahí no hay "volver" que ofrecerle, y un
-   * enlace de vuelta a la pantalla en la que ya está solo confunde.</p>
+   * <p>El residente vive en /app y el guardia en /porteria: ahí no hay
+   * "volver" que ofrecerles, y un enlace de vuelta a la pantalla en la que ya
+   * están solo confunde. Se resuelve contra la URL y no con un parámetro por
+   * pantalla para que ninguna quede sin salida por olvido.</p>
    */
-  estaDeVisitaEn(ruta: string): boolean {
-    return this.autenticado && this.rutaInicial() !== ruta;
+  get deVisita(): boolean {
+    if (!this.autenticado) {
+      return false;
+    }
+    const propio = this.rutaInicial();
+    const actual = this.router.url.split(/[?#]/)[0];
+    // El prefijo se compara con la barra incluida: /app cubre /app/mi-qr, pero
+    // no debe tragarse una futura /aplicacion.
+    return actual !== propio && !actual.startsWith(propio + '/');
   }
 
   private leerSesion(): Sesion | null {

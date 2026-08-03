@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { TooltipModule } from 'primeng/tooltip';
 
 import { FotoUploadComponent } from './foto-upload/foto-upload.component';
@@ -9,6 +10,7 @@ import { DocumentoPipe } from './documento.pipe';
 import { HojaComponent } from './hoja/hoja.component';
 import { BloqueoComponent } from './bloqueo/bloqueo.component';
 import { MotivoAccesoPipe } from './motivo-acceso.pipe';
+import { VolverComponent } from './volver/volver.component';
 
 @NgModule({
   declarations: [
@@ -17,16 +19,18 @@ import { MotivoAccesoPipe } from './motivo-acceso.pipe';
     DocumentoPipe,
     HojaComponent,
     BloqueoComponent,
-    MotivoAccesoPipe
+    MotivoAccesoPipe,
+    VolverComponent
   ],
-  imports: [CommonModule, FormsModule, TooltipModule],
+  imports: [CommonModule, FormsModule, TooltipModule, RouterModule],
   exports: [
     FotoUploadComponent,
     FotoPipe,
     DocumentoPipe,
     HojaComponent,
     BloqueoComponent,
-    MotivoAccesoPipe
+    MotivoAccesoPipe,
+    VolverComponent
   ]
 })
 export class SharedModule { }

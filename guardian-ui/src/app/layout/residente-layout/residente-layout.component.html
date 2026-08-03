@@ -3,12 +3,9 @@
   <!-- Cabecera compacta: identidad y una sola puerta. La navegación NO vive
        aquí, vive abajo, donde llega el pulgar. -->
   <header class="cabecera">
-    <!-- Primero a la izquierda y con el nombre del destino: es donde se busca
-         la salida, y "←" sin texto obliga a adivinar a dónde lleva. -->
-    <a class="volver" *ngIf="deVisita" [routerLink]="panelPropio">
-      <i class="pi pi-arrow-left"></i>
-      <span>{{ nombrePanelPropio }}</span>
-    </a>
+    <!-- Primero a la izquierda: es donde se busca la salida. Solo aparece para
+         quien está de paso; el residente vive acá. -->
+    <gd-volver></gd-volver>
 
     <div class="identidad" *ngIf="sesion">
       <span class="saludo">{{ saludo }}</span>
