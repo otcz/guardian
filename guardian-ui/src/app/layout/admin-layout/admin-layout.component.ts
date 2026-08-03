@@ -34,6 +34,10 @@ export class AdminLayoutComponent {
     // causa de que una dijera "Activa" y la otra le negara la entrada.
     { ruta: 'invitaciones', etiqueta: 'Invitaciones', icono: 'pi-ticket' },
     { ruta: 'bitacora', etiqueta: 'Bitácora', icono: 'pi-history' },
+    // Con Configuración y no con Casas: las porterías se definen una vez, al
+    // montar el conjunto, y después no se vuelven a tocar. Arriba le quitarían
+    // sitio a las pantallas del día a día.
+    { ruta: 'porterias', etiqueta: 'Porterías', icono: 'pi-shield' },
     // De último: es lo que menos se toca, y va después de las pantallas de
     // trabajo diario porque configura lo que aparece en ellas.
     { ruta: 'configuracion', etiqueta: 'Configuración', icono: 'pi-sliders-h' }

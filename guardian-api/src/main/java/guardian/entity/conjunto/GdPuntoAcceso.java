@@ -41,6 +41,17 @@ public class GdPuntoAcceso extends BaseEntity {
     @Column(name = "NOMBRE", nullable = false, length = 80)
     private String nombre;
 
+    /**
+     * Donde queda fisicamente: "Carrera 15 # 23-40, costado norte".
+     *
+     * <p>Opcional porque el conjunto de una sola porteria no la necesita, pero
+     * en cuanto hay dos el nombre solo no alcanza: el guardia nuevo, el tecnico
+     * que va a instalar el lector y la patrulla que responde una novedad
+     * necesitan saber a cual de las dos ir.</p>
+     */
+    @Column(name = "DIRECCION", length = 160)
+    private String direccion;
+
     /** Si admite ingreso de vehiculos. Una puerta peatonal no deberia registrar placas. */
     @Column(name = "PERMITE_VEHICULO", length = 1, nullable = false)
     private String permiteVehiculo;

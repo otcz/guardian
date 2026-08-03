@@ -26,6 +26,26 @@ export interface CasaRequest {
   observaciones?: string | null;
 }
 
+/**
+ * Punto de acceso del conjunto. En pantalla se llama portería, que es como lo
+ * nombran el guardia y el residente.
+ */
+export interface Porteria {
+  id: number;
+  nombre: string;
+  direccion: string | null;
+  permiteVehiculo: string;
+  activo: string;
+  /** Pasos registrados por acá. Dice si la portería está en uso real. */
+  registros: number;
+}
+
+export interface PorteriaRequest {
+  nombre: string;
+  direccion?: string | null;
+  permiteVehiculo?: string | null;
+}
+
 export interface Persona {
   id: number;
   tipoDocumento: string;

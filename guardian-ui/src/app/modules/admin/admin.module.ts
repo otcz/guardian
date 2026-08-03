@@ -7,6 +7,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { SharedModule } from '../../shared/shared.module';
 import { ResumenComponent } from './resumen/resumen.component';
 import { CasasComponent } from './casas/casas.component';
+import { PorteriasComponent } from './porterias/porterias.component';
 import { PersonasComponent } from './personas/personas.component';
 import { VehiculosComponent } from './vehiculos/vehiculos.component';
 import { InvitacionesComponent } from './invitaciones/invitaciones.component';
@@ -26,6 +27,7 @@ const routes: Routes = [
   { path: 'usuarios', redirectTo: 'personas' },
   { path: 'invitaciones', component: InvitacionesComponent },
   { path: 'bitacora', component: BitacoraComponent },
+  { path: 'porterias', component: PorteriasComponent },
   { path: 'configuracion', component: ConfiguracionComponent }
 ];
 
@@ -33,6 +35,7 @@ const routes: Routes = [
   declarations: [
     ResumenComponent,
     CasasComponent,
+    PorteriasComponent,
     PersonasComponent,
     VehiculosComponent,
     InvitacionesComponent,

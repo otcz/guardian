@@ -123,6 +123,15 @@ public final class MensajesGlobales {
             "Esa persona ya pertenece a otra casa.";
     public static final String CASA_YA_REGISTRADA =
             "Ya existe una casa con ese identificador.";
+    public static final String PORTERIA_YA_REGISTRADA =
+            "Ya existe una porteria con ese nombre.";
+    /**
+     * Sin porterias activas la fabrica de eventos deja el punto de acceso en
+     * nulo y la bitacora deja de decir por donde paso la gente. Se corta aca y
+     * no en la garita, donde el error aparecerian meses despues.
+     */
+    public static final String PORTERIA_ULTIMA_ACTIVA =
+            "Es la unica porteria activa. Activa otra antes de apagar esta.";
     public static final String PERSONA_SIN_FOTO =
             "La persona necesita una foto antes de que se le emita la credencial.";
     public static final String TITULAR_YA_EXISTE =

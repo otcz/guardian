@@ -1,0 +1,98 @@
+<div class="gd-page">
+  <h1>Porterías</h1>
+
+  <form class="alta gd-card" [formGroup]="formulario" (ngSubmit)="guardar()"
+        [class.editando]="editando">
+    <div class="campo">
+      <label for="nombre">Nombre</label>
+      <input id="nombre" type="text" formControlName="nombre"
+             placeholder="Ej: Portería norte">
+      <small class="error" *ngIf="campoInvalido('nombre')">
+        Escribe el nombre de la portería
+      </small>
+    </div>
+
+    <div class="campo ancho">
+      <label for="direccion">
+        Dirección
+        <i class="pi pi-info-circle ayuda"
+           pTooltip="Dónde queda el puesto"
+           tooltipPosition="top"></i>
+      </label>
+      <input id="direccion" type="text" formControlName="direccion"
+             placeholder="Ej: Carrera 15 # 23-40, costado norte">
+      <small class="error" *ngIf="campoInvalido('direccion')">
+        La dirección no puede superar 160 caracteres
+      </small>
+    </div>
+
+    <label class="opcion">
+      <input type="checkbox" formControlName="permiteVehiculo">
+      <span>Entran vehículos</span>
+    </label>
+
+    <button type="submit" class="principal" [disabled]="guardando">
+      <i class="pi" [ngClass]="editando ? 'pi-check' : 'pi-plus'"></i>
+      {{ editando ? 'Guardar cambios' : 'Agregar' }}
+    </button>
+
+    <button type="button" class="alterno" *ngIf="editando" (click)="cancelarEdicion()">
+      Cancelar
+    </button>
+  </form>
+
+  <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+  <p class="gd-muted" *ngIf="cargando">Cargando…</p>
+
+  <table class="tabla gd-card" *ngIf="!cargando">
+    <thead>
+      <tr>
+        <th>Portería</th>
+        <th>Dirección</th>
+        <th>Vehículos</th>
+        <th>Registros</th>
+        <th>Estado</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let porteria of porterias" [class.inactiva]="!activa(porteria)">
+        <td class="fuerte">{{ porteria.nombre }}</td>
+        <td>{{ porteria.direccion || '—' }}</td>
+        <td>
+          <i class="pi marca-vehiculo"
+             [ngClass]="permiteVehiculos(porteria) ? 'pi-car' : 'pi-user'"
+             [pTooltip]="permiteVehiculos(porteria) ? 'Entran vehículos' : 'Solo a pie'"
+             tooltipPosition="top"></i>
+        </td>
+        <td>{{ porteria.registros }}</td>
+        <td>
+          <span class="pastilla" [class.si]="activa(porteria)" [class.no]="!activa(porteria)">
+            {{ activa(porteria) ? 'Habilitada' : 'Deshabilitada' }}
+          </span>
+        </td>
+        <td class="derecha acciones">
+          <button type="button" class="accion"
+                  (click)="editar(porteria)"
+                  [attr.aria-label]="'Editar ' + porteria.nombre"
+                  pTooltip="Editar" tooltipPosition="left">
+            <i class="pi pi-pencil"></i>
+          </button>
+          <button type="button" class="accion"
+                  (click)="alternarEstado(porteria)"
+                  [attr.aria-label]="(activa(porteria) ? 'Deshabilitar ' : 'Habilitar ')
+                    + porteria.nombre"
+                  [pTooltip]="activa(porteria) ? 'Deshabilitar' : 'Habilitar'"
+                  tooltipPosition="left">
+            <i class="pi" [ngClass]="activa(porteria) ? 'pi-ban' : 'pi-check'"></i>
+          </button>
+        </td>
+      </tr>
+
+      <tr *ngIf="porterias.length === 0">
+        <td colspan="6" class="vacio">Todavía no hay porterías registradas.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

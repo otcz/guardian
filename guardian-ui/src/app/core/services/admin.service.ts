@@ -12,6 +12,8 @@ import {
   Persona,
   PersonaRegistrada,
   PersonaRequest,
+  Porteria,
+  PorteriaRequest,
   Resumen,
   Usuario,
   Vehiculo,
@@ -51,6 +53,28 @@ export class AdminService {
   cambiarEstadoCasa(id: number, activar: boolean): Observable<Casa> {
     const accion = activar ? 'activar' : 'desactivar';
     return this.http.patch<Casa>(`${this.base}/casas/${id}/${accion}`, {});
+  }
+
+  // ── Porterías ────────────────────────────────────────────────────────────
+  //
+  // Sin eliminar: cada evento de la bitácora apunta a la portería por la que
+  // pasó la persona. Se desactiva, y el histórico sigue pudiendo responder.
+
+  porterias(): Observable<Porteria[]> {
+    return this.http.get<Porteria[]>(`${this.base}/porterias`);
+  }
+
+  crearPorteria(request: PorteriaRequest): Observable<Porteria> {
+    return this.http.post<Porteria>(`${this.base}/porterias`, request);
+  }
+
+  actualizarPorteria(id: number, request: PorteriaRequest): Observable<Porteria> {
+    return this.http.put<Porteria>(`${this.base}/porterias/${id}`, request);
+  }
+
+  cambiarEstadoPorteria(id: number, activar: boolean): Observable<Porteria> {
+    const accion = activar ? 'activar' : 'desactivar';
+    return this.http.patch<Porteria>(`${this.base}/porterias/${id}/${accion}`, {});
   }
 
   // ── Personas ─────────────────────────────────────────────────────────────

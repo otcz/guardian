@@ -62,6 +62,8 @@ public final class ApiEndpoint {
     public static final String ADMIN = API + "/admin";
     public static final String ADMIN_RESUMEN = ADMIN + "/resumen";
     public static final String ADMIN_CASAS = ADMIN + "/casas";
+    /** Puntos de acceso del conjunto. En la pantalla se llaman porterias. */
+    public static final String ADMIN_PORTERIAS = ADMIN + "/porterias";
     public static final String ADMIN_PERSONAS = ADMIN + "/personas";
     public static final String ADMIN_VEHICULOS = ADMIN + "/vehiculos";
     public static final String ADMIN_USUARIOS = ADMIN + "/usuarios";

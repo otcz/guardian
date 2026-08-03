@@ -1,0 +1,43 @@
+@use '../../../styles/paneles';
+
+/* La dirección es la línea más larga del formulario: sin esto queda del mismo
+   ancho que "Nombre" y el texto se lee por una ventanita. `.alta` es un flex
+   en fila, así que aquí el basis SÍ es ancho. */
+.campo.ancho {
+  flex: 2 1 280px;
+}
+
+/* Casilla alineada con el pie de los campos, no con su etiqueta: en una fila
+   de controles que terminan a la misma altura, uno flotando arriba se lee como
+   un error de maquetación. */
+.opcion {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
+  flex: 0 0 auto;
+  min-height: var(--tactil);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-default);
+  cursor: pointer;
+  user-select: none;
+
+  input {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+}
+
+/* Icono y no texto: la columna solo distingue dos casos y a un vistazo el
+   carro se lee más rápido que la palabra. El significado va en el tooltip. */
+.marca-vehiculo {
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.error {
+  font-size: 0.75rem;
+  color: var(--deny);
+}

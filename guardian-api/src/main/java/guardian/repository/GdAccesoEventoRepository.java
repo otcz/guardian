@@ -76,6 +76,9 @@ public interface GdAccesoEventoRepository
                        @Param("permitido") String permitido,
                        @Param("entrada") String entrada);
 
+    /** Cuanto se ha registrado por una porteria. El panel lo muestra antes de apagarla. */
+    long countByPuntoAccesoId(Long puntoAccesoId);
+
     // ── Desvinculacion para la eliminacion fisica (solo administrador). ──────
     // Los eventos NUNCA se borran: la bitacora conserva nombre/documento/placa
     // copiados, asi que anular la FK no pierde informacion de auditoria.

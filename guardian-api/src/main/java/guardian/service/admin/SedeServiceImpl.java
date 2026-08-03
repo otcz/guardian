@@ -88,6 +88,10 @@ public class SedeServiceImpl implements SedeService {
         GdPuntoAcceso porteria = new GdPuntoAcceso();
         porteria.setConjunto(guardada);
         porteria.setNombre("Porteria principal");
+        // Arranca con la direccion de la sede: en un conjunto de una sola
+        // porteria son la misma, y el administrador la corrige el dia que abra
+        // la segunda.
+        porteria.setDireccion(guardada.getDireccion());
         porteria.setPermiteVehiculo(Codigos.SI);
         porteria.setActivo(Codigos.SI);
         porteria.setBloqueado(Codigos.NO);
