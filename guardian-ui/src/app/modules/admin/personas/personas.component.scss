@@ -300,32 +300,134 @@
   border-radius: var(--r-md);
 }
 
-.ficha-cuenta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--e-4);
-  margin-bottom: var(--e-4);
-  padding: var(--e-3);
-  background: var(--bg-soft);
-  border-radius: var(--r-md);
+/* ---------------------------------------------------------------------------
+   Hoja "Acceso a la aplicación".
 
-  .dato {
+   UN SOLO EJE. Antes había tres tratamientos de caja apilados —una tarjeta
+   gris, un select suelto y dos listas con borde— y cada uno arrancaba en una x
+   distinta. El desorden no venía de los colores sino de eso.
+
+   RITMO: dentro de un bloque las filas se tocan (--e-3); entre bloques hay
+   aire (--e-5) y una línea. Con una sola distancia para todo, nada se agrupa.
+   --------------------------------------------------------------------------- */
+.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  padding-bottom: var(--e-5);
+  margin-bottom: var(--e-5);
+  box-shadow: inset 0 -1px 0 var(--border-hairline);
+
+  /* El último no lleva línea ni aire: abajo ya está el pie de la hoja. */
+  &:last-of-type {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    box-shadow: none;
+  }
+
+  > h3 {
+    margin: 0;
+    font-size: var(--t-sm);
+    font-weight: 700;
+    color: var(--text-strong);
+  }
+}
+
+/* Clave a la izquierda, valor a la derecha, y la línea de base compartida. */
+.dato {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-4);
+  min-height: var(--tactil);
+
+  .clave {
+    flex: 0 0 auto;
+    font-size: var(--t-sm);
+    font-weight: 600;
+    color: var(--text-default);
+  }
+
+  .valor {
+    font-size: var(--t-sm);
+    color: var(--text-strong);
+    text-align: right;
+  }
+
+  /* El único control de la fila cierra contra el borde derecho, igual que los
+     valores de arriba: si se estirara a todo el ancho rompería el eje. */
+  select {
+    flex: 0 1 14rem;
+    min-height: var(--tactil);
+    padding: 0 var(--e-3);
+    color: var(--text-strong);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--r-sm);
+
+    &:focus {
+      border-color: var(--accent);
+      outline: none;
+    }
+  }
+}
+
+/* Estado + qué significa + qué hace el botón. Antes eran dos filas casi
+   idénticas ("Desactivar la cuenta" / "Deshabilitar la cuenta") que solo se
+   distinguían por el color. */
+.estado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-4);
+  min-height: var(--tactil);
+
+  .texto {
     display: flex;
     flex-direction: column;
     gap: 2px;
     min-width: 0;
+
+    strong {
+      font-size: var(--t-sm);
+      color: var(--text-strong);
+    }
+
+    span {
+      font-size: var(--t-xs);
+      line-height: 1.35;
+      color: var(--text-muted);
+    }
   }
 
-  .etiqueta {
-    font-size: var(--t-xs);
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--text-muted);
+  .alterno {
+    flex: 0 0 auto;
   }
 
-  strong {
-    font-size: var(--t-sm);
+  .alterno.destructivo {
+    color: var(--deny);
+    border-color: var(--deny);
+  }
+}
+
+/* Acción secundaria de su bloque: no merece un botón con borde al lado del
+   principal, pero sí un área táctil de verdad. */
+.enlace {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--e-2);
+  min-height: var(--tactil);
+  padding: 0;
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
   }
 }
 
@@ -374,16 +476,37 @@ code {
   word-break: break-all;
 }
 
-/* El PIN son cuatro dígitos: el campo mide lo que mide un PIN y no el ancho de
-   la hoja. Dos campos de 600px con cuatro caracteres adentro se leen como una
-   contraseña a medio escribir. */
-.formulario-clave {
+/* Los dos campos y el botón EN UNA FILA. Son cuatro dígitos cada uno: apilados
+   dejaban dos cajas angostas con media hoja de vacío a la derecha. */
+.asignar-pin {
   display: flex;
   flex-direction: column;
-  gap: var(--e-4);
+  gap: var(--e-2);
+
+  .fila-pin {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--e-3);
+  }
+
+  /* `flex: 0 0 auto` explícito: el `.campo` de _paneles ya no trae basis, pero
+     dejarlo dicho evita que el próximo que toque este archivo lo herede. */
+  .campo {
+    flex: 0 0 auto;
+  }
+
+  /* Cierra contra el mismo borde derecho que los valores y los botones de
+     estado. Pegado a los campos abría un tercer eje en una hoja que tiene
+     exactamente dos. */
+  .principal {
+    flex: 0 0 auto;
+    margin-left: auto;
+    min-height: calc(var(--tactil) + var(--e-2));
+  }
 
   input.pin {
-    max-width: 9.5rem;
+    width: 7.5rem;
     min-height: calc(var(--tactil) + var(--e-2));
     padding: var(--e-2);
     color: var(--text-strong);

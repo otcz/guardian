@@ -205,17 +205,13 @@ export class PersonasComponent implements OnInit {
     });
   }
 
-  emitirCredencial(persona: Persona): void {
-    this.error = null;
-    this.admin.emitirCredencial(persona.id).subscribe({
-      next: () => this.cargar(this.texto),
-      error: (fallo: HttpErrorResponse) => {
-        this.error = fallo.error?.mensaje ?? 'No pudimos emitir la credencial.';
-      }
-    });
-  }
-
-  /** Freno de emergencia para un QR comprometido: revoca sin reemitir. */
+  /**
+   * Freno de emergencia para un QR comprometido: revoca sin reemitir.
+   *
+   * <p>No hay acción de EMITIR: el código nace solo en cuanto la persona tiene
+   * foto, y ella lo ve en su propia pantalla. Emitirlo a mano era un paso que
+   * nadie tenía que dar.</p>
+   */
   revocarCredencial(persona: Persona): void {
     const seguro = window.confirm(
       `¿Revocar el QR de ${persona.nombreCompleto}? Dejará de servir en el próximo escaneo.`);

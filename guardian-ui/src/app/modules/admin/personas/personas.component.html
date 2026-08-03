@@ -244,16 +244,16 @@
                   pTooltip="Editar" tooltipPosition="left">
             <i class="pi pi-pencil"></i>
           </button>
-          <button type="button" class="accion"
-                  (click)="emitirCredencial(persona)"
-                  [pTooltip]="persona.tieneCredencial ? 'Reemitir QR (revoca el anterior)' : 'Emitir QR'"
-                  tooltipPosition="left">
-            <i class="pi pi-qrcode"></i>
-          </button>
+          <!-- Sin "emitir QR": el código se emite solo en cuanto la persona
+               tiene foto, y ella lo ve en su propia pantalla "Mi QR". Un botón
+               para emitirlo a mano solo agregaba un paso que nadie tenía que
+               dar —y la columna de la izquierda ya dice quién tiene el suyo.
+               Revocar SÍ se queda: es otra cosa, el freno para un QR que se
+               filtró. -->
           <button type="button" class="accion peligro"
                   *ngIf="persona.tieneCredencial"
                   (click)="revocarCredencial(persona)"
-                  pTooltip="Revocar QR" tooltipPosition="left">
+                  pTooltip="Revocar el QR (si se filtró)" tooltipPosition="left">
             <i class="pi pi-shield"></i>
           </button>
           <button type="button" class="accion"
@@ -350,58 +350,109 @@
 
       <!-- ── Con cuenta: se administra ───────────────────────────────── -->
       <ng-container *ngIf="tieneCuenta(p)">
-        <div class="ficha-cuenta">
+
+        <!-- Todo sobre UN eje: la clave a la izquierda, el valor a la derecha.
+             Antes había tres tratamientos de caja apilados —una tarjeta gris,
+             un select suelto y dos listas con borde— y cada uno arrancaba en
+             una x distinta. Eso era lo que se leía como desorden. -->
+        <section class="bloque">
           <div class="dato">
-            <span class="etiqueta">Usuario</span>
+            <span class="clave">Usuario</span>
             <code>{{ p.documento }}</code>
           </div>
           <div class="dato">
-            <span class="etiqueta">Último ingreso</span>
-            <strong>{{ (p.usuarioUltimoIngreso | date:'dd/MM/yyyy HH:mm') || 'Nunca' }}</strong>
+            <span class="clave">Último ingreso</span>
+            <span class="valor">
+              {{ (p.usuarioUltimoIngreso | date:'dd/MM/yyyy HH:mm') || 'Nunca' }}
+            </span>
           </div>
-        </div>
+          <div class="dato">
+            <label class="clave" for="acceso-rol-actual">Rol</label>
+            <select id="acceso-rol-actual" [ngModel]="p.rol"
+                    [ngModelOptions]="{ standalone: true }"
+                    (ngModelChange)="cambiarRol($event)">
+              <option *ngFor="let rol of roles" [value]="rol.codigo">{{ rol.valor }}</option>
+            </select>
+          </div>
+        </section>
 
-        <div class="campo">
-          <label for="acceso-rol-actual">Rol</label>
-          <select id="acceso-rol-actual" [ngModel]="p.rol"
-                  [ngModelOptions]="{ standalone: true }"
-                  (ngModelChange)="cambiarRol($event)">
-            <option *ngFor="let rol of roles" [value]="rol.codigo">{{ rol.valor }}</option>
-          </select>
-        </div>
+        <!-- Aquí mismo y NO en una segunda hoja encima de esta: un diálogo
+             sobre otro repite el título, el nombre y la equis, y deja al
+             administrador sin saber cuál está cerrando. Son dos campos de
+             cuatro dígitos; caben. -->
+        <section class="bloque">
+        <h3>PIN</h3>
+        <form class="asignar-pin" [formGroup]="formularioClave" (ngSubmit)="asignarClave()">
+          <div class="fila-pin">
+            <div class="campo">
+              <label for="c-nueva">
+                Nuevo
+                <i class="pi pi-info-circle ayuda"
+                   pTooltip="4 números. Evita 1234 y repetidos"
+                   tooltipPosition="top"></i>
+              </label>
+              <input id="c-nueva" type="text" inputmode="numeric" maxlength="4" class="pin"
+                     formControlName="claveNueva" autocomplete="off">
+            </div>
 
-        <h3 class="gd-titulo-seccion">PIN</h3>
-        <div class="gd-lista">
-          <button type="button" class="gd-fila gd-presionable" (click)="cambiandoClave = true">
-            <i class="pi pi-key"></i>
-            <span class="etiqueta">Asignar un PIN</span>
-            <i class="pi pi-chevron-right marca"></i>
-          </button>
-          <button type="button" class="gd-fila gd-presionable" (click)="restablecerClave()">
-            <i class="pi pi-refresh"></i>
-            <span class="etiqueta">Volver a {{ claveInicial }}</span>
-          </button>
-        </div>
+            <div class="campo">
+              <label for="c-confirmacion">Repetir</label>
+              <input id="c-confirmacion" type="text" inputmode="numeric" maxlength="4" class="pin"
+                     formControlName="confirmacion" autocomplete="off">
+            </div>
 
-        <h3 class="gd-titulo-seccion">Estado de la cuenta</h3>
-        <div class="gd-lista">
-          <button type="button" class="gd-fila gd-presionable" (click)="alternarEstadoCuenta()">
-            <i class="pi" [ngClass]="p.usuarioActivo === 'S' ? 'pi-ban' : 'pi-check'"></i>
-            <span class="etiqueta">
-              {{ p.usuarioActivo === 'S' ? 'Desactivar la cuenta' : 'Activar la cuenta' }}
-            </span>
-          </button>
-          <!-- El candado es la otra llave: además de apagar la cuenta, corta
-               la sesión que la persona tenga abierta en ese momento. -->
-          <button type="button" class="gd-fila gd-presionable"
-                  [class.gd-fila--destructiva]="!cuentaBloqueada(p)"
-                  (click)="alternarBloqueoCuenta()">
-            <i class="pi" [ngClass]="cuentaBloqueada(p) ? 'pi-lock-open' : 'pi-lock'"></i>
-            <span class="etiqueta">
-              {{ cuentaBloqueada(p) ? 'Habilitar la cuenta' : 'Deshabilitar la cuenta' }}
-            </span>
-          </button>
-        </div>
+            <button type="submit" class="principal"
+                    [disabled]="guardando || formularioClave.invalid || claveNoCoincide">
+              <i class="pi pi-check"></i>
+              Asignar
+            </button>
+          </div>
+
+          <p class="error" role="alert" *ngIf="errorPinAsignado || claveNoCoincide">
+            <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+            {{ claveNoCoincide ? 'Los dos no coinciden' : errorPinAsignado }}
+          </p>
+
+          <p class="dictado">
+            <i class="pi pi-info-circle" aria-hidden="true"></i>
+            Dile este PIN a la persona. Se lo pedirá al entrar y podrá cambiarlo.
+          </p>
+        </form>
+
+        <button type="button" class="enlace" (click)="restablecerClave()">
+          <i class="pi pi-refresh" aria-hidden="true"></i>
+          Volver a {{ claveInicial }}
+        </button>
+        </section>
+
+        <!-- Las DOS llaves, cada una diciendo en qué estado está y qué hace el
+             botón. Antes eran dos filas casi idénticas —"Desactivar la cuenta"
+             y "Deshabilitar la cuenta"— imposibles de distinguir. -->
+        <section class="bloque">
+          <h3>Estado</h3>
+
+          <div class="estado">
+            <div class="texto">
+              <strong>{{ p.usuarioActivo === 'S' ? 'Activa' : 'Inactiva' }}</strong>
+              <span>El interruptor normal para dejarla entrar o no.</span>
+            </div>
+            <button type="button" class="alterno" (click)="alternarEstadoCuenta()">
+              {{ p.usuarioActivo === 'S' ? 'Desactivar' : 'Activar' }}
+            </button>
+          </div>
+
+          <div class="estado">
+            <div class="texto">
+              <strong>{{ cuentaBloqueada(p) ? 'Bloqueada' : 'Sin bloqueo' }}</strong>
+              <span>El bloqueo gana sobre lo anterior y corta la sesión abierta.</span>
+            </div>
+            <button type="button" class="alterno"
+                    [class.destructivo]="!cuentaBloqueada(p)"
+                    (click)="alternarBloqueoCuenta()">
+              {{ cuentaBloqueada(p) ? 'Quitar el bloqueo' : 'Bloquear' }}
+            </button>
+          </div>
+        </section>
       </ng-container>
     </ng-container>
 
@@ -416,54 +467,6 @@
     </div>
   </gd-hoja>
 
-  <!-- Sub-hoja: escribir el PIN. Va aparte para que la de acceso no
-       se llene de campos que casi nunca se usan. -->
-  <gd-hoja [abierta]="cambiandoClave" titulo="Asignar PIN"
-           [subtitulo]="gestionandoAcceso?.nombreCompleto || ''"
-           (cerrar)="cambiandoClave = false">
-    <form id="forma-clave" class="formulario-clave"
-          [formGroup]="formularioClave" (ngSubmit)="asignarClave()">
-      <div class="campo">
-        <label for="c-nueva">
-          PIN
-          <i class="pi pi-info-circle ayuda"
-             pTooltip="4 números. Evita 1234 y repetidos"
-             tooltipPosition="top"></i>
-        </label>
-        <input id="c-nueva" type="text" inputmode="numeric" maxlength="4" class="pin"
-               formControlName="claveNueva" autocomplete="off">
-        <p class="error" role="alert" *ngIf="errorPinAsignado">
-          <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
-          {{ errorPinAsignado }}
-        </p>
-      </div>
-      <div class="campo">
-        <label for="c-confirmacion">Repetir</label>
-        <input id="c-confirmacion" type="text" inputmode="numeric" maxlength="4" class="pin"
-               formControlName="confirmacion" autocomplete="off">
-        <p class="error" role="alert" *ngIf="claveNoCoincide">
-          <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
-          Los dos no coinciden
-        </p>
-      </div>
-
-      <!-- El administrador lo dicta en voz alta y la persona lo cambia al
-           entrar: aquí ver los dígitos es lo útil, no ocultarlos. -->
-      <p class="dictado">
-        <i class="pi pi-info-circle" aria-hidden="true"></i>
-        Dile este PIN a la persona. Se lo pedirá al entrar y podrá cambiarlo.
-      </p>
-    </form>
-
-    <div pie>
-      <button type="button" class="alterno" (click)="cambiandoClave = false">Cancelar</button>
-      <button type="submit" form="forma-clave" class="principal"
-              [disabled]="guardando || claveNoCoincide">
-        <i class="pi pi-check"></i>
-        Asignar
-      </button>
-    </div>
-  </gd-hoja>
 
   <gd-bloqueo [abierta]="bloqueandoCuenta"
               [objetivo]="gestionandoAcceso?.nombreCompleto || ''"
