@@ -432,20 +432,27 @@
         </label>
         <input id="c-nueva" type="text" inputmode="numeric" maxlength="4" class="pin"
                formControlName="claveNueva" autocomplete="off">
-        <small class="error"
-               *ngIf="formularioClave.controls.claveNueva.invalid
-                 && formularioClave.controls.claveNueva.touched">
-          {{ formularioClave.controls.claveNueva.hasError('pinTrivial')
-             ? 'Ese PIN es muy fácil de adivinar. Evita repetidos y seguidos.'
-             : 'El PIN son 4 números' }}
-        </small>
+        <p class="error" role="alert" *ngIf="errorPinAsignado">
+          <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+          {{ errorPinAsignado }}
+        </p>
       </div>
       <div class="campo">
         <label for="c-confirmacion">Repetir</label>
         <input id="c-confirmacion" type="text" inputmode="numeric" maxlength="4" class="pin"
                formControlName="confirmacion" autocomplete="off">
-        <small class="error" *ngIf="claveNoCoincide">Los dos no coinciden</small>
+        <p class="error" role="alert" *ngIf="claveNoCoincide">
+          <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+          Los dos no coinciden
+        </p>
       </div>
+
+      <!-- El administrador lo dicta en voz alta y la persona lo cambia al
+           entrar: aquí ver los dígitos es lo útil, no ocultarlos. -->
+      <p class="dictado">
+        <i class="pi pi-info-circle" aria-hidden="true"></i>
+        Dile este PIN a la persona. Se lo pedirá al entrar y podrá cambiarlo.
+      </p>
     </form>
 
     <div pie>

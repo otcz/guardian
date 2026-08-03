@@ -374,10 +374,59 @@ code {
   word-break: break-all;
 }
 
+/* El PIN son cuatro dígitos: el campo mide lo que mide un PIN y no el ancho de
+   la hoja. Dos campos de 600px con cuatro caracteres adentro se leen como una
+   contraseña a medio escribir. */
 .formulario-clave {
   display: flex;
   flex-direction: column;
   gap: var(--e-4);
+
+  input.pin {
+    max-width: 9.5rem;
+    min-height: calc(var(--tactil) + var(--e-2));
+    padding: var(--e-2);
+    color: var(--text-strong);
+    background: var(--bg-soft);
+    border: 1px solid var(--border-default);
+    border-radius: var(--r-md);
+    --bg-campo: var(--bg-soft);
+
+    &:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+      outline: none;
+    }
+  }
+
+  .error {
+    display: flex;
+    align-items: center;
+    gap: var(--e-1);
+    margin: 0;
+    font-size: var(--t-xs);
+    font-weight: 600;
+    color: var(--deny);
+  }
+}
+
+/* Instrucción de lo que hay que HACER con el PIN, no ayuda de un campo. */
+.dictado {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e-2);
+  margin: 0;
+  padding: var(--e-3);
+  font-size: var(--t-sm);
+  line-height: 1.4;
+  color: var(--text-muted);
+  background: var(--bg-soft);
+  border-radius: var(--r-md);
+
+  i {
+    flex: 0 0 auto;
+    margin-top: 0.15em;
+  }
 }
 
 .gd-lista .etiqueta {

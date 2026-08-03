@@ -25,11 +25,23 @@
   margin-bottom: 1rem;
 }
 
+/* ---------------------------------------------------------------------------
+   OJO con el `flex` de este bloque: NO va aquí, va más abajo acotado a `.alta`.
+
+   `flex: 1 1 150px` suelto en `.campo` significa "reparte el ancho a partir de
+   150px" solo si el padre es una FILA. Dentro de un contenedor en COLUMNA —una
+   hoja, una tarjeta, un grupo del formulario de Personas— ese 150px es una
+   ALTURA de base, y cada campo reserva 150px de alto aunque solo tenga una
+   etiqueta y un input de cuatro dígitos.
+
+   Es el bug de los huecos gigantes, y ya apareció CUATRO veces en este
+   proyecto: en el grupo de Personas, en la tarjeta del PIN, y en la hoja de
+   "Asignar PIN". Acotarlo a la fila es lo que evita la quinta.
+   --------------------------------------------------------------------------- */
 .campo {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
-  flex: 1 1 150px;
   min-width: 0;
 
   label {
@@ -55,6 +67,11 @@
       border-color: var(--accent);
     }
   }
+}
+
+/* El reparto horizontal, solo donde el padre es de verdad una fila. */
+.alta > .campo {
+  flex: 1 1 150px;
 }
 
 .ayuda {

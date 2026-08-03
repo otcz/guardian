@@ -456,6 +456,23 @@ export class PersonasComponent implements OnInit {
     });
   }
 
+  /**
+   * Qué le pasa al PIN que se está asignando.
+   *
+   * <p>Elegir cuál regla se rompió es lógica de negocio y no va en la
+   * plantilla. Además es la misma fuente que decide si se pinta el mensaje, así
+   * que el texto no puede desincronizarse del estado del campo.</p>
+   */
+  get errorPinAsignado(): string | null {
+    const campo = this.formularioClave.controls.claveNueva;
+    if (!campo.invalid || !campo.touched) {
+      return null;
+    }
+    return campo.hasError('pinTrivial')
+      ? 'Ese PIN es muy fácil de adivinar. Evita repetidos y seguidos.'
+      : 'El PIN son 4 números';
+  }
+
   /** La confirmación evita que un error de tecleo deje al dueño por fuera. */
   get claveNoCoincide(): boolean {
     const { claveNueva, confirmacion } = this.formularioClave.getRawValue();
