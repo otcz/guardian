@@ -12,22 +12,42 @@ public class CorreoServiceImpl implements CorreoService {
 
     private final JavaMailSender mailSender;
     private final String host;
+    private final String usuario;
+    private final String clave;
     private final String remitente;
     private final String nombreRemitente;
 
     public CorreoServiceImpl(JavaMailSender mailSender,
                              @Value("${spring.mail.host}") String host,
+                             @Value("${spring.mail.username}") String usuario,
+                             @Value("${spring.mail.password}") String clave,
                              @Value("${guardian.correo.remitente}") String remitente,
                              @Value("${guardian.correo.nombre-remitente}") String nombreRemitente) {
         this.mailSender = mailSender;
         this.host = host;
+        this.usuario = usuario;
+        this.clave = clave;
         this.remitente = remitente;
         this.nombreRemitente = nombreRemitente;
     }
 
+    /**
+     * Exige host Y credenciales, no solo el host.
+     *
+     * <p>Con el host puesto y la clave todavia vacia —el estado normal
+     * mientras alguien tramita la contrasena de aplicacion de Gmail— mirar
+     * solo el host daba por configurado el correo, el envio moria en un
+     * "535 Username and Password not accepted", y el codigo dejaba de
+     * escribirse en el log. Es decir: la configuracion a medias rompia el
+     * unico camino que quedaba para probar el flujo.</p>
+     */
     @Override
     public boolean estaConfigurado() {
-        return host != null && !host.trim().isEmpty();
+        return tiene(host) && tiene(usuario) && tiene(clave);
+    }
+
+    private boolean tiene(String valor) {
+        return valor != null && !valor.trim().isEmpty();
     }
 
     @Override
@@ -37,7 +57,8 @@ public class CorreoServiceImpl implements CorreoService {
             // Sin SMTP el flujo completo sigue siendo probable en desarrollo.
             // El codigo va al log y NO a la respuesta HTTP: ponerlo ahi seria
             // regalarle la cuenta a cualquiera que sepa un numero de documento.
-            log.warn("[correo] SIN SMTP configurado. Codigo para {}: {}", destinatario, codigo);
+            log.warn("[correo] SIN SMTP configurado ({}). Codigo para {}: {}",
+                    queFalta(), destinatario, codigo);
             return;
         }
 
@@ -54,8 +75,42 @@ public class CorreoServiceImpl implements CorreoService {
             // Se traga a proposito: ver el contrato en CorreoService. El log
             // queda para que el administrador pueda diagnosticar un SMTP mal
             // configurado, que si no seria invisible.
-            log.error("[correo] fallo el envio del codigo de recuperacion", fallo);
+            //
+            // El MENSAJE en la linea y la traza solo en debug: lo que resuelve
+            // el problema es leer "535 Username and Password not accepted", no
+            // ciento veinte lineas de pila que lo entierran.
+            log.error("[correo] fallo el envio: {}", causaRaiz(fallo));
+            log.debug("[correo] detalle del fallo", fallo);
         }
+    }
+
+    /** Para que el log diga QUE falta, y no solo que falta algo. */
+    private String queFalta() {
+        StringBuilder falta = new StringBuilder();
+        if (!tiene(host)) {
+            falta.append("falta GUARDIAN_SMTP_HOST ");
+        }
+        if (!tiene(usuario)) {
+            falta.append("falta GUARDIAN_SMTP_USUARIO ");
+        }
+        if (!tiene(clave)) {
+            falta.append("falta GUARDIAN_SMTP_CLAVE ");
+        }
+        return falta.toString().trim();
+    }
+
+    /**
+     * El mensaje util vive al fondo de la cadena: Spring envuelve el fallo de
+     * JavaMail y la linea de arriba solo dice "Mail server connection failed".
+     */
+    private String causaRaiz(Throwable fallo) {
+        Throwable actual = fallo;
+        while (actual.getCause() != null && actual.getCause() != actual) {
+            actual = actual.getCause();
+        }
+        return actual.getMessage() != null
+                ? actual.getMessage().replaceAll("\\s+", " ").trim()
+                : actual.getClass().getSimpleName();
     }
 
     /**
