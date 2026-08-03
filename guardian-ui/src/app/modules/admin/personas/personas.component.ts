@@ -395,38 +395,11 @@ export class PersonasComponent implements OnInit {
     });
   }
 
-  cambiarRol(rol: string): void {
-    const persona = this.gestionandoAcceso;
-    if (!persona?.usuarioId || rol === persona.rol) {
-      return;
-    }
-
-    this.error = null;
-    this.admin.cambiarRolUsuario(persona.usuarioId, rol).subscribe({
-      next: () => this.refrescarAcceso(),
-      error: (fallo: HttpErrorResponse) => {
-        this.error = fallo.error?.mensaje ?? 'No pudimos cambiar el rol.';
-        this.refrescarAcceso();
-      }
-    });
-  }
-
-  alternarEstadoCuenta(): void {
-    const persona = this.gestionandoAcceso;
-    if (!persona?.usuarioId) {
-      return;
-    }
-
-    this.error = null;
-    this.admin
-      .cambiarEstadoUsuario(persona.usuarioId, persona.usuarioActivo !== 'S')
-      .subscribe({
-        next: () => this.refrescarAcceso(),
-        error: (fallo: HttpErrorResponse) => {
-          this.error = fallo.error?.mensaje ?? 'No pudimos cambiar el estado de la cuenta.';
-        }
-      });
-  }
+  // La hoja quedó siendo SOLO el cambio de PIN. Lo que vivía aquí —cambiar el
+  // rol, activar o desactivar la cuenta, bloquearla— repetía en un segundo
+  // sitio lo que los iconos de la fila ya hacen sobre la persona, y obligaba a
+  // preguntarse cuál de los dos había que tocar. Los endpoints del API siguen
+  // existiendo por si vuelven a hacer falta.
 
   // Sin "volver a 0000": era una segunda forma de hacer lo mismo. Si hay que
   // dejar la cuenta con el PIN inicial, se escribe en los mismos dos campos.
@@ -481,54 +454,6 @@ export class PersonasComponent implements OnInit {
           this.error = fallo.error?.mensaje ?? 'No pudimos asignar el PIN.';
         }
       });
-  }
-
-  alternarBloqueoCuenta(): void {
-    const persona = this.gestionandoAcceso;
-    if (!persona?.usuarioId) {
-      return;
-    }
-
-    if (this.cuentaBloqueada(persona)) {
-      const seguro = window.confirm(
-        `La cuenta está deshabilitada por: `
-        + `${persona.usuarioMotivoBloqueo || 'sin motivo registrado'}.`
-        + '\n\n¿Habilitarla de nuevo?');
-      if (!seguro) {
-        return;
-      }
-      this.admin.desbloquear('usuarios', persona.usuarioId).subscribe({
-        next: () => this.refrescarAcceso(),
-        error: (fallo: HttpErrorResponse) => {
-          this.error = fallo.error?.mensaje ?? 'No pudimos habilitar la cuenta.';
-        }
-      });
-      return;
-    }
-    this.bloqueandoCuenta = true;
-  }
-
-  /** Hoja del motivo, para bloquear la CUENTA (no la persona). */
-  bloqueandoCuenta = false;
-
-  confirmarBloqueoCuenta(motivo: string): void {
-    const persona = this.gestionandoAcceso;
-    if (!persona?.usuarioId) {
-      return;
-    }
-
-    this.error = null;
-    this.admin.bloquear('usuarios', persona.usuarioId, motivo).subscribe({
-      next: () => {
-        this.bloqueandoCuenta = false;
-        this.avisoAcceso = 'Cuenta deshabilitada. Si tenía la aplicación abierta, ya salió de ella.';
-        this.refrescarAcceso();
-      },
-      error: (fallo: HttpErrorResponse) => {
-        this.bloqueandoCuenta = false;
-        this.error = fallo.error?.mensaje ?? 'No pudimos deshabilitar la cuenta.';
-      }
-    });
   }
 
   /**

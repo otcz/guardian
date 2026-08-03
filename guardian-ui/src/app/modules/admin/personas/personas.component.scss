@@ -314,8 +314,12 @@
   display: flex;
   flex-direction: column;
   gap: var(--e-3);
-  padding-bottom: var(--e-5);
-  margin-bottom: var(--e-5);
+  /* --e-4 y no --e-5: con 24px a cada lado de las dos líneas, el diálogo
+     desbordaba por 39px en una ventana de portátil y aparecía una barra de
+     desplazamiento para no mostrar nada nuevo. Sigue habiendo el doble de aire
+     entre bloques que dentro de uno, que es lo que hace la agrupación. */
+  padding-bottom: var(--e-4);
+  margin-bottom: var(--e-4);
   box-shadow: inset 0 -1px 0 var(--border-hairline);
 
   /* El último no lleva línea ni aire: abajo ya está el pie de la hoja. */

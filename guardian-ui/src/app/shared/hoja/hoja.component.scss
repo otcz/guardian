@@ -33,7 +33,10 @@
      cabecera fija, cuerpo que se desplaza y pie fijo — así el pie no puede
      tapar nada porque ocupa su propio sitio. */
   overflow: hidden;
-  padding: var(--e-2) var(--e-4) calc(var(--seguro-abajo) + var(--e-4));
+  /* El relleno lateral con nombre: el cuerpo lo necesita para meter la barra
+     de desplazamiento DENTRO de él y no a costa del contenido. */
+  --hoja-relleno: var(--e-4);
+  padding: var(--e-2) var(--hoja-relleno) calc(var(--seguro-abajo) + var(--e-4));
   background: var(--bg-surface);
   border-radius: var(--r-xl) var(--r-xl) 0 0;
   box-shadow: var(--shadow-flotante);
@@ -102,12 +105,36 @@
   }
 }
 
+/* El cuerpo se estira hasta el borde de la hoja y devuelve el relleno por
+   dentro. Así la barra de desplazamiento se dibuja en esa franja y NO le quita
+   ancho al contenido: sin esto, en una ventana baja la barra empujaba los
+   valores a 954 mientras el pie seguía en 968 — dos bordes derechos en un
+   diálogo que tiene uno. */
 .cuerpo {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  margin-inline: calc(-1 * var(--hoja-relleno));
+  padding-inline: var(--hoja-relleno);
   /* Al llegar al tope el gesto NO debe empezar a mover el fondo. */
   overscroll-behavior: contain;
+
+  /* Barra fina y sin pista: en un diálogo que casi nunca desborda, la barra
+     ancha del sistema se lleva 15px del ancho útil y desalinea el contenido
+     respecto del pie, que no se desplaza. Con 6px la diferencia deja de
+     leerse como un borde torcido. */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: var(--r-full);
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
 
 /* El pie ocupa su propio sitio al final de la columna. Con el teclado abierto
@@ -144,6 +171,7 @@
     height: fit-content;
     max-width: 560px;
     max-height: 85dvh;
+    --hoja-relleno: var(--e-5);
     padding: var(--e-5);
     border-radius: var(--r-lg);
     animation: gd-entrada-modal var(--dur-media) var(--curva-estandar);

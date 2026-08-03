@@ -307,8 +307,11 @@
   <!-- ── Acceso a la aplicación ──────────────────────────────────────────
        Todo lo que antes vivía en el panel de Usuarios, aquí, sobre la
        persona que ya se está mirando. -->
+  <!-- El título dice lo que la hoja hace ahora: cambiar el PIN. Cuando la
+       persona todavía no tiene cuenta, dice lo que hace en ese caso. -->
   <gd-hoja [abierta]="!!gestionandoAcceso"
-           titulo="Acceso a la aplicación"
+           [titulo]="gestionandoAcceso && tieneCuenta(gestionandoAcceso)
+             ? 'Cambiar el PIN' : 'Dar acceso a la aplicación'"
            [subtitulo]="gestionandoAcceso?.nombreCompleto || ''"
            (cerrar)="gestionandoAcceso = null">
 
@@ -351,37 +354,10 @@
       <!-- ── Con cuenta: se administra ───────────────────────────────── -->
       <ng-container *ngIf="tieneCuenta(p)">
 
-        <!-- Todo sobre UN eje: la clave a la izquierda, el valor a la derecha.
-             Antes había tres tratamientos de caja apilados —una tarjeta gris,
-             un select suelto y dos listas con borde— y cada uno arrancaba en
-             una x distinta. Eso era lo que se leía como desorden. -->
+        <!-- Solo el PIN. El estado de la cuenta y el bloqueo ya se manejan con
+             los iconos de la fila, y repetirlos aquí obligaba a preguntarse en
+             cuál de los dos sitios había que tocarlos. -->
         <section class="bloque">
-          <div class="dato">
-            <span class="clave">Usuario</span>
-            <code>{{ p.documento }}</code>
-          </div>
-          <div class="dato">
-            <span class="clave">Último ingreso</span>
-            <span class="valor">
-              {{ (p.usuarioUltimoIngreso | date:'dd/MM/yyyy HH:mm') || 'Nunca' }}
-            </span>
-          </div>
-          <div class="dato">
-            <label class="clave" for="acceso-rol-actual">Rol</label>
-            <select id="acceso-rol-actual" [ngModel]="p.rol"
-                    [ngModelOptions]="{ standalone: true }"
-                    (ngModelChange)="cambiarRol($event)">
-              <option *ngFor="let rol of roles" [value]="rol.codigo">{{ rol.valor }}</option>
-            </select>
-          </div>
-        </section>
-
-        <!-- Aquí mismo y NO en una segunda hoja encima de esta: un diálogo
-             sobre otro repite el título, el nombre y la equis, y deja al
-             administrador sin saber cuál está cerrando. Son dos campos de
-             cuatro dígitos; caben. -->
-        <section class="bloque">
-        <h3>PIN</h3>
         <form class="asignar-pin" [formGroup]="formularioClave" (ngSubmit)="asignarClave()">
           <div class="fila-pin">
             <div class="campo">
@@ -420,35 +396,6 @@
         </form>
 
         </section>
-
-        <!-- Las DOS llaves, cada una diciendo en qué estado está y qué hace el
-             botón. Antes eran dos filas casi idénticas —"Desactivar la cuenta"
-             y "Deshabilitar la cuenta"— imposibles de distinguir. -->
-        <section class="bloque">
-          <h3>Estado</h3>
-
-          <div class="estado">
-            <div class="texto">
-              <strong>{{ p.usuarioActivo === 'S' ? 'Activa' : 'Inactiva' }}</strong>
-              <span>El interruptor normal para dejarla entrar o no.</span>
-            </div>
-            <button type="button" class="alterno" (click)="alternarEstadoCuenta()">
-              {{ p.usuarioActivo === 'S' ? 'Desactivar' : 'Activar' }}
-            </button>
-          </div>
-
-          <div class="estado">
-            <div class="texto">
-              <strong>{{ cuentaBloqueada(p) ? 'Bloqueada' : 'Sin bloqueo' }}</strong>
-              <span>El bloqueo gana sobre lo anterior y corta la sesión abierta.</span>
-            </div>
-            <button type="button" class="alterno"
-                    [class.destructivo]="!cuentaBloqueada(p)"
-                    (click)="alternarBloqueoCuenta()">
-              {{ cuentaBloqueada(p) ? 'Quitar el bloqueo' : 'Bloquear' }}
-            </button>
-          </div>
-        </section>
       </ng-container>
     </ng-container>
 
@@ -464,12 +411,4 @@
   </gd-hoja>
 
 
-  <gd-bloqueo [abierta]="bloqueandoCuenta"
-              [objetivo]="gestionandoAcceso?.nombreCompleto || ''"
-              [descripcion]="(gestionandoAcceso?.nombreCompleto || '') + ' no podrá entrar a la '
-                + 'aplicación. Si tiene una sesión abierta se cierra en cuanto guardes. '
-                + 'Seguirá entrando al conjunto con su QR.'"
-              (confirmar)="confirmarBloqueoCuenta($event)"
-              (cerrar)="bloqueandoCuenta = false">
-  </gd-bloqueo>
 </div>
