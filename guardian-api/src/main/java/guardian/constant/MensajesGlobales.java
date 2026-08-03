@@ -123,6 +123,8 @@ public final class MensajesGlobales {
             "Esa persona ya pertenece a otra casa.";
     public static final String CASA_YA_REGISTRADA =
             "Ya existe una casa con ese identificador.";
+    public static final String GUARDIA_SIN_CASA =
+            "Un guardia no se registra con casa: trabaja en el conjunto, no vive en el.";
     public static final String PORTERIA_YA_REGISTRADA =
             "Ya existe una porteria con ese nombre.";
     /**

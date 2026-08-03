@@ -117,6 +117,30 @@
   }
 }
 
+/* Ocupa el resto de la fila donde estaba la casa, alineada con los campos: es
+   la explicación de por qué desapareció un campo que estaba ahí hace un
+   segundo, no la ayuda de ninguno. */
+.nota-guardia {
+  grid-column: span 4;
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  margin: 0;
+  align-self: center;
+  font-size: var(--t-sm);
+  color: var(--text-muted);
+
+  i {
+    flex: 0 0 auto;
+  }
+}
+
+@container (max-width: 720px) {
+  .nota-guardia {
+    grid-column: span 3;
+  }
+}
+
 /* Manda el ancho del FORMULARIO, no el de la ventana. A la mitad, tres
    columnas: los pares siguen siendo pares y las ternas se apilan de a una. */
 @container (max-width: 720px) {

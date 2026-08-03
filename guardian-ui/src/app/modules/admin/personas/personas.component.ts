@@ -66,7 +66,14 @@ export class PersonasComponent implements OnInit {
 
     this.admin.casas().subscribe(casas => (this.casas = casas));
     this.admin.parametros('PARENTESCO').subscribe(p => (this.parentescos = p));
-    this.admin.parametros('ROL').subscribe(r => (this.roles = this.asignables(r)));
+    this.admin.parametros('ROL').subscribe(r => {
+      this.roles = this.asignables(r);
+      // El default se aplica al LLEGAR el catálogo, no antes: el select no
+      // puede seleccionar una opción que todavía no existe en el DOM.
+      if (!this.editando && !this.formulario.controls.rolUsuario.value) {
+        this.formulario.controls.rolUsuario.setValue(this.rolPorDefecto());
+      }
+    });
     this.admin.parametros('TIPO_DOCUMENTO').subscribe(t => (this.tiposDocumento = t));
 
     // debounce para no disparar una consulta por cada tecla.
@@ -74,9 +81,12 @@ export class PersonasComponent implements OnInit {
       .pipe(debounceTime(300), distinctUntilChanged())
       .subscribe(texto => this.cargar(texto));
 
-    // Elegir un rol vuelve el correo obligatorio; quitarlo lo suelta.
-    this.formulario.controls.rolUsuario.valueChanges
-      .subscribe(() => this.sincronizarValidadorDeCorreo());
+    // Elegir un rol vuelve el correo obligatorio; quitarlo lo suelta. Y elegir
+    // GUARDIA retira la casa, que para él no aplica.
+    this.formulario.controls.rolUsuario.valueChanges.subscribe(rol => {
+      this.sincronizarValidadorDeCorreo();
+      this.sincronizarCasaConElRol(rol);
+    });
   }
 
   buscar(texto: string): void {
@@ -163,7 +173,24 @@ export class PersonasComponent implements OnInit {
   cancelarEdicion(): void {
     this.editando = null;
     this.mostrarAlta = false;
-    this.formulario.reset({ tipoDocumento: 'CC', fotoUrl: null });
+    // Vuelve al rol por defecto y no a vacío: ya no existe "sin cuenta", así
+    // que un formulario en blanco dejaría el select sin ninguna opción marcada.
+    this.formulario.reset({
+      tipoDocumento: 'CC',
+      fotoUrl: null,
+      rolUsuario: this.rolPorDefecto()
+    });
+  }
+
+  /**
+   * RESIDENTE, que es la inmensa mayoría de un conjunto. Si el administrador lo
+   * ocultara desde Configuración, cae al primero que quede: un default que
+   * apunta a una opción inexistente dejaría el select en blanco y el alta
+   * bloqueada sin decir por qué.
+   */
+  private rolPorDefecto(): string {
+    const residente = this.roles.find(r => r.codigo === 'RESIDENTE');
+    return residente?.codigo ?? this.roles[0]?.codigo ?? '';
   }
 
   alternarEstado(persona: Persona): void {
@@ -567,6 +594,35 @@ export class PersonasComponent implements OnInit {
   /** El parentesco solo aplica si la persona vive en una casa. */
   get pideParentesco(): boolean {
     return !!this.formulario.controls.casaId.value;
+  }
+
+  /**
+   * Un guardia no vive en el conjunto: trabaja en él. Ofrecerle una casa lo
+   * metería en un núcleo familiar, con los vehículos y los invitados de esa
+   * casa detrás.
+   *
+   * <p>En el alta manda el rol que se está eligiendo. En la edición manda el
+   * que la persona ya tiene, porque ahí el selector de cuenta no se muestra —
+   * la cuenta se administra desde la columna Acceso.</p>
+   */
+  get pideCasa(): boolean {
+    const rol = this.editando
+      ? this.editando.rol
+      : this.formulario.controls.rolUsuario.value;
+    return rol !== 'GUARDIA';
+  }
+
+  /**
+   * Al pasar a guardia se limpia la casa elegida antes.
+   *
+   * <p>Sin esto el campo desaparece de la pantalla pero su valor sigue en el
+   * formulario y viaja igual al backend: el administrador ve un guardia y
+   * guarda a un residente.</p>
+   */
+  private sincronizarCasaConElRol(rol: string | null): void {
+    if (rol === 'GUARDIA') {
+      this.formulario.patchValue({ casaId: null, parentesco: '' });
+    }
   }
 
   /**

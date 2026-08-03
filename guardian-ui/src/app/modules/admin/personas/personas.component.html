@@ -98,24 +98,10 @@
     <div class="grupo">
       <h3>En el conjunto</h3>
       <div class="campos">
-        <div class="campo">
-          <label for="casa">Casa</label>
-          <select id="casa" formControlName="casaId">
-            <option [ngValue]="null">Sin casa (guardia / externo)</option>
-            <option *ngFor="let casa of casas" [ngValue]="casa.id">{{ casa.identificador }}</option>
-          </select>
-        </div>
-
-        <div class="campo" *ngIf="pideParentesco">
-          <label for="parentesco">Parentesco</label>
-          <select id="parentesco" formControlName="parentesco">
-            <option value="">Selecciona…</option>
-            <option *ngFor="let p of parentescos" [value]="p.codigo">{{ p.valor }}</option>
-          </select>
-        </div>
-
-        <!-- Solo en el alta: en edición la cuenta se administra desde la
-             columna Acceso, que además permite cambiarle el PIN. -->
+        <!-- La cuenta va PRIMERO porque decide qué se pregunta después: un
+             guardia no vive en el conjunto, así que ni siquiera se le ofrece
+             casa. Solo en el alta — en edición la cuenta se administra desde
+             la columna Acceso, que además permite cambiarle el PIN. -->
         <div class="campo" *ngIf="!editando">
           <label for="rolUsuario">
             Cuenta
@@ -124,10 +110,32 @@
                tooltipPosition="top"></i>
           </label>
           <select id="rolUsuario" formControlName="rolUsuario">
-            <option value="">Sin cuenta de acceso</option>
             <option *ngFor="let rol of roles" [value]="rol.codigo">{{ rol.valor }}</option>
           </select>
         </div>
+
+        <div class="campo" *ngIf="pideCasa">
+          <label for="casa">Casa</label>
+          <select id="casa" formControlName="casaId">
+            <option [ngValue]="null">Sin casa</option>
+            <option *ngFor="let casa of casas" [ngValue]="casa.id">{{ casa.identificador }}</option>
+          </select>
+        </div>
+
+        <div class="campo" *ngIf="pideCasa && pideParentesco">
+          <label for="parentesco">Parentesco</label>
+          <select id="parentesco" formControlName="parentesco">
+            <option value="">Selecciona…</option>
+            <option *ngFor="let p of parentescos" [value]="p.codigo">{{ p.valor }}</option>
+          </select>
+        </div>
+
+        <!-- No es ayuda de un campo: es la explicación de por qué desapareció
+             uno que estaba ahí hace un segundo. -->
+        <p class="nota-guardia" *ngIf="!pideCasa">
+          <i class="pi pi-info-circle" aria-hidden="true"></i>
+          El guardia trabaja en el conjunto, no vive en él.
+        </p>
       </div>
     </div>
 

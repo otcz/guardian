@@ -110,6 +110,8 @@ public class PersonaServiceImpl implements PersonaService {
         persona.setActivo(Codigos.SI);
         persona.setUsuarioCreador(ejecutor.getDocumento());
 
+        exigirCasaCoherenteConElRol(request);
+
         GdPersona guardada = personaRepository.save(persona);
         vincularCasa(guardada, request, ejecutor);
         crearCuentaSiCorresponde(guardada, request, ejecutor);
@@ -373,6 +375,21 @@ public class PersonaServiceImpl implements PersonaService {
      * deja como esta: un guardia o un administrador externo no vive en ninguna
      * unidad y eso es valido.
      */
+    /**
+     * Un guardia no vive en el conjunto: trabaja en el.
+     *
+     * <p>La pantalla ya deja de ofrecer la casa al elegir GUARDIA, pero la
+     * regla no puede vivir solo alli: el mismo endpoint lo llama cualquiera con
+     * el token, y una casa colada en el alta de un guardia lo mete en un nucleo
+     * familiar — con los vehiculos y los invitados de esa casa detras.</p>
+     */
+    private void exigirCasaCoherenteConElRol(PersonaRequest request) {
+        if (request.getCasaId() != null
+                && Codigos.ROL_GUARDIA.equals(request.getRolUsuario())) {
+            throw GuardianException.conflicto(MensajesGlobales.GUARDIA_SIN_CASA);
+        }
+    }
+
     private void vincularCasa(GdPersona persona, PersonaRequest request,
                               UsuarioAutenticado ejecutor) {
         if (request.getCasaId() == null) {
