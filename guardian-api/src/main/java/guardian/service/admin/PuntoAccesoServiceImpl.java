@@ -9,6 +9,7 @@ import guardian.entity.conjunto.GdPuntoAcceso;
 import guardian.exception.GuardianException;
 import guardian.repository.GdAccesoEventoRepository;
 import guardian.repository.GdConjuntoRepository;
+import guardian.repository.GdGuardiaPorteriaRepository;
 import guardian.repository.GdPuntoAccesoRepository;
 import guardian.security.UsuarioAutenticado;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class PuntoAccesoServiceImpl implements PuntoAccesoService {
     private final GdPuntoAccesoRepository puntoAccesoRepository;
     private final GdConjuntoRepository conjuntoRepository;
     private final GdAccesoEventoRepository accesoEventoRepository;
+    private final GdGuardiaPorteriaRepository guardiaPorteriaRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -164,6 +166,8 @@ public class PuntoAccesoServiceImpl implements PuntoAccesoService {
                 .permiteVehiculo(porteria.getPermiteVehiculo())
                 .activo(porteria.getActivo())
                 .registros(accesoEventoRepository.countByPuntoAccesoId(porteria.getId()))
+                .guardias(guardiaPorteriaRepository
+                        .countByPuntoAccesoIdAndActivo(porteria.getId(), Codigos.SI))
                 .build();
     }
 }

@@ -39,6 +39,18 @@ public interface GdUsuarioRepository extends JpaRepository<GdUsuario, Long> {
 
     List<GdUsuario> findByRol(String rol);
 
+    /**
+     * Las cuentas de un rol dentro de la sede. Sirve para ofrecer "los guardias
+     * del conjunto" al asignarlos a una porteria. El filtro por conjunto va en
+     * el query y el FETCH evita el N+1 al leer nombre y documento de cada fila.
+     */
+    @Query("SELECT u FROM GdUsuario u "
+            + "JOIN FETCH u.persona p "
+            + "WHERE p.conjunto.id = :conjuntoId AND u.rol = :rol "
+            + "ORDER BY p.apellidos, p.nombres")
+    List<GdUsuario> listarPorConjuntoYRol(@Param("conjuntoId") Long conjuntoId,
+                                          @Param("rol") String rol);
+
     /** Si una sede ya tiene administrador. Sirve para no crear un segundo. */
     @Query("SELECT COUNT(u) > 0 FROM GdUsuario u "
             + "WHERE u.persona.conjunto.id = :conjuntoId AND u.rol = :rol")

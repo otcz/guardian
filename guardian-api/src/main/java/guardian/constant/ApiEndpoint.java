@@ -22,6 +22,8 @@ public final class ApiEndpoint {
     public static final String ACCESO_VERIFICAR = "/verificar";
     public static final String ACCESO_REGISTRAR = "/registrar";
     public static final String ACCESO_EVENTOS = "/eventos";
+    /** Las porterias que la tablet puede elegir, y cual le toca a quien entro. */
+    public static final String ACCESO_PORTERIAS = "/porterias";
 
     /** Autogestion del residente — cualquier usuario autenticado sobre SU casa. */
     public static final String RESIDENTE = API + "/residente";
@@ -88,6 +90,7 @@ public final class ApiEndpoint {
     public static final String POR_ID = "/{id}";
     public static final String ACTIVAR = "/{id}/activar";
     public static final String DESACTIVAR = "/{id}/desactivar";
+    public static final String GUARDIAS = "/{id}/guardias";
     public static final String CREDENCIAL = "/{id}/credencial";
     public static final String CREDENCIAL_PNG = "/{id}/credencial.png";
 }

@@ -9,6 +9,7 @@ import guardian.repository.GdPersonaRepository;
 import guardian.repository.GdPuntoAccesoRepository;
 import guardian.security.UsuarioAutenticado;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +24,7 @@ import java.util.Optional;
  * invitados — extraido para que ninguno pueda divergir del otro en como escribe
  * la bitacora.</p>
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AccesoEventoFabrica {
@@ -62,16 +64,50 @@ public class AccesoEventoFabrica {
 
         personaRepository.findById(guardia.getPersonaId()).ifPresent(evento::setGuardia);
 
-        if (puntoAccesoId != null) {
-            puntoAccesoRepository.findById(puntoAccesoId).ifPresent(evento::setPuntoAcceso);
-        } else {
-            List<GdPuntoAcceso> activos = puntoAccesoRepository
-                    .findByConjuntoIdAndActivoOrderByNombreAsc(guardia.getConjuntoId(), Codigos.SI);
-            if (activos.size() == 1) {
-                evento.setPuntoAcceso(activos.get(0));
-            }
-        }
+        evento.setPuntoAcceso(resolverPunto(guardia, puntoAccesoId));
         return evento;
+    }
+
+    /**
+     * Por donde paso la persona.
+     *
+     * <p>El id que llega es de la TABLET, no del token: hay que tratarlo como
+     * entrada no confiable. Se resuelve contra el conjunto del guardia y no con
+     * un findById suelto — sin ese filtro, una tablet con la porteria de otra
+     * sede guardada estampa un punto de acceso ajeno sobre un evento de esta, y
+     * la bitacora no queda incompleta sino MENTIROSA, que es peor.</p>
+     *
+     * <p>Cuando no se puede resolver se cae al unico activo, si es que hay uno
+     * solo, y se deja constancia en el log. Antes un id invalido no hacia nada
+     * y la columna quedaba nula en silencio: el problema aparecia meses despues,
+     * leyendo una bitacora que ya no podia responder por donde entro nadie.</p>
+     */
+    private GdPuntoAcceso resolverPunto(UsuarioAutenticado guardia, Long puntoAccesoId) {
+        Long conjuntoId = guardia.getConjuntoId();
+
+        if (puntoAccesoId != null) {
+            Optional<GdPuntoAcceso> pedido =
+                    puntoAccesoRepository.findByIdAndConjuntoId(puntoAccesoId, conjuntoId);
+            if (pedido.isPresent()) {
+                return pedido.get();
+            }
+            log.warn("[acceso] la tablet mando puntoAccesoId={} que no es de la sede {}"
+                    + " (guardia={}); se cae al punto por defecto",
+                    puntoAccesoId, conjuntoId, guardia.getDocumento());
+        }
+
+        List<GdPuntoAcceso> activos = puntoAccesoRepository
+                .findByConjuntoIdAndActivoOrderByNombreAsc(conjuntoId, Codigos.SI);
+        if (activos.size() == 1) {
+            return activos.get(0);
+        }
+
+        // Con dos o mas porterias activas no hay forma de adivinar, y adivinar
+        // seria lo peor que se puede hacer aca. Queda nulo, pero NO en silencio.
+        log.warn("[acceso] evento sin punto de acceso: la sede {} tiene {} porterias"
+                + " activas y la tablet del guardia {} no dijo cual",
+                conjuntoId, activos.size(), guardia.getDocumento());
+        return null;
     }
 
     public GdAccesoEvento guardar(GdAccesoEvento evento) {

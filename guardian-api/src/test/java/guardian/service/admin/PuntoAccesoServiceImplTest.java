@@ -54,6 +54,9 @@ class PuntoAccesoServiceImplTest {
     @Mock
     private GdAccesoEventoRepository accesoEventoRepository;
 
+    @Mock
+    private guardian.repository.GdGuardiaPorteriaRepository guardiaPorteriaRepository;
+
     @InjectMocks
     private PuntoAccesoServiceImpl servicio;
 

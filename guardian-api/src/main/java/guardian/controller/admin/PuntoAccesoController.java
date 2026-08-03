@@ -1,9 +1,12 @@
 package guardian.controller.admin;
 
 import guardian.constant.ApiEndpoint;
+import guardian.dto.admin.AsignarGuardiasRequest;
+import guardian.dto.admin.GuardiaPorteriaResponse;
 import guardian.dto.admin.PuntoAccesoRequest;
 import guardian.dto.admin.PuntoAccesoResponse;
 import guardian.security.UsuarioActual;
+import guardian.service.admin.GuardiaPorteriaService;
 import guardian.service.admin.PuntoAccesoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,6 +33,7 @@ import java.util.List;
 public class PuntoAccesoController {
 
     private final PuntoAccesoService puntoAccesoService;
+    private final GuardiaPorteriaService guardiaPorteriaService;
     private final UsuarioActual usuarioActual;
 
     @GetMapping
@@ -62,5 +66,24 @@ public class PuntoAccesoController {
     public ResponseEntity<PuntoAccesoResponse> desactivar(@PathVariable Long id) {
         return ResponseEntity.ok(
                 puntoAccesoService.cambiarEstado(id, false, usuarioActual.obtener()));
+    }
+
+    // ── Guardias asignados ───────────────────────────────────────────────────
+
+    @GetMapping(ApiEndpoint.GUARDIAS)
+    public ResponseEntity<List<GuardiaPorteriaResponse>> guardias(@PathVariable Long id) {
+        return ResponseEntity.ok(guardiaPorteriaService.listar(id, usuarioActual.obtener()));
+    }
+
+    /**
+     * Reemplazo total: quedan EXACTAMENTE los que vengan. Con altas y bajas
+     * sueltas, dos administradores editando a la vez dejan un estado que
+     * ninguno de los dos eligio.
+     */
+    @PutMapping(ApiEndpoint.GUARDIAS)
+    public ResponseEntity<PuntoAccesoResponse> asignarGuardias(
+            @PathVariable Long id, @Valid @RequestBody AsignarGuardiasRequest request) {
+        return ResponseEntity.ok(
+                guardiaPorteriaService.asignar(id, request, usuarioActual.obtener()));
     }
 }

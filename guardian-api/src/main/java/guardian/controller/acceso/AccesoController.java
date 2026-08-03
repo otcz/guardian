@@ -3,11 +3,13 @@ package guardian.controller.acceso;
 import guardian.constant.ApiEndpoint;
 import guardian.dto.acceso.AccesoEventoResponse;
 import guardian.dto.acceso.FichaVerificacionResponse;
+import guardian.dto.acceso.PorteriasGaritaResponse;
 import guardian.dto.acceso.PresenciaResponse;
 import guardian.dto.acceso.RegistrarAccesoRequest;
 import guardian.dto.acceso.VerificarQrRequest;
 import guardian.security.UsuarioActual;
 import guardian.service.acceso.AccesoService;
+import guardian.service.acceso.PorteriaGaritaService;
 import guardian.service.acceso.PresenciaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,7 +37,19 @@ public class AccesoController {
 
     private final AccesoService accesoService;
     private final PresenciaService presenciaService;
+    private final PorteriaGaritaService porteriaGaritaService;
     private final UsuarioActual usuarioActual;
+
+    /**
+     * Entre que porterias puede elegir esta tablet, y cual proponerle.
+     *
+     * <p>Va aca y no bajo /admin porque quien la llama es el guardia, que no
+     * tiene permiso de administracion.</p>
+     */
+    @GetMapping(ApiEndpoint.ACCESO_PORTERIAS)
+    public ResponseEntity<PorteriasGaritaResponse> porterias() {
+        return ResponseEntity.ok(porteriaGaritaService.disponibles(usuarioActual.obtener()));
+    }
 
     /** Contadores ADENTRO / AFUERA que encabezan la pantalla de la porteria. */
     @GetMapping("/presencia")

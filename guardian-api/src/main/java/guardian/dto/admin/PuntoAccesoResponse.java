@@ -21,4 +21,12 @@ public class PuntoAccesoResponse {
      * garita, no en esta pantalla.</p>
      */
     private long registros;
+
+    /**
+     * Cuantos guardias tiene asignados. Un numero y no la lista: la tabla solo
+     * necesita el conteo, y traer los nombres de cada porteria en el listado
+     * seria una consulta mas por fila para un dato que solo se lee al abrir la
+     * hoja de asignacion.
+     */
+    private long guardias;
 }

@@ -15,6 +15,13 @@ public interface GdPuntoAccesoRepository extends JpaRepository<GdPuntoAcceso, Lo
 
     Optional<GdPuntoAcceso> findFirstByConjuntoIdAndNombreIgnoreCase(Long conjuntoId, String nombre);
 
+    /**
+     * Por id PERO dentro de la sede. El id llega de la tablet, o sea de fuera:
+     * un findById suelto deja estampar la porteria de otro conjunto sobre un
+     * evento de este.
+     */
+    Optional<GdPuntoAcceso> findByIdAndConjuntoId(Long id, Long conjuntoId);
+
     long countByConjuntoId(Long conjuntoId);
 
     long countByConjuntoIdAndActivo(Long conjuntoId, String activo);
