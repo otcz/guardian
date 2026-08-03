@@ -428,29 +428,10 @@ export class PersonasComponent implements OnInit {
       });
   }
 
-  restablecerClave(): void {
-    const persona = this.gestionandoAcceso;
-    if (!persona?.usuarioId) {
-      return;
-    }
-    const seguro = window.confirm(
-      `¿Devolver el PIN de ${persona.nombreCompleto} a ${this.claveInicial}? `
-      + 'Deberá cambiarla al entrar y su sesión abierta dejará de servirle.');
-    if (!seguro) {
-      return;
-    }
-
-    this.error = null;
-    this.admin.restablecerClave(persona.usuarioId).subscribe({
-      next: () => {
-        this.avisoAcceso = `PIN devuelto a ${this.claveInicial}.`;
-        this.refrescarAcceso();
-      },
-      error: (fallo: HttpErrorResponse) => {
-        this.error = fallo.error?.mensaje ?? 'No pudimos restablecer el PIN.';
-      }
-    });
-  }
+  // Sin "volver a 0000": era una segunda forma de hacer lo mismo. Si hay que
+  // dejar la cuenta con el PIN inicial, se escribe en los mismos dos campos.
+  // Un módulo con dos caminos para un solo resultado obliga a elegir entre
+  // ellos antes de poder actuar.
 
   /**
    * Qué le pasa al PIN que se está asignando.

@@ -490,23 +490,23 @@ code {
     gap: var(--e-3);
   }
 
-  /* `flex: 0 0 auto` explícito: el `.campo` de _paneles ya no trae basis, pero
-     dejarlo dicho evita que el próximo que toque este archivo lo herede. */
+  /* Los dos campos se REPARTEN el ancho disponible. Con un ancho fijo quedaba
+     un hueco muerto de 200px entre "Repetir" y el botón; repartiendo, la fila
+     llena su renglón y las proporciones se leen intencionales. */
   .campo {
-    flex: 0 0 auto;
+    flex: 1 1 0;
+    min-width: 5.5rem;
   }
 
   /* Cierra contra el mismo borde derecho que los valores y los botones de
-     estado. Pegado a los campos abría un tercer eje en una hoja que tiene
-     exactamente dos. */
+     estado. La hoja tiene exactamente dos ejes y este no abre un tercero. */
   .principal {
     flex: 0 0 auto;
-    margin-left: auto;
     min-height: calc(var(--tactil) + var(--e-2));
   }
 
   input.pin {
-    width: 7.5rem;
+    width: 100%;
     min-height: calc(var(--tactil) + var(--e-2));
     padding: var(--e-2);
     color: var(--text-strong);

@@ -27,9 +27,12 @@
   width: 100%;
   max-width: var(--ancho-panel);
   max-height: 90dvh;
-  overflow-y: auto;
-  /* Al llegar al tope de la hoja el gesto NO debe empezar a mover el fondo. */
-  overscroll-behavior: contain;
+  /* La hoja NO se desplaza: lo hace su cuerpo. Cuando el scroll vivía aquí, el
+     pie pegajoso quedaba ENCIMA del contenido y el último botón del formulario
+     asomaba por debajo de "Cerrar". La anatomía correcta de un diálogo es
+     cabecera fija, cuerpo que se desplaza y pie fijo — así el pie no puede
+     tapar nada porque ocupa su propio sitio. */
+  overflow: hidden;
   padding: var(--e-2) var(--e-4) calc(var(--seguro-abajo) + var(--e-4));
   background: var(--bg-surface);
   border-radius: var(--r-xl) var(--r-xl) 0 0;
@@ -102,13 +105,15 @@
 .cuerpo {
   flex: 1 1 auto;
   min-height: 0;
+  overflow-y: auto;
+  /* Al llegar al tope el gesto NO debe empezar a mover el fondo. */
+  overscroll-behavior: contain;
 }
 
-/* El pie queda pegado abajo mientras el cuerpo se desplaza: con el teclado
-   abierto, el botón de guardar sigue a la vista. */
+/* El pie ocupa su propio sitio al final de la columna. Con el teclado abierto
+   el botón de guardar sigue a la vista, y ya no puede solaparse con la última
+   fila del cuerpo. */
 .pie {
-  position: sticky;
-  bottom: 0;
   display: flex;
   gap: var(--e-2);
   justify-content: flex-end;
