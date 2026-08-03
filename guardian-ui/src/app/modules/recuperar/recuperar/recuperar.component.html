@@ -9,7 +9,7 @@
     <!-- PASO 1: quién eres -->
     <ng-container *ngIf="paso === 'documento'">
       <div class="titulo">
-        <h1>Recuperar contraseña</h1>
+        <h1>Recuperar tu PIN</h1>
         <p>Te enviamos un código al correo que tienes registrado.</p>
       </div>
 
@@ -35,7 +35,7 @@
       <a class="volver" routerLink="/">Volver</a>
     </ng-container>
 
-    <!-- PASO 2: el código y la contraseña nueva, en una sola pantalla para no
+    <!-- PASO 2: el código y el PIN nuevo, en una sola pantalla para no
          obligar a memorizar el código entre dos pasos. -->
     <ng-container *ngIf="paso === 'codigo'">
       <div class="titulo">
@@ -60,11 +60,18 @@
         </div>
 
         <div class="campo">
-          <label for="r-clave">Nueva contraseña</label>
-          <input id="r-clave" type="password" formControlName="claveNueva"
-                 autocomplete="new-password">
+          <label for="r-clave">
+            PIN nuevo
+            <i class="pi pi-info-circle ayuda"
+               pTooltip="4 números. Evita 1234 y repetidos"
+               tooltipPosition="top"></i>
+          </label>
+          <input id="r-clave" type="password" inputmode="numeric" maxlength="4"
+                 class="pin" formControlName="claveNueva" autocomplete="new-password">
           <small class="error" *ngIf="campoInvalido(formularioCodigo.controls.claveNueva)">
-            Debe tener al menos 8 caracteres
+            {{ formularioCodigo.controls.claveNueva.hasError('pinTrivial')
+               ? 'Ese PIN es muy fácil de adivinar. Evita repetidos y seguidos.'
+               : 'El PIN son 4 números' }}
           </small>
         </div>
 
@@ -72,7 +79,7 @@
 
         <button type="submit" class="principal" [disabled]="cargando">
           <i class="pi" [ngClass]="cargando ? 'pi-spinner pi-spin' : 'pi-check'"></i>
-          {{ cargando ? 'Cambiando…' : 'Cambiar mi contraseña' }}
+          {{ cargando ? 'Cambiando…' : 'Cambiar mi PIN' }}
         </button>
       </form>
 
@@ -85,7 +92,7 @@
     <div class="exito" *ngIf="paso === 'listo'">
       <i class="pi pi-check-circle"></i>
       <h1>Listo</h1>
-      <p>Tu contraseña quedó cambiada. Ya puedes entrar con ella.</p>
+      <p>Tu PIN quedó cambiado. Ya puedes entrar con él.</p>
 
       <button type="button" class="principal" (click)="irAlLogin()">
         <i class="pi pi-sign-in"></i>

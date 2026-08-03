@@ -10,6 +10,7 @@ import guardian.exception.GuardianException;
 import guardian.repository.GdPersonaRepository;
 import guardian.repository.GdUsuarioRepository;
 import guardian.security.UsuarioAutenticado;
+import guardian.service.auth.ValidadorPin;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -133,12 +134,10 @@ public class UsuarioServiceImpl implements UsuarioService {
     public UsuarioResponse asignarClave(Long id, String claveNueva, UsuarioAutenticado ejecutor) {
         GdUsuario usuario = obtener(id, ejecutor);
 
-        // La misma regla que en el cambio propio: si la clave asignada es el
-        // documento, el "cambio obligatorio" seria decorativo — es justo la que
-        // cualquiera adivina.
-        if (claveNueva.equalsIgnoreCase(usuario.getPersona().getDocumento())) {
-            throw GuardianException.solicitudInvalida(MensajesGlobales.CLAVE_IGUAL_AL_DOCUMENTO);
-        }
+        // Las mismas reglas que en el cambio propio. Si el panel aceptara un
+        // PIN mas debil que el que el sistema le exige al dueno, la puerta
+        // ancha seria justamente la que abre el administrador.
+        ValidadorPin.exigirValido(claveNueva, usuario.getPersona().getDocumento());
 
         usuario.setClaveHash(passwordEncoder.encode(claveNueva));
         // Quien la asigno la conoce: mientras el dueno no la cambie, la cuenta

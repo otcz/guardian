@@ -46,7 +46,7 @@ export class AuthService {
       .pipe(tap(respuesta => this.guardarSesion(respuesta)));
   }
 
-  // ── Olvidé mi contraseña ─────────────────────────────────────────────────
+  // ── Olvidé mi PIN ─────────────────────────────────────────────────
   //
   // Bajo /publico y no bajo /auth: quien las usa no tiene sesión, que es
   // justamente el problema que viene a resolver.

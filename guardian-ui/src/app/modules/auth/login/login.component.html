@@ -21,21 +21,21 @@
     </div>
 
     <div class="campo">
-      <label for="clave">Contraseña</label>
+      <label for="clave">PIN</label>
       <div class="clave-envoltura">
         <input id="clave"
                [type]="verClave ? 'text' : 'password'"
                autocomplete="current-password"
-               formControlName="clave">
+               formControlName="clave" inputmode="numeric" maxlength="4" class="pin">
         <button type="button"
                 class="ver-clave"
                 (click)="verClave = !verClave"
-                [attr.aria-label]="verClave ? 'Ocultar contraseña' : 'Ver contraseña'">
+                [attr.aria-label]="verClave ? 'Ocultar PIN' : 'Ver PIN'">
           <i class="pi" [ngClass]="verClave ? 'pi-eye-slash' : 'pi-eye'"></i>
         </button>
       </div>
       <small class="error" *ngIf="campoInvalido('clave')">
-        Escribe tu contraseña
+        Escribe tu PIN
       </small>
     </div>
 
@@ -51,11 +51,11 @@
       {{ cargando ? 'Entrando…' : 'Entrar' }}
     </button>
 
-    <a class="olvide" routerLink="/recuperar">¿Olvidaste tu contraseña?</a>
+    <a class="olvide" routerLink="/recuperar">¿Olvidaste tu PIN?</a>
 
     <p class="pie">
-      ¿Primera vez? Tu usuario es tu número de documento y tu contraseña es
-      <strong>0000</strong>. Al entrar tendrás que cambiarla.
+      ¿Primera vez? Tu usuario es tu número de documento y tu PIN es
+      <strong>0000</strong>. Al entrar tendrás que cambiarlo.
     </p>
   </form>
 </div>

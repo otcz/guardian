@@ -1,5 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, ValidationErrors, Validators } from '@angular/forms';
+
+import { validadorPin } from '../../../core/validadores/pin.validador';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -18,7 +20,7 @@ export class CambiarClaveComponent implements OnInit {
   readonly formulario = this.fb.nonNullable.group(
     {
       claveActual: ['', [Validators.required]],
-      claveNueva: ['', [Validators.required, Validators.minLength(8)]],
+      claveNueva: ['', [Validators.required, validadorPin()]],
       confirmacion: ['', [Validators.required]]
     },
     { validators: [coincidenLasClaves] }

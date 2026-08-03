@@ -9,99 +9,125 @@
   </div>
 
   <!-- Alta: la "tarjeta completa" — datos, foto, casa y cuenta en un paso.
-       En edición el mismo formulario, sin la cuenta (esa vive en Usuarios). -->
+       En edición el mismo formulario, sin la cuenta (esa vive en la hoja de
+       Acceso).
+
+       En TRES grupos y no en una sola fila corrida de nueve campos: quien
+       registra a alguien tiene la cédula en la mano y llena de arriba abajo.
+       Con todo revuelto en una fila que se acomoda sola, el orden cambia con
+       el ancho de la ventana y hay que buscar cada campo. -->
   <form class="alta gd-card" *ngIf="mostrarAlta" [formGroup]="formulario" (ngSubmit)="guardar()">
 
-    <gd-foto-upload
-        [fotoUrl]="formulario.controls.fotoUrl.value"
-        (fotoUrlChange)="formulario.controls.fotoUrl.setValue($event)">
-    </gd-foto-upload>
+    <div class="grupo identidad">
+      <h3>Quién es</h3>
+      <div class="fila-foto">
+        <gd-foto-upload
+            [fotoUrl]="formulario.controls.fotoUrl.value"
+            (fotoUrlChange)="formulario.controls.fotoUrl.setValue($event)">
+        </gd-foto-upload>
 
-    <div class="campos">
-      <div class="campo">
-        <label for="tipoDocumento">Tipo</label>
-        <select id="tipoDocumento" formControlName="tipoDocumento">
-          <option *ngFor="let t of tiposDocumento" [value]="t.codigo">{{ t.valor }}</option>
-        </select>
-      </div>
+        <div class="campos">
+          <div class="campo tipo">
+            <label for="tipoDocumento">Tipo</label>
+            <select id="tipoDocumento" formControlName="tipoDocumento">
+              <option *ngFor="let t of tiposDocumento" [value]="t.codigo">{{ t.valor }}</option>
+            </select>
+          </div>
 
-      <div class="campo">
-        <label for="documento">Número</label>
-        <input id="documento" type="text" formControlName="documento"
-               placeholder="Ej: 1020304050">
-      </div>
+          <div class="campo">
+            <label for="documento">Número</label>
+            <input id="documento" type="text" formControlName="documento"
+                   placeholder="Ej: 1020304050">
+          </div>
 
-      <div class="campo">
-        <label for="nombres">Nombres</label>
-        <input id="nombres" type="text" formControlName="nombres">
-      </div>
+          <div class="campo">
+            <label for="nombres">Nombres</label>
+            <input id="nombres" type="text" formControlName="nombres">
+          </div>
 
-      <div class="campo">
-        <label for="apellidos">Apellidos</label>
-        <input id="apellidos" type="text" formControlName="apellidos">
-      </div>
+          <div class="campo">
+            <label for="apellidos">Apellidos</label>
+            <input id="apellidos" type="text" formControlName="apellidos">
+          </div>
 
-      <div class="campo">
-        <label for="nacimiento">Nacimiento</label>
-        <input id="nacimiento" type="date" formControlName="fechaNacimiento">
-      </div>
-
-      <div class="campo">
-        <label for="telefono">Teléfono</label>
-        <input id="telefono" type="tel" formControlName="telefono">
-      </div>
-
-      <div class="campo">
-        <label for="email">
-          Correo
-          <i class="pi pi-info-circle ayuda" *ngIf="exigeCorreo"
-             pTooltip="Por aquí recupera su contraseña"
-             tooltipPosition="top"></i>
-        </label>
-        <input id="email" type="email" formControlName="email"
-               placeholder="Ej: nombre@correo.com">
-        <small class="error"
-               *ngIf="formulario.controls.email.invalid && formulario.controls.email.touched">
-          {{ formulario.controls.email.hasError('required')
-             ? 'La cuenta necesita correo para poder recuperar la contraseña'
-             : 'El correo no parece válido' }}
-        </small>
-      </div>
-
-      <div class="campo">
-        <label for="casa">Casa</label>
-        <select id="casa" formControlName="casaId">
-          <option [ngValue]="null">Sin casa (guardia / externo)</option>
-          <option *ngFor="let casa of casas" [ngValue]="casa.id">{{ casa.identificador }}</option>
-        </select>
-      </div>
-
-      <div class="campo" *ngIf="pideParentesco">
-        <label for="parentesco">Parentesco</label>
-        <select id="parentesco" formControlName="parentesco">
-          <option value="">Selecciona…</option>
-          <option *ngFor="let p of parentescos" [value]="p.codigo">{{ p.valor }}</option>
-        </select>
-      </div>
-
-      <div class="campo" *ngIf="!editando">
-        <label for="rolUsuario">
-          Cuenta
-          <i class="pi pi-info-circle ayuda"
-             pTooltip="Entra con la contraseña 0000"
-             tooltipPosition="top"></i>
-        </label>
-        <select id="rolUsuario" formControlName="rolUsuario">
-          <option value="">Sin cuenta de acceso</option>
-          <option *ngFor="let rol of roles" [value]="rol.codigo">{{ rol.valor }}</option>
-        </select>
+          <div class="campo">
+            <label for="nacimiento">Nacimiento</label>
+            <input id="nacimiento" type="date" formControlName="fechaNacimiento">
+          </div>
+        </div>
       </div>
     </div>
 
-    <button type="submit" class="principal" [disabled]="guardando">
-      <i class="pi pi-check"></i>
-      {{ editando ? 'Guardar cambios' : 'Guardar' }}
-    </button>
+    <div class="grupo">
+      <h3>Cómo contactarla</h3>
+      <div class="campos">
+        <div class="campo">
+          <label for="telefono">Teléfono</label>
+          <input id="telefono" type="tel" formControlName="telefono">
+        </div>
+
+        <div class="campo ancho">
+          <label for="email">
+            Correo
+            <i class="pi pi-info-circle ayuda" *ngIf="exigeCorreo"
+               pTooltip="Por aquí recupera su PIN"
+               tooltipPosition="top"></i>
+          </label>
+          <input id="email" type="email" formControlName="email"
+                 placeholder="Ej: nombre@correo.com">
+          <small class="error"
+                 *ngIf="formulario.controls.email.invalid && formulario.controls.email.touched">
+            {{ formulario.controls.email.hasError('required')
+               ? 'La cuenta necesita correo para poder recuperar el PIN'
+               : 'El correo no parece válido' }}
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <div class="grupo">
+      <h3>En el conjunto</h3>
+      <div class="campos">
+        <div class="campo">
+          <label for="casa">Casa</label>
+          <select id="casa" formControlName="casaId">
+            <option [ngValue]="null">Sin casa (guardia / externo)</option>
+            <option *ngFor="let casa of casas" [ngValue]="casa.id">{{ casa.identificador }}</option>
+          </select>
+        </div>
+
+        <div class="campo" *ngIf="pideParentesco">
+          <label for="parentesco">Parentesco</label>
+          <select id="parentesco" formControlName="parentesco">
+            <option value="">Selecciona…</option>
+            <option *ngFor="let p of parentescos" [value]="p.codigo">{{ p.valor }}</option>
+          </select>
+        </div>
+
+        <!-- Solo en el alta: en edición la cuenta se administra desde la
+             columna Acceso, que además permite cambiarle el PIN. -->
+        <div class="campo" *ngIf="!editando">
+          <label for="rolUsuario">
+            Cuenta
+            <i class="pi pi-info-circle ayuda"
+               pTooltip="Entra con el PIN 0000"
+               tooltipPosition="top"></i>
+          </label>
+          <select id="rolUsuario" formControlName="rolUsuario">
+            <option value="">Sin cuenta de acceso</option>
+            <option *ngFor="let rol of roles" [value]="rol.codigo">{{ rol.valor }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="pie-formulario">
+      <button type="button" class="alterno" (click)="cancelarEdicion()">Cancelar</button>
+      <button type="submit" class="principal" [disabled]="guardando">
+        <i class="pi pi-check"></i>
+        {{ editando ? 'Guardar cambios' : 'Guardar' }}
+      </button>
+    </div>
   </form>
 
   <div class="aviso-error" *ngIf="error">{{ error }}</div>
@@ -165,20 +191,36 @@
           </span>
         </td>
 
-        <!-- Toda la fila de acceso es un botón: abre la hoja donde se
-             administra la cuenta. Sin cuenta, invita a darla. -->
+        <!-- Toda la celda de acceso es un botón: abre la hoja donde se
+             administra la cuenta. Sin cuenta, invita a darla.
+
+             El chevron no es decoración: sin él la pastilla se leía como una
+             etiqueta de estado y nadie descubría que ahí adentro estaba el
+             cambio de PIN. -->
         <td>
           <button type="button" class="acceso" (click)="abrirAcceso(persona)"
                   [class.sin-cuenta]="!tieneCuenta(persona)"
                   [class.pendiente]="cuentaInactiva(persona)"
                   [class.bloqueada]="cuentaBloqueada(persona)"
+                  [pTooltip]="tieneCuenta(persona) ? 'Rol, PIN y estado de la cuenta' : 'Darle acceso'"
+                  tooltipPosition="top"
                   [attr.aria-label]="'Administrar el acceso de ' + persona.nombreCompleto">
             <i class="pi" [ngClass]="tieneCuenta(persona) ? 'pi-key' : 'pi-plus-circle'"></i>
             {{ estadoAcceso(persona) }}
+            <i class="pi pi-chevron-right marca"></i>
           </button>
         </td>
 
         <td class="derecha acciones">
+          <!-- Atajo directo al PIN. La hoja de acceso ya lo tenía, pero detrás
+               de un clic que no se veía: cambiar el PIN es de lo que más pide
+               un residente y no puede estar escondido. -->
+          <button type="button" class="accion" *ngIf="tieneCuenta(persona)"
+                  (click)="abrirCambioDePin(persona)"
+                  [attr.aria-label]="'Cambiar el PIN de ' + persona.nombreCompleto"
+                  pTooltip="Cambiar el PIN" tooltipPosition="left">
+            <i class="pi pi-key"></i>
+          </button>
           <button type="button" class="accion"
                   (click)="editar(persona)"
                   pTooltip="Editar" tooltipPosition="left">
@@ -281,7 +323,7 @@
           <div class="detalle">
             <span class="linea">
               Entrará con usuario <code>{{ p.documento }}</code>
-              y contraseña <code>{{ claveInicial }}</code>
+              y PIN <code>{{ claveInicial }}</code>
             </span>
             <span class="nota">Tendrá que cambiarla en su primer ingreso.</span>
           </div>
@@ -310,11 +352,11 @@
           </select>
         </div>
 
-        <h3 class="gd-titulo-seccion">Contraseña</h3>
+        <h3 class="gd-titulo-seccion">PIN</h3>
         <div class="gd-lista">
           <button type="button" class="gd-fila gd-presionable" (click)="cambiandoClave = true">
             <i class="pi pi-key"></i>
-            <span class="etiqueta">Asignar una contraseña</span>
+            <span class="etiqueta">Asignar un PIN</span>
             <i class="pi pi-chevron-right marca"></i>
           </button>
           <button type="button" class="gd-fila gd-presionable" (click)="restablecerClave()">
@@ -356,28 +398,35 @@
     </div>
   </gd-hoja>
 
-  <!-- Sub-hoja: escribir la contraseña. Va aparte para que la de acceso no
+  <!-- Sub-hoja: escribir el PIN. Va aparte para que la de acceso no
        se llene de campos que casi nunca se usan. -->
-  <gd-hoja [abierta]="cambiandoClave" titulo="Asignar contraseña"
+  <gd-hoja [abierta]="cambiandoClave" titulo="Asignar PIN"
            [subtitulo]="gestionandoAcceso?.nombreCompleto || ''"
            (cerrar)="cambiandoClave = false">
     <form id="forma-clave" class="formulario-clave"
           [formGroup]="formularioClave" (ngSubmit)="asignarClave()">
       <div class="campo">
-        <label for="c-nueva">Contraseña</label>
-        <input id="c-nueva" type="password" formControlName="claveNueva"
-               autocomplete="new-password">
+        <label for="c-nueva">
+          PIN
+          <i class="pi pi-info-circle ayuda"
+             pTooltip="4 números. Evita 1234 y repetidos"
+             tooltipPosition="top"></i>
+        </label>
+        <input id="c-nueva" type="text" inputmode="numeric" maxlength="4" class="pin"
+               formControlName="claveNueva" autocomplete="off">
         <small class="error"
                *ngIf="formularioClave.controls.claveNueva.invalid
                  && formularioClave.controls.claveNueva.touched">
-          Debe tener al menos 8 caracteres
+          {{ formularioClave.controls.claveNueva.hasError('pinTrivial')
+             ? 'Ese PIN es muy fácil de adivinar. Evita repetidos y seguidos.'
+             : 'El PIN son 4 números' }}
         </small>
       </div>
       <div class="campo">
         <label for="c-confirmacion">Repetir</label>
-        <input id="c-confirmacion" type="password" formControlName="confirmacion"
-               autocomplete="new-password">
-        <small class="error" *ngIf="claveNoCoincide">Las dos no coinciden</small>
+        <input id="c-confirmacion" type="text" inputmode="numeric" maxlength="4" class="pin"
+               formControlName="confirmacion" autocomplete="off">
+        <small class="error" *ngIf="claveNoCoincide">Los dos no coinciden</small>
       </div>
     </form>
 

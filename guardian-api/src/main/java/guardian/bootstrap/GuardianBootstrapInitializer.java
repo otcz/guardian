@@ -9,6 +9,7 @@ import guardian.repository.GdConjuntoRepository;
 import guardian.repository.GdParametroRepository;
 import guardian.repository.GdPersonaRepository;
 import guardian.repository.GdUsuarioRepository;
+import guardian.util.PinUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -127,20 +128,21 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
     }
 
     /**
-     * ¿La clave sembrada pasaria las reglas que el sistema le exige a
-     * cualquier persona que elige la suya?
+     * ¿El PIN sembrado pasaria las reglas que el sistema le exige a cualquier
+     * persona que elige el suyo?
      *
-     * <p>Son tres casos y los tres terminan igual — entrar una vez y cambiarla:
-     * la clave igual al usuario (la que cualquiera adivina), la publicada en el
-     * repositorio (equivale a no tener secreto) y la mas corta que el minimo
-     * que el propio endpoint de cambio rechaza. Este ultimo era el mas raro:
-     * el sistema arrancaba con una clave que despues no dejaba escribir, y
-     * quien la cambiaba no podia volver a ella.</p>
+     * <p>Cuatro casos y los cuatro terminan igual — entrar una vez y cambiarlo:
+     * igual al usuario (el que cualquiera adivina), el publicado en el
+     * repositorio (equivale a no tener secreto), el que no tiene forma de PIN
+     * y el trivial. Los dos ultimos evitan lo mas raro de todo: que el sistema
+     * arranque con un PIN que despues no deja escribir, y quien lo cambia no
+     * pueda volver a el.</p>
      */
     private boolean claveDemasiadoDebil() {
         return superAdminClave.equals(superAdminDocumento)
                 || CLAVE_PUBLICADA_EN_EL_REPO.equals(superAdminClave)
-                || superAdminClave.length() < Codigos.CLAVE_LONGITUD_MINIMA;
+                || !PinUtil.tieneFormaDePin(superAdminClave)
+                || PinUtil.esTrivial(superAdminClave);
     }
 
     private void sembrarParametros() {

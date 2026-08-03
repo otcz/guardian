@@ -1,17 +1,69 @@
 @use '../../../styles/paneles';
 
-/* El alta lleva la foto a la izquierda y los campos fluyen al lado. */
+/* El formulario va en COLUMNA de grupos, no en una sola fila corrida: quien
+   registra a alguien tiene la cédula en la mano y llena de arriba abajo. */
 .alta {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--e-4);
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+
+  /* El título nombra el grupo sin gritarlo: la jerarquía la da el separador,
+     no el tamaño de letra. */
+  h3 {
+    padding-bottom: var(--e-1);
+    font-size: var(--t-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+}
+
+/* La foto manda en la ficha de la portería, así que se pone junto a los datos
+   que el guardia va a comparar y no perdida al final del formulario. */
+.fila-foto {
+  display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
+  gap: var(--e-3);
 }
 
 .campos {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 0.75rem;
   flex: 1 1 300px;
   min-width: 0;
+
+  /* "Cédula de ciudadanía" no cabe en el ancho base y salía cortado. */
+  .campo.tipo {
+    flex: 1 1 170px;
+  }
+
+  /* Un correo largo no se lee en 150px. */
+  .campo.ancho {
+    flex: 2 1 260px;
+  }
+}
+
+/* Guardar y cancelar juntos y al final: el botón suelto arriba a la derecha
+   quedaba lejos del último campo que se llena. */
+.pie-formulario {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--e-2);
+  padding-top: var(--e-2);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .celda-avatar {
@@ -94,6 +146,13 @@
 
   i {
     font-size: 0.72rem;
+  }
+
+  /* Atenuado y pequeño: dice "esto se abre" sin competir con el estado, que
+     es lo que el administrador viene a leer. */
+  .marca {
+    margin-left: 0.1rem;
+    opacity: 0.55;
   }
 
   /* Sin cuenta no es un problema: la mayoría de las personas de un conjunto

@@ -33,7 +33,7 @@ export interface CambiarClaveRequest {
   claveNueva: string;
 }
 
-/** Paso 1 de "olvidé mi contraseña". Se pide el documento, no el correo:
+/** Paso 1 de "olvidé mi PIN". Se pide el documento, no el correo:
  *  es el dato con el que la persona ya inicia sesión. */
 export interface SolicitarCodigoRequest {
   documento: string;

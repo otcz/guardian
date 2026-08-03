@@ -191,9 +191,9 @@ class RecuperacionClaveServiceImplTest {
     void restableceYCortaSesiones() {
         prepararCodigoVigente("123456");
 
-        servicio.restablecer(restablecer("123456", "claveNueva123"));
+        servicio.restablecer(restablecer("123456", "5847"));
 
-        assertThat(passwordEncoder.matches("claveNueva123", usuario.getClaveHash())).isTrue();
+        assertThat(passwordEncoder.matches("5847", usuario.getClaveHash())).isTrue();
         // No se le vuelve a pedir cambiarla: acaba de elegirla.
         assertThat(usuario.getRequiereCambioClave()).isEqualTo(Codigos.NO);
         // Si la cuenta estaba comprometida, dejar viva la sesion del intruso
@@ -206,7 +206,7 @@ class RecuperacionClaveServiceImplTest {
     void elCodigoEsDeUnSoloUso() {
         GdCodigoRecuperacion fila = prepararCodigoVigente("123456");
 
-        servicio.restablecer(restablecer("123456", "claveNueva123"));
+        servicio.restablecer(restablecer("123456", "5847"));
 
         assertThat(fila.estaUsado()).isTrue();
         // La fila NO se borra: que alguien recuperara su clave y cuando es
@@ -228,12 +228,12 @@ class RecuperacionClaveServiceImplTest {
         GdCodigoRecuperacion fila = prepararCodigoVigente("123456");
         fila.setId(99L);
 
-        assertThatThrownBy(() -> servicio.restablecer(restablecer("000000", "claveNueva123")))
+        assertThatThrownBy(() -> servicio.restablecer(restablecer("000000", "5847")))
                 .isInstanceOf(GuardianException.class)
                 .hasMessage(MensajesGlobales.CODIGO_RECUPERACION_NO_VALIDO);
 
         verify(contadorIntentos).fallo(99L);
-        assertThat(passwordEncoder.matches("claveNueva123", usuario.getClaveHash())).isFalse();
+        assertThat(passwordEncoder.matches("5847", usuario.getClaveHash())).isFalse();
     }
 
     @Test
@@ -242,7 +242,7 @@ class RecuperacionClaveServiceImplTest {
         GdCodigoRecuperacion fila = prepararCodigoVigente("123456");
         fila.setIntentos(INTENTOS_MAXIMOS);
 
-        assertThatThrownBy(() -> servicio.restablecer(restablecer("123456", "claveNueva123")))
+        assertThatThrownBy(() -> servicio.restablecer(restablecer("123456", "5847")))
                 .isInstanceOf(GuardianException.class);
     }
 
@@ -252,7 +252,7 @@ class RecuperacionClaveServiceImplTest {
         GdCodigoRecuperacion fila = prepararCodigoVigente("123456");
         fila.setFechaVencimiento(new Date(System.currentTimeMillis() - 1000));
 
-        assertThatThrownBy(() -> servicio.restablecer(restablecer("123456", "claveNueva123")))
+        assertThatThrownBy(() -> servicio.restablecer(restablecer("123456", "5847")))
                 .isInstanceOf(GuardianException.class);
     }
 
@@ -264,28 +264,30 @@ class RecuperacionClaveServiceImplTest {
         when(usuarioRepository.buscarPorDocumento("9999")).thenReturn(Optional.empty());
         GdCodigoRecuperacion fila = prepararCodigoVigente("123456");
 
-        assertThatThrownBy(() -> servicio.restablecer(restablecer("000000", "claveNueva123")))
+        assertThatThrownBy(() -> servicio.restablecer(restablecer("000000", "5847")))
                 .hasMessage(MensajesGlobales.CODIGO_RECUPERACION_NO_VALIDO);
 
         fila.setFechaUso(new Date());
-        assertThatThrownBy(() -> servicio.restablecer(restablecer("123456", "claveNueva123")))
+        assertThatThrownBy(() -> servicio.restablecer(restablecer("123456", "5847")))
                 .hasMessage(MensajesGlobales.CODIGO_RECUPERACION_NO_VALIDO);
 
-        RestablecerClaveRequest ajeno = restablecer("123456", "claveNueva123");
+        RestablecerClaveRequest ajeno = restablecer("123456", "5847");
         ajeno.setDocumento("9999");
         assertThatThrownBy(() -> servicio.restablecer(ajeno))
                 .hasMessage(MensajesGlobales.CODIGO_RECUPERACION_NO_VALIDO);
     }
 
     @Test
-    @DisplayName("recuperar no es la puerta trasera para poner el documento de clave")
+    @DisplayName("recuperar no es la puerta trasera para poner un PIN trivial")
     void noPermiteLaClaveIgualAlDocumento() {
         // El cambio normal lo rechaza; si aca pasara, bastaria con recuperar
         // para dejar la cuenta tan expuesta como antes.
         prepararCodigoVigente("123456");
 
+        assertThatThrownBy(() -> servicio.restablecer(restablecer("123456", "1234")))
+                .hasMessage(MensajesGlobales.PIN_TRIVIAL);
         assertThatThrownBy(() -> servicio.restablecer(restablecer("123456", "1001")))
-                .hasMessage(MensajesGlobales.CLAVE_IGUAL_AL_DOCUMENTO);
+                .hasMessage(MensajesGlobales.PIN_SALE_DEL_DOCUMENTO);
     }
 
     @Test
@@ -301,7 +303,7 @@ class RecuperacionClaveServiceImplTest {
         when(usuarioRepository.buscarPorDocumento("2002")).thenReturn(Optional.of(vecino));
         when(codigoRepository.findFirstByUsuarioIdOrderByIdDesc(8L)).thenReturn(Optional.empty());
 
-        RestablecerClaveRequest delVecino = restablecer("123456", "claveNueva123");
+        RestablecerClaveRequest delVecino = restablecer("123456", "5847");
         delVecino.setDocumento("2002");
 
         assertThatThrownBy(() -> servicio.restablecer(delVecino))

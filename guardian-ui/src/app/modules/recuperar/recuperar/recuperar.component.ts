@@ -4,11 +4,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 import { AuthService } from '../../../core/services/auth.service';
+import { validadorPin } from '../../../core/validadores/pin.validador';
 
 type Paso = 'documento' | 'codigo' | 'listo';
 
 /**
- * "Olvidé mi contraseña" en dos pasos, sin salir de la aplicación.
+ * "Olvidé mi PIN" en dos pasos, sin salir de la aplicación.
  *
  * <p>Se eligió un código de seis dígitos y no un enlace. GUARDIAN se usa como
  * aplicación instalada en el teléfono: un enlace abriría el navegador y sacaría
@@ -39,7 +40,7 @@ export class RecuperarComponent {
 
   readonly formularioCodigo = this.fb.nonNullable.group({
     codigo: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
-    claveNueva: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(72)]]
+    claveNueva: ['', [Validators.required, validadorPin()]]
   });
 
   constructor(
@@ -101,7 +102,7 @@ export class RecuperarComponent {
         },
         error: (fallo: HttpErrorResponse) => {
           this.cargando = false;
-          this.error = fallo.error?.mensaje ?? 'No pudimos cambiar la contraseña.';
+          this.error = fallo.error?.mensaje ?? 'No pudimos cambiar el PIN.';
         }
       });
   }

@@ -11,7 +11,7 @@ public final class MensajesGlobales {
 
     // ── Autenticacion ────────────────────────────────────────────────────────
     public static final String CREDENCIALES_INVALIDAS =
-            "El documento o la contrasena no son correctos.";
+            "El documento o el PIN no son correctos.";
     /**
      * Dice "cuenta" y no "usuario" a proposito. En el panel de Personas el
      * registro de alguien puede figurar como "Activa" mientras su CUENTA sigue
@@ -22,13 +22,21 @@ public final class MensajesGlobales {
             "Tu cuenta todavia no esta habilitada. "
             + "Comunicate con la administracion del conjunto.";
     public static final String DEBE_CAMBIAR_CLAVE =
-            "Debes cambiar tu contrasena antes de continuar.";
+            "Debes cambiar tu PIN antes de continuar.";
     public static final String CLAVE_ACTUAL_INCORRECTA =
-            "La contrasena actual no es correcta.";
-    public static final String CLAVE_IGUAL_AL_DOCUMENTO =
-            "La nueva contrasena no puede ser tu numero de documento.";
-    public static final String CLAVE_MUY_CORTA =
-            "La contrasena debe tener al menos 8 caracteres.";
+            "El PIN actual no es correcto.";
+    public static final String PIN_FORMA_INVALIDA =
+            "El PIN son 4 numeros.";
+    /**
+     * Se dice QUE hacer y no solo que esta mal. "PIN invalido" a secas manda a
+     * la persona a probar otro trivial hasta que acierte uno permitido.
+     */
+    public static final String PIN_TRIVIAL =
+            "Ese PIN es muy facil de adivinar. Evita repetidos (1111), "
+            + "seguidos (1234) y anos.";
+    public static final String PIN_SALE_DEL_DOCUMENTO =
+            "El PIN no puede salir de tu documento: cualquiera que lo haya "
+            + "visto lo sabria.";
     /**
      * UN SOLO mensaje para codigo equivocado, vencido, ya usado, agotado y
      * documento inexistente. Distinguirlos le diria a quien prueba codigos
@@ -106,7 +114,7 @@ public final class MensajesGlobales {
     public static final String TELEFONO_YA_REGISTRADO =
             "Ese telefono ya esta registrado por otra persona.";
     public static final String CORREO_REQUERIDO_CON_CUENTA =
-            "Escribe el correo: es por donde la persona recupera su contrasena.";
+            "Escribe el correo: es por donde la persona recupera su PIN.";
     public static final String PLACA_YA_REGISTRADA =
             "Ya existe un vehiculo con esa placa.";
     public static final String PERSONA_YA_EN_UNA_CASA =

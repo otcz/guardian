@@ -10,7 +10,7 @@ import { CLAVE_INICIAL, HogarPublico, Parametro } from '../../../core/models/adm
  * La pantalla de quien recibió el código de su familia.
  *
  * <p>Sin sesión: llega por un enlace y todavía no existe en el sistema. Al
- * terminar tiene cuenta propia y entra con la contraseña inicial.</p>
+ * terminar tiene cuenta propia y entra con el PIN inicial.</p>
  */
 @Component({
   selector: 'gd-unirme',
@@ -40,7 +40,7 @@ export class UnirmeComponent implements OnInit {
     fechaNacimiento: [''],
     telefono: [''],
     // Obligatorio: quien se registra por acá SIEMPRE sale con cuenta, y sin
-    // correo esa cuenta nace sin forma de recuperar la contraseña.
+    // correo esa cuenta nace sin forma de recuperar el PIN.
     email: ['', [Validators.required, Validators.email]],
     parentesco: ['', [Validators.required]]
   });

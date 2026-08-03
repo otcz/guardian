@@ -204,10 +204,12 @@ class AutenticacionServiceImplTest {
 
         CambiarClaveRequest request = new CambiarClaveRequest();
         request.setClaveActual("123");
-        request.setClaveNueva("123");
+        // 0000 es el PIN inicial: sin la regla de triviales, el cambio
+        // obligatorio se resolveria dejandolo igual.
+        request.setClaveNueva("0000");
 
         assertThatThrownBy(() -> servicio.cambiarClave(autenticado(), request))
-                .hasMessage(MensajesGlobales.CLAVE_IGUAL_AL_DOCUMENTO);
+                .hasMessage(MensajesGlobales.PIN_TRIVIAL);
     }
 
     @Test
@@ -216,11 +218,11 @@ class AutenticacionServiceImplTest {
         usuario.setRequiereCambioClave(Codigos.SI);
         when(usuarioRepository.findById(9L)).thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("123", "$hash")).thenReturn(true);
-        when(passwordEncoder.encode("claveNueva9")).thenReturn("$nuevo");
+        when(passwordEncoder.encode("5847")).thenReturn("$nuevo");
 
         CambiarClaveRequest request = new CambiarClaveRequest();
         request.setClaveActual("123");
-        request.setClaveNueva("claveNueva9");
+        request.setClaveNueva("5847");
 
         LoginResponse respuesta = servicio.cambiarClave(autenticado(), request);
 
@@ -240,7 +242,7 @@ class AutenticacionServiceImplTest {
 
         CambiarClaveRequest request = new CambiarClaveRequest();
         request.setClaveActual("mala");
-        request.setClaveNueva("claveNueva9");
+        request.setClaveNueva("5847");
 
         assertThatThrownBy(() -> servicio.cambiarClave(autenticado(), request))
                 .hasMessage(MensajesGlobales.CLAVE_ACTUAL_INCORRECTA);

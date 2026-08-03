@@ -186,11 +186,8 @@ public class RecuperacionClaveServiceImpl implements RecuperacionClaveService {
         }
 
         // Las mismas reglas que el cambio normal. Recuperar no puede ser la
-        // puerta trasera para ponerse una clave que el cambio de clave
-        // rechazaria.
-        if (request.getClaveNueva().equalsIgnoreCase(documento)) {
-            throw GuardianException.solicitudInvalida(MensajesGlobales.CLAVE_IGUAL_AL_DOCUMENTO);
-        }
+        // puerta trasera para ponerse un PIN que el cambio normal rechazaria.
+        ValidadorPin.exigirValido(request.getClaveNueva(), documento);
 
         usuario.setClaveHash(passwordEncoder.encode(request.getClaveNueva()));
         // La persona acaba de ELEGIR su clave: obligarla a cambiarla otra vez

@@ -29,7 +29,7 @@ const routes: Routes = [
       import('./modules/auth/cambio-clave.module').then(m => m.CambioClaveModule)
   },
   {
-    // "Olvidé mi contraseña". Sin guard de invitado a propósito: quien tiene
+    // "Olvidé mi PIN". Sin guard de invitado a propósito: quien tiene
     // una sesión vieja en el teléfono y olvidó la clave igual debe poder
     // recuperarla sin que lo reboten a un panel al que no puede volver a
     // entrar cuando la sesión expire.

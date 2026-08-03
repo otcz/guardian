@@ -52,31 +52,39 @@ public final class Codigos {
     public static final String ROL_CLAVE_PENDIENTE = "CLAVE_PENDIENTE";
 
     /**
-     * Longitud minima de una clave elegida por una persona.
+     * El acceso es un PIN de CUATRO digitos, no una contrasena.
      *
-     * <p>Fuente unica: la usan las validaciones de los DTO y el bootstrap para
-     * decidir si la clave sembrada es demasiado debil para dejar entrar sin
-     * cambiarla. Duplicada como literal, el dia que suba se olvidaria en uno de
-     * los tres sitios.</p>
+     * <p>Decision de producto: esto lo usa gente de todas las edades desde el
+     * telefono, y un PIN es el gesto que ya conocen de desbloquear el celular
+     * y del cajero. Una contrasena de ocho caracteres en un teclado tactil, de
+     * pie en la porteria, produce el resultado contrario al que busca: se
+     * anota en un papel pegado a la puerta.</p>
+     *
+     * <p><b>El costo esta medido.</b> Cuatro digitos son diez mil
+     * combinaciones. Con el bloqueo de {@code login-max-intentos} agotarlas
+     * toma semanas, no minutos — pero sigue siendo un margen estrecho para una
+     * cuenta de administrador. Se compensa rechazando los PIN triviales, que
+     * es donde vive el riesgo real: nadie ataca esto probando 6 mil numeros al
+     * azar, prueba 0000, 1234 y la fecha de nacimiento. Ver
+     * {@link guardian.util.PinUtil}.</p>
+     *
+     * <p>Fuente unica: la usan los DTO, el bootstrap y las pantallas. Duplicada
+     * como literal, el dia que cambie se olvidaria en uno de los sitios.</p>
      */
-    public static final int CLAVE_LONGITUD_MINIMA = 8;
-
-    /** Tope de BCrypt: ignora en silencio todo byte despues del 72. */
-    public static final int CLAVE_LONGITUD_MAXIMA = 72;
+    public static final int PIN_LONGITUD = 4;
 
     /**
-     * Clave con la que nace toda cuenta creada desde un panel.
+     * PIN con el que nace toda cuenta creada desde un panel.
      *
      * <p>Antes era el documento de la persona. Cuatro ceros es mejor por dos
-     * razones: el administrador puede decirla de memoria al entregar el acceso
+     * razones: el administrador puede decirlo de memoria al entregar el acceso
      * —no tiene que buscar la cedula de cada quien— y se lee como lo que es,
-     * un valor de paso, mientras que una clave que ES tu documento invita a
-     * dejarla puesta.</p>
+     * un valor de paso, mientras que un PIN que ES tu documento invita a
+     * dejarlo puesto.</p>
      *
-     * <p>Que sea trivial de adivinar no la vuelve un riesgo: la cuenta nace
-     * INACTIVA y no sirve hasta que el administrador la habilita, y el cambio
-     * es obligatorio en el primer ingreso. Ademas es mas corta que
-     * {@link #CLAVE_LONGITUD_MINIMA}, asi que nadie puede volver a elegirla.</p>
+     * <p>Que sea trivial no lo vuelve un riesgo: el cambio es obligatorio en el
+     * primer ingreso, y {@link guardian.util.PinUtil} lo rechaza como PIN
+     * elegido — asi que nadie puede "cambiarlo" dejandolo igual.</p>
      */
     public static final String CLAVE_INICIAL = "0000";
 

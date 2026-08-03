@@ -19,8 +19,8 @@
              ninguna sede, así que sin este atajo no hay forma de cambiarle
              la clave a la cuenta que ve TODAS las sedes. -->
         <a routerLink="/cambiar-clave" class="accion"
-           aria-label="Cambiar mi contraseña"
-           pTooltip="Mi contraseña" tooltipPosition="bottom">
+           aria-label="Cambiar mi PIN"
+           pTooltip="Mi PIN" tooltipPosition="bottom">
           <i class="pi pi-key"></i>
         </a>
         <button type="button" class="accion" (click)="tema.alternar()"
@@ -234,7 +234,7 @@
         <div class="detalle">
           <span class="linea">
             Usuario <code>{{ documentoAdmin || '—' }}</code>
-            · contraseña <code>{{ claveInicial }}</code>
+            · PIN <code>{{ claveInicial }}</code>
           </span>
           <span class="nota">Deberá cambiarla en su primer ingreso.</span>
         </div>

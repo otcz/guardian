@@ -74,7 +74,7 @@ class AdminInvisibleParaSiMismoTest {
         sede.setId(1L);
 
         propia = cuenta(9L, 50L, "ADMIN", "Administrador", Codigos.ROL_ADMIN, sede);
-        ajena = cuenta(7L, 40L, "2001", "Luis Mora", Codigos.ROL_GUARDIA, sede);
+        ajena = cuenta(7L, 40L, "1074502938", "Luis Mora", Codigos.ROL_GUARDIA, sede);
 
         admin = new UsuarioAutenticado(9L, 50L, 1L, "ADMIN", "Administrador",
                 Codigos.ROL_ADMIN);
@@ -147,9 +147,9 @@ class AdminInvisibleParaSiMismoTest {
     @Test
     @DisplayName("asignar clave la guarda cifrada y exige el cambio al entrar")
     void asignarClaveExigeCambio() {
-        when(passwordEncoder.encode("ClaveDeLaAdmin9")).thenReturn("$asignada");
+        when(passwordEncoder.encode("5847")).thenReturn("$asignada");
 
-        usuarioService.asignarClave(7L, "ClaveDeLaAdmin9", admin);
+        usuarioService.asignarClave(7L, "5847", admin);
 
         assertThat(ajena.getClaveHash()).isEqualTo("$asignada");
         // Quien la asigno la conoce: la cuenta no es del dueno hasta que la
@@ -160,7 +160,7 @@ class AdminInvisibleParaSiMismoTest {
     @Test
     @DisplayName("asignar clave corta la sesion abierta del dueno")
     void asignarClaveInvalidaLaSesion() {
-        usuarioService.asignarClave(7L, "ClaveDeLaAdmin9", admin);
+        usuarioService.asignarClave(7L, "5847", admin);
 
         // Sin esto el token viejo sigue con autoridad completa hasta que
         // expire el TTL: le cambiamos la clave y seguiria trabajando.
@@ -168,10 +168,22 @@ class AdminInvisibleParaSiMismoTest {
     }
 
     @Test
-    @DisplayName("la clave asignada no puede ser el documento del dueno")
+    @DisplayName("el PIN asignado por el admin pasa las mismas reglas que el propio")
     void asignarClaveRechazaElDocumento() {
-        assertThatThrownBy(() -> usuarioService.asignarClave(7L, "2001", admin))
-                .hasMessage(MensajesGlobales.CLAVE_IGUAL_AL_DOCUMENTO);
+        // Si el panel aceptara un PIN mas debil que el que el sistema le exige
+        // al dueno, la puerta ancha seria justamente la que abre el
+        // administrador.
+        // 2938 son los cuatro ultimos de la cedula 1074502938, que es como la
+        // gente recorta su documento para armar un PIN. La cedula esta en la
+        // ficha de la porteria y en el carnet: ese PIN seria publico sin que
+        // su dueno lo sepa.
+        assertThatThrownBy(() -> usuarioService.asignarClave(7L, "2938", admin))
+                .as("sale del documento")
+                .hasMessage(MensajesGlobales.PIN_SALE_DEL_DOCUMENTO);
+
+        assertThatThrownBy(() -> usuarioService.asignarClave(7L, "1234", admin))
+                .as("trivial")
+                .hasMessage(MensajesGlobales.PIN_TRIVIAL);
 
         assertThat(ajena.getClaveHash()).isNull();
     }
@@ -228,9 +240,11 @@ class AdminInvisibleParaSiMismoTest {
     }
 
     @Test
-    @DisplayName("la clave inicial es mas corta que el minimo: nadie puede volver a elegirla")
+    @DisplayName("el PIN inicial es trivial: nadie puede volver a elegirlo")
     void laClaveInicialNoSePuedeReelegir() {
-        assertThat(Codigos.CLAVE_INICIAL.length())
-                .isLessThan(Codigos.CLAVE_LONGITUD_MINIMA);
+        // Antes lo impedia la longitud minima de ocho. Con PIN de cuatro, 0000
+        // pasa a tener forma valida, y sin la regla de triviales el "cambio
+        // obligatorio" del primer ingreso se resolveria escribiendo lo mismo.
+        assertThat(guardian.util.PinUtil.esTrivial(Codigos.CLAVE_INICIAL)).isTrue();
     }
 }

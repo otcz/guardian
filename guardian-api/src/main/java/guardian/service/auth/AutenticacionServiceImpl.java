@@ -99,13 +99,10 @@ public class AutenticacionServiceImpl implements AutenticacionService {
             throw GuardianException.solicitudInvalida(MensajesGlobales.CLAVE_ACTUAL_INCORRECTA);
         }
 
-        // Sin esta validacion el "cambio obligatorio" del primer ingreso seria
-        // decorativo: bastaria con volver a escribir el documento y la cuenta
-        // quedaria igual de expuesta que antes. Ignora mayusculas por la misma
-        // razon que el login las ignora.
-        if (request.getClaveNueva().equalsIgnoreCase(autenticado.getDocumento())) {
-            throw GuardianException.solicitudInvalida(MensajesGlobales.CLAVE_IGUAL_AL_DOCUMENTO);
-        }
+        // Sin esto el "cambio obligatorio" del primer ingreso seria decorativo:
+        // bastaria con volver a escribir 0000 y la cuenta quedaria igual de
+        // expuesta que antes.
+        ValidadorPin.exigirValido(request.getClaveNueva(), autenticado.getDocumento());
 
         usuario.setClaveHash(passwordEncoder.encode(request.getClaveNueva()));
         usuario.setRequiereCambioClave(Codigos.NO);

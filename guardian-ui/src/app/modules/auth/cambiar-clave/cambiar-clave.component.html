@@ -3,67 +3,72 @@
 
     <div class="encabezado">
       <i class="pi pi-lock"></i>
-      <h1>Cambia tu contraseña</h1>
+      <h1>Cambia tu PIN</h1>
       <p *ngIf="obligatorio">
-        Estás usando tu documento como contraseña. Elige una nueva para proteger tu cuenta.
+        Estás usando el PIN que te entregaron. Elige uno tuyo para proteger tu cuenta.
       </p>
     </div>
 
     <div class="campo">
-      <label for="actual">Contraseña actual</label>
+      <label for="actual">PIN actual</label>
       <div class="clave-envoltura">
         <input id="actual" [type]="verActual ? 'text' : 'password'"
+               inputmode="numeric" maxlength="4" class="pin"
                autocomplete="current-password"
                formControlName="claveActual">
         <button type="button"
                 class="ver-clave"
                 (click)="verActual = !verActual"
-                [attr.aria-label]="verActual ? 'Ocultar contraseña' : 'Ver contraseña'">
+                [attr.aria-label]="verActual ? 'Ocultar el PIN' : 'Ver el PIN'">
           <i class="pi" [ngClass]="verActual ? 'pi-eye-slash' : 'pi-eye'"></i>
         </button>
       </div>
       <small class="error" *ngIf="campoInvalido('claveActual')">
-        Escribe tu contraseña actual
+        Escribe tu PIN actual
       </small>
     </div>
 
     <div class="campo">
       <label for="nueva">
-        Nueva contraseña
+        PIN nuevo
         <i class="pi pi-info-circle ayuda"
-           pTooltip="Mínimo 8 caracteres"
+           pTooltip="4 números. Evita 1234 y repetidos"
            tooltipPosition="top"></i>
       </label>
       <div class="clave-envoltura">
         <input id="nueva" [type]="verNueva ? 'text' : 'password'"
+               inputmode="numeric" maxlength="4" class="pin"
                autocomplete="new-password"
                formControlName="claveNueva">
         <button type="button"
                 class="ver-clave"
                 (click)="verNueva = !verNueva"
-                [attr.aria-label]="verNueva ? 'Ocultar contraseña' : 'Ver contraseña'">
+                [attr.aria-label]="verNueva ? 'Ocultar el PIN' : 'Ver el PIN'">
           <i class="pi" [ngClass]="verNueva ? 'pi-eye-slash' : 'pi-eye'"></i>
         </button>
       </div>
       <small class="error" *ngIf="campoInvalido('claveNueva')">
-        Mínimo 8 caracteres
+        {{ formulario.controls.claveNueva.hasError('pinTrivial')
+           ? 'Ese PIN es muy fácil de adivinar. Evita repetidos y seguidos.'
+           : 'El PIN son 4 números' }}
       </small>
     </div>
 
     <div class="campo">
-      <label for="confirmacion">Repite la nueva</label>
+      <label for="confirmacion">Repite el PIN</label>
       <div class="clave-envoltura">
         <input id="confirmacion" [type]="verConfirmacion ? 'text' : 'password'"
+               inputmode="numeric" maxlength="4" class="pin"
                autocomplete="new-password"
                formControlName="confirmacion">
         <button type="button"
                 class="ver-clave"
                 (click)="verConfirmacion = !verConfirmacion"
-                [attr.aria-label]="verConfirmacion ? 'Ocultar contraseña' : 'Ver contraseña'">
+                [attr.aria-label]="verConfirmacion ? 'Ocultar el PIN' : 'Ver el PIN'">
           <i class="pi" [ngClass]="verConfirmacion ? 'pi-eye-slash' : 'pi-eye'"></i>
         </button>
       </div>
-      <small class="error" *ngIf="noCoinciden">Las contraseñas no coinciden</small>
+      <small class="error" *ngIf="noCoinciden">Los PIN no coinciden</small>
     </div>
 
     <div class="aviso" *ngIf="error">{{ error }}</div>

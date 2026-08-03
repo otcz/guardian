@@ -263,3 +263,31 @@ a {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* ---------------------------------------------------------------------------
+   Campo de PIN
+
+   Cuatro numeros que se teclean, casi siempre en un telefono y a veces con la
+   fila avanzando detras. Grandes, separados y centrados: asi se ve de un
+   vistazo cuantos van, sin contar caracteres apretados.
+
+   `letter-spacing` con `text-indent` compensando: el espaciado de la ultima
+   letra empuja el texto a la izquierda del centro, y sin el indent el PIN
+   queda visiblemente descuadrado dentro de su caja.
+   --------------------------------------------------------------------------- */
+input.pin {
+  font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+  font-size: var(--t-xl);
+  font-weight: 700;
+  letter-spacing: 0.6em;
+  text-indent: 0.6em;
+  text-align: center;
+}
+
+/* El navegador dibuja flechitas en los number; aqui el campo es text con
+   inputmode numeric, pero algunos moviles las meten igual. */
+input.pin::-webkit-outer-spin-button,
+input.pin::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}

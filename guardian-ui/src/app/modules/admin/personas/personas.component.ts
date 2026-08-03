@@ -5,6 +5,7 @@ import { Observable, Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { AdminService } from '../../../core/services/admin.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { validadorPin } from '../../../core/validadores/pin.validador';
 import { CLAVE_INICIAL, Casa, Parametro, Persona } from '../../../core/models/admin.model';
 
 @Component({
@@ -301,11 +302,11 @@ export class PersonasComponent implements OnInit {
   });
 
   readonly formularioClave = this.fb.nonNullable.group({
-    claveNueva: ['', [Validators.required, Validators.minLength(8)]],
+    claveNueva: ['', [Validators.required, validadorPin()]],
     confirmacion: ['', [Validators.required]]
   });
 
-  /** Sub-hoja para escribir la contraseña. Se abre encima de la de acceso. */
+  /** Sub-hoja para escribir el PIN. Se abre encima de la de acceso. */
   cambiandoClave = false;
 
   tieneCuenta(persona: Persona): boolean {
@@ -335,6 +336,18 @@ export class PersonasComponent implements OnInit {
     this.formularioClave.reset();
   }
 
+  /**
+   * Atajo directo al PIN desde la fila.
+   *
+   * <p>Abre las dos hojas de una vez: la de acceso queda debajo, así que
+   * cerrar la del PIN deja al administrador donde puede seguir administrando
+   * la cuenta en vez de devolverlo a la tabla.</p>
+   */
+  abrirCambioDePin(persona: Persona): void {
+    this.abrirAcceso(persona);
+    this.cambiandoClave = true;
+  }
+
   /** Le da acceso a la aplicación a alguien que solo era persona. */
   darAcceso(): void {
     const persona = this.gestionandoAcceso;
@@ -349,7 +362,7 @@ export class PersonasComponent implements OnInit {
     this.admin.crearUsuario(persona.id, this.formularioAcceso.getRawValue().rol).subscribe({
       next: () => {
         this.guardando = false;
-        this.avisoAcceso = `Ya puede entrar con la contraseña ${this.claveInicial}.`;
+        this.avisoAcceso = `Ya puede entrar con el PIN ${this.claveInicial}.`;
         this.refrescarAcceso();
       },
       error: (fallo: HttpErrorResponse) => {
@@ -398,7 +411,7 @@ export class PersonasComponent implements OnInit {
       return;
     }
     const seguro = window.confirm(
-      `¿Devolver la contraseña de ${persona.nombreCompleto} a ${this.claveInicial}? `
+      `¿Devolver el PIN de ${persona.nombreCompleto} a ${this.claveInicial}? `
       + 'Deberá cambiarla al entrar y su sesión abierta dejará de servirle.');
     if (!seguro) {
       return;
@@ -407,11 +420,11 @@ export class PersonasComponent implements OnInit {
     this.error = null;
     this.admin.restablecerClave(persona.usuarioId).subscribe({
       next: () => {
-        this.avisoAcceso = `Contraseña devuelta a ${this.claveInicial}.`;
+        this.avisoAcceso = `PIN devuelto a ${this.claveInicial}.`;
         this.refrescarAcceso();
       },
       error: (fallo: HttpErrorResponse) => {
-        this.error = fallo.error?.mensaje ?? 'No pudimos restablecer la contraseña.';
+        this.error = fallo.error?.mensaje ?? 'No pudimos restablecer el PIN.';
       }
     });
   }
@@ -439,12 +452,12 @@ export class PersonasComponent implements OnInit {
           this.guardando = false;
           this.cambiandoClave = false;
           this.formularioClave.reset();
-          this.avisoAcceso = 'Contraseña asignada. Deberá cambiarla en su próximo ingreso.';
+          this.avisoAcceso = 'PIN asignado. Deberá cambiarlo en su próximo ingreso.';
           this.refrescarAcceso();
         },
         error: (fallo: HttpErrorResponse) => {
           this.guardando = false;
-          this.error = fallo.error?.mensaje ?? 'No pudimos asignar la contraseña.';
+          this.error = fallo.error?.mensaje ?? 'No pudimos asignar el PIN.';
         }
       });
   }
@@ -541,7 +554,7 @@ export class PersonasComponent implements OnInit {
 
   /**
    * El correo es obligatorio SOLO cuando el alta incluye cuenta: es por donde
-   * esa persona recuperará su contraseña. La mayoría de personas del conjunto
+   * esa persona recuperará su PIN. La mayoría de personas del conjunto
    * no tienen cuenta —los niños, quienes solo pasan por la portería— y a esas
    * pedirles correo sería inventar un dato que nadie va a usar.
    */
