@@ -1,40 +1,161 @@
+/* El host TIENE que declarar su display: el router lo inserta como <gd-mi-qr> y
+   por defecto es `inline`, o sea que NO puede recibir altura. Esa es la causa
+   raíz de los ~400px de vacío, no el centrado. Sus hermanos mi-hogar e
+   invitados ya lo declaran; este era el único que no.
+
+   `flex: 1 0 auto` (crece, NO encoge): crece para llenar el alto de main cuando
+   el contenido es corto, y nunca se encoge por debajo del contenido cuando es
+   largo, así main sigue desplazándose normal. Con shrink activo el host se
+   comprimiría hasta el alto de main, nunca desbordaría, y el contenido sobrante
+   quedaría fuera de alcance.
+
+   Se resuelve en el :host del propio componente y no con ::ng-deep desde el
+   layout: los componentes que inserta el router no heredan el atributo de
+   encapsulación del padre y un `main > *` no los alcanzaría. */
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
+
+/* Flex column y no grid: con grid y `place-content: center` el `width: 100%` de
+   .credencial se resolvería contra una pista dimensionada al contenido. Con
+   flex, `align-items: center` centra lo que tiene max-width y respeta el ancho
+   completo de quien lo pide. */
 .pantalla {
-  display: grid;
-  place-items: center;
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-4);
   padding: var(--e-4) var(--e-4) var(--e-5);
+}
+
+/* Centrado vertical con márgenes automáticos y NO con justify-content: si el
+   contenido no cabe, un `justify-content: center` recorta por ARRIBA y esa
+   parte queda inalcanzable con el scroll. Los márgenes auto degradan a cero y
+   nunca dejan nada fuera de alcance —y no necesitan `safe`, que no existe en
+   Safari < 16.4—.
+
+   El aviso de error queda deliberadamente fuera: cuando convive con la
+   credencial se lee arriba, como un aviso, y la credencial se centra en lo que
+   sobra. */
+.cargando,
+.sin-foto,
+.credencial {
+  margin-block: auto;
+}
+
+/* El aviso también se centra, pero SOLO cuando es lo único que hay. Si convive
+   con la credencial tiene que leerse arriba, como el aviso que es, y dejar que
+   la credencial se reparta el resto. Medido: solo en pantalla y sin esta regla
+   quedaba a 16px del techo con 668px de vacío debajo — el mismo defecto que se
+   vino a arreglar, escondido en un estado menos frecuente.
+   `*ngIf` saca el elemento del DOM y deja un comentario, y los comentarios no
+   cuentan para :only-child. */
+.aviso-error:only-child {
+  margin-block: auto;
 }
 
 .cargando {
   display: flex;
   align-items: center;
   gap: var(--e-2);
-  padding: var(--e-6) 0;
   color: var(--text-muted);
 }
 
 .aviso-error {
+  width: 100%;
+  max-width: 380px;
   padding: var(--e-3);
   font-size: var(--t-sm);
+  line-height: 1.45;
   color: var(--deny);
   background: var(--deny-soft);
   border-radius: var(--r-md);
 }
 
-/* La credencial es UN objeto, no una tarjeta más de una lista: por eso la
-   sombra es más profunda y el radio más generoso que en el resto. */
+/* ── Falta la foto ───────────────────────────────────────────────────────
+   No es un aviso de error: es una tarea corta con su herramienta al lado. Ya no
+   lleva `margin: var(--e-6) auto`: la posición la decide el centrado del
+   contenedor, y ese margen fijo era parte de lo que la anclaba arriba.
+
+   NO se migra a la utilidad global `.gd-vacio` aunque sea una duplicación:
+   `.gd-vacio i` (styles.scss:236) es un selector DESCENDIENTE y alcanzaría el
+   `<i class="pi pi-camera">` que vive dentro de `label.boton` de
+   gd-foto-upload —que no fija su propio font-size—, dejándolo a 1.75rem, gris y
+   al 70% de opacidad dentro de la píldora de "Subir foto". La migración limpia
+   existe y son dos caracteres (`.gd-vacio > i` en styles.scss; verificado que
+   los cuatro usos actuales —invitados:171, mi-hogar:143 y :247, sedes:173— usan
+   hijo directo), pero es un cambio global y va en un commit aparte. */
+.sin-foto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-4);
+  width: 100%;
+  max-width: 320px;
+  padding: var(--e-6) var(--e-5);
+  text-align: center;
+  background: var(--bg-surface);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-card);
+
+  h1 {
+    font-size: var(--t-lg);
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  p {
+    margin: 0;
+    font-size: var(--t-sm);
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+
+  /* Título y explicación pegados entre sí y separados del selector de foto: son
+     una sola unidad de lectura, y lo de abajo es la acción. Sin icono decorativo
+     propio: gd-foto-upload ya dibuja un marco de 86x86 con un icono de persona,
+     y dos iconos a 20px de distancia son ruido. */
+  .titular {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e-1);
+  }
+
+  .estado {
+    display: flex;
+    align-items: center;
+    gap: var(--e-2);
+    margin: 0;
+    font-size: var(--t-xs);
+    font-weight: 600;
+    color: var(--accent);
+  }
+}
+
+/* ── Credencial ─────────────────────────────────────────────────────────────
+   La credencial es UN objeto, no una tarjeta más de una lista: por eso la
+   sombra es más profunda y el radio más generoso que en el resto.
+
+   El tope de 380px es la suma real de lo que lleva dentro: QR de 320 + 24 de
+   relleno del cuadro + 32 de relleno de la tarjeta = 376. Sin él, en el panel
+   de 520px de escritorio la credencial se estiraba a 488 con un código de 320
+   flotando en el medio. */
 .credencial {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--e-3);
   width: 100%;
+  max-width: 380px;
   padding: var(--e-4);
   background: var(--bg-surface);
   border-radius: var(--r-xl);
   box-shadow: var(--shadow-flotante);
 }
 
-/* ── Identidad ───────────────────────────────────────────────────────────── */
 .identidad {
   display: flex;
   align-items: center;
@@ -43,8 +164,8 @@
 }
 
 .retrato {
-  width: 44px;
-  height: 44px;
+  width: var(--tactil);
+  height: var(--tactil);
   flex: 0 0 auto;
   overflow: hidden;
   border-radius: var(--r-full);
@@ -60,18 +181,18 @@
 .quien {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: var(--e-1);
   min-width: 0;
-}
 
-h1 {
-  margin: 0;
-  font-size: var(--t-md);
-  font-weight: 700;
-  line-height: 1.2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  h1 {
+    margin: 0;
+    font-size: var(--t-md);
+    font-weight: 700;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .datos {
@@ -85,7 +206,7 @@ h1 {
     display: inline-flex;
     align-items: center;
     gap: var(--e-1);
-    padding: 0.1rem 0.5rem;
+    padding: 0 var(--e-2);
     background: var(--accent-soft);
     color: var(--accent);
     border-radius: var(--r-full);
@@ -142,20 +263,24 @@ h1 {
 }
 
 /* ── Modo sol ────────────────────────────────────────────────────────────
-   Bajo el sol el problema no es el QR (ya es blanco) sino todo lo que lo
-   rodea: en modo oscuro la tarjeta baja el contraste percibido y el residente
-   termina subiendo el brillo a mano. Acá desaparece todo menos el código.
-   Tapa la barra inferior a propósito, y se sale tocando en cualquier punto. */
+   Bajo el sol el problema no es el QR (ya es blanco) sino todo lo que lo rodea.
+   Acá desaparece todo menos el código. Tapa la barra inferior a propósito, y se
+   sale tocando en cualquier punto. Al ser `position: fixed` el flex del padre
+   deja de aplicar, pero el centrado por márgenes auto sigue funcionando igual.
+
+   El tamaño lo decide el componente y el canvas se REDIBUJA: acá no se estira
+   nada, estirarlo por CSS lo interpola y arruina los bordes de los módulos. */
 .pantalla.sol {
   position: fixed;
   inset: 0;
   z-index: var(--z-sol);
-  /* Mismo blanco del cuadro del QR y por la misma razón: un QR invertido no
-     escanea, así que este fondo NO se invierte en modo oscuro. */
   background: var(--bg-codigo);
   padding: 0;
 
+  /* Obligatorio: en modo sol el canvas se redibuja hasta 400px y el tope de 380
+     de la credencial lo dejaría descentrado. */
   .credencial {
+    max-width: none;
     background: none;
     box-shadow: none;
     padding: 0;
@@ -167,41 +292,7 @@ h1 {
     display: none;
   }
 
-  /* El tamaño lo decide el componente y el canvas se redibuja: aquí no se
-     estira nada, solo se quita el marco. */
   .qr {
     padding: 0;
-  }
-}
-
-/* ── Falta la foto ───────────────────────────────────────────────────────
-   No es un aviso de error: es una tarea corta con su herramienta al lado. */
-.sin-foto {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--e-3);
-  max-width: 340px;
-  margin: var(--e-6) auto;
-  padding: var(--e-5) var(--e-4);
-  text-align: center;
-  background: var(--bg-surface);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow-card);
-
-  > i {
-    font-size: 2rem;
-    color: var(--accent);
-  }
-
-  h1 {
-    font-size: var(--t-xl);
-  }
-
-  p {
-    margin: 0;
-    font-size: var(--t-sm);
-    color: var(--text-muted);
-    line-height: 1.5;
   }
 }

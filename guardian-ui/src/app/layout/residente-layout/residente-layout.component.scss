@@ -2,9 +2,15 @@
   display: block;
 }
 
-/* 100vh primero como respaldo (Safari iOS < 15.4 no conoce dvh). El panel NO
-   se desplaza: lo hace su contenido, así la cabecera y la barra inferior se
-   quedan fijas de verdad, como el cromo de una app. */
+/* 100vh primero como respaldo (Safari iOS < 15.4 no conoce dvh). El panel NO se
+   desplaza: lo hace su contenido, así la cabecera y la barra inferior quedan
+   fijas de verdad, como el cromo de una app.
+
+   La muesca se respeta ACÁ y no en la cabecera, porque ahora hay una franja que
+   puede ir por encima de ella. En navegador `env()` vale 0px y no cambia nada.
+
+   SIN `gap`: la franja de visita mide cero cuando no hay enlace, y un gap la
+   convertiría en una banda fantasma de 4px en el 95% de los casos. */
 .panel {
   display: flex;
   flex-direction: column;
@@ -13,42 +19,62 @@
   overflow: hidden;
   max-width: var(--ancho-panel);
   margin: 0 auto;
+  padding-top: var(--seguro-arriba);
   background: var(--bg-base);
 }
 
-/* ── Cabecera ─────────────────────────────────────────────────────────────
-   Fuera del área que se desplaza, y respetando la muesca. */
+/* Franja de contexto, solo para quien está de paso. Sin relleno vertical, sin
+   fondo y sin separador a propósito: `gd-volver` es `:host { display: contents }`
+   con un *ngIf dentro, así que cuando no hay a dónde volver este contenedor se
+   queda sin hijos y mide exactamente cero. El alto, cuando sí hay enlace, lo
+   pone el `min-height: var(--tactil)` del propio `.volver`.
+
+   El relleno lateral compensa el del enlace (16px - 12px) para que la flecha
+   caiga sobre la misma x del saludo. */
+.franja-visita {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 0 calc(var(--e-4) - var(--e-3));
+  color: var(--text-strong);
+}
+
+/* Dos bloques exactos y el sobrante ENTRE ellos. */
 .cabecera {
   position: relative;
   z-index: var(--z-cabecera);
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--e-3);
-  padding: calc(var(--seguro-arriba) + var(--e-3)) var(--e-4) var(--e-3);
+  padding: var(--e-3) var(--e-4);
   background: var(--bg-base);
   box-shadow: inset 0 -1px 0 var(--border-hairline);
 }
 
+/* SIN flex-grow. Ese `flex: 1 1 auto` era la causa literal del desbalance:
+   .identidad absorbía todo el sobrante y lo dejaba DENTRO de su propia caja, a
+   la derecha del nombre. Ese era el hueco que se veía antes del avatar. */
 .identidad {
   display: flex;
   flex-direction: column;
-  /* Absorbe el sobrante: con tres hijos, un space-between mandaria el saludo
-     al centro y dejaria "volver" solo en una esquina. */
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
 
   .saludo {
     font-size: var(--t-xs);
     font-weight: 600;
+    line-height: 1.3;
     color: var(--text-muted);
   }
 
+  /* --t-lg y no --t-xl: 1.4rem al lado de un avatar de 44px hacía gritar la
+     cabecera. 1.1rem en negrita sigue siendo lo más fuerte de la franja sin
+     competir con el contenido, que es a lo que el residente vino. */
   .nombre {
-    font-size: var(--t-xl);
+    font-size: var(--t-lg);
     font-weight: 700;
-    line-height: 1.15;
+    line-height: 1.25;
     color: var(--text-strong);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -56,19 +82,23 @@
   }
 }
 
+/* `margin-left: auto` y no `justify-content: space-between` en la cabecera:
+   `.identidad` está bajo *ngIf="sesion", y con space-between un solo hijo se
+   pegaría al borde izquierdo. El auto sostiene el extremo derecho siempre. */
 .utilidades {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: var(--e-1);
-  flex-shrink: 0;
+  gap: var(--e-2);
+  margin-left: auto;
 }
 
+/* El `margin-right` desapareció: el `gap` de .utilidades ya hace ese trabajo. */
 .casa {
   display: inline-flex;
   align-items: center;
   gap: var(--e-1);
-  margin-right: var(--e-1);
-  padding: 0.2rem 0.6rem;
+  padding: var(--e-1) var(--e-3);
   font-size: var(--t-xs);
   font-weight: 700;
   color: var(--accent);
@@ -100,11 +130,23 @@
 }
 
 /* ── Contenido ─────────────────────────────────────────────────────────────
-   Es lo único que se desplaza. La barra inferior ya ocupa su propio espacio
-   en el flujo, así que aquí solo hace falta aire al final del scroll. */
+   Es lo único que se desplaza. Y ahora es una COLUMNA flex: es lo que permite
+   que el componente que inserta el router reciba el alto disponible y pueda
+   repartirlo. Sin esto, cualquier pantalla corta se pega arriba y deja el resto
+   vacío —los ~400px de vacío bajo "Falta tu foto"—.
+
+   `min-height: 0` para que el flex item pueda encogerse y el scroll funcione.
+   Nada de `calc(100dvh - 56px)`: cablear el alto de la cabecera se rompe el día
+   que la cabecera cambie, que es hoy mismo.
+
+   SIN `gap`: el <router-outlet> es un item flex más y, aunque no aporta alto, un
+   gap dejaría un hueco fantasma antes del contenido. */
 main {
   flex: 1 1 auto;
   min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
@@ -129,7 +171,7 @@ main {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.15rem;
+  gap: var(--e-1);
   min-height: var(--alto-tabbar);
   padding: var(--e-2) var(--e-1);
   font-size: var(--t-xs);
@@ -137,8 +179,11 @@ main {
   color: var(--text-muted);
   transition: color var(--transicion);
 
+  /* Pasa de 1.25rem —un literal fuera de escala— a --t-xl. Crece ~2px: en una
+     barra de destinos el icono es lo que se toca y lo que se reconoce, y el
+     conjunto sigue cabiendo en --alto-tabbar (60px). */
   i {
-    font-size: 1.25rem;
+    font-size: var(--t-xl);
     transition: transform var(--transicion);
   }
 
@@ -146,8 +191,8 @@ main {
     transform: scale(0.88);
   }
 
-  /* El destino activo se marca con color y peso, nunca con un recuadro:
-     un borde dentro de la barra la vuelve una fila de botones web. */
+  /* El destino activo se marca con color y peso, nunca con un recuadro: un
+     borde dentro de la barra la vuelve una fila de botones web. */
   &.activa {
     color: var(--accent);
 
@@ -161,7 +206,7 @@ main {
 .ficha-cuenta {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: var(--e-1);
   margin-bottom: var(--e-4);
 
   .nombre-completo {

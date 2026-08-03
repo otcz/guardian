@@ -49,6 +49,50 @@ export class CambiarClaveComponent implements OnInit {
     return this.auth.requiereCambioClave;
   }
 
+  /**
+   * El encabezado tiene subtítulo SIEMPRE. Sin él, el caso voluntario deja un
+   * título huérfano y el bloque pierde el peso frente a los tres campos; y el
+   * texto voluntario responde la duda real de esa pantalla, que es por qué se
+   * pide el PIN actual.
+   */
+  get subtitulo(): string {
+    return this.obligatorio
+      ? 'Estás usando el PIN que te entregaron. Elige uno tuyo.'
+      : 'Necesitas tu PIN actual para confirmar el cambio.';
+  }
+
+  // ── Mensajes de error ──────────────────────────────────────────────
+  //
+  // Elegir QUÉ regla se rompió es lógica de negocio y CLAUDE.md §2 la prohíbe
+  // en la plantilla. Los tres getters devuelven el texto ya resuelto y la
+  // plantilla solo lo pinta; además son la misma fuente que enciende el estado
+  // visual del campo, así que color y mensaje no pueden desincronizarse.
+
+  get errorClaveActual(): string | null {
+    return this.campoInvalido('claveActual') ? 'Escribe tu PIN actual' : null;
+  }
+
+  get errorClaveNueva(): string | null {
+    if (!this.campoInvalido('claveNueva')) {
+      return null;
+    }
+    return this.formulario.controls.claveNueva.hasError('pinTrivial')
+      ? 'Ese PIN es muy fácil de adivinar. Evita repetidos y seguidos.'
+      : 'El PIN son 4 números';
+  }
+
+  /**
+   * Cubre los DOS fallos posibles. Hasta ahora la plantilla solo miraba
+   * `noCoinciden`, así que dejar la confirmación vacía no mostraba nada: el
+   * formulario no enviaba y la persona no sabía por qué.
+   */
+  get errorConfirmacion(): string | null {
+    if (this.noCoinciden) {
+      return 'Los PIN no coinciden';
+    }
+    return this.campoInvalido('confirmacion') ? 'Repite el PIN nuevo' : null;
+  }
+
   guardar(): void {
     if (this.formulario.invalid || this.cargando) {
       this.formulario.markAllAsTouched();

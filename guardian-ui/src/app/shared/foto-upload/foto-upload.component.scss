@@ -2,16 +2,18 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--e-2);
 }
 
 .marco {
+  /* 86px es una medida propia del componente, como --alto-tabbar: no hay token
+     de escala para dimensiones de contenido y no se inventa uno. */
   width: 86px;
   height: 86px;
   overflow: hidden;
   display: grid;
   place-items: center;
-  border-radius: 12px;
+  border-radius: var(--r-md);
   background: var(--bg-soft);
   border: 1px solid var(--border-default);
 
@@ -22,7 +24,7 @@
   }
 
   i {
-    font-size: 1.6rem;
+    font-size: var(--t-2xl);
     color: var(--text-muted);
   }
 }
@@ -30,44 +32,82 @@
 .acciones {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: var(--e-2);
 }
 
+/* Sube de ~28px a los 44px del dedo: era un incumplimiento silencioso de la
+   medida táctil del proyecto, y en la pantalla del residente es el único botón
+   que hay. */
 .boton {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.7rem;
-  font-size: 0.8rem;
+  gap: var(--e-2);
+  min-height: var(--tactil);
+  padding: 0 var(--e-4);
+  font-size: var(--t-sm);
   font-weight: 600;
   color: var(--accent);
   background: var(--accent-soft);
-  border-radius: 8px;
+  border-radius: var(--r-full);
   cursor: pointer;
+  transition: filter var(--transicion), transform var(--transicion);
 
+  /* El input NO se oculta con `display: none`: eso lo saca del orden de
+     tabulación y deja al teclado literalmente sin forma de subir una foto. A
+     1px con opacidad 0 sigue siendo enfocable y sigue abriendo el selector; el
+     `pointer-events: none` evita que robe el clic a la etiqueta. */
   input {
-    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* El foco vive en el input invisible; el anillo lo dibuja la etiqueta. */
+  &:focus-within {
+    outline: 2px solid var(--anillo-foco);
+    outline-offset: 2px;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      filter: brightness(0.97);
+    }
   }
 }
 
+/* De 26x26 a 44x44 por la misma razón. */
 .quitar {
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
+  width: var(--tactil);
+  height: var(--tactil);
+  flex: 0 0 auto;
   color: var(--text-muted);
   background: none;
-  border: 1px solid var(--border-default);
-  border-radius: 8px;
+  border: none;
+  border-radius: var(--r-full);
   cursor: pointer;
+  transition: color var(--transicion), background var(--transicion);
 
-  &:hover {
-    color: var(--deny);
+  @media (hover: hover) {
+    &:hover {
+      color: var(--deny);
+      background: var(--bg-soft);
+    }
   }
 }
 
 .error {
   color: var(--deny);
-  font-size: 0.75rem;
+  font-size: var(--t-xs);
   text-align: center;
 }

@@ -1,27 +1,27 @@
 <div class="pantalla" [class.sol]="sol">
 
-  <div class="cargando" *ngIf="cargando && !credencial">
-    <i class="pi pi-spinner pi-spin"></i>
+  <div class="cargando" role="status" *ngIf="cargando && !credencial">
+    <i class="pi pi-spinner pi-spin" aria-hidden="true"></i>
     <span>Cargando tu código…</span>
   </div>
 
-  <div class="aviso-error" *ngIf="error">{{ error }}</div>
+  <div class="aviso-error" role="alert" *ngIf="error">{{ error }}</div>
 
-  <!-- Falta la foto: no es un error del sistema, es un paso que le falta a
-       esta persona y que puede resolver aquí mismo. La credencial se emite
-       sola en cuanto la sube. -->
+  <!-- Falta la foto: no es un error del sistema, es un paso que le falta a esta
+       persona y que puede resolver aquí mismo. La credencial se emite sola en
+       cuanto la sube. -->
   <div class="sin-foto" *ngIf="credencial?.necesitaFoto">
-    <i class="pi pi-camera"></i>
-    <h1>Falta tu foto</h1>
-    <p>
-      El guardia compara tu cara con la foto de tu credencial, así que sin
-      ella no podemos emitirla. Súbela y tu código queda listo.
-    </p>
+    <div class="titular">
+      <h1>Falta tu foto</h1>
+      <p>El guardia compara tu cara con la foto de tu credencial. Súbela y tu código queda listo.</p>
+    </div>
 
     <gd-foto-upload [fotoUrl]="null" (fotoUrlChange)="guardarMiFoto($event)">
     </gd-foto-upload>
 
-    <p class="gd-muted" *ngIf="subiendoFoto">Guardando…</p>
+    <p class="estado" role="status" *ngIf="subiendoFoto">
+      <i class="pi pi-spinner pi-spin" aria-hidden="true"></i> Guardando…
+    </p>
   </div>
 
   <div class="credencial" *ngIf="credencial && !credencial.necesitaFoto">
@@ -35,7 +35,7 @@
         <h1>{{ credencial.nombreCompleto }}</h1>
         <div class="datos">
           <span class="casa" *ngIf="credencial.casaIdentificador">
-            <i class="pi pi-home"></i> {{ credencial.casaIdentificador }}
+            <i class="pi pi-home" aria-hidden="true"></i> {{ credencial.casaIdentificador }}
           </span>
           <span class="doc gd-seleccionable">
             {{ credencial.tipoDocumento }} {{ credencial.documento | documento }}
@@ -55,12 +55,12 @@
     </button>
 
     <p class="instruccion">
-      <i class="pi pi-arrow-up"></i>
+      <i class="pi pi-arrow-up" aria-hidden="true"></i>
       Muestra este código en la portería
     </p>
 
     <div class="sin-conexion" *ngIf="desdeCache">
-      <i class="pi pi-wifi"></i>
+      <i class="pi pi-wifi" aria-hidden="true"></i>
       Sin conexión. Tu código sigue siendo válido.
     </div>
   </div>

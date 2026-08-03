@@ -1,12 +1,17 @@
 <div class="panel">
 
-  <!-- Cabecera compacta: identidad y una sola puerta. La navegación NO vive
-       aquí, vive abajo, donde llega el pulgar. -->
-  <header class="cabecera">
-    <!-- Primero a la izquierda: es donde se busca la salida. Solo aparece para
-         quien está de paso; el residente vive acá. -->
+  <!-- Franja de contexto. Solo existe para quien está de paso: cuando el
+       residente mira su propio panel, gd-volver no pinta nada y la franja mide
+       cero. Sin fondo, sin relleno vertical y sin separador, justamente para
+       que vacía sea invisible. -->
+  <div class="franja-visita">
     <gd-volver></gd-volver>
+  </div>
 
+  <!-- Cabecera de DOS bloques: identidad a un extremo, utilidades al otro. Con
+       tres, uno de ellos tenía que absorber el sobrante y el saludo terminaba
+       apretado contra el enlace con un hueco largo antes del avatar. -->
+  <header class="cabecera">
     <div class="identidad" *ngIf="sesion">
       <span class="saludo">{{ saludo }}</span>
       <span class="nombre">{{ primerNombre }}</span>
@@ -14,12 +19,13 @@
 
     <div class="utilidades">
       <span class="casa" *ngIf="sesion?.casaIdentificador">
-        <i class="pi pi-home"></i> {{ sesion?.casaIdentificador }}
+        <i class="pi pi-home" aria-hidden="true"></i> {{ sesion?.casaIdentificador }}
       </span>
 
       <button type="button" class="avatar" (click)="mostrarCuenta = true"
-              aria-label="Mi cuenta">
-        {{ inicial }}
+              aria-label="Mi cuenta" aria-haspopup="dialog"
+              [attr.aria-expanded]="mostrarCuenta">
+        <span aria-hidden="true">{{ inicial }}</span>
       </button>
     </div>
   </header>
@@ -28,19 +34,22 @@
     <router-outlet></router-outlet>
   </main>
 
-  <!-- Barra inferior: la convención nativa. Tres destinos, siempre visibles,
-       el activo con color y peso, nunca con un borde. -->
-  <nav class="tabbar" role="tablist">
-    <a routerLink="mi-qr" routerLinkActive="activa" class="tab">
-      <i class="pi pi-qrcode"></i>
+  <!-- Barra inferior: la convención nativa. Tres destinos, siempre visibles, el
+       activo con color y peso, nunca con un borde.
+       Sin role="tablist": son tres enlaces que CAMBIAN de ruta, no pestañas de
+       un mismo panel; anunciar "pestaña 1 de 3" y acto seguido cambiar de
+       página desorienta. El estado real lo dice ariaCurrentWhenActive. -->
+  <nav class="tabbar" aria-label="Secciones">
+    <a routerLink="mi-qr" routerLinkActive="activa" ariaCurrentWhenActive="page" class="tab">
+      <i class="pi pi-qrcode" aria-hidden="true"></i>
       <span>Mi QR</span>
     </a>
-    <a routerLink="mi-hogar" routerLinkActive="activa" class="tab">
-      <i class="pi pi-home"></i>
+    <a routerLink="mi-hogar" routerLinkActive="activa" ariaCurrentWhenActive="page" class="tab">
+      <i class="pi pi-home" aria-hidden="true"></i>
       <span>Mi hogar</span>
     </a>
-    <a routerLink="invitados" routerLinkActive="activa" class="tab">
-      <i class="pi pi-ticket"></i>
+    <a routerLink="invitados" routerLinkActive="activa" ariaCurrentWhenActive="page" class="tab">
+      <i class="pi pi-ticket" aria-hidden="true"></i>
       <span>Invitados</span>
     </a>
   </nav>

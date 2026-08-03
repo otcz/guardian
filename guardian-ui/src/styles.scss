@@ -291,3 +291,30 @@ input.pin::-webkit-inner-spin-button {
   appearance: none;
   margin: 0;
 }
+
+/* ---------------------------------------------------------------------------
+   Autocompletado del navegador
+
+   Chrome y WebKit pintan el campo autocompletado de amarillo con un fondo
+   interno que `background` NO pisa: la única palanca es una sombra INTERIOR
+   del grosor del campo. La transición de 600000s congela el color que el
+   navegador reaplica al enfocar.
+
+   El color sale de `--bg-campo`, que cada componente fija al mismo token que
+   usa de fondo del input; el respaldo es --bg-surface, que es el fondo de los
+   campos de login y de recuperar. `--bg-campo` NO es un token de color nuevo:
+   es un gancho, y su valor siempre es un token existente.
+
+   Vive acá y no en cada componente a propósito: el defecto es idéntico en
+   cambiar-clave, login y recuperar, y tres copias con el color cableado a mano
+   se desincronizan el día que cambie el fondo de un campo.
+   --------------------------------------------------------------------------- */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-strong);
+  caret-color: var(--text-strong);
+  -webkit-box-shadow: inset 0 0 0 100px var(--bg-campo, var(--bg-surface));
+  box-shadow: inset 0 0 0 100px var(--bg-campo, var(--bg-surface));
+  transition: background-color 600000s 0s, color 600000s 0s;
+}

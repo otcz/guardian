@@ -1,96 +1,131 @@
 <div class="pantalla">
-  <form class="tarjeta" [formGroup]="formulario" (ngSubmit)="guardar()">
+  <!-- El marco ES la columna de lectura: el enlace de vuelta, el título, cada
+       etiqueta, cada campo y el botón arrancan y terminan en la misma x. -->
+  <div class="marco">
 
-    <!-- Arriba y no debajo de "Guardar": una salida puesta después del botón
-         principal compite con él, y es lo primero que se lee al bajar la
-         vista. Con el cambio OBLIGATORIO no hay a dónde volver —esta es la
-         única pantalla permitida— y por eso desaparece. -->
+    <!-- Fuera de la tarjeta y no en su esquina: dentro competía con el primer
+         renglón de contenido y abría un eje propio. Con el cambio OBLIGATORIO
+         no hay a dónde volver y por eso desaparece. -->
     <div class="navegacion" *ngIf="!obligatorio">
       <gd-volver></gd-volver>
     </div>
 
-    <div class="encabezado">
-      <i class="pi pi-lock"></i>
-      <h1>Cambia tu PIN</h1>
-      <p *ngIf="obligatorio">
-        Estás usando el PIN que te entregaron. Elige uno tuyo para proteger tu cuenta.
+    <form class="tarjeta" [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+
+      <!-- Sin candado decorativo: la jerarquía la hace el tamaño del título, no
+           un icono que obliga a centrar el bloque entero. -->
+      <header class="encabezado">
+        <h1>Cambia tu PIN</h1>
+        <p>{{ subtitulo }}</p>
+      </header>
+
+      <div class="campos">
+
+        <div class="campo" [class.invalido]="!!errorClaveActual">
+          <div class="etiqueta">
+            <label for="actual">PIN actual</label>
+          </div>
+          <div class="control">
+            <input id="actual" class="pin"
+                   [type]="verActual ? 'text' : 'password'"
+                   inputmode="numeric" maxlength="4" enterkeyhint="next"
+                   autocomplete="current-password"
+                   formControlName="claveActual"
+                   aria-describedby="error-actual"
+                   [attr.aria-invalid]="!!errorClaveActual || null">
+            <button type="button" class="ver-clave"
+                    (click)="verActual = !verActual"
+                    [attr.aria-label]="verActual ? 'Ocultar el PIN' : 'Ver el PIN'">
+              <i class="pi" [ngClass]="verActual ? 'pi-eye-slash' : 'pi-eye'"
+                 aria-hidden="true"></i>
+            </button>
+          </div>
+          <p class="error" id="error-actual" role="alert" *ngIf="errorClaveActual">
+            <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+            {{ errorClaveActual }}
+          </p>
+        </div>
+
+        <div class="campo" [class.invalido]="!!errorClaveNueva">
+          <div class="etiqueta">
+            <label for="nueva">PIN nuevo</label>
+            <!-- Botón y no un <i> suelto: un icono no enfocable deja el tooltip
+                 inalcanzable para el teclado Y para el dedo, porque en un móvil
+                 no hay hover. Con tooltipEvent="both" aparece al enfocar y al
+                 tocar, y el aria-label repite el texto por si el tooltip falla. -->
+            <button type="button" class="ayuda"
+                    aria-label="4 números. Evita 1234 y repetidos"
+                    pTooltip="4 números. Evita 1234 y repetidos"
+                    tooltipPosition="top" tooltipEvent="both">
+              <i class="pi pi-info-circle" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="control">
+            <input id="nueva" class="pin"
+                   [type]="verNueva ? 'text' : 'password'"
+                   inputmode="numeric" maxlength="4" enterkeyhint="next"
+                   autocomplete="new-password"
+                   formControlName="claveNueva"
+                   aria-describedby="error-nueva"
+                   [attr.aria-invalid]="!!errorClaveNueva || null">
+            <button type="button" class="ver-clave"
+                    (click)="verNueva = !verNueva"
+                    [attr.aria-label]="verNueva ? 'Ocultar el PIN' : 'Ver el PIN'">
+              <i class="pi" [ngClass]="verNueva ? 'pi-eye-slash' : 'pi-eye'"
+                 aria-hidden="true"></i>
+            </button>
+          </div>
+          <p class="error" id="error-nueva" role="alert" *ngIf="errorClaveNueva">
+            <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+            {{ errorClaveNueva }}
+          </p>
+        </div>
+
+        <div class="campo" [class.invalido]="!!errorConfirmacion">
+          <div class="etiqueta">
+            <label for="confirmacion">Repite el PIN</label>
+          </div>
+          <div class="control">
+            <input id="confirmacion" class="pin"
+                   [type]="verConfirmacion ? 'text' : 'password'"
+                   inputmode="numeric" maxlength="4" enterkeyhint="done"
+                   autocomplete="new-password"
+                   formControlName="confirmacion"
+                   aria-describedby="error-confirmacion"
+                   [attr.aria-invalid]="!!errorConfirmacion || null">
+            <button type="button" class="ver-clave"
+                    (click)="verConfirmacion = !verConfirmacion"
+                    [attr.aria-label]="verConfirmacion ? 'Ocultar el PIN' : 'Ver el PIN'">
+              <i class="pi" [ngClass]="verConfirmacion ? 'pi-eye-slash' : 'pi-eye'"
+                 aria-hidden="true"></i>
+            </button>
+          </div>
+          <p class="error" id="error-confirmacion" role="alert" *ngIf="errorConfirmacion">
+            <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+            {{ errorConfirmacion }}
+          </p>
+        </div>
+      </div>
+
+      <p class="aviso" role="alert" *ngIf="error">
+        <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+        <span>{{ error }}</span>
       </p>
-    </div>
 
-    <div class="campo">
-      <label for="actual">PIN actual</label>
-      <div class="clave-envoltura">
-        <input id="actual" [type]="verActual ? 'text' : 'password'"
-               inputmode="numeric" maxlength="4" class="pin"
-               autocomplete="current-password"
-               formControlName="claveActual">
-        <button type="button"
-                class="ver-clave"
-                (click)="verActual = !verActual"
-                [attr.aria-label]="verActual ? 'Ocultar el PIN' : 'Ver el PIN'">
-          <i class="pi" [ngClass]="verActual ? 'pi-eye-slash' : 'pi-eye'"></i>
+      <!-- Zona de decisión, separada por una línea del ancho del contenido: la
+           acción va sola al final y no se confunde con un campo más. -->
+      <div class="acciones">
+        <button type="submit" class="principal" [disabled]="cargando">
+          <i class="pi pi-spinner pi-spin" *ngIf="cargando" aria-hidden="true"></i>
+          {{ cargando ? 'Guardando…' : 'Guardar' }}
+        </button>
+
+        <!-- Solo con el cambio obligatorio: ahí la única salida es cerrar
+             sesión, y llamarla "Cancelar" haría creer que se puede posponer. -->
+        <button type="button" class="secundario" *ngIf="obligatorio" (click)="salir()">
+          Cerrar sesión
         </button>
       </div>
-      <small class="error" *ngIf="campoInvalido('claveActual')">
-        Escribe tu PIN actual
-      </small>
-    </div>
-
-    <div class="campo">
-      <label for="nueva">
-        PIN nuevo
-        <i class="pi pi-info-circle ayuda"
-           pTooltip="4 números. Evita 1234 y repetidos"
-           tooltipPosition="top"></i>
-      </label>
-      <div class="clave-envoltura">
-        <input id="nueva" [type]="verNueva ? 'text' : 'password'"
-               inputmode="numeric" maxlength="4" class="pin"
-               autocomplete="new-password"
-               formControlName="claveNueva">
-        <button type="button"
-                class="ver-clave"
-                (click)="verNueva = !verNueva"
-                [attr.aria-label]="verNueva ? 'Ocultar el PIN' : 'Ver el PIN'">
-          <i class="pi" [ngClass]="verNueva ? 'pi-eye-slash' : 'pi-eye'"></i>
-        </button>
-      </div>
-      <small class="error" *ngIf="campoInvalido('claveNueva')">
-        {{ formulario.controls.claveNueva.hasError('pinTrivial')
-           ? 'Ese PIN es muy fácil de adivinar. Evita repetidos y seguidos.'
-           : 'El PIN son 4 números' }}
-      </small>
-    </div>
-
-    <div class="campo">
-      <label for="confirmacion">Repite el PIN</label>
-      <div class="clave-envoltura">
-        <input id="confirmacion" [type]="verConfirmacion ? 'text' : 'password'"
-               inputmode="numeric" maxlength="4" class="pin"
-               autocomplete="new-password"
-               formControlName="confirmacion">
-        <button type="button"
-                class="ver-clave"
-                (click)="verConfirmacion = !verConfirmacion"
-                [attr.aria-label]="verConfirmacion ? 'Ocultar el PIN' : 'Ver el PIN'">
-          <i class="pi" [ngClass]="verConfirmacion ? 'pi-eye-slash' : 'pi-eye'"></i>
-        </button>
-      </div>
-      <small class="error" *ngIf="noCoinciden">Los PIN no coinciden</small>
-    </div>
-
-    <div class="aviso" *ngIf="error">{{ error }}</div>
-
-    <button type="submit" class="principal" [disabled]="cargando">
-      <i class="pi" [ngClass]="cargando ? 'pi-spinner pi-spin' : 'pi-check'"></i>
-      {{ cargando ? 'Guardando…' : 'Guardar' }}
-    </button>
-
-    <!-- Solo con el cambio obligatorio: ahí la única salida es cerrar sesión,
-         y llamarla "Cancelar" haría creer que se puede posponer. -->
-    <button type="button" class="secundario" *ngIf="obligatorio" (click)="salir()">
-      <i class="pi pi-sign-out"></i>
-      Salir
-    </button>
-  </form>
+    </form>
+  </div>
 </div>

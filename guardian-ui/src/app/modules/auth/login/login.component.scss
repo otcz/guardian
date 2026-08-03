@@ -58,7 +58,10 @@
 
   input {
     padding: 0.65rem 0.75rem;
-    font-size: 1rem;
+    /* SIN font-size: `.campo input` con encapsulación pesa (0,3,1) y le ganaba
+       a `input.pin` (0,1,1) de styles.scss, así que el PIN se dibujaba a 16px
+       en vez de los 22.4px que define el sistema. Las dos puertas de la
+       aplicación —login y cambiar PIN— tienen que mostrarlo del mismo tamaño. */
     color: var(--text-strong);
     background: var(--bg-surface);
     border: 1px solid var(--border-default);
