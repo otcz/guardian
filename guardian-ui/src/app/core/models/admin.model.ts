@@ -48,6 +48,22 @@ export interface FilaRechazada {
   motivo: string;
 }
 
+/** Mismo patrón que la carga de casas, con los datos de una persona. */
+export interface ImportacionPersonas {
+  leidas: number;
+  creadas: number;
+  repetidas: number;
+  conError: number;
+  rechazos: FilaPersonaRechazada[];
+}
+
+export interface FilaPersonaRechazada {
+  fila: number;
+  documento: string;
+  nombre: string;
+  motivo: string;
+}
+
 export interface Porteria {
   id: number;
   nombre: string;

@@ -10,6 +10,7 @@ import {
   GrupoParametro,
   GuardiaPorteria,
   ImportacionCasas,
+  ImportacionPersonas,
   Parametro,
   Persona,
   PersonaRegistrada,
@@ -66,6 +67,17 @@ export class AdminService {
     const cuerpo = new FormData();
     cuerpo.append('archivo', archivo);
     return this.http.post<ImportacionCasas>(`${this.base}/casas/importar`, cuerpo);
+  }
+
+  /** El .xlsx de ejemplo de personas, con las mismas columnas que se leen. */
+  plantillaPersonas(): Observable<Blob> {
+    return this.http.get(`${this.base}/personas/plantilla`, { responseType: 'blob' });
+  }
+
+  importarPersonas(archivo: File): Observable<ImportacionPersonas> {
+    const cuerpo = new FormData();
+    cuerpo.append('archivo', archivo);
+    return this.http.post<ImportacionPersonas>(`${this.base}/personas/importar`, cuerpo);
   }
 
   // ── Porterías ────────────────────────────────────────────────────────────

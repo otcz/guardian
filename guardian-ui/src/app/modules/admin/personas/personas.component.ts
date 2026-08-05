@@ -6,7 +6,13 @@ import { Observable, Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { AdminService } from '../../../core/services/admin.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { validadorPin } from '../../../core/validadores/pin.validador';
-import { CLAVE_INICIAL, Casa, Parametro, Persona } from '../../../core/models/admin.model';
+import {
+  CLAVE_INICIAL,
+  Casa,
+  ImportacionPersonas,
+  Parametro,
+  Persona
+} from '../../../core/models/admin.model';
 
 @Component({
   selector: 'gd-personas',
@@ -513,6 +519,62 @@ export class PersonasComponent implements OnInit {
       return roles;
     }
     return roles.filter(r => r.codigo !== 'ADMIN' && r.codigo !== 'SUPER_ADMIN');
+  }
+
+  // ── Carga masiva ─────────────────────────────────────────────────────────
+
+  importando = false;
+  resultado: ImportacionPersonas | null = null;
+
+  /**
+   * La plantilla la genera el SERVIDOR con las mismas columnas que lee el
+   * importador: una escrita a mano acá se separa del lector al primer cambio.
+   */
+  descargarPlantilla(): void {
+    this.error = null;
+    this.admin.plantillaPersonas().subscribe({
+      next: libro => this.descargar(libro, 'plantilla-personas.xlsx'),
+      error: () => (this.error = 'No pudimos generar la plantilla.')
+    });
+  }
+
+  archivoElegido(evento: Event): void {
+    const entrada = evento.target as HTMLInputElement;
+    const archivo = entrada.files?.[0];
+    // Se limpia el input para que elegir el MISMO archivo dos veces seguidas
+    // vuelva a disparar el evento; si no, corregir el Excel y reintentar sin
+    // cambiarle el nombre no haría nada.
+    entrada.value = '';
+    if (!archivo) {
+      return;
+    }
+
+    this.importando = true;
+    this.error = null;
+    this.resultado = null;
+
+    this.admin.importarPersonas(archivo).subscribe({
+      next: resultado => {
+        this.resultado = resultado;
+        this.importando = false;
+        // Se recarga siempre, aunque haya rechazos: las filas buenas ya entraron.
+        this.cargar(this.texto);
+      },
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos cargar el archivo.';
+        this.importando = false;
+      }
+    });
+  }
+
+  private descargar(contenido: Blob, nombre: string): void {
+    const url = URL.createObjectURL(contenido);
+    const enlace = document.createElement('a');
+    enlace.href = url;
+    enlace.download = nombre;
+    enlace.click();
+    // Sin esto el blob se queda en memoria hasta que se cierre la pestaña.
+    URL.revokeObjectURL(url);
   }
 
   /** El parentesco solo aplica si la persona vive en una casa. */
