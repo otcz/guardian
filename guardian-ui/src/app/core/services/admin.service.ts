@@ -11,6 +11,7 @@ import {
   GuardiaPorteria,
   ImportacionCasas,
   ImportacionPersonas,
+  ImportacionVehiculos,
   Parametro,
   Persona,
   PersonaRegistrada,
@@ -78,6 +79,17 @@ export class AdminService {
     const cuerpo = new FormData();
     cuerpo.append('archivo', archivo);
     return this.http.post<ImportacionPersonas>(`${this.base}/personas/importar`, cuerpo);
+  }
+
+  /** El .xlsx de ejemplo, con una segunda hoja de valores válidos. */
+  plantillaVehiculos(): Observable<Blob> {
+    return this.http.get(`${this.base}/vehiculos/plantilla`, { responseType: 'blob' });
+  }
+
+  importarVehiculos(archivo: File): Observable<ImportacionVehiculos> {
+    const cuerpo = new FormData();
+    cuerpo.append('archivo', archivo);
+    return this.http.post<ImportacionVehiculos>(`${this.base}/vehiculos/importar`, cuerpo);
   }
 
   // ── Porterías ────────────────────────────────────────────────────────────

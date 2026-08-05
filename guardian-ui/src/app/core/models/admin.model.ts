@@ -64,6 +64,22 @@ export interface FilaPersonaRechazada {
   motivo: string;
 }
 
+/** Mismo patrón, con los datos de un vehículo. */
+export interface ImportacionVehiculos {
+  leidas: number;
+  creadas: number;
+  repetidas: number;
+  conError: number;
+  rechazos: FilaVehiculoRechazada[];
+}
+
+export interface FilaVehiculoRechazada {
+  fila: number;
+  placa: string;
+  casa: string;
+  motivo: string;
+}
+
 export interface Porteria {
   id: number;
   nombre: string;

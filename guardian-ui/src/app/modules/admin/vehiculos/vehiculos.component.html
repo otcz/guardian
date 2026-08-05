@@ -1,11 +1,70 @@
 <div class="gd-page">
   <div class="encabezado">
     <h1>Vehículos</h1>
-    <button type="button" class="principal"
-            (click)="mostrarAlta ? cancelarEdicion() : (mostrarAlta = true)">
-      <i class="pi" [ngClass]="mostrarAlta ? 'pi-times' : 'pi-plus'"></i>
-      {{ mostrarAlta ? 'Cancelar' : 'Registrar' }}
-    </button>
+
+    <div class="masiva">
+      <!-- La plantilla PRIMERO, y con una segunda hoja de valores válidos: sin
+           saber qué tipos, marcas y colores acepta esta sede, un archivo hecho
+           a mano se cae fila por fila. -->
+      <button type="button" class="alterno" *ngIf="!mostrarAlta"
+              (click)="descargarPlantilla()">
+        <i class="pi pi-download"></i>
+        Ver el formato
+      </button>
+
+      <!-- El input va oculto pero enfocable, dentro del label: así el botón se
+           ve como los demás y el teclado sigue llegando. -->
+      <label class="alterno cargar" *ngIf="!mostrarAlta" [class.ocupado]="importando">
+        <i class="pi" [ngClass]="importando ? 'pi-spinner pi-spin' : 'pi-upload'"></i>
+        {{ importando ? 'Cargando…' : 'Cargar Excel' }}
+        <input type="file" accept=".xlsx" (change)="archivoElegido($event)"
+               [disabled]="importando">
+      </label>
+
+      <button type="button" class="principal"
+              (click)="mostrarAlta ? cancelarEdicion() : (mostrarAlta = true)">
+        <i class="pi" [ngClass]="mostrarAlta ? 'pi-times' : 'pi-plus'"></i>
+        {{ mostrarAlta ? 'Cancelar' : 'Registrar' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- El resultado NUNCA es un simple "listo": si de doscientas filas tres
+       quedaron fuera y no se dice cuáles, toca revisar la lista entera a mano
+       —que es justo lo que la carga masiva venía a evitar. -->
+  <div class="resultado gd-card" *ngIf="resultado">
+    <div class="resumen">
+      <span class="dato ok"><strong>{{ resultado.creadas }}</strong> creados</span>
+      <span class="dato" *ngIf="resultado.repetidas">
+        <strong>{{ resultado.repetidas }}</strong> ya existían
+      </span>
+      <span class="dato mal" *ngIf="resultado.conError">
+        <strong>{{ resultado.conError }}</strong> con error
+      </span>
+      <button type="button" class="cerrar" (click)="resultado = null"
+              aria-label="Cerrar el resumen">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <table class="rechazos" *ngIf="resultado.rechazos.length">
+      <thead>
+        <tr>
+          <th>Fila</th>
+          <th>Placa</th>
+          <th>Casa</th>
+          <th>Qué pasó</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of resultado.rechazos">
+          <td class="fuerte">{{ r.fila }}</td>
+          <td>{{ r.placa || '—' }}</td>
+          <td>{{ r.casa || '—' }}</td>
+          <td>{{ r.motivo }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <form class="alta gd-card" *ngIf="mostrarAlta" [formGroup]="formulario" (ngSubmit)="guardar()">
