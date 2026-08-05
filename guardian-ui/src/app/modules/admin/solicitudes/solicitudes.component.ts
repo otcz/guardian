@@ -1,15 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Observable, forkJoin } from 'rxjs';
 
 import { AdminService } from '../../../core/services/admin.service';
-import { SolicitudCasaAdmin } from '../../../core/models/admin.model';
+import {
+  SolicitudCasaAdmin,
+  SolicitudVehiculoAdmin
+} from '../../../core/models/admin.model';
+
+/** Lo que se está por rechazar, sin importar de qué bandeja salió. */
+interface Rechazo {
+  tipo: 'CASA' | 'VEHICULO';
+  id: number;
+  titulo: string;
+}
 
 /**
- * Bandeja de solicitudes de casa.
+ * Bandeja del administrador: todo lo que espera una decisión suya.
  *
- * <p>Aprobar es lo que de verdad mete a alguien en un hogar —con sus
- * vehículos, sus invitaciones y su familia detrás—, así que la decisión es del
- * administrador y no de quien la pide.</p>
+ * <p>Las dos clases de solicitud viven en la misma pantalla a propósito. Son la
+ * misma pregunta —¿autorizo esto?— y separarlas en dos menús obligaría al
+ * administrador a acordarse de revisar dos sitios; el que se le olvide deja a
+ * alguien esperando.</p>
  */
 @Component({
   selector: 'gd-solicitudes',
@@ -19,13 +31,14 @@ import { SolicitudCasaAdmin } from '../../../core/models/admin.model';
 })
 export class SolicitudesComponent implements OnInit {
 
-  solicitudes: SolicitudCasaAdmin[] = [];
+  casas: SolicitudCasaAdmin[] = [];
+  vehiculos: SolicitudVehiculoAdmin[] = [];
+
   cargando = true;
   resolviendo = false;
   error: string | null = null;
 
-  /** Solicitud a la que se le va a escribir el motivo del rechazo. */
-  rechazando: SolicitudCasaAdmin | null = null;
+  rechazando: Rechazo | null = null;
   motivo = '';
 
   constructor(private readonly admin: AdminService) {}
@@ -34,12 +47,21 @@ export class SolicitudesComponent implements OnInit {
     this.cargar();
   }
 
+  get vacia(): boolean {
+    return this.casas.length === 0 && this.vehiculos.length === 0;
+  }
+
   cargar(): void {
     this.cargando = true;
     this.error = null;
-    this.admin.solicitudesCasa().subscribe({
-      next: solicitudes => {
-        this.solicitudes = solicitudes;
+
+    forkJoin({
+      casas: this.admin.solicitudesCasa(),
+      vehiculos: this.admin.solicitudesVehiculo()
+    }).subscribe({
+      next: ({ casas, vehiculos }) => {
+        this.casas = casas;
+        this.vehiculos = vehiculos;
         this.cargando = false;
       },
       error: () => {
@@ -49,51 +71,68 @@ export class SolicitudesComponent implements OnInit {
     });
   }
 
-  aprobar(solicitud: SolicitudCasaAdmin): void {
+  aprobarCasa(solicitud: SolicitudCasaAdmin): void {
+    this.resolver(this.admin.aprobarSolicitudCasa(solicitud.id),
+      'No pudimos aprobar la solicitud.');
+  }
+
+  aprobarVehiculo(solicitud: SolicitudVehiculoAdmin): void {
+    this.resolver(this.admin.aprobarSolicitudVehiculo(solicitud.id),
+      'No pudimos autorizar el vehículo.');
+  }
+
+  abrirRechazoCasa(solicitud: SolicitudCasaAdmin): void {
+    this.rechazando = { tipo: 'CASA', id: solicitud.id, titulo: solicitud.nombreCompleto };
+    this.motivo = '';
+  }
+
+  abrirRechazoVehiculo(solicitud: SolicitudVehiculoAdmin): void {
+    this.rechazando = { tipo: 'VEHICULO', id: solicitud.id, titulo: solicitud.placa };
+    this.motivo = '';
+  }
+
+  confirmarRechazo(): void {
+    const rechazo = this.rechazando;
+    if (!rechazo) {
+      return;
+    }
+
+    const peticion = rechazo.tipo === 'CASA'
+      ? this.admin.rechazarSolicitudCasa(rechazo.id, this.motivo)
+      : this.admin.rechazarSolicitudVehiculo(rechazo.id, this.motivo);
+
+    this.resolver(peticion, 'No pudimos rechazar la solicitud.',
+      () => (this.rechazando = null));
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Aprobar y rechazar terminan igual: recargando la bandeja entera. Entre
+   * cargar y decidir pudo entrar otra solicitud, o la casa pudo conseguir
+   * titular y cambiar lo que se puede aprobar — quitar la fila a mano dejaría
+   * la pantalla mintiendo.
+   */
+  private resolver(peticion: Observable<unknown>, mensajeDeError: string,
+                   alLograr?: () => void): void {
     if (this.resolviendo) {
       return;
     }
     this.resolviendo = true;
     this.error = null;
 
-    this.admin.aprobarSolicitudCasa(solicitud.id).subscribe({
+    peticion.subscribe({
       next: () => {
         this.resolviendo = false;
-        // Se recarga la bandeja entera y no se quita la fila a mano: entre
-        // cargar y aprobar pudo entrar otra solicitud, o la casa pudo
-        // conseguir titular y cambiar lo que se puede aprobar.
+        if (alLograr) {
+          alLograr();
+        }
         this.cargar();
       },
       error: (fallo: HttpErrorResponse) => {
-        this.error = fallo.error?.mensaje ?? 'No pudimos aprobar la solicitud.';
+        this.error = fallo.error?.mensaje ?? mensajeDeError;
         this.resolviendo = false;
         this.cargar();
-      }
-    });
-  }
-
-  abrirRechazo(solicitud: SolicitudCasaAdmin): void {
-    this.rechazando = solicitud;
-    this.motivo = '';
-  }
-
-  confirmarRechazo(): void {
-    const solicitud = this.rechazando;
-    if (!solicitud || this.resolviendo) {
-      return;
-    }
-    this.resolviendo = true;
-    this.error = null;
-
-    this.admin.rechazarSolicitudCasa(solicitud.id, this.motivo).subscribe({
-      next: () => {
-        this.rechazando = null;
-        this.resolviendo = false;
-        this.cargar();
-      },
-      error: (fallo: HttpErrorResponse) => {
-        this.error = fallo.error?.mensaje ?? 'No pudimos rechazar la solicitud.';
-        this.resolviendo = false;
       }
     });
   }

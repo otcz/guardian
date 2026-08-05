@@ -27,11 +27,12 @@ export class AdminLayoutComponent implements OnInit {
   saliendo = false;
 
   /**
-   * Solicitudes de casa esperando respuesta.
+   * Solicitudes esperando respuesta: casas y vehículos, sumadas.
    *
    * <p>Va en el menú y no solo dentro de la pantalla: una solicitud sin
-   * responder deja a una persona sin poder usar la aplicación, y si el
-   * administrador tiene que entrar a mirar para enterarse, nadie se entera.</p>
+   * responder deja a alguien sin casa o con un carro que no entra al conjunto,
+   * y si el administrador tiene que entrar a mirar para enterarse, nadie se
+   * entera.</p>
    */
   solicitudesPendientes = 0;
 

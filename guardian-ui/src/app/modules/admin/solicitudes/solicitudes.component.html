@@ -1,58 +1,116 @@
 <div class="gd-page">
-  <h1>Solicitudes de casa</h1>
+  <h1>Solicitudes</h1>
 
   <div class="aviso-error" *ngIf="error">{{ error }}</div>
 
   <p class="gd-muted" *ngIf="cargando">Cargando…</p>
 
-  <div class="gd-vacio" *ngIf="!cargando && solicitudes.length === 0">
+  <div class="gd-vacio" *ngIf="!cargando && vacia">
     <i class="pi pi-inbox"></i>
     <p>No hay solicitudes esperando respuesta.</p>
   </div>
 
-  <table class="tabla gd-card" *ngIf="!cargando && solicitudes.length">
-    <thead>
-      <tr>
-        <th>Quién</th>
-        <th>Documento</th>
-        <th>Casa</th>
-        <th>Entra como</th>
-        <th>Pedida</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let s of solicitudes">
-        <td class="fuerte">{{ s.nombreCompleto }}</td>
-        <td>{{ s.documento }}</td>
-        <td>
-          {{ s.casaIdentificador }}
-          <!-- Que la casa esté vacía cambia lo que se está aprobando: esta
-               persona quedaría al mando de ese hogar. -->
-          <small class="sin-titular" *ngIf="!s.casaConTitular">sin titular todavía</small>
-        </td>
-        <td>{{ s.parentesco }}</td>
-        <td>{{ s.fechaSolicitud | date:'dd/MM/yyyy HH:mm' }}</td>
-        <td class="derecha acciones">
-          <button type="button" class="alterno" [disabled]="resolviendo"
-                  (click)="abrirRechazo(s)">
-            Rechazar
-          </button>
-          <button type="button" class="principal" [disabled]="resolviendo"
-                  (click)="aprobar(s)">
-            <i class="pi pi-check"></i>
-            Aprobar
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <!-- Personas pidiendo casa ────────────────────────────────────────────── -->
+  <section class="bandeja" *ngIf="!cargando && casas.length">
+    <h2>
+      <i class="pi pi-home"></i>
+      Personas pidiendo casa
+      <span class="cuantas">{{ casas.length }}</span>
+    </h2>
+
+    <table class="tabla gd-card">
+      <thead>
+        <tr>
+          <th>Quién</th>
+          <th>Documento</th>
+          <th>Casa</th>
+          <th>Entra como</th>
+          <th>Pedida</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of casas">
+          <td class="fuerte">{{ s.nombreCompleto }}</td>
+          <td>{{ s.documento }}</td>
+          <td>
+            {{ s.casaIdentificador }}
+            <!-- Que la casa esté vacía cambia lo que se está aprobando: esta
+                 persona quedaría al mando de ese hogar. -->
+            <small class="sin-titular" *ngIf="!s.casaConTitular">sin titular todavía</small>
+          </td>
+          <td>{{ s.parentesco }}</td>
+          <td>{{ s.fechaSolicitud | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td class="derecha acciones">
+            <button type="button" class="alterno" [disabled]="resolviendo"
+                    (click)="abrirRechazoCasa(s)">
+              Rechazar
+            </button>
+            <button type="button" class="principal" [disabled]="resolviendo"
+                    (click)="aprobarCasa(s)">
+              <i class="pi pi-check"></i>
+              Aprobar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Vehículos por autorizar ───────────────────────────────────────────── -->
+  <section class="bandeja" *ngIf="!cargando && vehiculos.length">
+    <h2>
+      <i class="pi pi-car"></i>
+      Vehículos por autorizar
+      <span class="cuantas">{{ vehiculos.length }}</span>
+    </h2>
+
+    <table class="tabla gd-card">
+      <thead>
+        <tr>
+          <th>Placa</th>
+          <th>Vehículo</th>
+          <th>Casa</th>
+          <th>Lo pidió</th>
+          <th>Pedida</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let v of vehiculos">
+          <td class="fuerte placa">{{ v.placa }}</td>
+          <td>
+            {{ v.tipoNombre }}
+            <ng-container *ngIf="v.marcaNombre"> · {{ v.marcaNombre }}</ng-container>
+            <ng-container *ngIf="v.colorNombre"> · {{ v.colorNombre }}</ng-container>
+          </td>
+          <td>{{ v.casaIdentificador }}</td>
+          <td>
+            {{ v.solicitante }}
+            <small class="quien">{{ v.documento }}</small>
+          </td>
+          <td>{{ v.fechaSolicitud | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td class="derecha acciones">
+            <button type="button" class="alterno" [disabled]="resolviendo"
+                    (click)="abrirRechazoVehiculo(v)">
+              Rechazar
+            </button>
+            <button type="button" class="principal" [disabled]="resolviendo"
+                    (click)="aprobarVehiculo(v)">
+              <i class="pi pi-check"></i>
+              Autorizar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
 
   <!-- El motivo lo lee el residente: sin él, un rechazo es una puerta cerrada
        sin explicación y la persona vuelve a pedir lo mismo. -->
   <gd-hoja [abierta]="!!rechazando"
            titulo="Rechazar la solicitud"
-           [subtitulo]="rechazando?.nombreCompleto || ''"
+           [subtitulo]="rechazando?.titulo || ''"
            (cerrar)="rechazando = null">
 
     <div class="campo">

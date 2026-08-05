@@ -327,6 +327,32 @@ section {
     color: var(--deny);
     background: var(--deny-soft);
   }
+
+  /* Ámbar y no rojo: nadie negó nada todavía, solo falta que respondan. En
+     rojo el titular creería que se lo rechazaron. */
+  &.espera {
+    color: var(--warn);
+    background: var(--warn-soft);
+  }
+}
+
+/* Se lee como "todavía no cuenta": mismo renglón que un vehículo real, pero
+   apagado, porque en la portería ese carro aún no existe. */
+.en-revision {
+  .avatar {
+    opacity: 0.6;
+  }
+
+  .placa {
+    color: var(--text-muted);
+  }
+
+  /* El motivo del rechazo, bajo la placa. Es lo que el titular tiene que
+     corregir antes de volver a pedirlo. */
+  .motivo {
+    font-size: var(--t-xs);
+    color: var(--deny);
+  }
 }
 
 .accion {

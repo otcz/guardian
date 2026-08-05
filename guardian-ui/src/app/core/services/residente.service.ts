@@ -9,6 +9,7 @@ import {
   Familiar,
   FamiliarRequest,
   SolicitudCasa,
+  SolicitudVehiculo,
   Vehiculo,
   VehiculoResidenteRequest
 } from '../models/admin.model';
@@ -86,13 +87,28 @@ export class ResidenteService {
     return this.http.get<Vehiculo[]>(`${this.base}/vehiculos`);
   }
 
-  agregarVehiculo(request: VehiculoResidenteRequest): Observable<Vehiculo> {
-    return this.http.post<Vehiculo>(`${this.base}/vehiculos`, request);
-  }
-
   cambiarEstadoVehiculo(id: number, activar: boolean): Observable<Vehiculo> {
     const accion = activar ? 'activar' : 'desactivar';
     return this.http.patch<Vehiculo>(`${this.base}/vehiculos/${id}/${accion}`, {});
+  }
+
+  // ── Vehículos por autorizar ──────────────────────────────────────────────
+  //
+  // El titular no registra el vehículo: lo PIDE. Registrar una placa es darle
+  // paso a un carro que el guardia no va a volver a discutir, así que lo
+  // autoriza la administración.
+
+  solicitudesVehiculo(): Observable<SolicitudVehiculo[]> {
+    return this.http.get<SolicitudVehiculo[]>(`${this.base}/solicitudes-vehiculo`);
+  }
+
+  solicitarVehiculo(request: VehiculoResidenteRequest): Observable<SolicitudVehiculo> {
+    return this.http.post<SolicitudVehiculo>(`${this.base}/solicitudes-vehiculo`, request);
+  }
+
+  /** Quita de la pantalla un rechazo que el residente ya leyó. */
+  descartarSolicitudVehiculo(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.base}/solicitudes-vehiculo/${id}/descartar`, {});
   }
 
   // ── Invitaciones ─────────────────────────────────────────────────────────

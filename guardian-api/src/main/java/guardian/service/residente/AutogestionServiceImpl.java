@@ -3,11 +3,9 @@ package guardian.service.residente;
 import guardian.constant.Codigos;
 import guardian.constant.MensajesGlobales;
 import guardian.dto.admin.PersonaRequest;
-import guardian.dto.admin.VehiculoRequest;
 import guardian.dto.admin.VehiculoResponse;
 import guardian.dto.residente.FamiliarRequest;
 import guardian.dto.residente.FamiliarResponse;
-import guardian.dto.residente.VehiculoResidenteRequest;
 import guardian.entity.conjunto.GdCasa;
 import guardian.entity.persona.GdPersona;
 import guardian.entity.persona.GdResidenteCasa;
@@ -42,6 +40,7 @@ public class AutogestionServiceImpl implements AutogestionService {
     private final GdResidenteCasaRepository residenteCasaRepository;
     private final GdCredencialQrRepository credencialRepository;
     private final GdVehiculoRepository vehiculoRepository;
+    private final HogarDelResidente hogar;
     private final PersonaService personaService;
     private final VehiculoService vehiculoService;
 
@@ -126,22 +125,6 @@ public class AutogestionServiceImpl implements AutogestionService {
 
     @Override
     @Transactional
-    public VehiculoResponse agregarVehiculo(VehiculoResidenteRequest request,
-                                            UsuarioAutenticado usuario) {
-        GdCasa casa = miCasa(usuario);
-
-        VehiculoRequest alta = new VehiculoRequest();
-        alta.setCasaId(casa.getId());
-        alta.setPlaca(request.getPlaca());
-        alta.setTipo(request.getTipo());
-        alta.setMarca(request.getMarca());
-        alta.setColor(request.getColor());
-
-        return vehiculoService.crear(alta, usuario);
-    }
-
-    @Override
-    @Transactional
     public VehiculoResponse cambiarEstadoVehiculo(Long vehiculoId, boolean activo,
                                                   UsuarioAutenticado usuario) {
         GdCasa casa = miCasa(usuario);
@@ -162,20 +145,11 @@ public class AutogestionServiceImpl implements AutogestionService {
     // ─────────────────────────────────────────────────────────────────────────
 
     private GdCasa miCasa(UsuarioAutenticado usuario) {
-        return residenteCasaRepository
-                .findFirstByPersonaIdAndActivoOrderByIdAsc(usuario.getPersonaId(), Codigos.SI)
-                .map(GdResidenteCasa::getCasa)
-                .orElseThrow(() -> GuardianException.solicitudInvalida(MensajesGlobales.SIN_CASA));
+        return hogar.casa(usuario);
     }
 
     private void exigirTitular(UsuarioAutenticado usuario, GdCasa casa) {
-        boolean esTitular = residenteCasaRepository
-                .findByPersonaIdAndCasaId(usuario.getPersonaId(), casa.getId())
-                .map(v -> Codigos.PARENTESCO_TITULAR.equals(v.getParentesco()))
-                .orElse(false);
-        if (!esTitular) {
-            throw GuardianException.sinPermiso(MensajesGlobales.SOLO_TITULAR_FAMILIA);
-        }
+        hogar.exigirTitular(usuario, casa, MensajesGlobales.SOLO_TITULAR_FAMILIA);
     }
 
     // La heuristica de "quien lo inhabilito" desaparecio: ahora hay dos

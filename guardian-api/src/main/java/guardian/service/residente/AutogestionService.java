@@ -30,8 +30,9 @@ public interface AutogestionService {
 
     List<VehiculoResponse> listarMisVehiculos(UsuarioAutenticado usuario);
 
-    VehiculoResponse agregarVehiculo(VehiculoResidenteRequest request,
-                                     UsuarioAutenticado usuario);
+    // El alta la hace SolicitudVehiculoService: el residente pide el vehiculo y
+    // la administracion lo autoriza. Aca solo se prenden y apagan los que ya
+    // fueron autorizados.
 
     VehiculoResponse cambiarEstadoVehiculo(Long vehiculoId, boolean activo,
                                            UsuarioAutenticado usuario);

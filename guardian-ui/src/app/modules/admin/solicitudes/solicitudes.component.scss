@@ -1,5 +1,50 @@
 @use '../../../styles/paneles';
 
+/* Las dos bandejas en la misma pantalla, separadas por su título y no por una
+   pestaña: el administrador tiene que VER que hay carros esperando sin tener
+   que hacer clic para enterarse. */
+.bandeja {
+  margin-top: var(--e-5);
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--e-2);
+    margin-bottom: var(--e-3);
+    font-size: var(--t-md);
+    color: var(--text-strong);
+
+    i {
+      color: var(--text-muted);
+    }
+  }
+
+  /* El número al lado del título y no dentro de la tabla: dice cuánto falta
+     por responder antes de leer una sola fila. */
+  .cuantas {
+    min-width: 20px;
+    padding: 0 var(--e-1);
+    font-size: var(--t-xs);
+    font-weight: 700;
+    line-height: 20px;
+    text-align: center;
+    color: var(--text-inverse);
+    background: var(--warn);
+    border-radius: var(--r-full);
+  }
+}
+
+.placa {
+  letter-spacing: 0.06em;
+}
+
+/* Bajo el nombre de quien pidió: identifica sin robarle peso al nombre. */
+.quien {
+  display: block;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+
 /* Los dos botones juntos y con el mismo alto: son las dos caras de una misma
    decisión, y separarlos o darles pesos distintos sugeriría que una es la
    normal y la otra la excepción. */

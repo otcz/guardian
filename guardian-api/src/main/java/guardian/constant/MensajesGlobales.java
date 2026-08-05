@@ -144,6 +144,12 @@ public final class MensajesGlobales {
             "Ya perteneces a una casa.";
     public static final String SOLICITUD_NO_PENDIENTE =
             "Esa solicitud ya fue resuelta.";
+    public static final String SOLICITUD_NO_RESUELTA =
+            "Esa solicitud todavia esta esperando respuesta.";
+    public static final String SOLICITUD_AJENA =
+            "Esa solicitud no es de tu casa.";
+    public static final String PLACA_YA_SOLICITADA =
+            "Ya hay una solicitud esperando respuesta para esa placa.";
     public static final String EXCEL_VACIO =
             "Elige un archivo antes de cargar.";
     public static final String EXCEL_FORMATO =
@@ -175,6 +181,9 @@ public final class MensajesGlobales {
             "El titular de la casa solo lo asigna la administracion.";
     public static final String SOLO_TITULAR_FAMILIA =
             "Solo el titular de la casa puede agregar o quitar personas. "
+                    + "Pideselo a el, o escribe a la administracion del conjunto.";
+    public static final String SOLO_TITULAR_VEHICULOS =
+            "Solo el titular de la casa puede registrar vehiculos. "
                     + "Pideselo a el, o escribe a la administracion del conjunto.";
 
     // ── Codigo para unirse a un hogar ────────────────────────────────────────

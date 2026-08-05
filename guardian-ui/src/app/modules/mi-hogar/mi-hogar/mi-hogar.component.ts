@@ -10,6 +10,7 @@ import {
   Familiar,
   Parametro,
   SolicitudCasa,
+  SolicitudVehiculo,
   Vehiculo
 } from '../../../core/models/admin.model';
 
@@ -44,6 +45,17 @@ export class MiHogarComponent implements OnInit {
     return this.familia.find(f => f.parentesco === 'TITULAR')?.nombreCompleto ?? null;
   }
   vehiculos: Vehiculo[] = [];
+
+  /**
+   * Lo que la casa pidió y la administración todavía no ha respondido, más los
+   * rechazos que el titular no ha descartado.
+   *
+   * <p>Se muestran junto a los vehículos y no en otra pantalla: la pregunta del
+   * residente es "¿mi carro ya entra?", y la respuesta tiene que estar donde
+   * están los carros.</p>
+   */
+  solicitudesVehiculo: SolicitudVehiculo[] = [];
+
   parentescos: Parametro[] = [];
   tiposVehiculo: Parametro[] = [];
   marcasVehiculo: Parametro[] = [];
@@ -203,6 +215,13 @@ export class MiHogarComponent implements OnInit {
       next: vehiculos => (this.vehiculos = vehiculos),
       error: () => undefined
     });
+
+    this.residente.solicitudesVehiculo().subscribe({
+      next: solicitudes => (this.solicitudesVehiculo = solicitudes),
+      // Quien todavía no tiene casa recibe un 400 acá: no es un error que
+      // mostrar, es que la pantalla de vehículos ni siquiera aplica.
+      error: () => (this.solicitudesVehiculo = [])
+    });
   }
 
   // ── Familia ──────────────────────────────────────────────────────────────
@@ -264,6 +283,10 @@ export class MiHogarComponent implements OnInit {
   }
 
   // ── Vehículos ────────────────────────────────────────────────────────────
+  //
+  // El titular NO registra el vehículo: lo pide. Una placa registrada es un
+  // carro al que la portería le abre sin volver a preguntar, y eso lo autoriza
+  // la administración.
 
   agregarVehiculo(): void {
     if (this.formularioVehiculo.invalid || this.guardando) {
@@ -274,7 +297,7 @@ export class MiHogarComponent implements OnInit {
     this.guardando = true;
     this.error = null;
 
-    this.residente.agregarVehiculo(this.formularioVehiculo.getRawValue()).subscribe({
+    this.residente.solicitarVehiculo(this.formularioVehiculo.getRawValue()).subscribe({
       next: () => {
         this.guardando = false;
         this.mostrarAltaVehiculo = false;
@@ -283,7 +306,18 @@ export class MiHogarComponent implements OnInit {
       },
       error: (fallo: HttpErrorResponse) => {
         this.guardando = false;
-        this.error = fallo.error?.mensaje ?? 'No pudimos registrar el vehículo.';
+        this.error = fallo.error?.mensaje ?? 'No pudimos enviar la solicitud.';
+      }
+    });
+  }
+
+  /** Quita de la lista un rechazo ya leído. El motivo queda en el histórico. */
+  descartarSolicitudVehiculo(solicitud: SolicitudVehiculo): void {
+    this.error = null;
+    this.residente.descartarSolicitudVehiculo(solicitud.id).subscribe({
+      next: () => this.cargar(),
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos quitar la solicitud.';
       }
     });
   }

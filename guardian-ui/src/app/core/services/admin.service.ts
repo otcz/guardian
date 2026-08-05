@@ -18,7 +18,9 @@ import {
   Porteria,
   PorteriaRequest,
   Resumen,
+  ConteoSolicitudes,
   SolicitudCasaAdmin,
+  SolicitudVehiculoAdmin,
   Usuario,
   Vehiculo,
   VehiculoRequest
@@ -90,14 +92,6 @@ export class AdminService {
     return this.http.get<SolicitudCasaAdmin[]>(`${this.base}/solicitudes-casa`);
   }
 
-  /**
-   * Solo el número, para el aviso del menú. Endpoint aparte y no la lista: esto
-   * se pide en cada navegación del panel.
-   */
-  solicitudesPendientes(): Observable<{ pendientes: number }> {
-    return this.http.get<{ pendientes: number }>(`${this.base}/solicitudes-casa/conteo`);
-  }
-
   aprobarSolicitudCasa(id: number): Observable<SolicitudCasaAdmin> {
     return this.http.patch<SolicitudCasaAdmin>(
       `${this.base}/solicitudes-casa/${id}/aprobar`, {});
@@ -106,6 +100,36 @@ export class AdminService {
   rechazarSolicitudCasa(id: number, motivo: string): Observable<SolicitudCasaAdmin> {
     return this.http.patch<SolicitudCasaAdmin>(
       `${this.base}/solicitudes-casa/${id}/rechazar`, { motivo });
+  }
+
+  // ── Solicitudes de vehículo ──────────────────────────────────────────────
+  //
+  // Aprobar acá es lo que hace que la talanquera suba para esa placa. Por eso
+  // la decisión es del administrador y no del titular que la pide.
+
+  solicitudesVehiculo(): Observable<SolicitudVehiculoAdmin[]> {
+    return this.http.get<SolicitudVehiculoAdmin[]>(`${this.base}/solicitudes-vehiculo`);
+  }
+
+  aprobarSolicitudVehiculo(id: number): Observable<SolicitudVehiculoAdmin> {
+    return this.http.patch<SolicitudVehiculoAdmin>(
+      `${this.base}/solicitudes-vehiculo/${id}/aprobar`, {});
+  }
+
+  rechazarSolicitudVehiculo(id: number, motivo: string): Observable<SolicitudVehiculoAdmin> {
+    return this.http.patch<SolicitudVehiculoAdmin>(
+      `${this.base}/solicitudes-vehiculo/${id}/rechazar`, { motivo });
+  }
+
+  /**
+   * El número del aviso del menú: las dos bandejas sumadas.
+   *
+   * <p>Endpoint propio y no las listas: esto se pide en cada navegación del
+   * panel, y traer las solicitudes enteras para pintar un numerito sería pagar
+   * la consulta grande todo el tiempo.</p>
+   */
+  solicitudesPendientes(): Observable<ConteoSolicitudes> {
+    return this.http.get<ConteoSolicitudes>(`${this.base}/solicitudes/conteo`);
   }
 
   // ── Porterías ────────────────────────────────────────────────────────────

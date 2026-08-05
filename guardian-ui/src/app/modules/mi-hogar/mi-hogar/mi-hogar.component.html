@@ -242,12 +242,13 @@
         <h2 class="gd-titulo-seccion">Mis vehículos</h2>
         <button type="button" class="agregar"
                 (click)="mostrarAltaVehiculo = true"
-                aria-label="Agregar vehículo">
+                aria-label="Pedir vehículo">
           <i class="pi pi-plus"></i>
         </button>
       </div>
 
-      <gd-hoja [abierta]="mostrarAltaVehiculo" titulo="Agregar vehículo"
+      <gd-hoja [abierta]="mostrarAltaVehiculo" titulo="Pedir vehículo"
+               subtitulo="La administración lo autoriza"
                (cerrar)="mostrarAltaVehiculo = false">
       <form id="alta-vehiculo" class="alta"
             [formGroup]="formularioVehiculo" (ngSubmit)="agregarVehiculo()">
@@ -286,10 +287,49 @@
           Cancelar
         </button>
         <button type="submit" form="alta-vehiculo" class="principal" [disabled]="guardando">
-          Guardar
+          {{ guardando ? 'Enviando…' : 'Enviar solicitud' }}
         </button>
       </div>
       </gd-hoja>
+
+      <!-- Antes que los vehículos ya autorizados: es lo que el titular acaba de
+           hacer y sobre lo que está esperando respuesta. -->
+      <div class="gd-lista" *ngIf="solicitudesVehiculo.length > 0">
+        <article class="gd-fila miembro en-revision"
+                 *ngFor="let solicitud of solicitudesVehiculo">
+          <div class="avatar vehiculo">
+            <i class="pi pi-car"></i>
+          </div>
+
+          <div class="datos">
+            <strong class="placa">{{ solicitud.placa }}</strong>
+            <span class="detalle">
+              {{ solicitud.marcaNombre || 'Sin marca' }}
+              <ng-container *ngIf="solicitud.colorNombre"> · {{ solicitud.colorNombre }}</ng-container>
+            </span>
+            <!-- El motivo del rechazo va acá y no en un tooltip: es la única
+                 forma que tiene el titular de saber qué corregir. -->
+            <span class="motivo" *ngIf="solicitud.estado === 'RECHAZADA'">
+              {{ solicitud.motivoRechazo || 'La administración no lo autorizó.' }}
+            </span>
+          </div>
+
+          <span class="pastilla espera" *ngIf="solicitud.estado === 'PENDIENTE'">
+            En revisión
+          </span>
+          <span class="pastilla no" *ngIf="solicitud.estado === 'RECHAZADA'">
+            No autorizado
+          </span>
+
+          <button type="button" class="accion"
+                  *ngIf="solicitud.estado === 'RECHAZADA'"
+                  (click)="descartarSolicitudVehiculo(solicitud)"
+                  [attr.aria-label]="'Quitar la solicitud de ' + solicitud.placa"
+                  pTooltip="Quitar" tooltipPosition="left">
+            <i class="pi pi-times"></i>
+          </button>
+        </article>
+      </div>
 
       <div class="gd-lista" *ngIf="vehiculos.length > 0">
         <article class="gd-fila miembro"
@@ -331,11 +371,12 @@
         </article>
       </div>
 
-      <div class="gd-vacio" *ngIf="vehiculos.length === 0 && !cargando">
+      <div class="gd-vacio"
+           *ngIf="vehiculos.length === 0 && solicitudesVehiculo.length === 0 && !cargando">
         <i class="pi pi-car"></i>
-        <p>No has registrado vehículos</p>
+        <p>No hay vehículos en tu casa</p>
         <button type="button" class="principal" (click)="mostrarAltaVehiculo = true">
-          Agregar vehículo
+          Pedir vehículo
         </button>
       </div>
     </section>

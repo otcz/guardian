@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -38,18 +37,8 @@ public class SolicitudCasaAdminController {
                 solicitudCasaAdminService.pendientes(usuarioActual.conjuntoId()));
     }
 
-    /**
-     * Solo el numero, para el aviso del menu.
-     *
-     * <p>Endpoint aparte y no la lista completa: esto se pide en CADA
-     * navegacion del panel, y traer las solicitudes enteras para pintar un
-     * numerito seria pagar la consulta grande todo el tiempo.</p>
-     */
-    @GetMapping(ApiEndpoint.CONTEO)
-    public ResponseEntity<Map<String, Long>> conteo() {
-        return ResponseEntity.ok(Collections.singletonMap("pendientes",
-                solicitudCasaAdminService.cuantasPendientes(usuarioActual.conjuntoId())));
-    }
+    // El conteo para el aviso del menu ya no vive aca: hay dos bandejas y el
+    // numerito es uno solo. Lo sirve SolicitudesController, sumando las dos.
 
     @PatchMapping(ApiEndpoint.APROBAR)
     public ResponseEntity<SolicitudCasaAdminResponse> aprobar(@PathVariable Long id) {

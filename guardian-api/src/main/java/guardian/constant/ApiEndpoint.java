@@ -40,6 +40,8 @@ public final class ApiEndpoint {
     /** Quien todavia no vive en ninguna casa: verlas y pedir entrar a una. */
     public static final String RESIDENTE_CASAS_DISPONIBLES = "/casas-disponibles";
     public static final String RESIDENTE_SOLICITUD_CASA = "/solicitud-casa";
+    /** El titular pide un vehiculo; el vehiculo nace cuando la administracion aprueba. */
+    public static final String RESIDENTE_SOLICITUDES_VEHICULO = RESIDENTE + "/solicitudes-vehiculo";
 
     /** Fotos: subida autenticada, lectura publica por nombre UUID. */
     public static final String FOTOS = API + "/fotos";
@@ -78,7 +80,15 @@ public final class ApiEndpoint {
     public static final String ADMIN_PARAMETROS = ADMIN + "/parametros";
     /** Bandeja: quien pidio entrar a que casa, esperando decision. */
     public static final String ADMIN_SOLICITUDES_CASA = ADMIN + "/solicitudes-casa";
+    /** Bandeja: que placas pidieron autorizar, esperando decision. */
+    public static final String ADMIN_SOLICITUDES_VEHICULO = ADMIN + "/solicitudes-vehiculo";
+    /**
+     * Las dos bandejas sumadas. Es lo que pide el aviso del menu en cada
+     * navegacion, y por eso es una sola peticion y no una por bandeja.
+     */
+    public static final String ADMIN_SOLICITUDES = ADMIN + "/solicitudes";
     public static final String CONTEO = "/conteo";
+    public static final String DESCARTAR = "/{id}/descartar";
     public static final String APROBAR = "/{id}/aprobar";
     public static final String RECHAZAR = "/{id}/rechazar";
 

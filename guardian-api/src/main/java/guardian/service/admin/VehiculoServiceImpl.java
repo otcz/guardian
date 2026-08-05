@@ -13,6 +13,7 @@ import guardian.repository.GdVehiculoRepository;
 import guardian.security.Autoridad;
 import guardian.security.UsuarioAutenticado;
 import guardian.util.CatalogoVehiculo;
+import guardian.util.PlacaUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -64,7 +65,7 @@ public class VehiculoServiceImpl implements VehiculoService {
     @Override
     @Transactional
     public VehiculoResponse crear(VehiculoRequest request, UsuarioAutenticado ejecutor) {
-        String placa = normalizarPlaca(request.getPlaca());
+        String placa = PlacaUtil.normalizar(request.getPlaca());
         validarCatalogo(request.getTipo(), request.getMarca(), request.getColor());
 
         // Placa unica en TODO el sistema: el mismo carro no puede estar en dos
@@ -93,7 +94,7 @@ public class VehiculoServiceImpl implements VehiculoService {
     @Transactional
     public VehiculoResponse actualizar(Long id, VehiculoRequest request, UsuarioAutenticado ejecutor) {
         GdVehiculo vehiculo = obtener(id, ejecutor.getConjuntoId());
-        String placa = normalizarPlaca(request.getPlaca());
+        String placa = PlacaUtil.normalizar(request.getPlaca());
         validarCatalogo(request.getTipo(), request.getMarca(), request.getColor());
 
         vehiculoRepository.findByPlaca(placa)
@@ -137,15 +138,6 @@ public class VehiculoServiceImpl implements VehiculoService {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Mayusculas y sin espacios ni guiones. Sin esto "abc 123", "ABC-123" y
-     * "ABC123" serian tres vehiculos distintos, y el guardia que no encuentra la
-     * placa en la lista termina dejando pasar sin registrar.
-     */
-    private String normalizarPlaca(String placa) {
-        return placa.trim().toUpperCase().replaceAll("[\\s-]", "");
-    }
 
     private GdVehiculo obtener(Long id, Long conjuntoId) {
         GdVehiculo vehiculo = vehiculoRepository.findById(id)

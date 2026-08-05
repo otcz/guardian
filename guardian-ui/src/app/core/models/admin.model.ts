@@ -101,6 +101,48 @@ export interface SolicitudCasaAdmin {
   casaConTitular: boolean;
 }
 
+/**
+ * Un vehículo pedido por el titular, todavía sin autorizar.
+ *
+ * <p>No es un vehículo: mientras esté acá no existe en la portería y no abre
+ * ninguna talanquera. El vehículo nace cuando la administración aprueba.</p>
+ */
+export interface SolicitudVehiculo {
+  id: number;
+  placa: string;
+  tipo: string;
+  marca: string | null;
+  color: string | null;
+  tipoNombre: string | null;
+  marcaNombre: string | null;
+  colorNombre: string | null;
+  estado: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
+  motivoRechazo: string | null;
+  fechaSolicitud: string;
+}
+
+/** La misma solicitud, en la bandeja del administrador. */
+export interface SolicitudVehiculoAdmin {
+  id: number;
+  placa: string;
+  tipoNombre: string | null;
+  marcaNombre: string | null;
+  colorNombre: string | null;
+  casaId: number;
+  casaIdentificador: string;
+  solicitante: string;
+  documento: string;
+  estado: string;
+  fechaSolicitud: string;
+}
+
+/** Lo que espera decisión, por bandeja y en total. El total es el aviso del menú. */
+export interface ConteoSolicitudes {
+  casas: number;
+  vehiculos: number;
+  pendientes: number;
+}
+
 export interface Porteria {
   id: number;
   nombre: string;

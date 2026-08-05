@@ -4,7 +4,6 @@ import guardian.constant.ApiEndpoint;
 import guardian.dto.admin.VehiculoResponse;
 import guardian.dto.residente.FamiliarRequest;
 import guardian.dto.residente.FamiliarResponse;
-import guardian.dto.residente.VehiculoResidenteRequest;
 import guardian.security.UsuarioActual;
 import guardian.service.admin.PersonaRegistrada;
 import guardian.service.residente.AutogestionService;
@@ -68,13 +67,8 @@ public class AutogestionController {
         return ResponseEntity.ok(autogestionService.listarMisVehiculos(usuarioActual.obtener()));
     }
 
-    @PostMapping(ApiEndpoint.RESIDENTE_VEHICULOS)
-    public ResponseEntity<VehiculoResponse> agregarVehiculo(
-            @Valid @RequestBody VehiculoResidenteRequest request) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(autogestionService.agregarVehiculo(request, usuarioActual.obtener()));
-    }
+    // El alta directa ya no existe: el residente PIDE el vehiculo y la
+    // administracion lo autoriza. Vive en SolicitudVehiculoController.
 
     @PatchMapping(ApiEndpoint.RESIDENTE_VEHICULOS + "/{id}/activar")
     public ResponseEntity<VehiculoResponse> activarVehiculo(@PathVariable Long id) {
