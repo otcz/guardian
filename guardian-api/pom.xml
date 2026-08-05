@@ -131,6 +131,23 @@
             <version>2.9.3</version>
         </dependency>
 
+        <!-- Excel para la carga masiva de casas. fastexcel y NO Apache POI:
+             POI pesa ~15 MB con sus dependencias y carga el libro entero en
+             memoria; fastexcel pesa ~1.7 MB y lo lee en streaming. En un Cloud
+             Run con 512 MB, un administrador subiendo un archivo de 2000 filas
+             no puede ser lo que tumbe el contenedor (CLAUDE.md seccion 8).
+             La linea 0.15.x es la ultima que sigue compilando contra Java 8. -->
+        <dependency>
+            <groupId>org.dhatim</groupId>
+            <artifactId>fastexcel-reader</artifactId>
+            <version>0.15.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.dhatim</groupId>
+            <artifactId>fastexcel</artifactId>
+            <version>0.15.7</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

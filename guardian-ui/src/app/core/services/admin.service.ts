@@ -9,6 +9,7 @@ import {
   CasaRequest,
   GrupoParametro,
   GuardiaPorteria,
+  ImportacionCasas,
   Parametro,
   Persona,
   PersonaRegistrada,
@@ -54,6 +55,17 @@ export class AdminService {
   cambiarEstadoCasa(id: number, activar: boolean): Observable<Casa> {
     const accion = activar ? 'activar' : 'desactivar';
     return this.http.patch<Casa>(`${this.base}/casas/${id}/${accion}`, {});
+  }
+
+  /** El .xlsx de ejemplo, con los tipos de vivienda reales de esta sede. */
+  plantillaCasas(): Observable<Blob> {
+    return this.http.get(`${this.base}/casas/plantilla`, { responseType: 'blob' });
+  }
+
+  importarCasas(archivo: File): Observable<ImportacionCasas> {
+    const cuerpo = new FormData();
+    cuerpo.append('archivo', archivo);
+    return this.http.post<ImportacionCasas>(`${this.base}/casas/importar`, cuerpo);
   }
 
   // ── Porterías ────────────────────────────────────────────────────────────

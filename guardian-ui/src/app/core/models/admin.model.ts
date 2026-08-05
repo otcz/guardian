@@ -30,6 +30,24 @@ export interface CasaRequest {
  * Punto de acceso del conjunto. En pantalla se llama portería, que es como lo
  * nombran el guardia y el residente.
  */
+/** Resultado de una carga masiva, fila por fila. */
+export interface ImportacionCasas {
+  leidas: number;
+  creadas: number;
+  repetidas: number;
+  conError: number;
+  /** Solo las que NO se crearon: las buenas no hay que revisarlas. */
+  rechazos: FilaRechazada[];
+}
+
+export interface FilaRechazada {
+  /** Número de fila del Excel tal como se ve al abrirlo, con encabezado incluido. */
+  fila: number;
+  tipo: string;
+  numero: string;
+  motivo: string;
+}
+
 export interface Porteria {
   id: number;
   nombre: string;

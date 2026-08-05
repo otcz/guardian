@@ -140,6 +140,12 @@ public final class MensajesGlobales {
      * El titular es quien administra la familia: una casa sin el deja a todos
      * sus residentes viendo un boton que no funciona.
      */
+    public static final String EXCEL_VACIO =
+            "Elige un archivo antes de cargar.";
+    public static final String EXCEL_FORMATO =
+            "El archivo tiene que ser .xlsx. Descarga la plantilla y llenala.";
+    public static final String EXCEL_ILEGIBLE =
+            "No pudimos leer el archivo. Descarga la plantilla y usala como base.";
     public static final String DOCUMENTO_NO_ENCONTRADO =
             "No hay nadie registrado con ese documento en el conjunto.";
     public static final String CASA_NECESITA_TITULAR =

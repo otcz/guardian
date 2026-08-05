@@ -89,6 +89,8 @@ public final class ApiEndpoint {
     public static final String SEDE_SALIR = "/salir";
 
     /** Sufijos reutilizados. */
+    public static final String PLANTILLA = "/plantilla";
+    public static final String IMPORTAR = "/importar";
     public static final String POR_ID = "/{id}";
     public static final String ACTIVAR = "/{id}/activar";
     public static final String DESACTIVAR = "/{id}/desactivar";

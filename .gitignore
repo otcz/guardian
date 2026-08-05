@@ -52,3 +52,6 @@ Thumbs.db
 
 ### Config local del preview de Claude ###
 .claude/launch.json
+
+# Respaldos de la base: datos reales del conjunto, nunca al repositorio.
+guardian-respaldo-*.sql

@@ -1,5 +1,26 @@
 <div class="gd-page">
-  <h1>Casas</h1>
+  <div class="encabezado">
+    <h1>Casas</h1>
+
+    <!-- La plantilla PRIMERO: en un conjunto de doscientas casas nadie escribe
+         el archivo de memoria, y ofrecer "cargar" sin decir con qué formato es
+         mandar a fallar. -->
+    <div class="masiva">
+      <button type="button" class="alterno" (click)="descargarPlantilla()">
+        <i class="pi pi-download"></i>
+        Ver el formato
+      </button>
+
+      <!-- El input va oculto pero enfocable, dentro del label: así el botón se
+           ve como los demás y el teclado sigue llegando. -->
+      <label class="alterno cargar" [class.ocupado]="importando">
+        <i class="pi" [ngClass]="importando ? 'pi-spinner pi-spin' : 'pi-upload'"></i>
+        {{ importando ? 'Cargando…' : 'Cargar Excel' }}
+        <input type="file" accept=".xlsx" (change)="archivoElegido($event)"
+               [disabled]="importando">
+      </label>
+    </div>
+  </div>
 
   <form class="alta gd-card" [formGroup]="formulario" (ngSubmit)="guardar()"
         [class.editando]="editando">
@@ -33,6 +54,44 @@
   </form>
 
   <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+  <!-- El resultado NUNCA es un simple "listo": si de doscientas filas tres
+       quedaron fuera y no se dice cuáles, toca revisar la lista entera a mano
+       —que es justo lo que la carga masiva venía a evitar. -->
+  <div class="resultado gd-card" *ngIf="resultado">
+    <div class="resumen">
+      <span class="dato ok"><strong>{{ resultado.creadas }}</strong> creadas</span>
+      <span class="dato" *ngIf="resultado.repetidas">
+        <strong>{{ resultado.repetidas }}</strong> ya existían
+      </span>
+      <span class="dato mal" *ngIf="resultado.conError">
+        <strong>{{ resultado.conError }}</strong> con error
+      </span>
+      <button type="button" class="cerrar" (click)="resultado = null"
+              aria-label="Cerrar el resumen">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <table class="rechazos" *ngIf="resultado.rechazos.length">
+      <thead>
+        <tr>
+          <th>Fila</th>
+          <th>Tipo</th>
+          <th>Número</th>
+          <th>Qué pasó</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of resultado.rechazos">
+          <td class="fuerte">{{ r.fila }}</td>
+          <td>{{ r.tipo || '—' }}</td>
+          <td>{{ r.numero || '—' }}</td>
+          <td>{{ r.motivo }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <p class="gd-muted" *ngIf="cargando">Cargando…</p>
 
