@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dhatim.fastexcel.Workbook;
 import org.dhatim.fastexcel.Worksheet;
 import org.dhatim.fastexcel.reader.ReadableWorkbook;
+import org.dhatim.fastexcel.reader.ReadingOptions;
 import org.dhatim.fastexcel.reader.Row;
 import org.dhatim.fastexcel.reader.Sheet;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -41,18 +45,42 @@ public class ImportacionPersonasServiceImpl implements ImportacionPersonasServic
 
     private final PersonaService personaService;
 
+    /**
+     * Se lee CON los formatos de celda y, si eso falla, otra vez sin ellos.
+     *
+     * <p>Los formatos hacen falta para las fechas: Excel las guarda como el
+     * numero de dias desde 1900, y sin el formato son indistinguibles de una
+     * cedula. Pero pedirlos obliga al lector a exigir styles.xml, y hay
+     * generadores de xlsx que no lo escriben. El segundo intento salva esos
+     * archivos — sus fechas solo se entenderan si vienen como texto, que es
+     * mejor que un "no pudimos leer el archivo" sin salida.</p>
+     */
     @Override
     public ImportacionPersonasResponse importar(MultipartFile archivo,
                                                 UsuarioAutenticado ejecutor) {
         exigirArchivo(archivo);
+        try {
+            return leer(archivo, new ReadingOptions(true, true), ejecutor);
+        } catch (GuardianException fallo) {
+            if (!MensajesGlobales.EXCEL_ILEGIBLE.equals(fallo.getMessage())) {
+                throw fallo;
+            }
+            log.info("[admin] el Excel no trae formatos de celda; se reintenta sin ellos");
+            return leer(archivo, new ReadingOptions(false, true), ejecutor);
+        }
+    }
 
+    private ImportacionPersonasResponse leer(MultipartFile archivo, ReadingOptions opciones,
+                                             UsuarioAutenticado ejecutor) {
         List<ImportacionPersonasResponse.FilaRechazada> rechazos = new ArrayList<>();
         int leidas = 0;
         int creadas = 0;
         int repetidas = 0;
 
+        // cellInErrorIfParseError=true: una celda que no se entiende marca ESA
+        // celda, en vez de lanzar y tumbar la lectura del archivo entero.
         try (InputStream entrada = archivo.getInputStream();
-             ReadableWorkbook libro = new ReadableWorkbook(entrada)) {
+             ReadableWorkbook libro = new ReadableWorkbook(entrada, opciones)) {
 
             Sheet hoja = libro.getFirstSheet();
             try (Stream<Row> filas = hoja.openStream()) {
@@ -66,12 +94,15 @@ public class ImportacionPersonasServiceImpl implements ImportacionPersonasServic
                     String documento = texto(fila, 0);
                     String nombres = texto(fila, 1);
                     String apellidos = texto(fila, 2);
-                    String correo = texto(fila, 3);
-                    String telefono = texto(fila, 4);
+                    String nacimientoEscrito = texto(fila, 3);
+                    LocalDate nacimiento = CeldaExcel.fecha(fila, 3);
+                    String correo = texto(fila, 4);
+                    String telefono = texto(fila, 5);
 
                     // Fila del todo vacia: es el final del archivo o una linea
                     // que quedo al borrar contenido, no un error que reportar.
                     if (documento.isEmpty() && nombres.isEmpty() && apellidos.isEmpty()
+                            && nacimientoEscrito.isEmpty()
                             && correo.isEmpty() && telefono.isEmpty()) {
                         continue;
                     }
@@ -84,6 +115,9 @@ public class ImportacionPersonasServiceImpl implements ImportacionPersonasServic
                     }
 
                     String falta = queFalta(documento, nombres, apellidos, correo);
+                    if (falta == null) {
+                        falta = revisarNacimiento(nacimientoEscrito, nacimiento);
+                    }
                     if (falta != null) {
                         rechazos.add(rechazo(numeroFila, documento, nombres, falta));
                         continue;
@@ -95,6 +129,8 @@ public class ImportacionPersonasServiceImpl implements ImportacionPersonasServic
                     peticion.setApellidos(apellidos);
                     peticion.setEmail(correo);
                     peticion.setTelefono(telefono.isEmpty() ? null : telefono);
+                    peticion.setFechaNacimiento(nacimiento == null ? null
+                            : Date.from(nacimiento.atStartOfDay(ZoneId.systemDefault()).toInstant()));
                     // Residente y sin casa: la carga masiva registra a la gente,
                     // y quien vive donde se asigna despues — meter a alguien en
                     // una casa exige decir tambien si es el titular.
@@ -139,7 +175,7 @@ public class ImportacionPersonasServiceImpl implements ImportacionPersonasServic
             Worksheet hoja = libro.newWorksheet("Personas");
 
             String[] columnas = {COLUMNA_DOCUMENTO, COLUMNA_NOMBRES, COLUMNA_APELLIDOS,
-                    COLUMNA_CORREO, COLUMNA_TELEFONO};
+                    COLUMNA_NACIMIENTO, COLUMNA_CORREO, COLUMNA_TELEFONO};
             for (int i = 0; i < columnas.length; i++) {
                 hoja.value(0, i, columnas[i]);
                 hoja.style(0, i).bold().set();
@@ -150,14 +186,22 @@ public class ImportacionPersonasServiceImpl implements ImportacionPersonasServic
             hoja.value(1, 0, "1020304050");
             hoja.value(1, 1, "Juan Carlos");
             hoja.value(1, 2, "de la Cruz Perez");
-            hoja.value(1, 3, "juan@correo.com");
-            hoja.value(1, 4, "3001234567");
+            hoja.value(1, 3, LocalDate.of(1990, 3, 15));
+            hoja.value(1, 4, "juan@correo.com");
+            hoja.value(1, 5, "3001234567");
+
+            // La columna se marca como fecha: sin formato, Excel muestra el
+            // numero de serie —32947— y quien abre la plantilla no entiende que
+            // se le esta pidiendo. Es tambien la marca por la que el lector
+            // distingue una fecha de un numero cualquiera.
+            hoja.style(1, 3).format("dd/mm/yyyy").set();
 
             hoja.width(0, 18);
             hoja.width(1, 20);
             hoja.width(2, 22);
-            hoja.width(3, 28);
-            hoja.width(4, 16);
+            hoja.width(3, 20);
+            hoja.width(4, 28);
+            hoja.width(5, 16);
             libro.finish();
             return salida.toByteArray();
         } catch (IOException fallo) {
@@ -191,6 +235,24 @@ public class ImportacionPersonasServiceImpl implements ImportacionPersonasServic
         }
         if (!CORREO.matcher(correo).matches()) {
             return "El correo no tiene un formato valido.";
+        }
+        return null;
+    }
+
+    /**
+     * La fecha es OPCIONAL, pero si se escribio algo tiene que entenderse: una
+     * fecha ilegible que se guarda como nula deja a la persona registrada con
+     * un dato que el administrador cree haber puesto.
+     */
+    private String revisarNacimiento(String escrito, LocalDate fecha) {
+        if (escrito.isEmpty()) {
+            return null;
+        }
+        if (fecha == null) {
+            return "No entendimos la fecha de nacimiento. Escribela como 15/03/1990.";
+        }
+        if (!fecha.isBefore(LocalDate.now())) {
+            return "La fecha de nacimiento tiene que ser anterior a hoy.";
         }
         return null;
     }

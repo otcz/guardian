@@ -19,6 +19,7 @@ public interface ImportacionPersonasService {
     String COLUMNA_DOCUMENTO = "Identificacion";
     String COLUMNA_NOMBRES = "Nombres";
     String COLUMNA_APELLIDOS = "Apellidos";
+    String COLUMNA_NACIMIENTO = "Fecha de nacimiento";
     String COLUMNA_CORREO = "Correo";
     String COLUMNA_TELEFONO = "Telefono";
 

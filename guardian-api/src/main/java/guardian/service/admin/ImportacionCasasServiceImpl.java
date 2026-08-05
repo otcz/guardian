@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dhatim.fastexcel.Workbook;
 import org.dhatim.fastexcel.Worksheet;
 import org.dhatim.fastexcel.reader.ReadableWorkbook;
+import org.dhatim.fastexcel.reader.ReadingOptions;
 import org.dhatim.fastexcel.reader.Row;
 import org.dhatim.fastexcel.reader.Sheet;
 import org.springframework.stereotype.Service;
@@ -51,8 +52,13 @@ public class ImportacionCasasServiceImpl implements ImportacionCasasService {
 
         List<String> tiposValidos = codigosDeTipoVivienda();
 
+        // SIN withCellFormat, al contrario que personas: aqui no hay fechas, y
+        // pedir los formatos obliga al lector a exigir styles.xml — hay
+        // generadores de xlsx que no lo escriben, y esos archivos dejarian de
+        // poder cargarse a cambio de nada.
         try (InputStream entrada = archivo.getInputStream();
-             ReadableWorkbook libro = new ReadableWorkbook(entrada)) {
+             ReadableWorkbook libro = new ReadableWorkbook(entrada,
+                     new ReadingOptions(false, true))) {
 
             Sheet hoja = libro.getFirstSheet();
             try (Stream<Row> filas = hoja.openStream()) {
