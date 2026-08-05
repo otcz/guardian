@@ -14,6 +14,12 @@
          routerLinkActive="activa">
         <i class="pi" [ngClass]="seccion.icono"></i>
         <span>{{ seccion.etiqueta }}</span>
+        <!-- El número, no un punto: "3 esperando" y "1 esperando" no piden la
+             misma urgencia, y el punto obliga a entrar para saber cuántas. -->
+        <span class="aviso"
+              *ngIf="seccion.ruta === 'solicitudes' && solicitudesPendientes">
+          {{ solicitudesPendientes }}
+        </span>
       </a>
     </nav>
 

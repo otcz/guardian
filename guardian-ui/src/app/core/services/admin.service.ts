@@ -90,6 +90,14 @@ export class AdminService {
     return this.http.get<SolicitudCasaAdmin[]>(`${this.base}/solicitudes-casa`);
   }
 
+  /**
+   * Solo el número, para el aviso del menú. Endpoint aparte y no la lista: esto
+   * se pide en cada navegación del panel.
+   */
+  solicitudesPendientes(): Observable<{ pendientes: number }> {
+    return this.http.get<{ pendientes: number }>(`${this.base}/solicitudes-casa/conteo`);
+  }
+
   aprobarSolicitudCasa(id: number): Observable<SolicitudCasaAdmin> {
     return this.http.patch<SolicitudCasaAdmin>(
       `${this.base}/solicitudes-casa/${id}/aprobar`, {});

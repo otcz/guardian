@@ -76,6 +76,23 @@
       text-align: center;
     }
 
+    /* Pegado al borde derecho del renglón: es el sitio donde el ojo busca un
+       contador, y así la etiqueta no se corre cuando el número aparece. */
+    .aviso {
+      margin-left: auto;
+      min-width: 20px;
+      padding: 0 var(--e-1);
+      font-size: var(--t-xs);
+      font-weight: 700;
+      line-height: 20px;
+      text-align: center;
+      color: var(--text-inverse);
+      /* Ámbar y no rojo: hay alguien esperando, pero nada está roto. El rojo
+         del proyecto es el de la portería negando el paso. */
+      background: var(--warn);
+      border-radius: var(--r-full);
+    }
+
     &:hover {
       background: var(--bg-soft);
     }

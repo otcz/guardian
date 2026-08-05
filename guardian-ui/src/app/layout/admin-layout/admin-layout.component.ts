@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
 
+import { AdminService } from '../../core/services/admin.service';
 import { AuthService } from '../../core/services/auth.service';
 import { SedeService } from '../../core/services/sede.service';
 import { TemaService } from '../../core/services/tema.service';
@@ -19,10 +21,19 @@ import { Sesion } from '../../core/models/sesion.model';
   styleUrl: './admin-layout.component.scss',
   standalone: false
 })
-export class AdminLayoutComponent {
+export class AdminLayoutComponent implements OnInit {
 
   sesion: Sesion | null = null;
   saliendo = false;
+
+  /**
+   * Solicitudes de casa esperando respuesta.
+   *
+   * <p>Va en el menú y no solo dentro de la pantalla: una solicitud sin
+   * responder deja a una persona sin poder usar la aplicación, y si el
+   * administrador tiene que entrar a mirar para enterarse, nadie se entera.</p>
+   */
+  solicitudesPendientes = 0;
 
   readonly secciones = [
     { ruta: 'resumen', etiqueta: 'Resumen', icono: 'pi-chart-bar' },
@@ -50,10 +61,31 @@ export class AdminLayoutComponent {
   constructor(
     private readonly auth: AuthService,
     private readonly sedeService: SedeService,
+    private readonly admin: AdminService,
     private readonly router: Router,
     public readonly tema: TemaService
   ) {
     this.auth.sesion$.subscribe(sesion => (this.sesion = sesion));
+
+    // Se recuenta en cada navegación del panel y no con un temporizador: el
+    // administrador que acaba de aprobar una tiene que ver el número bajar al
+    // volver, y un sondeo cada X segundos gastaría peticiones toda la jornada
+    // para un dato que cambia unas pocas veces al día.
+    this.router.events
+      .pipe(filter(evento => evento instanceof NavigationEnd))
+      .subscribe(() => this.contarSolicitudes());
+  }
+
+  ngOnInit(): void {
+    this.contarSolicitudes();
+  }
+
+  private contarSolicitudes(): void {
+    this.admin.solicitudesPendientes().subscribe({
+      next: conteo => (this.solicitudesPendientes = conteo.pendientes),
+      // Un aviso que no carga no puede romper el panel: se queda sin número.
+      error: () => (this.solicitudesPendientes = 0)
+    });
   }
 
   get suplantando(): boolean {

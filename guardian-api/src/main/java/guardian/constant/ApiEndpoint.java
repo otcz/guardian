@@ -78,6 +78,7 @@ public final class ApiEndpoint {
     public static final String ADMIN_PARAMETROS = ADMIN + "/parametros";
     /** Bandeja: quien pidio entrar a que casa, esperando decision. */
     public static final String ADMIN_SOLICITUDES_CASA = ADMIN + "/solicitudes-casa";
+    public static final String CONTEO = "/conteo";
     public static final String APROBAR = "/{id}/aprobar";
     public static final String RECHAZAR = "/{id}/rechazar";
 
