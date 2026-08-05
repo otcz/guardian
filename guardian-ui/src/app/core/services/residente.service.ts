@@ -4,9 +4,11 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import {
+  CasaDisponible,
   CodigoHogar,
   Familiar,
   FamiliarRequest,
+  SolicitudCasa,
   Vehiculo,
   VehiculoResidenteRequest
 } from '../models/admin.model';
@@ -45,6 +47,26 @@ export class ResidenteService {
 
   revocarCodigoHogar(): Observable<void> {
     return this.http.delete<void>(`${this.base}/hogar/codigo`);
+  }
+
+  // ── Todavía sin casa ─────────────────────────────────────────────────────
+  //
+  // Pedir NO asigna nada: deja constancia de quién pide qué, y la
+  // administración decide. Entrar a un hogar de un clic sería autoservicio de
+  // acceso — quien entra se queda con sus vehículos y sus invitaciones.
+
+  casasDisponibles(): Observable<CasaDisponible[]> {
+    return this.http.get<CasaDisponible[]>(`${this.base}/casas-disponibles`);
+  }
+
+  /** 204 cuando nunca ha pedido nada: el observable emite null. */
+  miSolicitud(): Observable<SolicitudCasa | null> {
+    return this.http.get<SolicitudCasa | null>(`${this.base}/solicitud-casa`);
+  }
+
+  solicitarCasa(casaId: number, parentesco: string): Observable<SolicitudCasa> {
+    return this.http.post<SolicitudCasa>(
+      `${this.base}/solicitud-casa`, { casaId, parentesco });
   }
 
   familia(): Observable<Familiar[]> {

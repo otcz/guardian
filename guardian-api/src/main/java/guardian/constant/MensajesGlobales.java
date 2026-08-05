@@ -140,6 +140,10 @@ public final class MensajesGlobales {
      * El titular es quien administra la familia: una casa sin el deja a todos
      * sus residentes viendo un boton que no funciona.
      */
+    public static final String YA_TIENE_CASA =
+            "Ya perteneces a una casa.";
+    public static final String SOLICITUD_NO_PENDIENTE =
+            "Esa solicitud ya fue resuelta.";
     public static final String EXCEL_VACIO =
             "Elige un archivo antes de cargar.";
     public static final String EXCEL_FORMATO =

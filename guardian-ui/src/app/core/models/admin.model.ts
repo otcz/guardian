@@ -64,6 +64,43 @@ export interface FilaPersonaRechazada {
   motivo: string;
 }
 
+/**
+ * Una casa como la ve alguien que todavía no vive en ninguna.
+ *
+ * <p>Sin nombres de residentes a propósito: quien elige casa aún no pertenece a
+ * ninguna, y una lista con "CASA-101 — familia Pérez" le entregaría el
+ * directorio del conjunto a cualquiera con cuenta.</p>
+ */
+export interface CasaDisponible {
+  id: number;
+  identificador: string;
+  /** Dice si entraría como titular o a una familia que ya existe. */
+  tieneTitular: boolean;
+}
+
+export interface SolicitudCasa {
+  id: number;
+  casaId: number;
+  casaIdentificador: string;
+  parentesco: string;
+  estado: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
+  motivoRechazo: string | null;
+  fechaSolicitud: string;
+}
+
+/** La misma solicitud, en la bandeja del administrador. */
+export interface SolicitudCasaAdmin {
+  id: number;
+  personaId: number;
+  nombreCompleto: string;
+  documento: string;
+  casaIdentificador: string;
+  parentesco: string;
+  estado: string;
+  fechaSolicitud: string;
+  casaConTitular: boolean;
+}
+
 export interface Porteria {
   id: number;
   nombre: string;

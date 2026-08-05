@@ -35,6 +35,15 @@ public final class Codigos {
     public static final String MODO_VEHICULO = "VEHICULO";
 
     /** Resultado del intento de acceso. */
+    /**
+     * Estados de una solicitud de casa. En Codigos y no en GD_PARAMETRO porque
+     * el codigo RAMIFICA sobre ellos —solo una PENDIENTE se puede aprobar— y un
+     * administrador borrandolos desde Configuracion dejaria la bandeja muerta.
+     */
+    public static final String SOLICITUD_PENDIENTE = "PENDIENTE";
+    public static final String SOLICITUD_APROBADA = "APROBADA";
+    public static final String SOLICITUD_RECHAZADA = "RECHAZADA";
+
     public static final String RESULTADO_PERMITIDO = "PERMITIDO";
     public static final String RESULTADO_DENEGADO = "DENEGADO";
 

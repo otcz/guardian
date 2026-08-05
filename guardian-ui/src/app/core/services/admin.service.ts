@@ -18,6 +18,7 @@ import {
   Porteria,
   PorteriaRequest,
   Resumen,
+  SolicitudCasaAdmin,
   Usuario,
   Vehiculo,
   VehiculoRequest
@@ -78,6 +79,25 @@ export class AdminService {
     const cuerpo = new FormData();
     cuerpo.append('archivo', archivo);
     return this.http.post<ImportacionPersonas>(`${this.base}/personas/importar`, cuerpo);
+  }
+
+  // ── Solicitudes de casa ──────────────────────────────────────────────────
+  //
+  // Aprobar es lo que de verdad mete a alguien en un hogar, con sus vehículos
+  // y sus invitaciones detrás. Por eso es del administrador y no del residente.
+
+  solicitudesCasa(): Observable<SolicitudCasaAdmin[]> {
+    return this.http.get<SolicitudCasaAdmin[]>(`${this.base}/solicitudes-casa`);
+  }
+
+  aprobarSolicitudCasa(id: number): Observable<SolicitudCasaAdmin> {
+    return this.http.patch<SolicitudCasaAdmin>(
+      `${this.base}/solicitudes-casa/${id}/aprobar`, {});
+  }
+
+  rechazarSolicitudCasa(id: number, motivo: string): Observable<SolicitudCasaAdmin> {
+    return this.http.patch<SolicitudCasaAdmin>(
+      `${this.base}/solicitudes-casa/${id}/rechazar`, { motivo });
   }
 
   // ── Porterías ────────────────────────────────────────────────────────────

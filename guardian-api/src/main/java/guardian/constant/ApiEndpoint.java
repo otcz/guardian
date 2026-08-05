@@ -37,6 +37,9 @@ public final class ApiEndpoint {
     public static final String RESIDENTE_INVITACIONES = "/invitaciones";
     /** Codigo con el que un familiar se registra dentro de este hogar. */
     public static final String RESIDENTE_CODIGO_HOGAR = "/hogar/codigo";
+    /** Quien todavia no vive en ninguna casa: verlas y pedir entrar a una. */
+    public static final String RESIDENTE_CASAS_DISPONIBLES = "/casas-disponibles";
+    public static final String RESIDENTE_SOLICITUD_CASA = "/solicitud-casa";
 
     /** Fotos: subida autenticada, lectura publica por nombre UUID. */
     public static final String FOTOS = API + "/fotos";
@@ -73,6 +76,10 @@ public final class ApiEndpoint {
     public static final String ADMIN_USUARIOS = ADMIN + "/usuarios";
     public static final String ADMIN_INVITACIONES = ADMIN + "/invitaciones";
     public static final String ADMIN_PARAMETROS = ADMIN + "/parametros";
+    /** Bandeja: quien pidio entrar a que casa, esperando decision. */
+    public static final String ADMIN_SOLICITUDES_CASA = ADMIN + "/solicitudes-casa";
+    public static final String APROBAR = "/{id}/aprobar";
+    public static final String RECHAZAR = "/{id}/rechazar";
 
     /** Bloqueos administrativos: la llave que el residente no puede levantar. */
     public static final String ADMIN_BLOQUEOS = ADMIN + "/bloqueos";

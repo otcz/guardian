@@ -8,6 +8,7 @@ import { SharedModule } from '../../shared/shared.module';
 import { ResumenComponent } from './resumen/resumen.component';
 import { CasasComponent } from './casas/casas.component';
 import { PorteriasComponent } from './porterias/porterias.component';
+import { SolicitudesComponent } from './solicitudes/solicitudes.component';
 import { PersonasComponent } from './personas/personas.component';
 import { VehiculosComponent } from './vehiculos/vehiculos.component';
 import { InvitacionesComponent } from './invitaciones/invitaciones.component';
@@ -27,6 +28,7 @@ const routes: Routes = [
   { path: 'usuarios', redirectTo: 'personas' },
   { path: 'invitaciones', component: InvitacionesComponent },
   { path: 'bitacora', component: BitacoraComponent },
+  { path: 'solicitudes', component: SolicitudesComponent },
   { path: 'porterias', component: PorteriasComponent },
   { path: 'configuracion', component: ConfiguracionComponent }
 ];
@@ -36,6 +38,7 @@ const routes: Routes = [
     ResumenComponent,
     CasasComponent,
     PorteriasComponent,
+    SolicitudesComponent,
     PersonasComponent,
     VehiculosComponent,
     InvitacionesComponent,

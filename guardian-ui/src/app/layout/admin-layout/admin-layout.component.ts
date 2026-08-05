@@ -33,6 +33,10 @@ export class AdminLayoutComponent {
     // persona, en Personas. Dos pantallas para el mismo ser humano eran la
     // causa de que una dijera "Activa" y la otra le negara la entrada.
     { ruta: 'invitaciones', etiqueta: 'Invitaciones', icono: 'pi-ticket' },
+    // Con las pantallas del día a día y no abajo con la configuración: es una
+    // bandeja, y una solicitud sin responder deja a alguien sin poder usar la
+    // aplicación.
+    { ruta: 'solicitudes', etiqueta: 'Solicitudes', icono: 'pi-inbox' },
     { ruta: 'bitacora', etiqueta: 'Bitácora', icono: 'pi-history' },
     // Con Configuración y no con Casas: las porterías se definen una vez, al
     // montar el conjunto, y después no se vuelven a tocar. Arriba le quitarían

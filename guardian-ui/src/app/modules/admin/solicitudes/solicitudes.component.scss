@@ -1,0 +1,35 @@
+@use '../../../styles/paneles';
+
+/* Los dos botones juntos y con el mismo alto: son las dos caras de una misma
+   decisión, y separarlos o darles pesos distintos sugeriría que una es la
+   normal y la otra la excepción. */
+.acciones {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--e-2);
+}
+
+/* Que la casa esté vacía cambia lo que se aprueba: esta persona quedaría al
+   mando de ese hogar. Va bajo el nombre de la casa, que es donde se mira. */
+.sin-titular {
+  display: block;
+  font-size: var(--t-xs);
+  color: var(--warn);
+}
+
+.campo textarea {
+  padding: var(--e-2) var(--e-3);
+  font-family: inherit;
+  font-size: var(--t-md);
+  color: var(--text-strong);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-sm);
+  resize: vertical;
+
+  &:focus {
+    border-color: var(--accent);
+    outline: none;
+  }
+}

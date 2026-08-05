@@ -5,9 +5,11 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ResidenteService } from '../../../core/services/residente.service';
 import { AdminService } from '../../../core/services/admin.service';
 import {
+  CasaDisponible,
   CodigoHogar,
   Familiar,
   Parametro,
+  SolicitudCasa,
   Vehiculo
 } from '../../../core/models/admin.model';
 
@@ -51,6 +53,80 @@ export class MiHogarComponent implements OnInit {
   cargando = true;
   sinCasa = false;
   error: string | null = null;
+
+  // ── Todavía sin casa ─────────────────────────────────────────────────────
+  //
+  // Antes esto era un callejón sin salida: "tu usuario no tiene una casa
+  // asignada" y nada más que hacer. Ahora elige la suya y la administración
+  // aprueba — pedir no asigna nada.
+
+  casasDisponibles: CasaDisponible[] = [];
+  solicitud: SolicitudCasa | null = null;
+  casaElegida: number | null = null;
+  parentescoElegido = '';
+  enviandoSolicitud = false;
+
+  /** true mientras espera respuesta: no puede pedir otra encima. */
+  get solicitudPendiente(): boolean {
+    return this.solicitud?.estado === 'PENDIENTE';
+  }
+
+  get solicitudRechazada(): boolean {
+    return this.solicitud?.estado === 'RECHAZADA';
+  }
+
+  /**
+   * En una casa sin titular el primero que entra TIENE que serlo, o esa
+   * familia nace sin quien la administre. El selector se ajusta solo en vez de
+   * dejar elegir algo que el backend va a rechazar.
+   */
+  get soloPuedeSerTitular(): boolean {
+    const casa = this.casasDisponibles.find(c => c.id === this.casaElegida);
+    return !!casa && !casa.tieneTitular;
+  }
+
+  private cargarEstadoSinCasa(): void {
+    this.residente.casasDisponibles().subscribe({
+      next: casas => (this.casasDisponibles = casas),
+      error: () => (this.error = 'No pudimos cargar las casas del conjunto.')
+    });
+    this.residente.miSolicitud().subscribe({
+      next: solicitud => (this.solicitud = solicitud),
+      error: () => undefined
+    });
+  }
+
+  alElegirCasa(): void {
+    // El parentesco se recalcula al cambiar de casa: si venía en HIJO y elige
+    // una casa vacía, quedaría pidiendo algo imposible.
+    this.parentescoElegido = this.soloPuedeSerTitular ? 'TITULAR' : '';
+  }
+
+  solicitarCasa(): void {
+    if (!this.casaElegida || !this.parentescoElegido || this.enviandoSolicitud) {
+      return;
+    }
+    this.enviandoSolicitud = true;
+    this.error = null;
+
+    this.residente.solicitarCasa(this.casaElegida, this.parentescoElegido).subscribe({
+      next: solicitud => {
+        this.solicitud = solicitud;
+        this.enviandoSolicitud = false;
+      },
+      error: (fallo: HttpErrorResponse) => {
+        this.error = fallo.error?.mensaje ?? 'No pudimos enviar la solicitud.';
+        this.enviandoSolicitud = false;
+      }
+    });
+  }
+
+  /** Volver a elegir después de un rechazo. */
+  elegirDeNuevo(): void {
+    this.solicitud = null;
+    this.casaElegida = null;
+    this.parentescoElegido = '';
+  }
 
   mostrarAltaFamiliar = false;
   mostrarAltaVehiculo = false;
@@ -114,6 +190,9 @@ export class MiHogarComponent implements OnInit {
         this.cargando = false;
         if (fallo.status === 400) {
           this.sinCasa = true;
+          // Recién ahí se piden las casas: al residente con hogar no le hace
+          // falta la lista del conjunto y no tiene por qué recibirla.
+          this.cargarEstadoSinCasa();
         } else {
           this.error = fallo.error?.mensaje ?? 'No pudimos cargar tu hogar.';
         }

@@ -1,0 +1,73 @@
+<div class="gd-page">
+  <h1>Solicitudes de casa</h1>
+
+  <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+  <p class="gd-muted" *ngIf="cargando">Cargando…</p>
+
+  <div class="gd-vacio" *ngIf="!cargando && solicitudes.length === 0">
+    <i class="pi pi-inbox"></i>
+    <p>No hay solicitudes esperando respuesta.</p>
+  </div>
+
+  <table class="tabla gd-card" *ngIf="!cargando && solicitudes.length">
+    <thead>
+      <tr>
+        <th>Quién</th>
+        <th>Documento</th>
+        <th>Casa</th>
+        <th>Entra como</th>
+        <th>Pedida</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let s of solicitudes">
+        <td class="fuerte">{{ s.nombreCompleto }}</td>
+        <td>{{ s.documento }}</td>
+        <td>
+          {{ s.casaIdentificador }}
+          <!-- Que la casa esté vacía cambia lo que se está aprobando: esta
+               persona quedaría al mando de ese hogar. -->
+          <small class="sin-titular" *ngIf="!s.casaConTitular">sin titular todavía</small>
+        </td>
+        <td>{{ s.parentesco }}</td>
+        <td>{{ s.fechaSolicitud | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td class="derecha acciones">
+          <button type="button" class="alterno" [disabled]="resolviendo"
+                  (click)="abrirRechazo(s)">
+            Rechazar
+          </button>
+          <button type="button" class="principal" [disabled]="resolviendo"
+                  (click)="aprobar(s)">
+            <i class="pi pi-check"></i>
+            Aprobar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- El motivo lo lee el residente: sin él, un rechazo es una puerta cerrada
+       sin explicación y la persona vuelve a pedir lo mismo. -->
+  <gd-hoja [abierta]="!!rechazando"
+           titulo="Rechazar la solicitud"
+           [subtitulo]="rechazando?.nombreCompleto || ''"
+           (cerrar)="rechazando = null">
+
+    <div class="campo">
+      <label for="motivo">Motivo</label>
+      <textarea id="motivo" rows="3" [(ngModel)]="motivo"
+                placeholder="Ej: esa casa no corresponde, verifica con la administración"></textarea>
+    </div>
+
+    <div pie>
+      <button type="button" class="alterno" (click)="rechazando = null">Cancelar</button>
+      <button type="button" class="principal" [disabled]="resolviendo"
+              (click)="confirmarRechazo()">
+        <i class="pi pi-times"></i>
+        Rechazar
+      </button>
+    </div>
+  </gd-hoja>
+</div>

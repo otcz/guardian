@@ -67,26 +67,98 @@ section {
   }
 }
 
+/* Ya no es un aviso, es una tarea: elegir casa. Por eso lleva título, forma y
+   un botón — un estado vacío que no ofrece el paso siguiente es un callejón. */
 .sin-casa {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--e-1);
+  gap: var(--e-3);
   padding: var(--e-6) var(--e-4);
   text-align: center;
 
-  i {
+  > i {
     font-size: 2rem;
     color: var(--text-muted);
   }
 
-  p {
-    margin: 0;
-    font-weight: 600;
+  /* Rojo SOLO en el rechazo: los otros dos estados no son errores. */
+  > i.rechazo {
+    color: var(--deny);
   }
 
-  small {
+  h2 {
+    margin: 0;
+    font-size: var(--t-lg);
+    font-weight: 700;
+    color: var(--text-strong);
+  }
+
+  p {
+    margin: 0;
+    max-width: 34ch;
+    font-size: var(--t-sm);
+    line-height: 1.5;
     color: var(--text-muted);
+  }
+}
+
+/* La forma se alinea a la IZQUIERDA aunque la tarjeta esté centrada: una
+   etiqueta centrada sobre su campo obliga a buscar dónde empieza cada uno. */
+.eleccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  width: 100%;
+  max-width: 320px;
+  margin-top: var(--e-2);
+  text-align: left;
+
+  .campo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e-1);
+
+    label {
+      font-size: var(--t-sm);
+      font-weight: 600;
+      color: var(--text-default);
+    }
+
+    select {
+      min-height: var(--tactil);
+      padding: 0 var(--e-3);
+      font-size: var(--t-md);
+      color: var(--text-strong);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--r-sm);
+
+      &:focus {
+        border-color: var(--accent);
+        outline: none;
+      }
+    }
+  }
+
+  .principal {
+    margin-top: var(--e-2);
+  }
+}
+
+.nota {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e-2);
+  margin: 0;
+  font-size: var(--t-xs);
+  line-height: 1.4;
+  color: var(--text-muted);
+  text-align: left;
+
+  i {
+    flex: 0 0 auto;
+    margin-top: 0.15em;
   }
 }
 

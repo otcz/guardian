@@ -1,9 +1,80 @@
 <div class="gd-page">
 
+  <!-- ── Todavía sin casa ───────────────────────────────────────────────────
+       Antes esto era un callejón sin salida. Ahora elige la suya; pedir NO
+       asigna nada — quien entra a un hogar se queda con sus vehículos y sus
+       invitaciones, así que la administración aprueba. -->
   <div class="sin-casa gd-card" *ngIf="sinCasa">
-    <i class="pi pi-home"></i>
-    <p>Tu usuario no tiene una casa asignada.</p>
-    <small>Comunícate con la administración del conjunto.</small>
+
+    <ng-container *ngIf="solicitudPendiente">
+      <i class="pi pi-clock"></i>
+      <h2>Pediste entrar a {{ solicitud?.casaIdentificador }}</h2>
+      <p>La administración tiene que aprobarlo. Te avisamos apenas responda.</p>
+    </ng-container>
+
+    <ng-container *ngIf="solicitudRechazada">
+      <i class="pi pi-times-circle rechazo"></i>
+      <h2>No aprobaron tu solicitud</h2>
+      <p *ngIf="solicitud?.motivoRechazo">{{ solicitud?.motivoRechazo }}</p>
+      <p *ngIf="!solicitud?.motivoRechazo">
+        No dejaron un motivo. Escribe a la administración del conjunto.
+      </p>
+      <button type="button" class="principal" (click)="elegirDeNuevo()">
+        <i class="pi pi-refresh"></i>
+        Elegir otra casa
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="!solicitudPendiente && !solicitudRechazada">
+      <i class="pi pi-home"></i>
+      <h2>¿En qué casa vives?</h2>
+      <p>Elígela y la administración lo confirma. Después podrás registrar a tu
+        familia y tus vehículos.</p>
+
+      <div class="eleccion" *ngIf="casasDisponibles.length">
+        <div class="campo">
+          <label for="casa-elegida">Casa</label>
+          <select id="casa-elegida" [(ngModel)]="casaElegida"
+                  (ngModelChange)="alElegirCasa()">
+            <option [ngValue]="null">Selecciona…</option>
+            <option *ngFor="let c of casasDisponibles" [ngValue]="c.id">
+              {{ c.identificador }}
+            </option>
+          </select>
+        </div>
+
+        <!-- El selector solo aparece cuando de verdad hay algo que elegir. En
+             una casa sin titular el primero TIENE que serlo, así que no se
+             pregunta: se dice. (Además esta lista excluye TITULAR a propósito
+             —es la del alta de familiares— y ofrecerla aquí dejaría el campo
+             sin la única opción válida.) -->
+        <div class="campo" *ngIf="casaElegida && !soloPuedeSerTitular">
+          <label for="parentesco-elegido">Eres</label>
+          <select id="parentesco-elegido" [(ngModel)]="parentescoElegido">
+            <option value="">Selecciona…</option>
+            <option *ngFor="let p of parentescos" [value]="p.codigo">{{ p.valor }}</option>
+          </select>
+        </div>
+
+        <p class="nota" *ngIf="casaElegida && soloPuedeSerTitular">
+          <i class="pi pi-info-circle" aria-hidden="true"></i>
+          Esa casa todavía no tiene titular, así que entrarías como titular:
+          quien administra la familia y los vehículos.
+        </p>
+
+        <button type="button" class="principal"
+                [disabled]="!casaElegida || !parentescoElegido || enviandoSolicitud"
+                (click)="solicitarCasa()">
+          <i class="pi" [ngClass]="enviandoSolicitud ? 'pi-spinner pi-spin' : 'pi-send'"></i>
+          {{ enviandoSolicitud ? 'Enviando…' : 'Enviar solicitud' }}
+        </button>
+      </div>
+
+      <p class="nota" *ngIf="!casasDisponibles.length">
+        Tu conjunto todavía no tiene casas registradas. Escribe a la
+        administración.
+      </p>
+    </ng-container>
   </div>
 
   <ng-container *ngIf="!sinCasa">
