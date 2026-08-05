@@ -113,6 +113,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  /* El mismo que `.principal`. Faltaba solo aquí, y en un contenedor flex los
+     espacios del HTML entre el <i> y el texto se descartan: el icono quedaba
+     pegado a la palabra en TODOS los botones secundarios con icono. */
+  gap: var(--e-2);
   min-height: var(--tactil);
   padding: 0 1.1rem;
   font-size: var(--t-md);
