@@ -7,6 +7,7 @@ import guardian.dto.admin.ImportacionCasasResponse;
 import guardian.dto.common.ParametroResponse;
 import guardian.exception.GuardianException;
 import guardian.security.UsuarioAutenticado;
+import guardian.util.CeldaExcel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dhatim.fastexcel.Workbook;
@@ -197,8 +198,13 @@ public class ImportacionCasasServiceImpl implements ImportacionCasasService {
                 .orElse(null);
     }
 
+    /**
+     * Cualquier tipo de celda como texto. El numero de una casa escrito en
+     * Excel llega como NUMBER, no como STRING, y leerlo como cadena reventaba
+     * la importacion entera.
+     */
     private String texto(Row fila, int columna) {
-        return fila.getCellAsString(columna).orElse("").trim();
+        return CeldaExcel.texto(fila, columna);
     }
 
     private ImportacionCasasResponse.FilaRechazada rechazo(int fila, String tipo,

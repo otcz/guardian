@@ -6,6 +6,7 @@ import guardian.dto.admin.ImportacionPersonasResponse;
 import guardian.dto.admin.PersonaRequest;
 import guardian.exception.GuardianException;
 import guardian.security.UsuarioAutenticado;
+import guardian.util.CeldaExcel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dhatim.fastexcel.Workbook;
@@ -205,8 +206,9 @@ public class ImportacionPersonasServiceImpl implements ImportacionPersonasServic
         }
     }
 
+    /** Cualquier tipo de celda como texto: Excel guarda las cedulas como numero. */
     private String texto(Row fila, int columna) {
-        return fila.getCellAsString(columna).orElse("").trim();
+        return CeldaExcel.texto(fila, columna);
     }
 
     private ImportacionPersonasResponse.FilaRechazada rechazo(int fila, String documento,
