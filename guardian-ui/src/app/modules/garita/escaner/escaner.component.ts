@@ -35,6 +35,18 @@ const PREFIJO_CODIGO = 'GRD';
 
 const ID_LECTOR = 'gd-lector';
 
+/** Dónde recuerda esta tablet si el guardia dejó el paso automático activo. */
+const CLAVE_AUTO = 'guardian.porteria.auto';
+
+/**
+ * Segundos que espera el paso automático antes de registrar solo.
+ *
+ * <p>Diez: alcanzan para mirar la cara, compararla con la foto y tocar una
+ * placa si hace falta. Menos, y el guardia registraría a alguien mientras
+ * todavía lo está mirando.</p>
+ */
+const SEGUNDOS_AUTO = 10;
+
 /**
  * Operación de la portería.
  *
@@ -99,8 +111,37 @@ export class EscanerComponent implements OnInit, OnDestroy {
     return this.eventoRegistrado?.resultado !== 'DENEGADO';
   }
 
+  // ── Paso automático ──────────────────────────────────────────────────────
+  //
+  // En hora pico la fila no espera a que el guardia toque "A pie" cuarenta
+  // veces. Con esto activo, una ficha en verde se registra sola a los diez
+  // segundos —a pie, que es lo más común y lo único que no le atribuye un
+  // carro a nadie— y el guardia solo interviene cuando NO es eso.
+  //
+  // Se queda apagado por defecto y es decisión de cada tablet: la puerta
+  // peatonal de un conjunto pequeño no lo necesita.
+
+  /** Si esta tablet registra sola cuando el guardia no toca nada. */
+  autoRegistro = false;
+
+  /** Lo que falta para que se registre solo. 0 = no hay cuenta corriendo. */
+  segundosRestantes = 0;
+
+  /** Para que la pantalla diga el número real y no uno escrito a mano. */
+  readonly SEGUNDOS_AUTO = SEGUNDOS_AUTO;
+
   private lector: Html5Qrcode | null = null;
   private procesando = false;
+  private cuenta: ReturnType<typeof setInterval> | null = null;
+
+  /**
+   * Credencial leída mientras otra ficha seguía en pantalla.
+   *
+   * <p>Es el caso que hace útil el paso automático: si ya llegó el siguiente,
+   * el anterior no tiene por qué esperar sus diez segundos. Se registra con el
+   * default de una vez y la fila sigue moviéndose.</p>
+   */
+  private colaLectura: string | null = null;
 
   constructor(
     private readonly acceso: AccesoService,
@@ -109,6 +150,7 @@ export class EscanerComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.autoRegistro = localStorage.getItem(CLAVE_AUTO) === 'S';
     this.cargarPresencia();
     this.iniciarCamara();
     // El motivo se muestra con el texto del catálogo, no con el código:
@@ -125,6 +167,7 @@ export class EscanerComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.detenerCamara();
+    this.detenerCuenta();
   }
 
   // ── Cámara ───────────────────────────────────────────────────────────────
@@ -158,14 +201,47 @@ export class EscanerComponent implements OnInit, OnDestroy {
   }
 
   private alLeer(payload: string): void {
+    // Con paso automático la cámara NO se apaga sobre la ficha: es lo que
+    // permite que el siguiente en la fila empuje al anterior. Fuera de ese
+    // modo el comportamiento es el de siempre — se apaga y se decide con
+    // calma.
+    if (this.etapa === 'ficha') {
+      this.alLlegarOtro(payload);
+      return;
+    }
+    if (this.etapa !== 'escaneando') {
+      return;
+    }
     // La cámara sigue leyendo el mismo QR mientras esté al frente. Sin esta
     // guarda se dispararían decenas de peticiones por un solo escaneo.
     if (this.procesando) {
       return;
     }
     this.procesando = true;
-    this.detenerCamara();
+    if (!this.autoRegistro) {
+      this.detenerCamara();
+    }
     this.verificar(payload);
+  }
+
+  /**
+   * Alguien nuevo se paró frente al lector con una ficha todavía en pantalla.
+   *
+   * <p>Se registra la anterior con el default y se pasa a la nueva. Sin esto,
+   * el que llega tendría que esperar a que se agote la cuenta del que ya se
+   * fue.</p>
+   */
+  private alLlegarOtro(lectura: string): void {
+    // La misma credencial delante de la cámara no es alguien nuevo: es el QR
+    // que sigue ahí. Y sin ficha permitida no hay nada que registrar solo —
+    // un rechazo se resuelve mirándolo, no dejando que lo empujen.
+    const esElMismo = lectura === this.ficha?.payload || lectura === this.ficha?.documento;
+    if (!this.autoRegistro || this.registrando || esElMismo || !this.ficha?.permitido) {
+      return;
+    }
+    this.detenerCuenta();
+    this.colaLectura = lectura;
+    this.registrar('PEATON');
   }
 
   // ── Flujo ────────────────────────────────────────────────────────────────
@@ -183,8 +259,26 @@ export class EscanerComponent implements OnInit, OnDestroy {
     if (!texto) {
       return;
     }
-    this.procesando = true;
 
+    // El lector de barras teclea igual sobre una ficha abierta que sobre la
+    // pantalla de escaneo. Si ya hay alguien en pantalla, el que acaba de
+    // llegar lo empuja — exactamente como con la cámara.
+    if (this.etapa === 'ficha') {
+      this.entradaManual = '';
+      this.alLlegarOtro(texto);
+      return;
+    }
+
+    this.procesando = true;
+    this.procesarLectura(texto);
+  }
+
+  /**
+   * Una lectura, venga de donde venga. El prefijo distingue el QR de GUARDIAN
+   * de una cédula sin preguntarle nada al guardia, que es quien menos tiempo
+   * tiene para responder preguntas.
+   */
+  private procesarLectura(texto: string): void {
     if (texto.toUpperCase().startsWith(PREFIJO_CODIGO)) {
       this.verificar(texto);
     } else {
@@ -200,6 +294,7 @@ export class EscanerComponent implements OnInit, OnDestroy {
       next: ficha => {
         this.ficha = ficha;
         this.etapa = 'ficha';
+        this.arrancarCuenta();
       },
       error: (fallo: HttpErrorResponse) => {
         this.error = fallo.error?.mensaje ?? 'No pudimos verificar el documento.';
@@ -231,6 +326,7 @@ export class EscanerComponent implements OnInit, OnDestroy {
       next: ficha => {
         this.ficha = { ...ficha, payload: ficha.payload ?? payload };
         this.etapa = 'ficha';
+        this.arrancarCuenta();
       },
       error: (fallo: HttpErrorResponse) => {
         this.error = fallo.error?.mensaje ?? 'No pudimos verificar el código.';
@@ -243,6 +339,9 @@ export class EscanerComponent implements OnInit, OnDestroy {
     if (!this.ficha?.payload || this.registrando) {
       return;
     }
+    // Tocar cualquier opción es intervenir: la cuenta se corta aunque el toque
+    // sea justo el mismo default que iba a aplicarse.
+    this.detenerCuenta();
     this.registrando = true;
     this.error = null;
 
@@ -264,21 +363,96 @@ export class EscanerComponent implements OnInit, OnDestroy {
           // verde igual — el guardia dejaba pasar justo el caso que motivó el
           // bloqueo. Ahora el veredicto sale del evento, no del código HTTP.
           this.eventoRegistrado = evento;
-          this.etapa = 'registrado';
           this.cargarPresencia();
+
+          // Ya había alguien esperando: se salta la confirmación y se le
+          // atiende de una vez. La fila no espera dos segundos por cortesía.
+          if (this.colaLectura) {
+            const siguiente = this.colaLectura;
+            this.colaLectura = null;
+            this.limpiarFicha();
+            // Por procesarLectura y NO por verificar(): en la cola puede haber
+            // caído un QR o una cédula, y mandar una cédula al endpoint del QR
+            // dejaba la pantalla en blanco con el siguiente ya esperando.
+            this.procesarLectura(siguiente);
+            return;
+          }
+
+          this.etapa = 'registrado';
           // Vuelve solo a escanear: en hora pico nadie va a tocar "siguiente".
           // El rojo se queda más tiempo: hay que leer POR QUÉ no entra.
           setTimeout(() => this.reiniciar(), this.permitido ? 2000 : 5000);
         },
         error: (fallo: HttpErrorResponse) => {
           this.registrando = false;
+          this.colaLectura = null;
           this.error = fallo.error?.mensaje ?? 'No pudimos registrar el ingreso.';
         }
       });
   }
 
+  // ── Paso automático ──────────────────────────────────────────────────────
+
+  /** El check de la pantalla. Se recuerda por tablet, no por usuario. */
+  alternarAuto(): void {
+    this.autoRegistro = !this.autoRegistro;
+    localStorage.setItem(CLAVE_AUTO, this.autoRegistro ? 'S' : 'N');
+
+    if (!this.autoRegistro) {
+      this.detenerCuenta();
+    }
+  }
+
+  /**
+   * Corta la cuenta sin registrar. Es el freno del guardia: la ficha se queda
+   * quieta en pantalla y él decide con calma.
+   */
+  cancelarAuto(): void {
+    this.detenerCuenta();
+  }
+
+  get cuentaCorriendo(): boolean {
+    return this.segundosRestantes > 0;
+  }
+
+  /**
+   * Arranca la cuenta solo sobre una ficha en verde.
+   *
+   * <p>Un rechazo NO se registra solo: es justo el caso que el guardia tiene
+   * que leer, y encima el sentido de una negación no la resuelve un
+   * temporizador.</p>
+   */
+  private arrancarCuenta(): void {
+    this.detenerCuenta();
+    if (!this.autoRegistro || !this.ficha?.permitido) {
+      return;
+    }
+
+    this.segundosRestantes = SEGUNDOS_AUTO;
+    this.cuenta = setInterval(() => {
+      this.segundosRestantes--;
+      if (this.segundosRestantes <= 0) {
+        this.detenerCuenta();
+        // A pie: es lo más común, y es la única opción que no le atribuye un
+        // vehículo a alguien que quizá venía caminando.
+        this.registrar('PEATON');
+      }
+    }, 1000);
+  }
+
+  private detenerCuenta(): void {
+    if (this.cuenta) {
+      clearInterval(this.cuenta);
+      this.cuenta = null;
+    }
+    this.segundosRestantes = 0;
+  }
+
   /** Un toque alterna; el sistema ya acertó casi siempre, esto es la excepción. */
   alternarSentido(): void {
+    // Corregir el sentido es intervenir: quien lo toca está decidiendo, y que
+    // el temporizador le registre encima sería el peor momento posible.
+    this.detenerCuenta();
     const sugerido = this.ficha?.sentidoSugerido ?? 'E';
     if (this.sentidoCorregido === null) {
       this.sentidoCorregido = sugerido === 'E' ? 'S' : 'E';
@@ -288,19 +462,28 @@ export class EscanerComponent implements OnInit, OnDestroy {
   }
 
   reiniciar(): void {
-    this.ficha = null;
-    this.entradaManual = '';
-    this.procesando = false;
-    this.registrando = false;
-    this.sentidoCorregido = null;
+    this.limpiarFicha();
     this.eventoRegistrado = null;
     this.etapa = 'escaneando';
 
     // Vuelve al modo que el guardia venía usando: si eligió documento porque el
     // lector de barras está en esa puerta, no tiene por qué reelegirlo cada vez.
-    if (this.modoEntrada === 'CAMARA') {
+    // Con paso automático la cámara nunca se apagó, así que no hay que
+    // reabrirla — hacerlo dos veces deja dos streams peleando por el mismo
+    // dispositivo.
+    if (this.modoEntrada === 'CAMARA' && !this.lector) {
       this.iniciarCamara();
     }
+  }
+
+  /** Lo que se borra entre una persona y la siguiente, sin tocar la etapa. */
+  private limpiarFicha(): void {
+    this.detenerCuenta();
+    this.ficha = null;
+    this.entradaManual = '';
+    this.procesando = false;
+    this.registrando = false;
+    this.sentidoCorregido = null;
   }
 
   // ── Presentación ─────────────────────────────────────────────────────────

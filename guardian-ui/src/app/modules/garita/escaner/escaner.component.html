@@ -1,7 +1,9 @@
 <div class="garita">
 
-  <!-- PRESENCIA -->
-  <div class="presencia" *ngIf="presencia">
+  <!-- PRESENCIA. Fuera de la pantalla mientras hay una ficha: son datos de
+       contexto, y en una tablet lo que ocupan arriba obliga a bajar para ver
+       la decisión — justo lo que la portería no puede hacer. -->
+  <div class="presencia" *ngIf="presencia && etapa !== 'ficha'">
     <div class="kpi adentro">
       <span class="valor">{{ presencia.adentro }}</span>
       <span class="titulo">ADENTRO</span>
@@ -67,6 +69,19 @@
     </p>
 
     <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+    <!-- El paso automático se prende acá y no en Configuración: lo decide el
+         guardia según cómo esté la fila, y es su tablet la que lo recuerda. -->
+    <button type="button" class="auto-check"
+            [class.encendido]="autoRegistro"
+            [attr.aria-pressed]="autoRegistro"
+            (click)="alternarAuto()">
+      <i class="pi" [ngClass]="autoRegistro ? 'pi-check-square' : 'pi-stop'"></i>
+      <span class="texto">
+        Paso automático
+        <small>Registra a pie a los {{ SEGUNDOS_AUTO }} s si no tocas nada</small>
+      </span>
+    </button>
   </section>
 
   <!-- FICHA -->
@@ -90,72 +105,109 @@
       </span>
     </div>
 
-    <!-- La foto es el control real: el guardia compara cara contra pantalla. -->
-    <div class="foto" *ngIf="!ficha.esInvitado">
-      <img *ngIf="fotoFicha" [src]="fotoFicha" [alt]="ficha.nombreCompleto || 'Residente'">
-      <div class="sin-foto" *ngIf="!fotoFicha">
-        <i class="pi pi-user"></i>
-        <span>Sin foto</span>
+    <!-- Dos columnas cuando el ancho da y una sola cuando no, sin @media: la
+         foto y la decisión caben lado a lado en la tablet apaisada de la
+         portería, que es como se usa. Apilado obligaba a bajar para ver los
+         botones. -->
+    <div class="cuerpo">
+
+      <!-- La foto es el control real: el guardia compara cara contra pantalla. -->
+      <div class="foto" *ngIf="!ficha.esInvitado">
+        <img *ngIf="fotoFicha" [src]="fotoFicha" [alt]="ficha.nombreCompleto || 'Residente'">
+        <div class="sin-foto" *ngIf="!fotoFicha">
+          <i class="pi pi-user"></i>
+          <span>Sin foto</span>
+        </div>
       </div>
-    </div>
 
-    <h1>{{ ficha.nombreCompleto || 'Desconocido' }}</h1>
+      <div class="identidad">
+        <h1>{{ ficha.nombreCompleto || 'Desconocido' }}</h1>
 
-    <div class="datos">
-      <span class="casa" *ngIf="ficha.casaIdentificador">
-        <i class="pi pi-home"></i> {{ ficha.casaIdentificador }}
-      </span>
-      <span *ngIf="ficha.edad !== null">{{ ficha.edad }} años</span>
-      <span *ngIf="ficha.documento">
-        {{ ficha.tipoDocumento ?? '' }} {{ ficha.documento | documento }}
-      </span>
-    </div>
+        <div class="datos">
+          <span class="casa" *ngIf="ficha.casaIdentificador">
+            <i class="pi pi-home"></i> {{ ficha.casaIdentificador }}
+          </span>
+          <span *ngIf="ficha.edad !== null">{{ ficha.edad }} años</span>
+          <span *ngIf="ficha.documento">
+            {{ ficha.tipoDocumento ?? '' }} {{ ficha.documento | documento }}
+          </span>
+        </div>
 
-    <div class="verifica-documento" *ngIf="ficha.esInvitado && ficha.permitido">
-      <i class="pi pi-id-card"></i>
-      Pide el documento y compáralo: <strong>{{ ficha.documento | documento }}</strong>
-    </div>
+        <div class="verifica-documento" *ngIf="ficha.esInvitado && ficha.permitido">
+          <i class="pi pi-id-card"></i>
+          Pide el documento y compáralo: <strong>{{ ficha.documento | documento }}</strong>
+        </div>
 
-    <!-- Un solo toque: el sentido ya viene inferido. Corregirlo es la
-         excepción (primer día del sistema, alguien que entró sin escanear). -->
-    <div class="acciones" *ngIf="ficha.permitido">
-      <p class="sentido">
-        Registrar {{ textoSentido }}
-        <button type="button" class="corregir" (click)="alternarSentido()">
-          Cambiar a {{ textoSentidoOpuesto }}
-        </button>
-      </p>
+        <!-- Un solo toque: el sentido ya viene inferido. Corregirlo es la
+             excepción (primer día del sistema, alguien que entró sin escanear). -->
+        <div class="acciones" *ngIf="ficha.permitido">
+          <p class="sentido">
+            Registrar {{ textoSentido }}
+            <button type="button" class="corregir" (click)="alternarSentido()">
+              Cambiar a {{ textoSentidoOpuesto }}
+            </button>
+          </p>
 
-      <button type="button" class="opcion" (click)="registrar('PEATON')">
-        <i class="pi pi-user"></i> A pie
-      </button>
+          <button type="button" class="opcion" [class.porDefecto]="cuentaCorriendo"
+                  (click)="registrar('PEATON')">
+            <i class="pi pi-user"></i> A pie
+          </button>
 
-      <button type="button"
-              class="opcion"
-              *ngFor="let vehiculo of ficha.vehiculos"
-              (click)="registrar('VEHICULO', vehiculo)">
-        <i class="pi pi-car"></i>
-        {{ vehiculo.placa }}
-        <small *ngIf="vehiculo.marca || vehiculo.color">
-          {{ vehiculo.marca }} {{ vehiculo.color }}
-        </small>
-      </button>
+          <button type="button"
+                  class="opcion"
+                  *ngFor="let vehiculo of ficha.vehiculos"
+                  (click)="registrar('VEHICULO', vehiculo)">
+            <i class="pi pi-car"></i>
+            {{ vehiculo.placa }}
+            <small *ngIf="vehiculo.marca || vehiculo.color">
+              {{ vehiculo.marca }} {{ vehiculo.color }}
+            </small>
+          </button>
 
-      <!-- Placa declarada en la invitacion: la unica valida para el invitado. -->
-      <button type="button"
-              class="opcion"
-              *ngIf="ficha.esInvitado && ficha.invitacionPlaca"
-              (click)="registrar('VEHICULO')">
-        <i class="pi pi-car"></i>
-        {{ ficha.invitacionPlaca }}
-      </button>
+          <!-- Placa declarada en la invitacion: la unica valida para el invitado. -->
+          <button type="button"
+                  class="opcion"
+                  *ngIf="ficha.esInvitado && ficha.invitacionPlaca"
+                  (click)="registrar('VEHICULO')">
+            <i class="pi pi-car"></i>
+            {{ ficha.invitacionPlaca }}
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="aviso-error" *ngIf="error">{{ error }}</div>
 
-    <button type="button" class="alterno" (click)="reiniciar()">
-      {{ ficha.permitido ? 'Cancelar' : 'Siguiente' }}
-    </button>
+    <!-- La cuenta atrás dice QUÉ se va a registrar, no solo que va a pasar
+         algo: el guardia tiene que poder ver que dice "A pie" y tocar una
+         placa si el señor venía en carro. Tocarla la detiene. -->
+    <div class="pie-ficha">
+      <button type="button" class="cuenta" *ngIf="cuentaCorriendo" (click)="cancelarAuto()">
+        <span class="anillo" [style.--vuelta]="segundosRestantes / SEGUNDOS_AUTO">
+          {{ segundosRestantes }}
+        </span>
+        <span class="que-pasa">
+          A pie automático
+          <small>Toca para detener</small>
+        </span>
+      </button>
+
+      <!-- El lector de barras teclea acá mientras la ficha sigue abierta: si
+           llega el siguiente, el anterior se registra con el default y la fila
+           no se detiene. -->
+      <input class="siguiente"
+             *ngIf="autoRegistro && ficha.permitido && modoEntrada === 'DOCUMENTO'"
+             type="text"
+             inputmode="numeric"
+             [(ngModel)]="entradaManual"
+             (keyup.enter)="verificarEntradaManual()"
+             placeholder="Escanea al siguiente"
+             autocomplete="off">
+
+      <button type="button" class="alterno" (click)="reiniciar()">
+        {{ ficha.permitido ? 'Cancelar' : 'Siguiente' }}
+      </button>
+    </div>
   </section>
 
   <!-- CONFIRMACION. Verde o rojo, sin matices: el resultado se lee en menos de

@@ -207,6 +207,17 @@ section {
 /* ── Ficha ───────────────────────────────────────────────────────────────── */
 
 .ficha {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  /* Ancha de verdad: en la tablet apaisada de la portería la ficha ocupa la
+     pantalla, no una columna de 420px con todo apilado debajo. */
+  width: 100%;
+  max-width: 900px;
+  /* Contra el `section { align-items: center }` de más arriba, que sirve para
+     la pantalla de escaneo pero acá encogía las dos columnas a su contenido y
+     las hacía apilarse aunque sobrara ancho. */
+  align-items: stretch;
   padding: 1.25rem;
   background: var(--bg-surface);
   border: 2px solid var(--border-default);
@@ -220,6 +231,25 @@ section {
   &.deny {
     border-color: var(--deny);
   }
+}
+
+/* Foto y decisión lado a lado, y apiladas cuando el ancho no da. Sin @media
+   del viewport: lo que manda es el espacio que tiene la ficha. */
+.cuerpo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+  align-items: flex-start;
+}
+
+.identidad {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  /* Pide más ancho que la foto: si algo tiene que bajar de renglón primero,
+     que no sea la columna donde están los botones. */
+  flex: 1 1 320px;
+  min-width: 0;
 }
 
 /* Verde o rojo, sin matices: es lo primero que se lee. */
@@ -295,10 +325,13 @@ section {
   }
 }
 
-/* La foto es el elemento más grande de la pantalla, no un avatar decorativo. */
+/* La foto es el elemento más grande de la pantalla, no un avatar decorativo:
+   el guardia compara cara contra pantalla, y si es chica no compara. Crece con
+   el espacio disponible en vez de quedarse en 190px fijos. */
 .foto {
-  width: 190px;
-  height: 190px;
+  flex: 1 1 240px;
+  max-width: 320px;
+  aspect-ratio: 1;
   overflow: hidden;
   border-radius: 14px;
   background: var(--bg-soft);
@@ -329,17 +362,17 @@ section {
   }
 }
 
+/* Alineado a la izquierda y no centrado: en dos columnas el nombre arranca
+   donde arranca todo lo demás de su lado, y el ojo lo encuentra sin buscarlo. */
 h1 {
   margin: 0;
-  font-size: 1.35rem;
-  text-align: center;
-  line-height: 1.2;
+  font-size: 1.5rem;
+  line-height: 1.15;
 }
 
 .datos {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 0.6rem;
   flex-wrap: wrap;
   font-size: 0.95rem;
@@ -369,7 +402,6 @@ h1 {
 
 .sentido {
   margin: 0 0 0.15rem;
-  text-align: center;
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -417,6 +449,131 @@ h1 {
 
   &:active {
     transform: scale(0.985);
+  }
+
+  /* La que va a aplicarse sola. Marcada con un borde y no con otro color: el
+     verde de estos botones ya significa "puede pasar" y un segundo verde no
+     diría nada nuevo. */
+  &.porDefecto {
+    outline: 3px solid var(--text-inverse);
+    outline-offset: -6px;
+  }
+}
+
+/* ── Paso automático ─────────────────────────────────────────────────────── */
+
+/* Es un ajuste, no una acción: discreto y al final de la pantalla de escaneo,
+   donde el guardia lo prende una vez y se olvida. */
+.auto-check {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 420px;
+  padding: 0.7rem 0.9rem;
+  text-align: left;
+  color: var(--text-muted);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  cursor: pointer;
+
+  i {
+    font-size: 1.15rem;
+  }
+
+  .texto {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+    font-weight: 600;
+
+    small {
+      font-weight: 400;
+      font-size: 0.75rem;
+      opacity: 0.85;
+    }
+  }
+
+  &.encendido {
+    color: var(--ok);
+    border-color: var(--ok);
+    background: var(--ok-soft);
+  }
+}
+
+.pie-ficha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+
+  .alterno {
+    margin-left: auto;
+  }
+
+  .siguiente {
+    flex: 1 1 180px;
+    min-width: 0;
+    padding: 0.7rem 0.9rem;
+    font-size: 1rem;
+    color: var(--text-strong);
+    background: var(--bg-soft);
+    border: 1px dashed var(--border-strong);
+    border-radius: 10px;
+
+    &:focus {
+      border-style: solid;
+      border-color: var(--accent);
+      outline: none;
+    }
+  }
+}
+
+/* La cuenta atrás. Ámbar y no verde: algo está por pasar solo, y el guardia
+   tiene que poder verlo venir y frenarlo. */
+.cuenta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.9rem 0.5rem 0.5rem;
+  text-align: left;
+  color: var(--warn);
+  background: var(--warn-soft);
+  border: 1px solid var(--warn);
+  border-radius: 999px;
+  cursor: pointer;
+
+  /* El anillo se vacía con los segundos: se entiende cuánto falta sin leer el
+     número, que es lo que pasa cuando se mira de reojo. */
+  .anillo {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    border-radius: 50%;
+    background: conic-gradient(
+      var(--warn) calc(var(--vuelta) * 360deg),
+      var(--bg-surface) 0
+    );
+    box-shadow: inset 0 0 0 4px var(--warn-soft);
+    transition: background var(--transicion) linear;
+  }
+
+  .que-pasa {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    font-size: 0.85rem;
+    font-weight: 700;
+
+    small {
+      font-weight: 400;
+      font-size: 0.72rem;
+      opacity: 0.85;
+    }
   }
 }
 
