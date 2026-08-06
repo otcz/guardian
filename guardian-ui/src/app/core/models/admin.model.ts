@@ -276,6 +276,8 @@ export interface Familiar {
   tieneCredencial: boolean;
   /** Si puede entrar a la aplicación. Sin cuenta solo existe para la portería. */
   tieneCuenta: boolean;
+  /** Su último paso por la portería fue una ENTRADA: sigue en el conjunto. */
+  adentro: boolean;
   esUsuarioActual: boolean;
 }
 

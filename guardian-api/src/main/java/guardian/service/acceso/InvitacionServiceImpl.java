@@ -60,6 +60,7 @@ public class InvitacionServiceImpl implements InvitacionService {
     private final GdResidenteCasaRepository residenteCasaRepository;
     private final GdPersonaRepository personaRepository;
     private final GdAccesoEventoRepository eventoRepository;
+    private final PresenciaService presenciaService;
 
     @Value("${guardian.security.qr-hmac-secret}")
     private String secretoHmac;
@@ -316,6 +317,7 @@ public class InvitacionServiceImpl implements InvitacionService {
                 .estado(estadoDe(invitacion))
                 .casaIdentificador(invitacion.getCasa().getIdentificador())
                 .anfitrionNombre(invitacion.getAnfitrion().getNombreCompleto())
+                .adentro(presenciaService.estaAdentroInvitado(invitacion.getId()))
                 .codigoPublico(invitacion.getCodigoPublico())
                 .payload(construirPayload(invitacion))
                 .build();

@@ -16,6 +16,7 @@ import guardian.repository.GdResidenteCasaRepository;
 import guardian.repository.GdUsuarioRepository;
 import guardian.repository.GdVehiculoRepository;
 import guardian.security.UsuarioAutenticado;
+import guardian.service.acceso.PresenciaService;
 import guardian.service.admin.PersonaRegistrada;
 import guardian.service.admin.PersonaService;
 import guardian.service.admin.VehiculoService;
@@ -40,6 +41,7 @@ import java.util.stream.Collectors;
 public class AutogestionServiceImpl implements AutogestionService {
 
     private final GdResidenteCasaRepository residenteCasaRepository;
+    private final PresenciaService presenciaService;
     private final GdCredencialQrRepository credencialRepository;
     private final GdUsuarioRepository usuarioRepository;
     private final GdVehiculoRepository vehiculoRepository;
@@ -192,6 +194,7 @@ public class AutogestionServiceImpl implements AutogestionService {
                 .motivoBloqueo(persona.getMotivoBloqueo())
                 .tieneCredencial(tieneCredencial)
                 .tieneCuenta(usuarioRepository.existsByPersonaId(persona.getId()))
+                .adentro(presenciaService.estaAdentro(persona.getId()))
                 .esUsuarioActual(persona.getId().equals(usuario.getPersonaId()))
                 .build();
     }

@@ -76,6 +76,8 @@ export interface Invitacion {
   estado: EstadoInvitacion;
   casaIdentificador: string;
   anfitrionNombre: string;
+  /** Su último paso por la portería fue una ENTRADA: sigue en el conjunto. */
+  adentro: boolean;
   codigoPublico: string;
   payload: string;
 }

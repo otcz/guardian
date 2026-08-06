@@ -217,6 +217,14 @@
             </span>
           </div>
 
+          <!-- Dónde está, según su último paso por la portería. Solo se marca
+               a quien está ADENTRO: "afuera" es el estado normal de casi todos
+               a casi toda hora, y marcarlo llenaría la lista de ruido. -->
+          <span class="presencia" *ngIf="familiar.adentro"
+                pTooltip="Su último registro fue una entrada" tooltipPosition="left">
+            <i class="pi pi-circle-fill"></i> Adentro
+          </span>
+
           <span class="pastilla no" *ngIf="bloqueado(familiar)">Deshabilitado</span>
           <span class="pastilla no" *ngIf="!bloqueado(familiar) && !activo(familiar.activo)">
             Inactivo

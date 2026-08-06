@@ -25,6 +25,15 @@ public class InvitacionResponse {
     private String casaIdentificador;
     private String anfitrionNombre;
 
+    /**
+     * Si su ultimo paso por la porteria fue una ENTRADA: el invitado sigue en
+     * el conjunto. Es lo que responde "¿ya se fue?" sin llamar a la porteria.
+     *
+     * <p>Es lo que dice la bitacora, no una ubicacion: quien salio caminando
+     * sin escanear figura adentro hasta que vuelva a pasar.</p>
+     */
+    private boolean adentro;
+
     /** Identificador del link publico que se comparte con el invitado. */
     private String codigoPublico;
 

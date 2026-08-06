@@ -56,6 +56,7 @@ class InvitacionServiceImplTest {
     @Mock private GdResidenteCasaRepository residenteCasaRepository;
     @Mock private GdPersonaRepository personaRepository;
     @Mock private GdAccesoEventoRepository eventoRepository;
+    @Mock private PresenciaService presenciaService;
 
     @InjectMocks
     private InvitacionServiceImpl servicio;

@@ -314,6 +314,26 @@ section {
   color: var(--ok);
 }
 
+/* Verde apagado, no la pastilla de estado: "adentro" es información, no un
+   permiso ni una alarma. El punto lleva el peso y el texto lo confirma. */
+.presencia {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex: 0 0 auto;
+  padding: 0.15rem 0.55rem;
+  font-size: var(--t-xs);
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--ok);
+  background: var(--ok-soft);
+  border-radius: var(--r-full);
+
+  i {
+    font-size: 0.4rem;
+  }
+}
+
 /* Gris y no rojo: no está mal, es una persona registrada solo para la
    portería. Lo que hace falta es que se sepa, no que alarme. */
 .sin-cuenta {

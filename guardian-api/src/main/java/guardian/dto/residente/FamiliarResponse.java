@@ -37,6 +37,15 @@ public class FamiliarResponse {
      */
     private boolean tieneCuenta;
 
+    /**
+     * Si su ultimo paso por la porteria fue una ENTRADA. Es lo que responde
+     * "¿ya llego mi hijo?" sin tener que llamarlo.
+     *
+     * <p>Es lo que dice la bitacora, no una ubicacion: quien se fue caminando
+     * sin escanear sigue figurando adentro hasta que vuelva a pasar.</p>
+     */
+    private boolean adentro;
+
     /** Marca al propio solicitante para que la UI no le ofrezca inactivarse. */
     private boolean esUsuarioActual;
 }
