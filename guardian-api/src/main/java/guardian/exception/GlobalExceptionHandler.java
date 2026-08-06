@@ -4,11 +4,14 @@ import guardian.constant.MensajesGlobales;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Date;
 import java.util.List;
@@ -54,6 +57,34 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse(new Date(), HttpStatus.CONFLICT.value(),
                         MensajesGlobales.OPERACION_CRUZADA, null));
+    }
+
+    /**
+     * La peticion no se pudo leer: cuerpo JSON malformado o mal codificado, un
+     * {@code /{id}} con letras, un parametro obligatorio que no vino.
+     *
+     * <p>Todo esto es culpa de QUIEN LLAMA, y sin este handler caia en el
+     * catch-all y salia como 500. Un 500 dice "el servidor se rompio": levanta
+     * alertas de infraestructura por algo que no lo es, y deja un stack trace
+     * completo en el log por cada peticion basura que llegue —que en un
+     * endpoint publico son todas las que quiera mandar un escaner.</p>
+     *
+     * <p>Se registra la causa en una linea y sin stack: el tipo de excepcion ya
+     * dice que fue, y el detalle no se le devuelve al cliente porque describe
+     * la estructura interna de los DTO.</p>
+     */
+    @ExceptionHandler({
+            HttpMessageNotReadableException.class,
+            MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class
+    })
+    public ResponseEntity<ErrorResponse> manejarPeticionIlegible(Exception ex) {
+        log.warn("[error] peticion ilegible {}: {}",
+                ex.getClass().getSimpleName(), ex.getMessage());
+        return ResponseEntity
+                .badRequest()
+                .body(new ErrorResponse(new Date(), HttpStatus.BAD_REQUEST.value(),
+                        MensajesGlobales.PETICION_ILEGIBLE, null));
     }
 
     /**

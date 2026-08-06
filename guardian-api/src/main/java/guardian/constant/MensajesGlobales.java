@@ -231,4 +231,11 @@ public final class MensajesGlobales {
             "Ocurrio un error inesperado. Intenta de nuevo en unos minutos.";
     public static final String OPERACION_CRUZADA =
             "Otra persona hizo un cambio al mismo tiempo. Intenta de nuevo.";
+    /**
+     * El cuerpo o los parametros de la peticion no se pudieron leer. Es culpa
+     * de quien llama, no del servidor, asi que el mensaje no promete que
+     * reintentar vaya a servir de algo.
+     */
+    public static final String PETICION_ILEGIBLE =
+            "No pudimos leer los datos enviados.";
 }
