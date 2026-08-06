@@ -152,7 +152,18 @@ export class PorteriasComponent implements OnInit {
   /** Portería cuya lista de guardias está abierta. Null = hoja cerrada. */
   asignando: Porteria | null = null;
 
+  /**
+   * A partir de cuántos guardias aparece el buscador. Con cuatro nombres a la
+   * vista es un campo que estorba; con treinta, sin él no se encuentra a nadie.
+   */
+  readonly UMBRAL_BUSCADOR = 8;
+
   guardias: GuardiaPorteria[] = [];
+
+  /** Lo que la hoja pinta: los guardias que pasan el filtro del buscador. */
+  guardiasVisibles: GuardiaPorteria[] = [];
+
+  busquedaGuardia = '';
   cargandoGuardias = false;
 
   /** Marcados en la hoja. Un Set porque la pregunta es siempre "¿está?". */
@@ -161,14 +172,23 @@ export class PorteriasComponent implements OnInit {
   abrirGuardias(porteria: Porteria): void {
     this.asignando = porteria;
     this.guardias = [];
+    this.guardiasVisibles = [];
+    this.busquedaGuardia = '';
     this.marcados.clear();
     this.cargandoGuardias = true;
     this.error = null;
 
     this.admin.guardiasDePorteria(porteria.id).subscribe({
       next: guardias => {
-        this.guardias = guardias;
         guardias.filter(g => g.asignado).forEach(g => this.marcados.add(g.personaId));
+
+        // Los ya asignados arriba, y dentro de cada grupo el orden por apellido
+        // que trae el backend (el sort de JS es estable). Se ordena UNA vez, al
+        // abrir: si la lista se reacomodara al marcar, el siguiente nombre
+        // saltaría bajo el dedo y se marcaría a quien no era.
+        this.guardias = [...guardias]
+          .sort((a, b) => Number(b.asignado) - Number(a.asignado));
+        this.guardiasVisibles = this.guardias;
         this.cargandoGuardias = false;
       },
       error: () => {
@@ -177,6 +197,22 @@ export class PorteriasComponent implements OnInit {
         this.asignando = null;
       }
     });
+  }
+
+  /**
+   * Filtra por nombre o documento. Sin tildes a lado y lado: quien busca
+   * "yajaira" desde una tablet no escribe la tilde, y no encontrarla lo hace
+   * concluir que la persona no está registrada.
+   */
+  filtrarGuardias(): void {
+    const busqueda = this.sinTildes(this.busquedaGuardia).trim();
+    if (!busqueda) {
+      this.guardiasVisibles = this.guardias;
+      return;
+    }
+    this.guardiasVisibles = this.guardias.filter(g =>
+      this.sinTildes(g.nombreCompleto).includes(busqueda)
+      || g.documento.toLowerCase().includes(busqueda));
   }
 
   marcado(guardia: GuardiaPorteria): boolean {
@@ -193,6 +229,10 @@ export class PorteriasComponent implements OnInit {
 
   get cuantosMarcados(): number {
     return this.marcados.size;
+  }
+
+  private sinTildes(texto: string): string {
+    return texto.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
   }
 
   guardarGuardias(): void {

@@ -123,23 +123,46 @@
       <p>Este conjunto todavía no tiene guardias. Créalos en Personas, con cuenta de rol Guardia.</p>
     </div>
 
-    <div class="gd-lista" *ngIf="!cargandoGuardias && guardias.length">
-      <button type="button" class="gd-fila gd-presionable"
-              *ngFor="let g of guardias"
-              (click)="alternarMarcado(g)"
-              [attr.aria-pressed]="marcado(g)">
-        <i class="pi" [ngClass]="marcado(g) ? 'pi-check-square' : 'pi-stop'"
-           [class.marca]="marcado(g)" aria-hidden="true"></i>
-        <span class="etiqueta">
-          {{ g.nombreCompleto }}
-          <!-- Asignado pero ya sin cuenta de guardia: se ve para poder
-               quitarlo. Filtrarlo lo volvería invisible e imposible de
-               corregir desde la pantalla. -->
-          <small class="ya-no" *ngIf="!g.esGuardia">ya no es guardia</small>
-        </span>
-        <span class="gd-muted">{{ g.documento }}</span>
-      </button>
-    </div>
+    <ng-container *ngIf="!cargandoGuardias && guardias.length">
+      <!-- El buscador solo cuando hay suficientes para perderse: con cuatro
+           nombres a la vista es un campo que estorba. -->
+      <div class="buscador" *ngIf="guardias.length > UMBRAL_BUSCADOR">
+        <i class="pi pi-search" aria-hidden="true"></i>
+        <input type="search" [(ngModel)]="busquedaGuardia" (input)="filtrarGuardias()"
+               placeholder="Buscar por nombre o documento"
+               aria-label="Buscar guardia">
+      </div>
+
+      <!-- Cuántos van sobre cuántos hay: con la lista filtrada, el pie dice
+           "Guardar (3)" y sin este renglón no se sabe sobre qué total. -->
+      <p class="conteo">
+        {{ cuantosMarcados }} de {{ guardias.length }}
+        {{ guardias.length === 1 ? 'asignado' : 'asignados' }}
+      </p>
+
+      <div class="gd-vacio" *ngIf="guardiasVisibles.length === 0">
+        <i class="pi pi-search"></i>
+        <p>Nadie coincide con «{{ busquedaGuardia }}»</p>
+      </div>
+
+      <div class="gd-lista" *ngIf="guardiasVisibles.length">
+        <button type="button" class="gd-fila gd-presionable"
+                *ngFor="let g of guardiasVisibles"
+                (click)="alternarMarcado(g)"
+                [attr.aria-pressed]="marcado(g)">
+          <i class="pi" [ngClass]="marcado(g) ? 'pi-check-square' : 'pi-stop'"
+             [class.marca]="marcado(g)" aria-hidden="true"></i>
+          <span class="etiqueta">
+            {{ g.nombreCompleto }}
+            <!-- Asignado pero ya sin cuenta de guardia: se ve para poder
+                 quitarlo. Filtrarlo lo volvería invisible e imposible de
+                 corregir desde la pantalla. -->
+            <small class="ya-no" *ngIf="!g.esGuardia">ya no es guardia</small>
+          </span>
+          <span class="gd-muted">{{ g.documento }}</span>
+        </button>
+      </div>
+    </ng-container>
 
     <div pie>
       <button type="button" class="alterno" (click)="asignando = null">Cancelar</button>

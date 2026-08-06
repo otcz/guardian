@@ -83,3 +83,48 @@
   font-weight: 500;
   color: var(--warn);
 }
+
+/* Pegado arriba mientras la lista rueda: con treinta guardias, un buscador que
+   se va con el scroll obliga a subir hasta arriba para corregir la búsqueda.
+   El fondo es opaco porque las filas le pasan por debajo. */
+.buscador {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: var(--e-2) var(--e-3);
+  margin-bottom: var(--e-2);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-md);
+
+  &:focus-within {
+    border-color: var(--accent);
+  }
+
+  i {
+    color: var(--text-muted);
+  }
+
+  input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: var(--t-md);
+    color: var(--text-strong);
+
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+.conteo {
+  margin-bottom: var(--e-2);
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
