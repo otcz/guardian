@@ -160,6 +160,18 @@
             <label for="f-telefono">Teléfono</label>
             <input id="f-telefono" type="tel" formControlName="telefono">
           </div>
+          <!-- El correo es lo que le da cuenta: sin él la persona queda
+               registrada para la portería pero no puede abrir la aplicación. -->
+          <div class="campo">
+            <label for="f-email">
+              Correo
+              <i class="pi pi-info-circle ayuda"
+                 pTooltip="Con correo puede entrar a la aplicación"
+                 tooltipPosition="top"></i>
+            </label>
+            <input id="f-email" type="email" formControlName="email"
+                   placeholder="Vacío si no usará la aplicación">
+          </div>
         </div>
 
       </form>
@@ -195,6 +207,13 @@
               {{ etiquetaParentesco(familiar.parentesco) }}
               <ng-container *ngIf="familiar.edad !== null"> · {{ familiar.edad }} años</ng-container>
               · {{ familiar.tipoDocumento }} {{ familiar.documento | documento }}
+            </span>
+            <!-- Se dice en la fila y no se deja adivinar: sin cuenta la persona
+                 entra al conjunto pero no puede abrir la aplicación, y sin este
+                 renglón el titular la da de alta, el familiar intenta entrar
+                 con el PIN inicial y nadie entiende por qué lo rechazan. -->
+            <span class="sin-cuenta" *ngIf="!familiar.tieneCuenta">
+              <i class="pi pi-mobile"></i> No entra a la aplicación
             </span>
           </div>
 

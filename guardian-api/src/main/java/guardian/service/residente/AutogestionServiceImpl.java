@@ -13,11 +13,13 @@ import guardian.entity.vehiculo.GdVehiculo;
 import guardian.exception.GuardianException;
 import guardian.repository.GdCredencialQrRepository;
 import guardian.repository.GdResidenteCasaRepository;
+import guardian.repository.GdUsuarioRepository;
 import guardian.repository.GdVehiculoRepository;
 import guardian.security.UsuarioAutenticado;
 import guardian.service.admin.PersonaRegistrada;
 import guardian.service.admin.PersonaService;
 import guardian.service.admin.VehiculoService;
+import guardian.util.CorreoUtil;
 import guardian.util.EdadUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +41,7 @@ public class AutogestionServiceImpl implements AutogestionService {
 
     private final GdResidenteCasaRepository residenteCasaRepository;
     private final GdCredencialQrRepository credencialRepository;
+    private final GdUsuarioRepository usuarioRepository;
     private final GdVehiculoRepository vehiculoRepository;
     private final HogarDelResidente hogar;
     private final PersonaService personaService;
@@ -81,8 +84,20 @@ public class AutogestionServiceImpl implements AutogestionService {
         alta.setFechaNacimiento(request.getFechaNacimiento());
         alta.setFotoUrl(request.getFotoUrl());
         alta.setTelefono(request.getTelefono());
+        alta.setEmail(request.getEmail());
         alta.setCasaId(casa.getId());
         alta.setParentesco(request.getParentesco());
+
+        // Con correo, el familiar entra a la aplicacion: ve su QR, sus datos y
+        // los vehiculos de la casa. Sin cuenta quedaba registrado para el
+        // guardia pero no podia abrir la aplicacion, y el login le decia que su
+        // PIN era 0000 — una promesa que nadie cumplia.
+        //
+        // El rol se fija ACA y no se lee del request: si viniera de afuera, un
+        // titular podria crearse un ADMIN desde el celular.
+        if (CorreoUtil.normalizar(request.getEmail()) != null) {
+            alta.setRolUsuario(Codigos.ROL_RESIDENTE);
+        }
 
         PersonaRegistrada registrada = personaService.crear(alta, usuario);
         log.info("[autogestion] familiar agregado personaId={} casaId={} por={}",
@@ -176,6 +191,7 @@ public class AutogestionServiceImpl implements AutogestionService {
                 .bloqueado(persona.getBloqueado())
                 .motivoBloqueo(persona.getMotivoBloqueo())
                 .tieneCredencial(tieneCredencial)
+                .tieneCuenta(usuarioRepository.existsByPersonaId(persona.getId()))
                 .esUsuarioActual(persona.getId().equals(usuario.getPersonaId()))
                 .build();
     }

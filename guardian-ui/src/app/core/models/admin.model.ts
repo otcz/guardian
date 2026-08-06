@@ -274,6 +274,8 @@ export interface Familiar {
   bloqueado: string;
   motivoBloqueo: string | null;
   tieneCredencial: boolean;
+  /** Si puede entrar a la aplicación. Sin cuenta solo existe para la portería. */
+  tieneCuenta: boolean;
   esUsuarioActual: boolean;
 }
 
@@ -285,6 +287,8 @@ export interface FamiliarRequest {
   fechaNacimiento?: string | null;
   fotoUrl?: string | null;
   telefono?: string | null;
+  /** Con correo, el familiar recibe cuenta y entra a la aplicación. */
+  email?: string | null;
   parentesco: string;
 }
 

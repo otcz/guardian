@@ -314,6 +314,16 @@ section {
   color: var(--ok);
 }
 
+/* Gris y no rojo: no está mal, es una persona registrada solo para la
+   portería. Lo que hace falta es que se sepa, no que alarme. */
+.sin-cuenta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+
 /* Solo se muestra el estado excepcional: si todo está bien, no hay pastilla
    que leer. El ojo va directo a lo que necesita atención. */
 .pastilla {

@@ -159,6 +159,10 @@ export class MiHogarComponent implements OnInit {
     fechaNacimiento: [''],
     fotoUrl: [null as string | null],
     telefono: [''],
+    // Opcional a propósito: con correo el familiar recibe cuenta y entra a la
+    // aplicación; sin él queda registrado solo para la portería, que es el caso
+    // del niño que todavía no tiene correo propio.
+    email: ['', [Validators.email]],
     parentesco: ['', [Validators.required]]
   });
 
@@ -240,7 +244,10 @@ export class MiHogarComponent implements OnInit {
       .agregarFamiliar({
         ...datos,
         fechaNacimiento: datos.fechaNacimiento || null,
-        telefono: datos.telefono || null
+        telefono: datos.telefono || null,
+        // Cadena vacía y null significan lo mismo —no lo declaró— y el backend
+        // decide con esto si le crea cuenta o no.
+        email: datos.email || null
       })
       .subscribe({
         next: () => {
