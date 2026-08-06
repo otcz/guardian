@@ -65,16 +65,31 @@
     <thead>
       <tr>
         <th>Placa</th>
-        <th>Casa</th>
-        <th>Tipo</th>
-        <th>Marca</th>
-        <th>Color</th>
-        <th>Estado</th>
+        <th>Casa
+          <gd-filtro-columna campo="casa" [filtro]="filtro" [filas]="vehiculos"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+        </th>
+        <th>Tipo
+          <gd-filtro-columna campo="tipo" [filtro]="filtro" [filas]="vehiculos"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+        </th>
+        <th>Marca
+          <gd-filtro-columna campo="marca" [filtro]="filtro" [filas]="vehiculos"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+        </th>
+        <th>Color
+          <gd-filtro-columna campo="color" [filtro]="filtro" [filas]="vehiculos"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+        </th>
+        <th>Estado
+          <gd-filtro-columna campo="estado" [filtro]="filtro" [filas]="vehiculos"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+        </th>
         <th></th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let vehiculo of vehiculos" [class.inactiva]="!activo(vehiculo)">
+      <tr *ngFor="let vehiculo of visibles" [class.inactiva]="!activo(vehiculo)">
         <td class="fuerte">{{ vehiculo.placa }}</td>
         <td>{{ vehiculo.casaIdentificador }}</td>
         <td>{{ vehiculo.tipoNombre ?? vehiculo.tipo }}</td>

@@ -228,21 +228,33 @@
     <thead>
       <tr>
         <th></th>
-        <th>Persona</th>
+        <th>Persona
+          <gd-filtro-columna campo="rol" [filtro]="filtro" [filas]="personas"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+        </th>
         <th>Documento</th>
-        <th>Casa</th>
+        <th>Casa
+          <gd-filtro-columna campo="casa" [filtro]="filtro" [filas]="personas"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+        </th>
         <th>Edad</th>
         <th>QR</th>
         <!-- Dos columnas y no una: el registro dice si entra al CONJUNTO,
              el acceso si entra a la APLICACIÓN. Verlas juntas es lo que
              evita el "dice Activa pero no puede entrar". -->
-        <th>Registro</th>
-        <th>Acceso</th>
+        <th>Registro
+          <gd-filtro-columna campo="registro" [filtro]="filtro" [filas]="personas"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+        </th>
+        <th>Acceso
+          <gd-filtro-columna campo="acceso" [filtro]="filtro" [filas]="personas"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+        </th>
         <th></th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let persona of personas" [class.inactiva]="!activa(persona)">
+      <tr *ngFor="let persona of visibles" [class.inactiva]="!activa(persona)">
         <td class="celda-avatar">
           <span class="avatar">
             <img *ngIf="persona.fotoUrl" [src]="persona.fotoUrl | foto" [alt]="persona.nombreCompleto">

@@ -4,6 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { AdminService } from '../../../core/services/admin.service';
+import { FiltroTabla } from '../../../shared/tabla/filtro-tabla';
 import { AuthService } from '../../../core/services/auth.service';
 import { validadorPin } from '../../../core/validadores/pin.validador';
 import {
@@ -26,6 +27,26 @@ export class PersonasComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   personas: Persona[] = [];
+
+  /** Lo que la tabla pinta: las personas que pasan el autofiltro. */
+  visibles: Persona[] = [];
+
+  /**
+   * Autofiltro por columna, como en una hoja de cálculo.
+   *
+   * <p>Sin buscador propio: el de arriba ya pregunta al servidor, que es quien
+   * tiene TODAS las personas. Duplicarlo acá filtraría solo lo cargado y diría
+   * "no hay nadie" con la persona esperando en el servidor.</p>
+   */
+  readonly filtro = new FiltroTabla<Persona>(
+    {
+      rol: p => p.rol ?? 'Sin cuenta',
+      casa: p => p.casaIdentificador,
+      registro: p => this.estado(p),
+      acceso: p => this.estadoAcceso(p)
+    },
+    () => ''
+  );
   casas: Casa[] = [];
   parentescos: Parametro[] = [];
   roles: Parametro[] = [];
@@ -113,6 +134,7 @@ export class PersonasComponent implements OnInit {
     this.admin.personas(texto).subscribe({
       next: pagina => {
         this.personas = pagina.content;
+        this.filtrar();
         this.cargando = false;
       },
       error: () => {
@@ -209,6 +231,7 @@ export class PersonasComponent implements OnInit {
     this.admin.cambiarEstadoPersona(persona.id, persona.activo !== 'S').subscribe({
       next: actualizada => {
         this.personas = this.personas.map(p => (p.id === actualizada.id ? actualizada : p));
+        this.filtrar();
       },
       error: (fallo: HttpErrorResponse) => {
         this.error = fallo.error?.mensaje ?? 'No pudimos cambiar el estado.';
@@ -343,6 +366,11 @@ export class PersonasComponent implements OnInit {
   /** Sub-hoja para escribir el PIN. Se abre encima de la de acceso. */
   cambiandoClave = false;
 
+  /** Recalcula la lista visible. Se llama tras cargar y tras cada cambio. */
+  filtrar(): void {
+    this.visibles = this.filtro.aplicar(this.personas);
+  }
+
   tieneCuenta(persona: Persona): boolean {
     return persona.usuarioId !== null;
   }
@@ -475,6 +503,7 @@ export class PersonasComponent implements OnInit {
     const id = this.gestionandoAcceso?.id;
     this.admin.personas(this.texto).subscribe(pagina => {
       this.personas = pagina.content;
+      this.filtrar();
       this.gestionandoAcceso = this.personas.find(p => p.id === id) ?? null;
       if (this.gestionandoAcceso) {
         this.formularioAcceso.setValue({ rol: this.gestionandoAcceso.rol ?? '' });

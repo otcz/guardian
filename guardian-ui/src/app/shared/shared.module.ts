@@ -11,6 +11,7 @@ import { HojaComponent } from './hoja/hoja.component';
 import { BloqueoComponent } from './bloqueo/bloqueo.component';
 import { MotivoAccesoPipe } from './motivo-acceso.pipe';
 import { RangoFechasPipe } from './rango-fechas.pipe';
+import { FiltroColumnaComponent } from './tabla/filtro-columna.component';
 import { VolverComponent } from './volver/volver.component';
 
 @NgModule({
@@ -22,6 +23,7 @@ import { VolverComponent } from './volver/volver.component';
     BloqueoComponent,
     MotivoAccesoPipe,
     RangoFechasPipe,
+    FiltroColumnaComponent,
     VolverComponent
   ],
   imports: [CommonModule, FormsModule, TooltipModule, RouterModule],
@@ -33,6 +35,7 @@ import { VolverComponent } from './volver/volver.component';
     BloqueoComponent,
     MotivoAccesoPipe,
     RangoFechasPipe,
+    FiltroColumnaComponent,
     VolverComponent
   ]
 })

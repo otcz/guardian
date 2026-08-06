@@ -1,0 +1,34 @@
+<button type="button" class="gatillo"
+        [class.activo]="activo"
+        [attr.aria-expanded]="abierto"
+        [attr.aria-label]="'Filtrar por ' + campo"
+        (click)="alternarMenu()">
+  <i class="pi" [ngClass]="activo ? 'pi-filter-fill' : 'pi-filter'"></i>
+  <span class="cuantos" *ngIf="cuantos">{{ cuantos }}</span>
+</button>
+
+<div class="menu" *ngIf="abierto">
+  <!-- Buscador dentro del menú: una columna "Casa" de un conjunto real trae
+       cientos de valores, y sin él hay que rodarlos todos. -->
+  <div class="buscar">
+    <i class="pi pi-search"></i>
+    <input type="search" [(ngModel)]="busqueda" placeholder="Buscar" aria-label="Buscar valor">
+  </div>
+
+  <div class="valores">
+    <button type="button" class="valor"
+            *ngFor="let v of valores"
+            [class.marcado]="marcado(v)"
+            (click)="alternar(v)">
+      <i class="pi" [ngClass]="marcado(v) ? 'pi-check-square' : 'pi-stop'"></i>
+      <span>{{ v }}</span>
+    </button>
+
+    <p class="vacio" *ngIf="valores.length === 0">Sin coincidencias</p>
+  </div>
+
+  <div class="pie">
+    <button type="button" (click)="marcarTodos()">Marcar todo</button>
+    <button type="button" [disabled]="!activo" (click)="limpiar()">Quitar filtro</button>
+  </div>
+</div>

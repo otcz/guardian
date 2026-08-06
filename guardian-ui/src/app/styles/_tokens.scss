@@ -99,6 +99,9 @@
      inventa un 999 y a partir de ahí nadie sabe qué tapa a qué. */
   --z-cabecera: 20;
   --z-tabbar: 30;
+  /* Menús que cuelgan de una cabecera de tabla: por encima de la tabla y de la
+     barra, por debajo de una hoja — si una hoja está abierta, manda ella. */
+  --z-menu: 35;
   --z-hoja: 40;
   --z-sol: 60;
 

@@ -5,6 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AdminService } from '../../../core/services/admin.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Casa, Parametro, Vehiculo } from '../../../core/models/admin.model';
+import { FiltroTabla } from '../../../shared/tabla/filtro-tabla';
 
 @Component({
   selector: 'gd-admin-vehiculos',
@@ -18,6 +19,26 @@ export class VehiculosComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   vehiculos: Vehiculo[] = [];
+
+  /** Lo que la tabla pinta: los vehículos que pasan el autofiltro. */
+  visibles: Vehiculo[] = [];
+
+  /**
+   * Autofiltro por columna, como en una hoja de cálculo. Los valores del menú
+   * salen de las filas que hay, no de los catálogos: ofrecer "Moto" cuando
+   * nadie tiene moto obliga a probarlo para descubrir que está vacío.
+   */
+  readonly filtro = new FiltroTabla<Vehiculo>(
+    {
+      casa: v => v.casaIdentificador,
+      tipo: v => v.tipoNombre ?? v.tipo,
+      marca: v => v.marcaNombre,
+      color: v => v.colorNombre,
+      estado: v => this.estado(v)
+    },
+    v => `${v.placa} ${v.casaIdentificador} ${v.marcaNombre ?? ''} ${v.colorNombre ?? ''}`
+  );
+
   casas: Casa[] = [];
   tipos: Parametro[] = [];
   marcas: Parametro[] = [];
@@ -66,6 +87,7 @@ export class VehiculosComponent implements OnInit {
     this.admin.vehiculos().subscribe({
       next: vehiculos => {
         this.vehiculos = vehiculos;
+        this.filtrar();
         this.cargando = false;
       },
       error: () => {
@@ -126,6 +148,7 @@ export class VehiculosComponent implements OnInit {
     this.admin.cambiarEstadoVehiculo(vehiculo.id, vehiculo.activo !== 'S').subscribe({
       next: actualizado => {
         this.vehiculos = this.vehiculos.map(v => (v.id === actualizado.id ? actualizado : v));
+        this.filtrar();
       },
       error: (fallo: HttpErrorResponse) => {
         this.error = fallo.error?.mensaje ?? 'No pudimos cambiar el estado.';
@@ -198,6 +221,13 @@ export class VehiculosComponent implements OnInit {
         this.error = fallo.error?.mensaje ?? 'No pudimos levantar el bloqueo.';
       }
     });
+  }
+
+  // ── Autofiltro ───────────────────────────────────────────────────────────
+
+  /** Recalcula la lista visible. Se llama tras cargar y tras cada cambio. */
+  filtrar(): void {
+    this.visibles = this.filtro.aplicar(this.vehiculos);
   }
 
   // ── Estado de pantalla ───────────────────────────────────────────────────
