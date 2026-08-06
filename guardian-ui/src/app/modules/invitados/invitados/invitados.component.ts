@@ -34,20 +34,39 @@ export class InvitadosComponent implements OnInit {
   /** Invitación pendiente de confirmar su revocación. */
   invitacionARevocar: Invitacion | null = null;
 
-  /** Piso del selector de fecha: una visita no puede agendarse en el pasado. */
-  readonly hoy = this.hoyIso();
+  /** Piso del selector: una visita no puede agendarse en el pasado. */
+  readonly ahora = this.ahoraIso();
 
+  // Sin tope de ingresos: la visita la acota su ventana. El invitado que sale
+  // a comprar y vuelve gastaba su único cupo y se quedaba afuera.
   readonly formulario = this.fb.nonNullable.group({
     nombreInvitado: ['', [Validators.required]],
     documentoInvitado: ['', [Validators.required]],
     placa: [''],
-    fechaVisita: [this.hoyIso(), [Validators.required]],
-    usosMaximos: [1, [Validators.required, Validators.min(1), Validators.max(20)]]
+    inicio: [this.ahoraIso(), [Validators.required]],
+    fin: [this.finDelDiaIso(), [Validators.required]]
   });
 
-  get fechaEnPasado(): boolean {
-    const campo = this.formulario.controls.fechaVisita;
-    return campo.touched && campo.value < this.hoy;
+  get inicioEnPasado(): boolean {
+    const campo = this.formulario.controls.inicio;
+    return campo.touched && campo.value < this.ahoraIso();
+  }
+
+  get finAntesDelInicio(): boolean {
+    const fin = this.formulario.controls.fin;
+    return fin.touched && fin.value <= this.formulario.controls.inicio.value;
+  }
+
+  /**
+   * Al correr el inicio, el fin lo sigue hasta el final de ESE día. Quien
+   * invita para el sábado no tiene que corregir dos campos para decir una sola
+   * cosa, y un fin que quedó antes del inicio nunca llega al servidor.
+   */
+  alCambiarInicio(): void {
+    const inicio = this.formulario.controls.inicio.value;
+    if (this.formulario.controls.fin.value <= inicio) {
+      this.formulario.controls.fin.setValue(`${inicio.slice(0, 10)}T23:59`);
+    }
   }
 
   constructor(private readonly residente: ResidenteService) {}
@@ -84,19 +103,20 @@ export class InvitadosComponent implements OnInit {
     }
 
     const datos = this.formulario.getRawValue();
-    if (datos.fechaVisita < this.hoyIso()) {
-      this.formulario.controls.fechaVisita.markAsTouched();
+    if (datos.fin <= datos.inicio) {
+      this.formulario.controls.fin.markAsTouched();
       return;
     }
     this.guardando = true;
     this.error = null;
 
-    // La visita es "ese día completo": desde las 00:00 si es una fecha futura
-    // (o ahora si es hoy) hasta la medianoche. Las horas van CON el offset
-    // local: sin él, el backend las leería como UTC y la invitación moriría
-    // horas antes de la medianoche real del conjunto.
-    const esHoy = datos.fechaVisita === this.hoyIso();
-    const desde = esHoy ? null : this.conOffsetLocal(datos.fechaVisita, '00:00:00');
+    // "Ya" se manda como null y no como el instante que marcaba el reloj cuando
+    // se abrió el formulario: entre abrirlo y guardarlo pasan minutos, y ese
+    // inicio ya vencido nacería en el pasado. El backend lo lee como "desde
+    // ahora". Las horas van CON el offset local: sin él, el servidor las leería
+    // como UTC y la invitación moriría horas antes de lo que dice la pantalla.
+    const empiezaYa = datos.inicio <= this.ahoraIso();
+    const desde = empiezaYa ? null : this.conOffsetLocal(datos.inicio);
 
     this.residente
       .crearInvitacion({
@@ -104,14 +124,13 @@ export class InvitadosComponent implements OnInit {
         documentoInvitado: datos.documentoInvitado,
         placa: datos.placa || null,
         vigenciaDesde: desde,
-        vigenciaHasta: this.conOffsetLocal(datos.fechaVisita, '23:59:59'),
-        usosMaximos: datos.usosMaximos
+        vigenciaHasta: this.conOffsetLocal(datos.fin)
       })
       .subscribe({
         next: creada => {
           this.guardando = false;
           this.mostrarAlta = false;
-          this.formulario.reset({ fechaVisita: this.hoyIso(), usosMaximos: 1 });
+          this.formulario.reset({ inicio: this.ahoraIso(), fin: this.finDelDiaIso() });
           this.cargar();
           // Abrir el QR de una vez: crear y compartir son un solo gesto.
           this.qrAbierto = creada;
@@ -227,20 +246,38 @@ export class InvitadosComponent implements OnInit {
     return invitacion.estado === 'VIGENTE' || invitacion.estado === 'NO_VIGENTE';
   }
 
-  private hoyIso(): string {
-    const hoy = new Date();
-    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-    const dia = String(hoy.getDate()).padStart(2, '0');
-    return `${hoy.getFullYear()}-${mes}-${dia}`;
+  // La ventana de la visita se pinta con el pipe rangoFechas: lo comparten
+  // esta pantalla, la página del invitado y la tabla del administrador.
+
+  /** Ahora mismo, en el formato que entiende un `datetime-local`. */
+  private ahoraIso(): string {
+    return this.aValorLocal(new Date());
   }
 
-  /** `2026-08-01` + `23:59:59` → `2026-08-01T23:59:59-05:00` (offset real del dispositivo). */
-  private conOffsetLocal(fecha: string, hora: string): string {
-    const minutos = -new Date(`${fecha}T12:00:00`).getTimezoneOffset();
+  /**
+   * El final del día de hoy. Es el fin por defecto: la visita típica se acaba
+   * ese mismo día, y quien la quiera más larga corre la fecha.
+   */
+  private finDelDiaIso(): string {
+    const hoy = new Date();
+    return `${this.aValorLocal(hoy).slice(0, 10)}T23:59`;
+  }
+
+  private aValorLocal(momento: Date): string {
+    const mes = String(momento.getMonth() + 1).padStart(2, '0');
+    const dia = String(momento.getDate()).padStart(2, '0');
+    const hh = String(momento.getHours()).padStart(2, '0');
+    const mm = String(momento.getMinutes()).padStart(2, '0');
+    return `${momento.getFullYear()}-${mes}-${dia}T${hh}:${mm}`;
+  }
+
+  /** `2026-08-01T23:59` → `2026-08-01T23:59:00-05:00` (offset real del dispositivo). */
+  private conOffsetLocal(valorLocal: string): string {
+    const minutos = -new Date(`${valorLocal.slice(0, 10)}T12:00:00`).getTimezoneOffset();
     const signo = minutos >= 0 ? '+' : '-';
     const absolutos = Math.abs(minutos);
     const hh = String(Math.floor(absolutos / 60)).padStart(2, '0');
     const mm = String(absolutos % 60).padStart(2, '0');
-    return `${fecha}T${hora}${signo}${hh}:${mm}`;
+    return `${valorLocal}:00${signo}${hh}:${mm}`;
   }
 }

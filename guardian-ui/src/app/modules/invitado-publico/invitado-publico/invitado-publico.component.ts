@@ -44,6 +44,7 @@ export class InvitadoPublicoComponent implements OnInit {
   get textoEstado(): string {
     switch (this.invitacion?.estado) {
       case 'NO_VIGENTE': return 'Tu invitación aún no está vigente.';
+      // Solo lo ven invitaciones viejas: las nuevas no tienen tope de entradas.
       case 'AGOTADA': return 'Esta invitación ya usó todos sus ingresos.';
       case 'VENCIDA': return 'Esta invitación ya venció.';
       case 'REVOCADA': return 'Esta invitación fue cancelada.';

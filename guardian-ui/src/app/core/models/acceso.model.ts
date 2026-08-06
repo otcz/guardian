@@ -73,8 +73,6 @@ export interface Invitacion {
   placa: string | null;
   vigenciaDesde: string;
   vigenciaHasta: string;
-  usosMaximos: number;
-  usosRealizados: number;
   estado: EstadoInvitacion;
   casaIdentificador: string;
   anfitrionNombre: string;
@@ -86,9 +84,9 @@ export interface InvitacionRequest {
   nombreInvitado: string;
   documentoInvitado: string;
   placa?: string | null;
+  /** La ventana de la visita. Sin tope de entradas: dentro de ella entra y sale. */
   vigenciaDesde?: string | null;
   vigenciaHasta?: string | null;
-  usosMaximos?: number | null;
 }
 
 /** Lo que ve el invitado al abrir el link, sin sesión. */
@@ -98,7 +96,6 @@ export interface InvitacionPublica {
   anfitrionNombre: string;
   vigenciaDesde: string;
   vigenciaHasta: string;
-  usosRestantes: number;
   estado: EstadoInvitacion;
   payload: string;
 }

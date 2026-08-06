@@ -45,6 +45,9 @@ import java.util.Date;
 )
 public class GdInvitacion extends BaseEntity {
 
+    /** Sin tope de entradas: la ventana de vigencia es todo el control. */
+    public static final int SIN_LIMITE = 0;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
@@ -84,10 +87,20 @@ public class GdInvitacion extends BaseEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date vigenciaHasta;
 
-    /** Cuantas ENTRADAS permite. La salida nunca consume uso. */
+    /**
+     * Tope de ENTRADAS. Ya no se pide al invitar: la visita la acota su
+     * ventana de vigencia, no un contador — quien viene el sabado puede
+     * entrar, salir a comprar y volver sin que nadie le lleve la cuenta.
+     *
+     * <p>La columna sigue existiendo, con {@link #SIN_LIMITE}, por dos
+     * razones: es NOT NULL y el esquema se actualiza solo (nunca borra
+     * columnas), y las invitaciones emitidas ANTES de este cambio se
+     * repartieron prometiendo "una sola entrada". Esas se siguen respetando.</p>
+     */
     @Column(name = "USOS_MAXIMOS", nullable = false)
     private Integer usosMaximos;
 
+    /** Cuantas veces entro de verdad. La salida nunca cuenta. */
     @Column(name = "USOS_REALIZADOS", nullable = false)
     private Integer usosRealizados;
 
@@ -117,7 +130,12 @@ public class GdInvitacion extends BaseEntity {
         return ahora.after(vigenciaHasta);
     }
 
+    /**
+     * Solo se agota lo que nacio con tope. Las invitaciones nuevas llevan
+     * {@link #SIN_LIMITE} y nunca entran por aca.
+     */
     public boolean agotada() {
-        return usosRealizados >= usosMaximos;
+        return usosMaximos != null && usosMaximos > SIN_LIMITE
+                && usosRealizados >= usosMaximos;
     }
 }

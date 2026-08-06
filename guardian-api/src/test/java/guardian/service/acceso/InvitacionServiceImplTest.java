@@ -67,7 +67,6 @@ class InvitacionServiceImplTest {
     void preparar() {
         ReflectionTestUtils.setField(servicio, "secretoHmac", SECRETO);
         ReflectionTestUtils.setField(servicio, "diasVigenciaMaxima", 30L);
-        ReflectionTestUtils.setField(servicio, "usosMaximosTope", 20);
 
         anfitrion = new UsuarioAutenticado(1L, 50L, 1L, "123", "Ana Diaz", "RESIDENTE");
 
@@ -108,7 +107,7 @@ class InvitacionServiceImplTest {
     // ── Creacion y topes ─────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("sin fechas: desde ahora hasta la medianoche, 1 uso")
+    @DisplayName("sin fechas: desde ahora hasta la medianoche, sin tope de entradas")
     void defaultsDeCreacion() {
         InvitacionRequest request = requestBase();
 
@@ -121,8 +120,30 @@ class InvitacionServiceImplTest {
         org.mockito.Mockito.verify(invitacionRepository).save(captor.capture());
         GdInvitacion creada = captor.getValue();
 
-        assertThat(creada.getUsosMaximos()).isEqualTo(1);
+        // Sin tope: la visita la acota su ventana, no un contador de entradas.
+        assertThat(creada.getUsosMaximos()).isEqualTo(GdInvitacion.SIN_LIMITE);
+        assertThat(creada.agotada()).isFalse();
         assertThat(creada.getVigenciaHasta()).isAfter(creada.getVigenciaDesde());
+    }
+
+    @Test
+    @DisplayName("la invitacion nueva no se agota por entrar muchas veces")
+    void sinTopeNoSeAgota() {
+        GdInvitacion nueva = new GdInvitacion();
+        nueva.setUsosMaximos(GdInvitacion.SIN_LIMITE);
+        nueva.setUsosRealizados(37);
+
+        assertThat(nueva.agotada()).isFalse();
+    }
+
+    @Test
+    @DisplayName("las invitaciones viejas con tope se siguen respetando")
+    void elTopeViejoSigueValiendo() {
+        GdInvitacion vieja = new GdInvitacion();
+        vieja.setUsosMaximos(1);
+        vieja.setUsosRealizados(1);
+
+        assertThat(vieja.agotada()).isTrue();
     }
 
     @Test

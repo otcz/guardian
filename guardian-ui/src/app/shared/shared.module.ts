@@ -10,6 +10,7 @@ import { DocumentoPipe } from './documento.pipe';
 import { HojaComponent } from './hoja/hoja.component';
 import { BloqueoComponent } from './bloqueo/bloqueo.component';
 import { MotivoAccesoPipe } from './motivo-acceso.pipe';
+import { RangoFechasPipe } from './rango-fechas.pipe';
 import { VolverComponent } from './volver/volver.component';
 
 @NgModule({
@@ -20,6 +21,7 @@ import { VolverComponent } from './volver/volver.component';
     HojaComponent,
     BloqueoComponent,
     MotivoAccesoPipe,
+    RangoFechasPipe,
     VolverComponent
   ],
   imports: [CommonModule, FormsModule, TooltipModule, RouterModule],
@@ -30,6 +32,7 @@ import { VolverComponent } from './volver/volver.component';
     HojaComponent,
     BloqueoComponent,
     MotivoAccesoPipe,
+    RangoFechasPipe,
     VolverComponent
   ]
 })

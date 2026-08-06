@@ -44,7 +44,6 @@ public class InvitacionServiceImpl implements InvitacionService {
     private static final String PREFIJO = "GRDI";
     private static final String SEPARADOR = ".";
     private static final int PARTES_ESPERADAS = 3;
-    private static final int USOS_POR_DEFECTO = 1;
 
     /** Estados derivados que consume la UI. Nunca se almacenan. */
     private static final String ESTADO_VIGENTE = "VIGENTE";
@@ -67,9 +66,6 @@ public class InvitacionServiceImpl implements InvitacionService {
 
     @Value("${guardian.invitacion.dias-vigencia-maxima}")
     private long diasVigenciaMaxima;
-
-    @Value("${guardian.invitacion.usos-maximos-tope}")
-    private int usosMaximosTope;
 
     // ── Creacion y gestion del anfitrion ─────────────────────────────────────
 
@@ -101,9 +97,6 @@ public class InvitacionServiceImpl implements InvitacionService {
         if (hasta.getTime() - desde.getTime() > diasVigenciaMaxima * MILIS_POR_DIA) {
             throw GuardianException.solicitudInvalida(MensajesGlobales.INVITACION_MUY_LARGA);
         }
-        if (request.getUsosMaximos() != null && request.getUsosMaximos() > usosMaximosTope) {
-            throw GuardianException.solicitudInvalida(MensajesGlobales.INVITACION_MUY_LARGA);
-        }
 
         String codigo = UUID.randomUUID().toString();
 
@@ -116,8 +109,10 @@ public class InvitacionServiceImpl implements InvitacionService {
         invitacion.setPlaca(normalizarPlaca(request.getPlaca()));
         invitacion.setVigenciaDesde(desde);
         invitacion.setVigenciaHasta(hasta);
-        invitacion.setUsosMaximos(request.getUsosMaximos() != null
-                ? request.getUsosMaximos() : USOS_POR_DEFECTO);
+        // Sin tope de entradas: lo que acota la visita es su ventana. El
+        // invitado del sabado puede salir a comprar y volver, y hasta ahora eso
+        // gastaba su unico cupo y lo dejaba afuera.
+        invitacion.setUsosMaximos(GdInvitacion.SIN_LIMITE);
         invitacion.setUsosRealizados(0);
         invitacion.setCodigoPublico(codigo);
         invitacion.setFirmaHash(HmacUtil.firmar(codigo, secretoHmac));
@@ -125,8 +120,8 @@ public class InvitacionServiceImpl implements InvitacionService {
         invitacion.setUsuarioCreador(anfitrion.getDocumento());
 
         GdInvitacion guardada = invitacionRepository.save(invitacion);
-        log.info("[invitacion] creada id={} casaId={} anfitrionId={} usos={}",
-                guardada.getId(), casa.getId(), persona.getId(), guardada.getUsosMaximos());
+        log.info("[invitacion] creada id={} casaId={} anfitrionId={} desde={} hasta={}",
+                guardada.getId(), casa.getId(), persona.getId(), desde, hasta);
 
         return mapear(guardada);
     }
@@ -208,8 +203,6 @@ public class InvitacionServiceImpl implements InvitacionService {
                 .anfitrionNombre(util ? invitacion.getAnfitrion().getNombreCompleto() : null)
                 .vigenciaDesde(invitacion.getVigenciaDesde())
                 .vigenciaHasta(invitacion.getVigenciaHasta())
-                .usosRestantes(Math.max(0,
-                        invitacion.getUsosMaximos() - invitacion.getUsosRealizados()))
                 .estado(estado)
                 .payload(util ? construirPayload(invitacion) : null)
                 .build();
@@ -320,8 +313,6 @@ public class InvitacionServiceImpl implements InvitacionService {
                 .placa(invitacion.getPlaca())
                 .vigenciaDesde(invitacion.getVigenciaDesde())
                 .vigenciaHasta(invitacion.getVigenciaHasta())
-                .usosMaximos(invitacion.getUsosMaximos())
-                .usosRealizados(invitacion.getUsosRealizados())
                 .estado(estadoDe(invitacion))
                 .casaIdentificador(invitacion.getCasa().getIdentificador())
                 .anfitrionNombre(invitacion.getAnfitrion().getNombreCompleto())

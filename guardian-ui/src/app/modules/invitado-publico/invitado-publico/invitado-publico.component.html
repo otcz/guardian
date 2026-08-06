@@ -35,13 +35,11 @@
       </p>
 
       <div class="detalles">
+        <!-- La ventana completa y no solo el último día: el invitado necesita
+             saber desde cuándo puede llegar, no solo hasta cuándo. -->
         <span>
           <i class="pi pi-calendar"></i>
-          Válida el {{ invitacion.vigenciaHasta | date:'dd/MM/yyyy' }}
-        </span>
-        <span>
-          <i class="pi pi-sign-in"></i>
-          {{ invitacion.usosRestantes }} ingreso(s) disponible(s)
+          Válida {{ invitacion.vigenciaDesde | rangoFechas:invitacion.vigenciaHasta }}
         </span>
       </div>
 

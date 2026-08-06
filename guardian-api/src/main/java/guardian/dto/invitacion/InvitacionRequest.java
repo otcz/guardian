@@ -2,8 +2,6 @@ package guardian.dto.invitacion;
 
 import lombok.Data;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -39,8 +37,6 @@ public class InvitacionRequest {
     /** Null = hasta el final del dia de la vigencia inicial. */
     private Date vigenciaHasta;
 
-    /** Null = 1 (un solo ingreso). */
-    @Min(value = 1, message = "Minimo un ingreso")
-    @Max(value = 20, message = "Maximo 20 ingresos")
-    private Integer usosMaximos;
+    // El tope de ingresos ya no se pide: la visita la acota su ventana. Quien
+    // viene el sabado puede salir a comprar y volver sin gastar un cupo.
 }

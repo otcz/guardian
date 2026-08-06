@@ -37,19 +37,25 @@
             <input id="i-documento" type="text" inputmode="numeric"
                    formControlName="documentoInvitado" placeholder="Ej: 1020304050">
           </div>
+          <!-- Con hora, y no un día suelto: la visita de las 7 de la noche no
+               tiene por qué valer desde las 6 de la mañana, y la mamá que viene
+               el viernes y se va el domingo es una sola invitación. -->
           <div class="campo">
-            <label for="i-fecha">Día de la visita</label>
-            <input id="i-fecha" type="date" formControlName="fechaVisita" [min]="hoy">
-            <small class="error" *ngIf="fechaEnPasado">La visita no puede ser en el pasado</small>
+            <label for="i-inicio">Inicio</label>
+            <input id="i-inicio" type="datetime-local" formControlName="inicio"
+                   [min]="ahora" (change)="alCambiarInicio()">
+            <small class="error" *ngIf="inicioEnPasado">La visita no puede ser en el pasado</small>
           </div>
           <div class="campo">
-            <label for="i-usos">
-              Ingresos
+            <label for="i-fin">
+              Fin
               <i class="pi pi-info-circle ayuda"
-                 pTooltip="Cuántas veces puede entrar"
+                 pTooltip="Puede entrar y salir hasta esa hora"
                  tooltipPosition="top"></i>
             </label>
-            <input id="i-usos" type="number" min="1" max="20" formControlName="usosMaximos">
+            <input id="i-fin" type="datetime-local" formControlName="fin"
+                   [min]="formulario.controls.inicio.value">
+            <small class="error" *ngIf="finAntesDelInicio">El fin tiene que ser después del inicio</small>
           </div>
           <div class="campo">
             <label for="i-placa">Placa</label>
@@ -81,9 +87,7 @@
 
         <strong class="qr-nombre">{{ qrAbierto.nombreInvitado }}</strong>
         <span class="gd-muted">
-          {{ qrAbierto.casaIdentificador }} ·
-          {{ qrAbierto.vigenciaHasta | date:'d MMM' }} ·
-          {{ qrAbierto.usosMaximos - qrAbierto.usosRealizados }} ingreso(s)
+          {{ qrAbierto.casaIdentificador }} · {{ qrAbierto.vigenciaDesde | rangoFechas:qrAbierto.vigenciaHasta }}
         </span>
 
         <p class="instruccion">
@@ -142,9 +146,11 @@
 
         <div class="datos">
           <strong>{{ invitacion.nombreInvitado }}</strong>
+          <!-- La ventana y la placa. Cuántas veces entró no va acá: eso lo
+               responde la bitácora, con hora y portería, que es información de
+               verdad y no un contador suelto. -->
           <span class="detalle">
-            {{ invitacion.vigenciaHasta | date:'d MMM' }} ·
-            {{ invitacion.usosRealizados }}/{{ invitacion.usosMaximos }} ingresos
+            {{ invitacion.vigenciaDesde | rangoFechas:invitacion.vigenciaHasta }}
             <ng-container *ngIf="invitacion.placa"> · {{ invitacion.placa }}</ng-container>
           </span>
         </div>

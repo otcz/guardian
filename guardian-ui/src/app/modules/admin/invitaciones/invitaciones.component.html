@@ -19,7 +19,6 @@
         <th>Casa</th>
         <th>Anfitrión</th>
         <th>Vigencia</th>
-        <th>Ingresos</th>
         <th>Placa</th>
         <th>Estado</th>
         <th></th>
@@ -32,8 +31,7 @@
         <td>{{ invitacion.documentoInvitado }}</td>
         <td>{{ invitacion.casaIdentificador }}</td>
         <td>{{ invitacion.anfitrionNombre }}</td>
-        <td>{{ invitacion.vigenciaHasta | date:'dd/MM/yyyy' }}</td>
-        <td>{{ invitacion.usosRealizados }}/{{ invitacion.usosMaximos }}</td>
+        <td>{{ invitacion.vigenciaDesde | rangoFechas:invitacion.vigenciaHasta }}</td>
         <td>{{ invitacion.placa ?? '—' }}</td>
         <td>
           <span class="pastilla"

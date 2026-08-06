@@ -19,7 +19,6 @@ public class InvitacionPublicaResponse {
     private String anfitrionNombre;
     private Date vigenciaDesde;
     private Date vigenciaHasta;
-    private Integer usosRestantes;
     private String estado;
 
     /** Contenido del QR que la pagina publica dibuja. */

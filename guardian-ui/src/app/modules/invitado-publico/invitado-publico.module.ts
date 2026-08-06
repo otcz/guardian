@@ -4,6 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { QRCodeModule } from 'angularx-qrcode';
 
 import { InvitadoPublicoComponent } from './invitado-publico/invitado-publico.component';
+import { SharedModule } from '../../shared/shared.module';
 
 const routes: Routes = [{ path: ':codigo', component: InvitadoPublicoComponent }];
 
@@ -13,6 +14,6 @@ const routes: Routes = [{ path: ':codigo', component: InvitadoPublicoComponent }
  */
 @NgModule({
   declarations: [InvitadoPublicoComponent],
-  imports: [CommonModule, QRCodeModule, RouterModule.forChild(routes)]
+  imports: [CommonModule, SharedModule, QRCodeModule, RouterModule.forChild(routes)]
 })
 export class InvitadoPublicoModule { }

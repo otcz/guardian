@@ -18,8 +18,6 @@ public class InvitacionResponse {
     private String placa;
     private Date vigenciaDesde;
     private Date vigenciaHasta;
-    private Integer usosMaximos;
-    private Integer usosRealizados;
 
     /** VIGENTE | NO_VIGENTE | AGOTADA | VENCIDA | REVOCADA — derivado, no almacenado. */
     private String estado;
