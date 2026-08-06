@@ -368,8 +368,17 @@
         </td>
       </tr>
 
-      <tr *ngIf="personas.length === 0">
-        <td colspan="9" class="vacio">No encontramos personas con ese criterio.</td>
+      <tr *ngIf="visibles.length === 0">
+        <td colspan="9" class="vacio">
+          <ng-container *ngIf="personas.length === 0">
+            No encontramos personas con ese criterio.
+          </ng-container>
+          <!-- Hay personas cargadas pero ninguna pasa los embudos: se resuelve
+               quitando el filtro, no cambiando la búsqueda de arriba. -->
+          <ng-container *ngIf="personas.length > 0">
+            Ninguna persona coincide con el filtro de las columnas.
+          </ng-container>
+        </td>
       </tr>
     </tbody>
   </table>

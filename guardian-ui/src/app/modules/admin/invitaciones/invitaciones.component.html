@@ -9,6 +9,14 @@
 
   <div class="aviso-ok" *ngIf="aviso">{{ aviso }}</div>
   <div class="aviso-error" *ngIf="error">{{ error }}</div>
+  <!-- El buscador mira todas las columnas a la vez; los embudos de la
+       cabecera acotan una por una. Se usan juntos.  -->
+  <div class="busqueda">
+    <i class="pi pi-search"></i>
+    <input type="search" [(ngModel)]="filtro.busqueda" (ngModelChange)="filtrar()"
+           placeholder="Buscar por invitado, documento, placa o anfitrión">
+  </div>
+
   <p class="gd-muted" *ngIf="cargando">Cargando…</p>
 
   <table class="tabla gd-card" *ngIf="!cargando">
@@ -16,16 +24,28 @@
       <tr>
         <th>Invitado</th>
         <th>Documento</th>
-        <th>Casa</th>
-        <th>Anfitrión</th>
+        <th>Casa
+          <gd-filtro-columna campo="casa" [filtro]="filtro" [filas]="invitaciones"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+        </th>
+        <th>Anfitrión
+          <gd-filtro-columna campo="anfitrion" [filtro]="filtro" [filas]="invitaciones"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+        </th>
         <th>Vigencia</th>
-        <th>Placa</th>
-        <th>Estado</th>
+        <th>Placa
+          <gd-filtro-columna campo="llegada" [filtro]="filtro" [filas]="invitaciones"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+        </th>
+        <th>Estado
+          <gd-filtro-columna campo="estado" [filtro]="filtro" [filas]="invitaciones"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+        </th>
         <th></th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let invitacion of invitaciones"
+      <tr *ngFor="let invitacion of visibles"
           [class.inactiva]="!revocable(invitacion)">
         <td class="fuerte">{{ invitacion.nombreInvitado }}</td>
         <td>{{ invitacion.documentoInvitado }}</td>
@@ -65,8 +85,18 @@
         </td>
       </tr>
 
-      <tr *ngIf="invitaciones.length === 0">
-        <td colspan="9" class="vacio">Ningún residente ha creado invitaciones.</td>
+      <!-- Se distinguen los dos vacíos: "no hay ninguna" es un hecho del
+           conjunto, y "no hay ninguna QUE COINCIDA" se resuelve quitando el
+           filtro. Con un solo mensaje, el segundo se lee como el primero. -->
+      <tr *ngIf="visibles.length === 0">
+        <td colspan="9" class="vacio">
+          <ng-container *ngIf="invitaciones.length === 0">
+            Ningún residente ha creado invitaciones.
+          </ng-container>
+          <ng-container *ngIf="invitaciones.length > 0">
+            Ninguna invitación coincide con el filtro.
+          </ng-container>
+        </td>
       </tr>
     </tbody>
   </table>

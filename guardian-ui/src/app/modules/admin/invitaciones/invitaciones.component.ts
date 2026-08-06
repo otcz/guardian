@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { AdminService } from '../../../core/services/admin.service';
+import { FiltroTabla } from '../../../shared/tabla/filtro-tabla';
 import { AuthService } from '../../../core/services/auth.service';
 import { EstadoInvitacion, Invitacion } from '../../../core/models/acceso.model';
 
@@ -27,6 +28,24 @@ export class InvitacionesComponent implements OnInit {
   private readonly auth = inject(AuthService);
 
   invitaciones: Invitacion[] = [];
+
+  /** Lo que la tabla pinta: las invitaciones que pasan el autofiltro. */
+  visibles: Invitacion[] = [];
+
+  /**
+   * Autofiltro por columna. Sin filtro por invitado ni documento —cada valor
+   * dejaría una sola fila— y con uno sobre la placa vuelto pregunta útil: si
+   * el visitante llegó en carro o a pie.
+   */
+  readonly filtro = new FiltroTabla<Invitacion>(
+    {
+      casa: i => i.casaIdentificador,
+      anfitrion: i => i.anfitrionNombre,
+      llegada: i => (i.placa ? 'En vehículo' : 'A pie'),
+      estado: i => this.etiquetaEstado(i.estado)
+    },
+    i => `${i.nombreInvitado} ${i.documentoInvitado} ${i.placa ?? ''} ${i.anfitrionNombre}`
+  );
   cargando = true;
   error: string | null = null;
   aviso: string | null = null;
@@ -54,6 +73,7 @@ export class InvitacionesComponent implements OnInit {
     this.admin.invitaciones().subscribe({
       next: invitaciones => {
         this.invitaciones = invitaciones;
+        this.filtrar();
         this.cargando = false;
       },
       error: () => {
@@ -109,6 +129,11 @@ export class InvitacionesComponent implements OnInit {
       this.aviso = `Link de ${invitacion.nombreInvitado} copiado.`;
       setTimeout(() => (this.aviso = null), 4000);
     });
+  }
+
+  /** Recalcula la lista visible. Se llama tras cargar y tras cada cambio. */
+  filtrar(): void {
+    this.visibles = this.filtro.aplicar(this.invitaciones);
   }
 
   etiquetaEstado(estado: EstadoInvitacion): string {

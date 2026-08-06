@@ -59,6 +59,14 @@
 
   <div class="aviso-error" *ngIf="error">{{ error }}</div>
 
+  <!-- El buscador mira todas las columnas a la vez; los embudos de la
+       cabecera acotan una por una. Se usan juntos.  -->
+  <div class="busqueda">
+    <i class="pi pi-search"></i>
+    <input type="search" [(ngModel)]="filtro.busqueda" (ngModelChange)="filtrar()"
+           placeholder="Buscar por placa, casa, marca o color">
+  </div>
+
   <p class="gd-muted" *ngIf="cargando">Cargando…</p>
 
   <table class="tabla gd-card" *ngIf="!cargando">
@@ -146,8 +154,18 @@
         </td>
       </tr>
 
-      <tr *ngIf="vehiculos.length === 0">
-        <td colspan="7" class="vacio">Todavía no hay vehículos registrados.</td>
+      <!-- Se distinguen los dos vacíos: "no hay ninguno" se resuelve
+           registrando, y "no hay ninguno QUE COINCIDA" quitando el filtro.
+           Con un solo mensaje, el segundo se lee como el primero. -->
+      <tr *ngIf="visibles.length === 0">
+        <td colspan="7" class="vacio">
+          <ng-container *ngIf="vehiculos.length === 0">
+            Todavía no hay vehículos registrados.
+          </ng-container>
+          <ng-container *ngIf="vehiculos.length > 0">
+            Ningún vehículo coincide con el filtro.
+          </ng-container>
+        </td>
       </tr>
     </tbody>
   </table>

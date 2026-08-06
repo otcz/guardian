@@ -3,6 +3,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { AdminService } from '../../../core/services/admin.service';
+import { FiltroTabla } from '../../../shared/tabla/filtro-tabla';
 import { Casa, ImportacionCasas, Parametro } from '../../../core/models/admin.model';
 
 @Component({
@@ -16,6 +17,25 @@ export class CasasComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   casas: Casa[] = [];
+
+  /** Lo que la tabla pinta: las casas que pasan el autofiltro. */
+  visibles: Casa[] = [];
+
+  /**
+   * Autofiltro por columna. No se filtra por identificador —es único, así que
+   * cada valor dejaría una sola fila— sino por lo que agrupa: la torre, si
+   * está habitada y su estado.
+   */
+  readonly filtro = new FiltroTabla<Casa>(
+    {
+      torre: c => c.torre,
+      // "3" o "5" no es una pregunta que nadie se haga; "¿cuáles están vacías?"
+      // sí, y es la que manda una carta de cobro o una visita.
+      ocupacion: c => (c.residentes > 0 ? 'Habitada' : 'Vacía'),
+      estado: c => this.estado(c)
+    },
+    c => `${c.identificador} ${c.torre ?? ''}`
+  );
   cargando = true;
   guardando = false;
   error: string | null = null;
@@ -52,6 +72,7 @@ export class CasasComponent implements OnInit {
     this.admin.casas().subscribe({
       next: casas => {
         this.casas = casas;
+        this.filtrar();
         this.cargando = false;
       },
       error: () => {
@@ -81,6 +102,7 @@ export class CasasComponent implements OnInit {
           ? this.casas.map(c => (c.id === casa.id ? casa : c))
           : [...this.casas, casa])
           .sort((a, b) => a.identificador.localeCompare(b.identificador));
+        this.filtrar();
         this.cancelarEdicion();
         this.guardando = false;
       },
@@ -112,6 +134,7 @@ export class CasasComponent implements OnInit {
     this.admin.cambiarEstadoCasa(casa.id, activar).subscribe({
       next: actualizada => {
         this.casas = this.casas.map(c => (c.id === actualizada.id ? actualizada : c));
+        this.filtrar();
       },
       error: (fallo: HttpErrorResponse) => {
         this.error = fallo.error?.mensaje ?? 'No pudimos cambiar el estado.';
@@ -178,6 +201,13 @@ export class CasasComponent implements OnInit {
   private tipoPorDefecto(): string {
     const casa = this.tiposVivienda.find(t => t.codigo === 'CASA');
     return casa?.codigo ?? this.tiposVivienda[0]?.codigo ?? '';
+  }
+
+  // ── Autofiltro ───────────────────────────────────────────────────────────
+
+  /** Recalcula la lista visible. Se llama tras cargar y tras cada cambio. */
+  filtrar(): void {
+    this.visibles = this.filtro.aplicar(this.casas);
   }
 
   // ── Estado de pantalla ───────────────────────────────────────────────────

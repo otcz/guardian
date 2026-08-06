@@ -93,20 +93,37 @@
     </table>
   </div>
 
+  <!-- El buscador mira todas las columnas a la vez; los embudos de la
+       cabecera acotan una por una. Se usan juntos.  -->
+  <div class="busqueda">
+    <i class="pi pi-search"></i>
+    <input type="search" [(ngModel)]="filtro.busqueda" (ngModelChange)="filtrar()"
+           placeholder="Buscar por casa o torre">
+  </div>
+
   <p class="gd-muted" *ngIf="cargando">Cargando…</p>
 
   <table class="tabla gd-card" *ngIf="!cargando">
     <thead>
       <tr>
-        <th>Casa</th>
-        <th>Residentes</th>
+        <th>Casa
+          <gd-filtro-columna campo="torre" [filtro]="filtro" [filas]="casas"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+        </th>
+        <th>Residentes
+          <gd-filtro-columna campo="ocupacion" [filtro]="filtro" [filas]="casas"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+        </th>
         <th>Vehículos</th>
-        <th>Estado</th>
+        <th>Estado
+          <gd-filtro-columna campo="estado" [filtro]="filtro" [filas]="casas"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+        </th>
         <th></th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let casa of casas" [class.inactiva]="!activa(casa)">
+      <tr *ngFor="let casa of visibles" [class.inactiva]="!activa(casa)">
         <td class="fuerte">{{ casa.identificador }}</td>
         <td>{{ casa.residentes }}</td>
         <td>{{ casa.vehiculos }}</td>
@@ -149,8 +166,17 @@
         </td>
       </tr>
 
-      <tr *ngIf="casas.length === 0">
-        <td colspan="5" class="vacio">Todavía no hay casas registradas.</td>
+      <!-- Se distinguen los dos vacíos: "no hay ninguna" se resuelve creando,
+           y "no hay ninguna QUE COINCIDA" quitando el filtro. -->
+      <tr *ngIf="visibles.length === 0">
+        <td colspan="5" class="vacio">
+          <ng-container *ngIf="casas.length === 0">
+            Todavía no hay casas registradas.
+          </ng-container>
+          <ng-container *ngIf="casas.length > 0">
+            Ninguna casa coincide con el filtro.
+          </ng-container>
+        </td>
       </tr>
     </tbody>
   </table>
