@@ -89,3 +89,24 @@
     }
   }
 }
+
+/* El buscador de la bitácora lleva botón, a diferencia de las otras tablas:
+   acá cada tecla sería una consulta al servidor sobre una tabla que puede
+   tener años de eventos. Se busca al terminar de escribir, con Enter o con el
+   botón. */
+.busqueda .ir {
+  flex: 0 0 auto;
+  padding: 0.4rem 0.9rem;
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: none;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--text-inverse);
+    background: var(--accent);
+  }
+}

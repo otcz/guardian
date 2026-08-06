@@ -96,10 +96,14 @@ export class FiltroTabla<T> {
 
     return filas.filter(fila => {
       for (const [campo, seleccion] of this.marcados) {
-        if (seleccion.size === 0) {
+        const lector = this.columnas[campo];
+        // Sin lector, la columna no se filtra acá. Es el caso de una tabla que
+        // filtra en el SERVIDOR: usa este objeto solo para recordar lo marcado,
+        // y aplicar el filtro en memoria sobre la página a la vista mentiría.
+        if (!lector || seleccion.size === 0) {
           continue;
         }
-        if (!seleccion.has(this.textoDe(this.columnas[campo](fila)))) {
+        if (!seleccion.has(this.textoDe(lector(fila)))) {
           return false;
         }
       }

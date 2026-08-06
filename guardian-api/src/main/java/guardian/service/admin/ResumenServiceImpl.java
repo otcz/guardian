@@ -2,6 +2,7 @@ package guardian.service.admin;
 
 import guardian.constant.Codigos;
 import guardian.dto.acceso.AccesoEventoResponse;
+import guardian.dto.acceso.FiltroEventos;
 import guardian.dto.acceso.PresenciaResponse;
 import guardian.dto.admin.ResumenResponse;
 import guardian.repository.GdCasaRepository;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.Date;
 
 @Service
@@ -54,11 +56,11 @@ public class ResumenServiceImpl implements ResumenService {
         // tranquila el tablero mostraria una lista vacia aunque anoche hubiera
         // actividad, y eso se lee como "no funciona".
         Page<AccesoEventoResponse> ultimos = accesoService.buscarEventos(
-                conjuntoId, null, null, null, null, PageRequest.of(0, ULTIMOS_MOVIMIENTOS));
+                conjuntoId, new FiltroEventos(), PageRequest.of(0, ULTIMOS_MOVIMIENTOS));
         Page<AccesoEventoResponse> hoy = accesoService.buscarEventos(
-                conjuntoId, inicioDia, null, null, null, PageRequest.of(0, 1));
+                conjuntoId, desde(inicioDia, null), PageRequest.of(0, 1));
         Page<AccesoEventoResponse> denegadosHoy = accesoService.buscarEventos(
-                conjuntoId, inicioDia, null, null, Codigos.RESULTADO_DENEGADO, PageRequest.of(0, 1));
+                conjuntoId, desde(inicioDia, Codigos.RESULTADO_DENEGADO), PageRequest.of(0, 1));
 
         return ResumenResponse.builder()
                 .adentro(presencia.getAdentro())
@@ -78,5 +80,15 @@ public class ResumenServiceImpl implements ResumenService {
                 .permitidosHoy(hoy.getTotalElements() - denegadosHoy.getTotalElements())
                 .ultimosMovimientos(ultimos.getContent())
                 .build();
+    }
+
+    /** Un filtro de "desde tal fecha", opcionalmente acotado a un resultado. */
+    private FiltroEventos desde(Date inicio, String resultado) {
+        FiltroEventos filtro = new FiltroEventos();
+        filtro.setDesde(inicio);
+        if (resultado != null) {
+            filtro.setResultados(Collections.singletonList(resultado));
+        }
+        return filtro;
     }
 }

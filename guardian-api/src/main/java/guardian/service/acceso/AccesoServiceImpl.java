@@ -2,6 +2,7 @@ package guardian.service.acceso;
 
 import guardian.constant.Codigos;
 import guardian.constant.MensajesGlobales;
+import guardian.dto.acceso.FiltroEventos;
 import guardian.dto.acceso.AccesoEventoResponse;
 import guardian.dto.acceso.FichaVerificacionResponse;
 import guardian.dto.acceso.RegistrarAccesoRequest;
@@ -299,16 +300,22 @@ public class AccesoServiceImpl implements AccesoService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<AccesoEventoResponse> buscarEventos(Long conjuntoId, Date desde, Date hasta,
-                                                    Long casaId, String resultado,
+    public Page<AccesoEventoResponse> buscarEventos(Long conjuntoId, FiltroEventos filtros,
                                                     Pageable pageable) {
 
+        // El filtro del conjunto va SIEMPRE y no es negociable: sin el, un
+        // administrador veria por quien entro en la sede del vecino.
         Specification<GdAccesoEvento> filtro = Specification
                 .where(AccesoEventoSpecs.delConjunto(conjuntoId))
-                .and(AccesoEventoSpecs.desde(desde))
-                .and(AccesoEventoSpecs.hasta(hasta))
-                .and(AccesoEventoSpecs.deCasa(casaId))
-                .and(AccesoEventoSpecs.conResultado(resultado));
+                .and(AccesoEventoSpecs.desde(filtros.getDesde()))
+                .and(AccesoEventoSpecs.hasta(filtros.getHasta()))
+                .and(AccesoEventoSpecs.deCasa(filtros.getCasaId()))
+                .and(AccesoEventoSpecs.conValoresDe("resultado", filtros.getResultados()))
+                .and(AccesoEventoSpecs.conValoresDe("sentido", filtros.getSentidos()))
+                .and(AccesoEventoSpecs.conValoresDe("modo", filtros.getModos()))
+                .and(AccesoEventoSpecs.conValoresDe("motivoDenegacion", filtros.getMotivos()))
+                .and(AccesoEventoSpecs.enPorterias(filtros.getPorteriaIds()))
+                .and(AccesoEventoSpecs.queDiga(filtros.getTexto()));
 
         return eventoRepository.findAll(filtro, ordenar(pageable)).map(fabrica::mapear);
     }

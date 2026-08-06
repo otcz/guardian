@@ -38,7 +38,17 @@ export class FiltroColumnaComponent {
 
   /** Las filas SIN filtrar: el menú tiene que seguir ofreciendo lo que se ocultó. */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Input({ required: true }) filas: any[] = [];
+  @Input() filas: any[] = [];
+
+  /**
+   * Opciones fijas, cuando NO se pueden deducir de las filas.
+   *
+   * <p>Es el caso de una tabla que pagina en el servidor: los valores que hay
+   * en la página a la vista no son los que hay en la columna, así que el menú
+   * se arma con el catálogo real —los dos sentidos, los dos resultados, las
+   * porterías del conjunto— y no con una muestra.</p>
+   */
+  @Input() opciones: string[] | null = null;
 
   /** La pantalla recalcula su lista visible. */
   @Output() cambio = new EventEmitter<void>();
@@ -49,7 +59,7 @@ export class FiltroColumnaComponent {
   constructor(private readonly host: ElementRef<HTMLElement>) {}
 
   get valores(): string[] {
-    const todos = this.filtro.valoresDe(this.campo, this.filas);
+    const todos = this.opciones ?? this.filtro.valoresDe(this.campo, this.filas);
     const busqueda = this.busqueda.trim().toLowerCase();
     if (!busqueda) {
       return todos;

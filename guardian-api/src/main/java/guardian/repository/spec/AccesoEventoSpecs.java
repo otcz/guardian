@@ -4,6 +4,7 @@ import guardian.entity.acceso.GdAccesoEvento;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Filtros combinables del historico de accesos.
@@ -46,5 +47,51 @@ public final class AccesoEventoSpecs {
     public static Specification<GdAccesoEvento> conResultado(String resultado) {
         return (resultado == null || resultado.trim().isEmpty()) ? null
                 : (root, query, cb) -> cb.equal(root.get("resultado"), resultado);
+    }
+
+    /**
+     * Filtro de varios valores para una misma columna — el desplegable de la
+     * cabecera, donde se marcan uno o varios.
+     *
+     * <p>Lista vacia devuelve null y no filtra: "ninguno marcado" en un
+     * autofiltro significa "todos", no "nada". Si devolviera un IN vacio, la
+     * bitacora saldria en blanco apenas alguien abriera un menu.</p>
+     */
+    public static Specification<GdAccesoEvento> conValoresDe(String campo, List<String> valores) {
+        if (valores == null || valores.isEmpty()) {
+            return null;
+        }
+        return (root, query, cb) -> root.get(campo).in(valores);
+    }
+
+    /** Igual, para la porteria, que se filtra por id y no por texto. */
+    public static Specification<GdAccesoEvento> enPorterias(List<Long> porteriaIds) {
+        if (porteriaIds == null || porteriaIds.isEmpty()) {
+            return null;
+        }
+        return (root, query, cb) -> root.get("puntoAcceso").get("id").in(porteriaIds);
+    }
+
+    /**
+     * Busqueda libre sobre lo que el evento COPIO al registrarse: nombre,
+     * documento, casa y placa.
+     *
+     * <p>Sobre las copias y no sobre las tablas vivas a proposito. La bitacora
+     * responde por lo que paso ESE dia: si a alguien le cambiaron el apellido
+     * o el carro cambio de casa, buscar por el dato de hoy no deberia dejar de
+     * encontrar el evento de entonces — y un join contra la persona actual
+     * haria justo eso.</p>
+     */
+    public static Specification<GdAccesoEvento> queDiga(String texto) {
+        if (texto == null || texto.trim().isEmpty()) {
+            return null;
+        }
+        String patron = "%" + texto.trim().toLowerCase() + "%";
+
+        return (root, query, cb) -> cb.or(
+                cb.like(cb.lower(root.get("personaNombre")), patron),
+                cb.like(cb.lower(root.get("personaDocumento")), patron),
+                cb.like(cb.lower(root.get("casaIdentificador")), patron),
+                cb.like(cb.lower(root.get("vehiculoPlaca")), patron));
     }
 }

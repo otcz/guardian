@@ -1,21 +1,19 @@
 <div class="gd-page">
   <div class="encabezado">
     <h1>Bitácora de accesos</h1>
-
-    <div class="segmentado">
-      <button type="button"
-              [class.activo]="filtroResultado === ''"
-              (click)="filtrar('')">Todos</button>
-      <button type="button"
-              [class.activo]="filtroResultado === 'PERMITIDO'"
-              (click)="filtrar('PERMITIDO')">Permitidos</button>
-      <button type="button"
-              [class.activo]="filtroResultado === 'DENEGADO'"
-              (click)="filtrar('DENEGADO')">Denegados</button>
-    </div>
   </div>
 
   <div class="aviso-error" *ngIf="error">{{ error }}</div>
+
+  <!-- Este buscador pregunta al SERVIDOR, no filtra lo que está a la vista: la
+       bitácora pagina, y buscar solo en la página abierta escondería justo el
+       movimiento que se está buscando. -->
+  <div class="busqueda">
+    <i class="pi pi-search"></i>
+    <input type="search" [(ngModel)]="filtro.busqueda" (keyup.enter)="filtrar()"
+           placeholder="Buscar por persona, documento, casa o placa">
+    <button type="button" class="ir" (click)="filtrar()">Buscar</button>
+  </div>
 
   <p class="gd-muted" *ngIf="cargando">Cargando…</p>
 
@@ -25,10 +23,30 @@
         <th>Fecha</th>
         <th>Persona</th>
         <th>Casa</th>
-        <th>Movimiento</th>
+        <th>Movimiento
+          <gd-filtro-columna campo="sentido" [filtro]="filtro"
+                             [opciones]="opcionesSentido"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+          <gd-filtro-columna campo="modo" [filtro]="filtro"
+                             [opciones]="opcionesModo"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+        </th>
         <th>Vehículo</th>
-        <th>Resultado</th>
-        <th>Guardia</th>
+        <th>Resultado
+          <gd-filtro-columna campo="resultado" [filtro]="filtro"
+                             [opciones]="opcionesResultado"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+          <!-- El motivo va junto al resultado y no en su propia columna: es lo
+               que la celda muestra cuando el resultado es denegado. -->
+          <gd-filtro-columna campo="motivo" [filtro]="filtro"
+                             [opciones]="opcionesMotivo"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+        </th>
+        <th>Guardia
+          <gd-filtro-columna campo="porteria" [filtro]="filtro"
+                             [opciones]="opcionesPorteria"
+                             (cambio)="filtrar()"></gd-filtro-columna>
+        </th>
       </tr>
     </thead>
     <tbody>
@@ -56,8 +74,18 @@
         <td>{{ evento.guardiaNombre ?? '—' }}</td>
       </tr>
 
+      <!-- Se distinguen los dos vacíos: sin filtro es que no ha pasado nadie;
+           con filtro, que hay que quitarlo. En una auditoría, confundirlos
+           hace concluir que no hay registro de algo que sí ocurrió. -->
       <tr *ngIf="eventos.length === 0">
-        <td colspan="7" class="vacio">No hay movimientos con ese filtro.</td>
+        <td colspan="7" class="vacio">
+          <ng-container *ngIf="filtro.algunoActivo">
+            Ningún movimiento coincide con el filtro.
+          </ng-container>
+          <ng-container *ngIf="!filtro.algunoActivo">
+            Todavía no hay movimientos registrados.
+          </ng-container>
+        </td>
       </tr>
     </tbody>
   </table>

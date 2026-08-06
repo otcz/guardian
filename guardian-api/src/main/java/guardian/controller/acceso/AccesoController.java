@@ -1,6 +1,7 @@
 package guardian.controller.acceso;
 
 import guardian.constant.ApiEndpoint;
+import guardian.dto.acceso.FiltroEventos;
 import guardian.dto.acceso.AccesoEventoResponse;
 import guardian.dto.acceso.FichaVerificacionResponse;
 import guardian.dto.acceso.PorteriasGaritaResponse;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -88,17 +90,11 @@ public class AccesoController {
 
     @GetMapping(ApiEndpoint.ACCESO_EVENTOS)
     public ResponseEntity<Page<AccesoEventoResponse>> eventos(
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date desde,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date hasta,
-            @RequestParam(required = false) Long casaId,
-            @RequestParam(required = false) String resultado,
+            @ModelAttribute FiltroEventos filtros,
             @RequestParam(defaultValue = "0") int pagina,
             @RequestParam(defaultValue = "50") int tamano) {
 
         return ResponseEntity.ok(accesoService.buscarEventos(
-                usuarioActual.conjuntoId(), desde, hasta, casaId, resultado,
-                PageRequest.of(pagina, tamano)));
+                usuarioActual.conjuntoId(), filtros, PageRequest.of(pagina, tamano)));
     }
 }

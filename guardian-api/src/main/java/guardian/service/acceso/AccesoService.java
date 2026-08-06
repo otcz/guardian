@@ -1,5 +1,6 @@
 package guardian.service.acceso;
 
+import guardian.dto.acceso.FiltroEventos;
 import guardian.dto.acceso.AccesoEventoResponse;
 import guardian.dto.acceso.FichaVerificacionResponse;
 import guardian.dto.acceso.RegistrarAccesoRequest;
@@ -41,6 +42,7 @@ public interface AccesoService {
     /** Confirma el ingreso una vez el guardia eligio a pie o vehiculo. */
     AccesoEventoResponse registrar(RegistrarAccesoRequest request, UsuarioAutenticado guardia);
 
-    Page<AccesoEventoResponse> buscarEventos(Long conjuntoId, Date desde, Date hasta,
-                                             Long casaId, String resultado, Pageable pageable);
+    /** La bitacora, acotada por lo que la pantalla haya filtrado. */
+    Page<AccesoEventoResponse> buscarEventos(Long conjuntoId, FiltroEventos filtros,
+                                             Pageable pageable);
 }

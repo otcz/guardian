@@ -62,8 +62,20 @@ export class AccesoService {
       `${this.base}/registrar`, { ...request, puntoAccesoId: this.puntoAccesoId });
   }
 
+  /**
+   * La bitácora, filtrada EN EL SERVIDOR.
+   *
+   * <p>No se filtra en memoria como en las otras tablas: esta pagina, y un
+   * filtro sobre la página a la vista diría "no hay nada" con el evento
+   * esperando en la página siguiente.</p>
+   */
   eventos(filtros: {
-    resultado?: Resultado | null;
+    resultados?: Resultado[];
+    sentidos?: string[];
+    modos?: string[];
+    motivos?: string[];
+    porteriaIds?: number[];
+    texto?: string | null;
     casaId?: number | null;
     pagina?: number;
     tamano?: number;
@@ -73,8 +85,21 @@ export class AccesoService {
       .set('pagina', String(filtros.pagina ?? 0))
       .set('tamano', String(filtros.tamano ?? 50));
 
-    if (filtros.resultado) {
-      params = params.set('resultado', filtros.resultado);
+    // Repetido, no separado por comas: es como Spring arma una List<> desde el
+    // query string, y una coma dentro de un valor no rompe nada.
+    const repetir = (campo: string, valores?: (string | number)[]) => {
+      for (const valor of valores ?? []) {
+        params = params.append(campo, String(valor));
+      }
+    };
+    repetir('resultados', filtros.resultados);
+    repetir('sentidos', filtros.sentidos);
+    repetir('modos', filtros.modos);
+    repetir('motivos', filtros.motivos);
+    repetir('porteriaIds', filtros.porteriaIds);
+
+    if (filtros.texto?.trim()) {
+      params = params.set('texto', filtros.texto.trim());
     }
     if (filtros.casaId) {
       params = params.set('casaId', String(filtros.casaId));
