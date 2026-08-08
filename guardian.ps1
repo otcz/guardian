@@ -39,6 +39,10 @@ $jar = Join-Path $raiz 'guardian-api\target\guardian-api-0.0.1-SNAPSHOT.jar'
 $compose = Join-Path $raiz 'infra\docker-compose.yml'
 $archivoEnv = Join-Path $raiz 'infra\.env'
 
+# Las fotos de las personas, en la raiz del repo y en un solo sitio. Es el
+# 'data-fotos' que ve el backend al arrancar con -WorkingDirectory $raiz.
+$fotos = Join-Path $raiz 'data-fotos'
+
 $PUERTO_API = 8484
 $PUERTO_UI = 4200
 $PUERTO_BD = 5434
@@ -169,8 +173,16 @@ function Start-Backend {
     Import-Env
 
     New-Item -ItemType Directory -Force -Path $logs | Out-Null
+    New-Item -ItemType Directory -Force -Path $fotos | Out-Null
+
+    # -WorkingDirectory NO es opcional: sin el, el proceso hereda el directorio
+    # desde donde se invoco el script, y storage.local.path es relativo. Arrancar
+    # desde otra carpeta creaba un data-fotos nuevo ahi y las fotos de las
+    # personas quedaban repartidas en media docena de sitios — invisibles para
+    # la porteria, que es donde el guardia compara la cara.
     Start-Process -FilePath (Join-Path $java 'bin\java.exe') `
         -ArgumentList '-jar', $jar `
+        -WorkingDirectory $raiz `
         -RedirectStandardOutput $logApi -RedirectStandardError "$logApi.err" `
         -WindowStyle Hidden
 
