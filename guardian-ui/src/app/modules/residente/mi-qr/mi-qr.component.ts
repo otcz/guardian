@@ -88,6 +88,9 @@ export class MiQrComponent implements OnInit, OnDestroy {
 
   subiendoFoto = false;
 
+  /** Hoja para cambiar la foto una vez que la credencial ya existe. */
+  cambiandoFoto = false;
+
   /**
    * El payload ya resuelto para la librería del QR, que exige un string.
    * Cuando falta la foto no hay código y esa rama de la plantilla ni se
@@ -113,6 +116,7 @@ export class MiQrComponent implements OnInit, OnDestroy {
     this.residente.fijarMiFoto(fotoUrl).subscribe({
       next: credencial => {
         this.subiendoFoto = false;
+        this.cambiandoFoto = false;
         this.credencial = credencial;
         this.guardarEnCache(credencial);
       },

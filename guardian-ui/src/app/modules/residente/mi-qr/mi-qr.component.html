@@ -29,6 +29,11 @@
     <div class="identidad">
       <div class="retrato" *ngIf="credencial.fotoUrl">
         <img [src]="credencial.fotoUrl | foto" [alt]="credencial.nombreCompleto">
+        <button type="button" class="cambiar-foto" (click)="cambiandoFoto = true"
+                aria-label="Cambiar tu foto"
+                pTooltip="Cambiar tu foto" tooltipPosition="top">
+          <i class="pi pi-camera"></i>
+        </button>
       </div>
 
       <div class="quien">
@@ -64,4 +69,18 @@
       Sin conexión. Tu código sigue siendo válido.
     </div>
   </div>
+
+  <gd-hoja [abierta]="cambiandoFoto" titulo="Cambiar tu foto"
+           (cerrar)="cambiandoFoto = false">
+    <p class="instruccion-hoja">
+      El guardia compara tu cara con esta foto. Usa una donde se te vea de
+      frente.
+    </p>
+    <gd-foto-upload [fotoUrl]="credencial?.fotoUrl ?? null"
+                    (fotoUrlChange)="guardarMiFoto($event)">
+    </gd-foto-upload>
+    <p class="estado" role="status" *ngIf="subiendoFoto">
+      <i class="pi pi-spinner pi-spin" aria-hidden="true"></i> Guardando…
+    </p>
+  </gd-hoja>
 </div>

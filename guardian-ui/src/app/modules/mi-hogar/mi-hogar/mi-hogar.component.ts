@@ -44,6 +44,20 @@ export class MiHogarComponent implements OnInit {
   get nombreDelTitular(): string | null {
     return this.familia.find(f => f.parentesco === 'TITULAR')?.nombreCompleto ?? null;
   }
+
+  /**
+   * Solo la propia foto se puede cambiar desde acá. El backend firma
+   * "mi-foto" contra la persona del token — no hay forma de ponerle la cara a
+   * otro, ni siquiera siendo el titular. Cambiar la foto de un familiar sigue
+   * siendo cosa de la administración.
+   */
+  get miFotoActual(): string | null {
+    return this.familia.find(f => f.esUsuarioActual)?.fotoUrl ?? null;
+  }
+
+  cambiandoFoto = false;
+  guardandoFoto = false;
+
   vehiculos: Vehiculo[] = [];
 
   /**
@@ -189,6 +203,35 @@ export class MiHogarComponent implements OnInit {
     this.admin.parametros('MARCA_VEHICULO').subscribe(m => (this.marcasVehiculo = m));
     this.admin.parametros('COLOR_VEHICULO').subscribe(c => (this.coloresVehiculo = c));
     this.admin.parametros('TIPO_DOCUMENTO').subscribe(t => (this.tiposDocumento = t));
+  }
+
+  // ── Mi foto ──────────────────────────────────────────────────────────────
+
+  abrirCambioFoto(): void {
+    this.cambiandoFoto = true;
+  }
+
+  guardarFotoPropia(fotoUrl: string | null): void {
+    if (!fotoUrl || this.guardandoFoto) {
+      return;
+    }
+
+    this.guardandoFoto = true;
+    this.error = null;
+
+    this.residente.fijarMiFoto(fotoUrl).subscribe({
+      next: () => {
+        this.guardandoFoto = false;
+        this.cambiandoFoto = false;
+        // Recarga la fila entera: es la forma mas simple de que la foto
+        // nueva se vea sin duplicar aca lo que ya sabe armar la lista.
+        this.cargar();
+      },
+      error: (fallo: HttpErrorResponse) => {
+        this.guardandoFoto = false;
+        this.error = fallo.error?.mensaje ?? 'No pudimos guardar tu foto.';
+      }
+    });
   }
 
   cargar(): void {

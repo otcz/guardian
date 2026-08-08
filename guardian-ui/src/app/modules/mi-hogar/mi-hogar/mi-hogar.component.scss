@@ -248,6 +248,7 @@ section {
 }
 
 .avatar {
+  position: relative;
   width: 44px;
   height: 44px;
   flex: 0 0 auto;
@@ -277,6 +278,53 @@ section {
       color: var(--accent);
     }
   }
+}
+
+/* Insignia y no un botón aparte: se ve pegada a LA foto que cambia, no como
+   una acción más de la fila. Solo existe en la propia fila —el resto no la
+   tiene— así que no necesita competir con las demás acciones por espacio. */
+.cambiar-foto {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  color: var(--text-inverse);
+  background: var(--accent);
+  border: 2px solid var(--bg-surface);
+  border-radius: var(--r-full);
+  cursor: pointer;
+
+  i {
+    font-size: 0.6rem;
+    color: var(--text-inverse);
+  }
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+/* Copy de la hoja "Cambiar tu foto": mismo tono que "Falta tu foto" en Mi QR,
+   centrado y discreto — es contexto de una sola vez, no un campo. */
+.instruccion {
+  margin: 0 0 var(--e-3);
+  text-align: center;
+  font-size: var(--t-sm);
+  color: var(--text-muted);
+}
+
+.estado {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  margin-top: var(--e-2);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--accent);
 }
 
 .datos {

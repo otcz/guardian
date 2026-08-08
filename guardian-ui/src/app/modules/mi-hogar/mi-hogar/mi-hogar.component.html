@@ -195,6 +195,15 @@
           <div class="avatar">
             <img *ngIf="familiar.fotoUrl" [src]="familiar.fotoUrl | foto" [alt]="familiar.nombreCompleto">
             <i class="pi pi-user" *ngIf="!familiar.fotoUrl"></i>
+
+            <!-- Solo en la propia fila: nadie puede ponerle la cara a otro,
+                 ni siquiera el titular. -->
+            <button type="button" class="cambiar-foto" *ngIf="familiar.esUsuarioActual"
+                    (click)="abrirCambioFoto()"
+                    aria-label="Cambiar tu foto"
+                    pTooltip="Cambiar tu foto" tooltipPosition="top">
+              <i class="pi pi-camera"></i>
+            </button>
           </div>
 
           <div class="datos">
@@ -261,6 +270,19 @@
           Agregar a alguien
         </button>
       </div>
+
+      <gd-hoja [abierta]="cambiandoFoto" titulo="Cambiar tu foto"
+               (cerrar)="cambiandoFoto = false">
+        <p class="instruccion">
+          El guardia compara tu cara con esta foto. Usa una donde se te vea de
+          frente.
+        </p>
+        <gd-foto-upload [fotoUrl]="miFotoActual" (fotoUrlChange)="guardarFotoPropia($event)">
+        </gd-foto-upload>
+        <p class="estado" role="status" *ngIf="guardandoFoto">
+          <i class="pi pi-spinner pi-spin" aria-hidden="true"></i> Guardando…
+        </p>
+      </gd-hoja>
     </section>
 
     <!-- ── VEHÍCULOS ───────────────────────────────────────────────────── -->
