@@ -48,6 +48,21 @@ const CLAVE_AUTO = 'guardian.porteria.auto';
 const SEGUNDOS_AUTO = 10;
 
 /**
+ * Segundos que una credencial recién procesada queda "enfriada": una nueva
+ * lectura de la MISMA credencial en ese tiempo se ignora en vez de abrir una
+ * ficha nueva.
+ *
+ * <p>Sin esto, dejar el QR o la cédula frente al lector después de registrar
+ * —con paso automático, o simplemente porque el residente no guardó el
+ * teléfono de una— hace que la cámara la vuelva a leer, abra una ficha nueva
+ * y (con paso automático) la registre otra vez sola. Como la presencia ya
+ * cambió, sale en el sentido contrario: entra, sale, entra, sale, cada pocos
+ * segundos, para siempre. Es la misma persona que no se movió, no alguien
+ * nuevo.</p>
+ */
+const SEGUNDOS_ENFRIAMIENTO = 20;
+
+/**
  * Operación de la portería.
  *
  * <p>Todo el diseño obedece a que esto se usa de pie, con una tablet, de noche
@@ -143,6 +158,13 @@ export class EscanerComponent implements OnInit, OnDestroy {
    */
   private colaLectura: string | null = null;
 
+  /**
+   * La última credencial registrada, y hasta cuándo sigue "enfriada". Null =
+   * nadie se acaba de procesar, o ya pasó el enfriamiento.
+   */
+  private ultimaProcesada: { payload: string | null; documento: string | null; hasta: number }
+    | null = null;
+
   constructor(
     private readonly acceso: AccesoService,
     private readonly admin: AdminService,
@@ -201,6 +223,12 @@ export class EscanerComponent implements OnInit, OnDestroy {
   }
 
   private alLeer(payload: string): void {
+    // La misma credencial que se acaba de registrar, todavía frente a la
+    // cámara: no es alguien nuevo. Se ignora entera y sin abrir ficha —
+    // rompe el ciclo entra-sale-entra-sale del paso automático.
+    if (this.enEnfriamiento(payload)) {
+      return;
+    }
     // Con paso automático la cámara NO se apaga sobre la ficha: es lo que
     // permite que el siguiente en la fila empuje al anterior. Fuera de ese
     // modo el comportamiento es el de siempre — se apaga y se decide con
@@ -257,6 +285,12 @@ export class EscanerComponent implements OnInit, OnDestroy {
   verificarEntradaManual(): void {
     const texto = this.entradaManual.trim();
     if (!texto) {
+      return;
+    }
+    // Mismo freno que en la cámara: el lector de barras y la cédula tecleada
+    // pueden repetir la misma lectura segundos después de procesarla.
+    if (this.enEnfriamiento(texto)) {
+      this.entradaManual = '';
       return;
     }
 
@@ -357,6 +391,14 @@ export class EscanerComponent implements OnInit, OnDestroy {
       })
       .subscribe({
         next: evento => {
+          // Se marca ANTES de tocar this.ficha: reiniciar() y limpiarFicha()
+          // lo van a poner en null unas líneas más abajo.
+          this.ultimaProcesada = {
+            payload: this.ficha?.payload ?? null,
+            documento: this.ficha?.documento ?? null,
+            hasta: Date.now() + SEGUNDOS_ENFRIAMIENTO * 1000
+          };
+
           // El registro puede volver DENEGADO con 200: entre el escaneo y el
           // toque pasan segundos, y en esos segundos el administrador pudo
           // deshabilitar el carro o revocar la credencial. Antes se pintaba
@@ -474,6 +516,19 @@ export class EscanerComponent implements OnInit, OnDestroy {
     if (this.modoEntrada === 'CAMARA' && !this.lector) {
       this.iniciarCamara();
     }
+  }
+
+  /**
+   * Si esta lectura es la misma credencial que se acaba de registrar y el
+   * enfriamiento todavía no pasó. Compara contra payload Y documento porque la
+   * misma persona puede volver a aparecer por cualquiera de los dos lectores.
+   */
+  private enEnfriamiento(lectura: string): boolean {
+    const previa = this.ultimaProcesada;
+    if (!previa || Date.now() >= previa.hasta) {
+      return false;
+    }
+    return lectura === previa.payload || lectura === previa.documento;
   }
 
   /** Lo que se borra entre una persona y la siguiente, sin tocar la etapa. */
