@@ -288,9 +288,11 @@ export class EscanerComponent implements OnInit, OnDestroy {
       return;
     }
     // Mismo freno que en la cámara: el lector de barras y la cédula tecleada
-    // pueden repetir la misma lectura segundos después de procesarla.
+    // pueden repetir la misma lectura segundos después de procesarla. No se
+    // limpia el campo: si esto dispara es porque ya se proceso, y borrarlo
+    // ahora seria justo el problema que se corrigio mas abajo — que el
+    // guardia pierda lo que escribio sin haber terminado nada nuevo.
     if (this.enEnfriamiento(texto)) {
-      this.entradaManual = '';
       return;
     }
 
@@ -332,7 +334,11 @@ export class EscanerComponent implements OnInit, OnDestroy {
       },
       error: (fallo: HttpErrorResponse) => {
         this.error = fallo.error?.mensaje ?? 'No pudimos verificar el documento.';
-        this.reiniciar();
+        this.etapa = 'escaneando';
+        this.procesando = false;
+        // A propósito NO se limpia entradaManual: si el guardia se equivocó en
+        // un dígito, tiene que poder corregirlo, no volver a escribir el
+        // número entero. reiniciar() sí lo borra, y por eso no se usa acá.
       }
     });
   }
@@ -398,6 +404,13 @@ export class EscanerComponent implements OnInit, OnDestroy {
             documento: this.ficha?.documento ?? null,
             hasta: Date.now() + SEGUNDOS_ENFRIAMIENTO * 1000
           };
+
+          // Este es el único punto que borra lo que el guardia tecleó: se
+          // completó un registro de verdad, así que el campo queda listo para
+          // la SIGUIENTE persona. limpiarFicha() ya NO lo toca — cancelar una
+          // ficha o que el documento no aparezca no puede costarle al guardia
+          // reescribir el número entero por un solo dígito equivocado.
+          this.entradaManual = '';
 
           // El registro puede volver DENEGADO con 200: entre el escaneo y el
           // toque pasan segundos, y en esos segundos el administrador pudo
@@ -531,11 +544,19 @@ export class EscanerComponent implements OnInit, OnDestroy {
     return lectura === previa.payload || lectura === previa.documento;
   }
 
-  /** Lo que se borra entre una persona y la siguiente, sin tocar la etapa. */
+  /**
+   * Lo que se borra entre una persona y la siguiente, sin tocar la etapa.
+   *
+   * <p>NO toca {@link entradaManual} a propósito: esto se llama tanto al
+   * cerrar una ficha ya registrada como al cancelar una que no se registró
+   * —incluida la de "documento no encontrado"—, y solo en el primer caso el
+   * campo debe quedar vacío. Ese caso lo limpia {@link registrar} en su
+   * propio punto. Si esta función lo borrara siempre, cancelar por un
+   * documento mal tecleado obligaría a escribirlo entero otra vez.</p>
+   */
   private limpiarFicha(): void {
     this.detenerCuenta();
     this.ficha = null;
-    this.entradaManual = '';
     this.procesando = false;
     this.registrando = false;
     this.sentidoCorregido = null;
