@@ -27,4 +27,15 @@ public class VehiculoResponse {
 
     private Long casaId;
     private String casaIdentificador;
+
+    /**
+     * Si el carro esta en el conjunto: su ultimo paso permitido fue una
+     * ENTRADA.
+     *
+     * <p>Solo se calcula donde la lista es corta —los vehiculos de UNA casa—
+     * porque cuesta una consulta por fila. En el listado del administrador,
+     * que puede traer cientos, se queda en false; ahi la pregunta la responde
+     * la bitacora, que para eso pagina y filtra.</p>
+     */
+    private boolean adentro;
 }

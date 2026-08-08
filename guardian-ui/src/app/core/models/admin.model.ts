@@ -323,6 +323,8 @@ export interface Vehiculo {
   motivoBloqueo: string | null;
   casaId: number;
   casaIdentificador: string;
+  /** Su último paso permitido fue una ENTRADA: el carro está en el conjunto. */
+  adentro: boolean;
 }
 
 export interface VehiculoRequest {

@@ -15,6 +15,16 @@ public interface PresenciaService {
     /** Mismo criterio, para el titular de una invitacion. */
     boolean estaAdentroInvitado(Long invitacionId);
 
+    /**
+     * Mismo criterio, para un vehiculo: su ultimo paso permitido fue una
+     * ENTRADA, asi que el carro esta en el conjunto.
+     *
+     * <p>Se mira el evento del VEHICULO y no el de su dueno: en una casa el
+     * carro lo saca quien lo necesite ese dia, y son cosas distintas — la
+     * senora puede estar adentro con el carro afuera.</p>
+     */
+    boolean estaAdentroVehiculo(Long vehiculoId);
+
     PresenciaResponse conteo(Long conjuntoId);
 
     /**

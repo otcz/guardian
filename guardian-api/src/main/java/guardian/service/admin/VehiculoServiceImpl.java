@@ -32,6 +32,7 @@ public class VehiculoServiceImpl implements VehiculoService {
     private final GdAccesoEventoRepository eventoRepository;
     private final ParametroService parametroService;
     private final EtiquetaCatalogoService etiquetaCatalogoService;
+    private final guardian.service.acceso.PresenciaService presenciaService;
 
     @Override
     @Transactional(readOnly = true)
@@ -52,13 +53,20 @@ public class VehiculoServiceImpl implements VehiculoService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Los vehiculos de UNA casa, con su presencia.
+     *
+     * <p>Es la lista de "Mi hogar": son pocos y el residente quiere saber si el
+     * carro esta adentro. La presencia cuesta una consulta por fila, asi que se
+     * calcula aca y no en el listado del conjunto entero.</p>
+     */
     @Override
     @Transactional(readOnly = true)
     public List<VehiculoResponse> listarPorCasaIncluyendoInactivos(Long casaId, Long conjuntoId) {
         obtenerCasa(casaId, conjuntoId);
         return vehiculoRepository.findByCasaIdOrderByPlacaAsc(casaId)
                 .stream()
-                .map(this::mapear)
+                .map(vehiculo -> mapear(vehiculo, true))
                 .collect(Collectors.toList());
     }
 
@@ -170,6 +178,10 @@ public class VehiculoServiceImpl implements VehiculoService {
     }
 
     private VehiculoResponse mapear(GdVehiculo vehiculo) {
+        return mapear(vehiculo, false);
+    }
+
+    private VehiculoResponse mapear(GdVehiculo vehiculo, boolean conPresencia) {
         return VehiculoResponse.builder()
                 .id(vehiculo.getId())
                 .placa(vehiculo.getPlaca())
@@ -187,6 +199,7 @@ public class VehiculoServiceImpl implements VehiculoService {
                 .motivoBloqueo(vehiculo.getMotivoBloqueo())
                 .casaId(vehiculo.getCasa().getId())
                 .casaIdentificador(vehiculo.getCasa().getIdentificador())
+                .adentro(conPresencia && presenciaService.estaAdentroVehiculo(vehiculo.getId()))
                 .build();
     }
 }

@@ -40,6 +40,14 @@ public interface GdAccesoEventoRepository
             Long invitacionId, Date desde);
 
     /**
+     * El ultimo paso de un VEHICULO. Dice si el carro esta en el conjunto, que
+     * no es lo mismo que si su dueno lo esta: el carro lo saca quien lo
+     * necesite ese dia.
+     */
+    Optional<GdAccesoEvento> findFirstByVehiculoIdAndResultadoOrderByFechaEventoDesc(
+            Long vehiculoId, String resultado);
+
+    /**
      * Invitados cuyo ultimo evento permitido es una entrada: estan adentro.
      * Con piso de fecha: un invitado que salio a pie sin escanear quedaria
      * "adentro" para siempre y el conteo de evacuacion se volveria mentira.

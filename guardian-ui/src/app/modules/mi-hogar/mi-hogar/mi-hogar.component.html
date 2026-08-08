@@ -379,6 +379,15 @@
             Inactivo
           </span>
 
+          <!-- Dónde está el carro, por su último paso. Solo se marca el que
+               está adentro: "afuera" es lo normal y pintarlo en cada renglón
+               sería ruido. Va después del estado porque primero importa si
+               puede pasar y después dónde quedó. -->
+          <span class="presencia" *ngIf="vehiculo.adentro"
+                pTooltip="Su último registro fue una entrada" tooltipPosition="left">
+            <i class="pi pi-circle-fill"></i> Adentro
+          </span>
+
           <button type="button" class="accion candado"
                   *ngIf="bloqueado(vehiculo)"
                   (click)="explicarBloqueo(vehiculo.placa, vehiculo.motivoBloqueo)"

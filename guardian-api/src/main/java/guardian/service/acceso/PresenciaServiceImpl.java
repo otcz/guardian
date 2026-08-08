@@ -49,6 +49,16 @@ public class PresenciaServiceImpl implements PresenciaService {
 
     @Override
     @Transactional(readOnly = true)
+    public boolean estaAdentroVehiculo(Long vehiculoId) {
+        return eventoRepository
+                .findFirstByVehiculoIdAndResultadoOrderByFechaEventoDesc(
+                        vehiculoId, Codigos.RESULTADO_PERMITIDO)
+                .map(ultimo -> Codigos.ENTRADA.equals(ultimo.getSentido()))
+                .orElse(false);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public PresenciaResponse conteo(Long conjuntoId) {
         return conteo(conjuntoId, null);
     }
