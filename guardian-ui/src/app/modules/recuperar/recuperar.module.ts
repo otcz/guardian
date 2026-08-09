@@ -4,6 +4,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 import { TooltipModule } from 'primeng/tooltip';
 
+import { SharedModule } from '../../shared/shared.module';
 import { RecuperarComponent } from './recuperar/recuperar.component';
 
 const routes: Routes = [{ path: '', component: RecuperarComponent }];
@@ -14,6 +15,7 @@ const routes: Routes = [{ path: '', component: RecuperarComponent }];
     CommonModule,
     ReactiveFormsModule,
     TooltipModule,
+    SharedModule,
     RouterModule.forChild(routes)
   ]
 })

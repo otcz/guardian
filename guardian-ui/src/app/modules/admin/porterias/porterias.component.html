@@ -6,7 +6,7 @@
     <div class="campo">
       <label for="nombre">Nombre</label>
       <input id="nombre" type="text" formControlName="nombre"
-             placeholder="Ej: Portería norte">
+             gdMayusculas placeholder="Ej: Portería norte">
       <small class="error" *ngIf="campoInvalido('nombre')">
         Escribe el nombre de la portería
       </small>
@@ -20,7 +20,7 @@
            tooltipPosition="top"></i>
       </label>
       <input id="direccion" type="text" formControlName="direccion"
-             placeholder="Ej: Carrera 15 # 23-40, costado norte">
+             gdMayusculas placeholder="Ej: Carrera 15 # 23-40, costado norte">
       <small class="error" *ngIf="campoInvalido('direccion')">
         La dirección no puede superar 160 caracteres
       </small>

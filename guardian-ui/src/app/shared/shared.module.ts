@@ -15,6 +15,7 @@ import { FiltroColumnaComponent } from './tabla/filtro-columna.component';
 import { VolverComponent } from './volver/volver.component';
 import { FechaComponent } from './fecha/fecha.component';
 import { HoraComponent } from './hora/hora.component';
+import { MayusculasDirective } from './mayusculas.directive';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import { HoraComponent } from './hora/hora.component';
     FiltroColumnaComponent,
     VolverComponent,
     FechaComponent,
-    HoraComponent
+    HoraComponent,
+    MayusculasDirective
   ],
   imports: [CommonModule, FormsModule, TooltipModule, RouterModule],
   exports: [
@@ -42,7 +44,8 @@ import { HoraComponent } from './hora/hora.component';
     FiltroColumnaComponent,
     VolverComponent,
     FechaComponent,
-    HoraComponent
+    HoraComponent,
+    MayusculasDirective
   ]
 })
 export class SharedModule { }
