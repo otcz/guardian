@@ -41,46 +41,59 @@
                tiene por qué valer desde las 6 de la mañana, y la mamá que viene
                el viernes y se va el domingo es una sola invitación.
 
-               Fecha y hora van SEPARADAS. Juntas, el navegador abría su propio
-               panel con una rueda de sesenta minutos encima del formulario: se
-               elegía el minuto exacto de una visita, que a nadie le importa, y
-               tapaba los campos de atrás. Acá el día se elige en el calendario
-               de siempre y la hora es una lista de medias horas. -->
-          <div class="campo campo--momento">
-            <label for="i-inicio-fecha">Inicio</label>
-            <div class="momento">
+               Desde y hasta van JUNTOS en un bloque y no sueltos entre los
+               demás campos: son un solo dato de dos partes, y repartidos en la
+               grilla quedaban en filas distintas, cada uno con su fecha
+               desalineada de la del otro.
+
+               Fecha y hora, dentro de cada línea, van SEPARADAS. Juntas, el
+               navegador abría su propio panel con una rueda de sesenta minutos
+               encima del formulario: pedía el minuto exacto de una visita, que
+               a nadie le importa, y tapaba los campos de atrás. -->
+          <div class="periodo" role="group" aria-label="Vigencia de la invitación">
+            <div class="cabecera">
+              <span class="titulo">Vigencia</span>
+              <!-- Los atajos del 90% de las visitas: hoy o mañana. Corren las
+                   DOS fechas, por eso viven en la cabecera del bloque y no
+                   colgando de la línea del desde. -->
+              <div class="atajos">
+                <button type="button" *ngFor="let atajo of atajos"
+                        [class.activo]="formulario.controls.inicioFecha.value === atajo.fecha"
+                        (click)="usarAtajo(atajo)">{{ atajo.etiqueta }}</button>
+              </div>
+            </div>
+
+            <div class="linea">
+              <label for="i-inicio-fecha">Desde</label>
               <input id="i-inicio-fecha" type="date" formControlName="inicioFecha"
                      [min]="hoy" (change)="alCambiarInicio()">
               <select id="i-inicio-hora" formControlName="inicioHora"
                       aria-label="Hora de inicio" (change)="alCambiarInicio()">
-                <option *ngFor="let hora of horas" [value]="hora">{{ hora }}</option>
+                <option *ngFor="let hora of horas" [value]="hora.valor">{{ hora.etiqueta }}</option>
               </select>
             </div>
-            <!-- Los atajos del 90% de las visitas: hoy o mañana. -->
-            <div class="atajos">
-              <button type="button" *ngFor="let atajo of atajos"
-                      [class.activo]="formulario.controls.inicioFecha.value === atajo.fecha"
-                      (click)="usarAtajo(atajo)">{{ atajo.etiqueta }}</button>
-            </div>
-            <small class="error" *ngIf="inicioEnPasado">La visita no puede ser en el pasado</small>
-          </div>
-          <div class="campo campo--momento">
-            <label for="i-fin-fecha">
-              Fin
-              <i class="pi pi-info-circle ayuda"
-                 pTooltip="Puede entrar y salir hasta esa hora"
-                 tooltipPosition="top"></i>
-            </label>
-            <div class="momento">
+
+            <div class="linea">
+              <label for="i-fin-fecha">
+                Hasta
+                <i class="pi pi-info-circle ayuda"
+                   pTooltip="Puede entrar y salir hasta esa hora"
+                   tooltipPosition="top"></i>
+              </label>
               <input id="i-fin-fecha" type="date" formControlName="finFecha"
                      [min]="formulario.controls.inicioFecha.value">
               <select id="i-fin-hora" formControlName="finHora" aria-label="Hora de fin">
-                <option *ngFor="let hora of horas" [value]="hora">{{ hora }}</option>
+                <option *ngFor="let hora of horas" [value]="hora.valor">{{ hora.etiqueta }}</option>
               </select>
             </div>
+
+            <small class="error" *ngIf="inicioEnPasado">La visita no puede ser en el pasado</small>
             <small class="error" *ngIf="finAntesDelInicio">El fin tiene que ser después del inicio</small>
           </div>
-          <div class="campo">
+
+          <!-- Va al final y NO se estira: una placa son seis caracteres, y un
+               campo de ancho completo prometía un dato largo. -->
+          <div class="campo campo--corto">
             <label for="i-placa">Placa</label>
             <input id="i-placa" type="text" formControlName="placa"
                    placeholder="Vacío si viene a pie">

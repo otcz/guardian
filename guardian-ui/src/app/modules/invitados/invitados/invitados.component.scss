@@ -76,8 +76,13 @@
   display: flex;
   flex-direction: column;
   gap: var(--e-1);
-  flex: 1 1 150px;
+  flex: 1 1 180px;
   min-width: 0;
+
+  /* Un campo de valor corto no crece a llenar la fila. */
+  &.campo--corto {
+    flex: 0 1 200px;
+  }
 
   label {
     display: flex;
@@ -111,40 +116,99 @@
   }
 }
 
-/* Fecha y hora, uno al lado del otro. La fecha manda —es lo que se decide
-   primero— y por eso se lleva el espacio que sobra; la hora es una lista y
-   ocupa lo que ocupa. Se apilan solos cuando la hoja es angosta. */
-.campo--momento {
-  flex: 1 1 260px;
-}
-
-.momento {
+/* Desde y hasta son UN dato de dos partes, y se ven como uno: un bloque con
+   su título, las dos líneas alineadas por el rótulo y los atajos arriba a la
+   derecha, donde alcanzan a las dos fechas. */
+.periodo {
+  flex: 1 1 100%;
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--e-1);
+  flex-direction: column;
+  gap: var(--e-2);
+  min-width: 0;
+  padding: var(--e-3);
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-md);
 
-  input[type='date'] {
-    flex: 2 1 130px;
+  .cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--e-2);
   }
 
+  .titulo {
+    font-size: var(--t-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* El rótulo con ancho propio: sin él, "Desde" y "Hasta" miden distinto y
+     las dos fechas quedan corridas una respecto de la otra. */
+  .linea {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--e-2);
+
+    > label {
+      flex: 0 0 3.5rem;
+      display: flex;
+      align-items: center;
+      gap: var(--e-1);
+      font-size: var(--t-sm);
+      color: var(--text-muted);
+    }
+
+    input[type='date'] {
+      flex: 2 1 140px;
+    }
+
+    select {
+      flex: 1 1 118px;
+      cursor: pointer;
+    }
+  }
+
+  /* Sobre el fondo del bloque los campos van en superficie, no al revés: es
+     lo que los separa del panel que los contiene. */
+  input,
   select {
-    flex: 1 1 90px;
-    cursor: pointer;
+    padding: 0.55rem 0.7rem;
+    font: inherit;
+    color: var(--text-strong);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--r-sm);
+    min-width: 0;
+    transition: border-color var(--transicion);
+
+    &:focus {
+      border-color: var(--accent);
+      outline: none;
+    }
+  }
+
+  .error {
+    font-size: var(--t-xs);
+    color: var(--deny);
   }
 }
 
-/* Hoy y mañana de un toque. Van DEBAJO del campo y no encima: quien viene a
-   corregir una fecha ya sabe cuál quiere, y arriba se leerían como el título
-   de la sección. */
+/* Hoy y mañana de un toque; el calendario queda para la excepción. */
 .atajos {
   display: flex;
   gap: var(--e-1);
 
   button {
-    padding: 0.25rem 0.6rem;
+    padding: 0.3rem 0.7rem;
+    font: inherit;
     font-size: var(--t-xs);
     color: var(--text-muted);
-    background: transparent;
+    background: var(--bg-surface);
     border: 1px solid var(--border-default);
     border-radius: 999px;
     cursor: pointer;
@@ -157,6 +221,7 @@
     &.activo {
       color: var(--accent);
       border-color: var(--accent);
+      font-weight: 600;
     }
   }
 }

@@ -45,10 +45,13 @@ export class InvitadosComponent implements OnInit {
    * la media hora es toda la precisión que hace falta, y así la hora se elige
    * de una lista corta en vez de rodando.</p>
    *
-   * <p>23:59 va aparte al final porque no es una hora a la que se cite a
-   * nadie: es "hasta que termine el día", y es el fin por defecto.</p>
+   * <p>Se guarda en 24 h y se muestra en 12 h: el valor tiene que ordenarse y
+   * compararse como texto, pero quien invita piensa en "7 de la noche".</p>
+   *
+   * <p>23:59 va al final porque no es una hora a la que se cite a nadie: es
+   * "hasta que termine el día", y es el fin por defecto.</p>
    */
-  readonly horas: string[] = InvitadosComponent.construirHoras();
+  readonly horas: { valor: string; etiqueta: string }[] = InvitadosComponent.construirHoras();
 
   /**
    * Casi toda visita es para hoy o para mañana. Ese caso no debería costar
@@ -112,15 +115,26 @@ export class InvitadosComponent implements OnInit {
   }
 
   /** 00:00, 00:30, … 23:30, y 23:59 al final como "fin del día". */
-  private static construirHoras(): string[] {
-    const lista: string[] = [];
+  private static construirHoras(): { valor: string; etiqueta: string }[] {
+    const lista: { valor: string; etiqueta: string }[] = [];
     for (let minutos = 0; minutos < 24 * 60; minutos += 30) {
-      const hh = String(Math.floor(minutos / 60)).padStart(2, '0');
-      const mm = String(minutos % 60).padStart(2, '0');
-      lista.push(`${hh}:${mm}`);
+      lista.push(InvitadosComponent.hora(minutos));
     }
-    lista.push('23:59');
+    lista.push(InvitadosComponent.hora(23 * 60 + 59));
     return lista;
+  }
+
+  /** 1170 → `{ valor: '19:30', etiqueta: '7:30 p.m.' }`. */
+  private static hora(minutosDelDia: number): { valor: string; etiqueta: string } {
+    const h = Math.floor(minutosDelDia / 60);
+    const m = minutosDelDia % 60;
+    // Las 12 no son las 0: mediodía y medianoche se escriben igual y solo las
+    // distingue el sufijo.
+    const doce = h % 12 === 0 ? 12 : h % 12;
+    return {
+      valor: `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`,
+      etiqueta: `${doce}:${String(m).padStart(2, '0')} ${h < 12 ? 'a.m.' : 'p.m.'}`
+    };
   }
 
   /**
