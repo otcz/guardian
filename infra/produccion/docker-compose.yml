@@ -175,25 +175,42 @@ services:
     entrypoint: ["/bin/bash", "-c"]
     command:
       - |
-        echo "[respaldo] en marcha, retencion $${RETENCION_DIAS} dias"
+        echo "[respaldo] en marcha, retencion $${RETENCION_DIAS} dias, ventana 03:00"
         while true; do
-          ARCHIVO="/respaldos/guardian-$$(date +%Y%m%d-%H%M).sql.gz"
-          # -Fp comprimido con gzip y no -Fc: un volcado en texto plano se
-          # puede inspeccionar y restaurar con psql en cualquier maquina, sin
-          # depender de que la version de pg_restore coincida.
-          if pg_dump -h guardian-db -U "${GUARDIAN_DB_USUARIO}" -d "${GUARDIAN_DB_NOMBRE}" \
-               | gzip > "$$ARCHIVO.parcial"; then
-            # El renombrado al final es lo que hace atomico el respaldo: si el
-            # volcado se corta a la mitad, queda un .parcial y no un .sql.gz
-            # corrupto que parece bueno hasta el dia que haga falta.
-            mv "$$ARCHIVO.parcial" "$$ARCHIVO"
-            echo "[respaldo] $$ARCHIVO ($$(du -h "$$ARCHIVO" | cut -f1))"
+          # ¿Hay esquema? En el primer arranque este contenedor gana la carrera
+          # contra Hibernate y la base todavia no tiene ni una tabla. Guardar
+          # ese volcado dejaria en /respaldos un archivo que parece un respaldo
+          # y esta vacio — peor que no tener ninguno, porque nadie lo mira
+          # hasta el dia que hace falta.
+          TABLAS=$$(psql -h guardian-db -U "${GUARDIAN_DB_USUARIO}" -d "${GUARDIAN_DB_NOMBRE}" \
+                      -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema='public'" 2>/dev/null || echo 0)
+          if [ "$${TABLAS:-0}" -gt 0 ]; then
+            ARCHIVO="/respaldos/guardian-$$(date +%Y%m%d-%H%M).sql.gz"
+            # Texto plano comprimido y no -Fc: se puede inspeccionar y
+            # restaurar con psql en cualquier maquina, sin depender de que la
+            # version de pg_restore coincida.
+            if pg_dump -h guardian-db -U "${GUARDIAN_DB_USUARIO}" -d "${GUARDIAN_DB_NOMBRE}" \
+                 | gzip > "$$ARCHIVO.parcial"; then
+              # El renombrado al final es lo que lo hace atomico: si el volcado
+              # se corta a la mitad queda un .parcial, y no un .sql.gz corrupto
+              # que se ve bueno hasta el dia que hace falta.
+              mv "$$ARCHIVO.parcial" "$$ARCHIVO"
+              echo "[respaldo] $$ARCHIVO ($$(du -h "$$ARCHIVO" | cut -f1), $$TABLAS tablas)"
+            else
+              rm -f "$$ARCHIVO.parcial"
+              echo "[respaldo] FALLO el volcado" >&2
+            fi
           else
-            rm -f "$$ARCHIVO.parcial"
-            echo "[respaldo] FALLO el volcado" >&2
+            echo "[respaldo] la base aun no tiene tablas; no hay nada que guardar"
           fi
           find /respaldos -name "guardian-*.sql.gz" -mtime +$${RETENCION_DIAS} -delete
-          sleep 86400
+          # A una HORA FIJA y no cada 86400 segundos desde que arranco el
+          # contenedor: con el segundo, cada reinicio corre la cita un poco y
+          # al mes el respaldo cae en plena hora de entrada al conjunto.
+          AHORA=$$(date +%s)
+          PROXIMO=$$(date -d "today 03:00" +%s)
+          [ "$$PROXIMO" -le "$$AHORA" ] && PROXIMO=$$(date -d "tomorrow 03:00" +%s)
+          sleep $$((PROXIMO - AHORA))
         done
     deploy:
       resources:
