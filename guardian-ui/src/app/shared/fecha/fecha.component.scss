@@ -39,11 +39,14 @@
   }
 }
 
+/* Fijo a la pantalla y NO colgado del campo: el cuerpo de la hoja tiene su
+   propio desplazamiento y recorta todo lo que se salga de él, así que un
+   calendario que no cupiera entre el campo y el pie aparecía cortado por la
+   mitad. Con `fixed` el único límite es la pantalla. Las coordenadas las
+   calcula el componente y llegan por [style]. */
 .panel {
-  position: absolute;
-  z-index: var(--z-panel, 60);
-  top: calc(100% + 0.35rem);
-  left: 0;
+  position: fixed;
+  z-index: var(--z-flotante);
   /* Nunca más angosto que su contenido ni más ancho que la pantalla del
      teléfono: el calendario tiene siete columnas y no se puede comprimir. */
   min-width: 15.5rem;
@@ -52,12 +55,7 @@
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
   border-radius: var(--r-md);
-  box-shadow: var(--shadow-card);
-
-  &.arriba {
-    top: auto;
-    bottom: calc(100% + 0.35rem);
-  }
+  box-shadow: var(--shadow-flotante);
 }
 
 .mes {

@@ -38,13 +38,12 @@
   }
 }
 
+/* Fijo a la pantalla y NO colgado del campo: el cuerpo de la hoja tiene su
+   propio desplazamiento y recorta todo lo que se salga de él. Las coordenadas
+   las calcula el componente y llegan por [style]. */
 .panel {
-  position: absolute;
-  z-index: var(--z-panel, 60);
-  top: calc(100% + 0.35rem);
-  /* Anclado a la derecha: es el control de más a la derecha de su fila, y
-     abriendo hacia la izquierda nunca se sale de la pantalla del teléfono. */
-  right: 0;
+  position: fixed;
+  z-index: var(--z-flotante);
   display: flex;
   flex-direction: column;
   gap: var(--e-2);
@@ -53,12 +52,7 @@
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
   border-radius: var(--r-md);
-  box-shadow: var(--shadow-card);
-
-  &.arriba {
-    top: auto;
-    bottom: calc(100% + 0.35rem);
-  }
+  box-shadow: var(--shadow-flotante);
 }
 
 .ruedas {

@@ -103,6 +103,9 @@
      barra, por debajo de una hoja — si una hoja está abierta, manda ella. */
   --z-menu: 35;
   --z-hoja: 40;
+  /* Calendarios y selectores que cuelgan de un campo. Por encima de la hoja
+     —casi siempre viven dentro de una— y por debajo del modo sol. */
+  --z-flotante: 50;
   --z-sol: 60;
 
   /* El ancho del panel lo declaran el layout, la tab bar y la hoja: si vive

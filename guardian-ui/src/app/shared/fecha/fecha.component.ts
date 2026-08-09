@@ -1,11 +1,16 @@
 import {
+  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
   HostListener,
   Input,
-  Output
+  OnDestroy,
+  Output,
+  ViewChild
 } from '@angular/core';
+
+import { seguirAlCampo, ubicarPanel } from '../panel-flotante';
 
 /** Lunes primero: es como se lee un calendario en el país. */
 const DIAS = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'];
@@ -14,9 +19,6 @@ const MESES = [
   'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
   'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
 ];
-
-/** Alto aproximado del panel, para decidir hacia dónde abrirlo. */
-const ALTO_PANEL = 320;
 
 /**
  * Un calendario propio para elegir un día.
@@ -37,7 +39,7 @@ const ALTO_PANEL = 320;
   styleUrl: './fecha.component.scss',
   standalone: false
 })
-export class FechaComponent {
+export class FechaComponent implements OnDestroy {
 
   /** `YYYY-MM-DD`. */
   @Input() valor = '';
@@ -53,13 +55,16 @@ export class FechaComponent {
 
   abierto = false;
 
-  /** El panel se despliega hacia arriba cuando abajo no cabe. */
-  arriba = false;
+  @ViewChild('panel') private panel?: ElementRef<HTMLElement>;
+  @ViewChild('campo') private campo?: ElementRef<HTMLElement>;
 
   /** Mes en pantalla, `YYYY-MM`. Se mueve con las flechas sin tocar el valor. */
   private mes = '';
 
-  constructor(private readonly host: ElementRef<HTMLElement>) {}
+  constructor(
+    private readonly host: ElementRef<HTMLElement>,
+    private readonly cd: ChangeDetectorRef
+  ) {}
 
   /** Lo que se lee en el campo cerrado: `sáb 8 ago`. */
   get texto(): string {
@@ -123,27 +128,56 @@ export class FechaComponent {
   }
 
   alternar(): void {
-    this.abierto = !this.abierto;
-    if (this.abierto) {
-      // Se reabre siempre sobre el mes del valor: quien navegó a diciembre y
-      // cerró sin elegir no quiere volver a diciembre la próxima vez.
-      this.mes = (this.valor || this.hoy()).slice(0, 7);
-      this.decidirLado(ALTO_PANEL);
-    }
+    this.abierto ? this.cerrar() : this.abrir();
   }
 
+  private abrir(): void {
+    // Se reabre siempre sobre el mes del valor: quien navegó a diciembre y
+    // cerró sin elegir no quiere volver a diciembre la próxima vez.
+    this.mes = (this.valor || this.hoy()).slice(0, 7);
+    this.abierto = true;
+
+    // Pintar el panel AHORA y medirlo en el mismo turno. Con un setTimeout la
+    // medida corría antes de que la vista existiera y el panel se quedaba en
+    // la esquina; y como todo pasa sin ceder el hilo, no hay un fotograma
+    // intermedio donde se vea saltar.
+    this.cd.detectChanges();
+    this.ubicar();
+
+    this.soltar = seguirAlCampo(() => this.ubicar(), () => this.cerrarYRefrescar());
+  }
+
+  private cerrar(): void {
+    this.abierto = false;
+    this.soltar?.();
+    this.soltar = undefined;
+  }
+
+  /** Cerrar desde un evento de fuera de Angular necesita avisar a la vista. */
+  private cerrarYRefrescar(): void {
+    this.cerrar();
+    this.cd.detectChanges();
+  }
+
+  ngOnDestroy(): void {
+    this.cerrar();
+  }
+
+  /** Suelta los escuchas del panel abierto. */
+  private soltar?: () => void;
+
   /**
-   * Abre hacia el lado donde quepa.
-   *
-   * <p>La hoja recorta lo que se sale de su cuerpo, así que un panel que se
-   * despliega hacia abajo cuando el campo está en la parte baja de la pantalla
-   * queda fuera de vista y solo aparece si el usuario adivina que tiene que
-   * desplazar. Hacia arriba solo se abre si arriba SÍ cabe: si no cabe en
-   * ninguno de los dos lados, abajo es lo esperable.</p>
+   * Se escribe en el estilo del elemento y no por binding: el binding depende
+   * de otro ciclo de detección, y hasta que llegue el panel ya se dibujó.
    */
-  private decidirLado(alto: number): void {
-    const caja = this.host.nativeElement.getBoundingClientRect();
-    this.arriba = window.innerHeight - caja.bottom < alto && caja.top > alto;
+  private ubicar(): void {
+    if (!this.abierto || !this.panel || !this.campo) {
+      return;
+    }
+    const donde = ubicarPanel(this.campo.nativeElement, this.panel.nativeElement);
+    const estilo = this.panel.nativeElement.style;
+    estilo.top = `${donde.top}px`;
+    estilo.left = `${donde.left}px`;
   }
 
   correrMes(pasos: number): void {
@@ -158,20 +192,20 @@ export class FechaComponent {
     }
     this.valor = dia;
     this.valorChange.emit(dia);
-    this.abierto = false;
+    this.cerrar();
   }
 
   /** Tocar fuera cierra. Sin esto el panel se queda abierto sobre el resto. */
   @HostListener('document:pointerdown', ['$event'])
   alTocarFuera(evento: Event): void {
     if (this.abierto && !this.host.nativeElement.contains(evento.target as Node)) {
-      this.abierto = false;
+      this.cerrar();
     }
   }
 
   @HostListener('document:keydown.escape')
   alEscapar(): void {
-    this.abierto = false;
+    this.cerrar();
   }
 
   private hoy(): string {

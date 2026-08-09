@@ -1,17 +1,19 @@
 import {
+  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
   HostListener,
   Input,
-  Output
+  OnDestroy,
+  Output,
+  ViewChild
 } from '@angular/core';
+
+import { seguirAlCampo, ubicarPanel } from '../panel-flotante';
 
 /** El final del día. No es una hora a la que se cite a nadie: es "hasta que se acabe". */
 const FIN_DEL_DIA = '23:59';
-
-/** Alto aproximado del panel, para decidir hacia dónde abrirlo. */
-const ALTO_PANEL = 190;
 
 /**
  * Cuánto salta la flecha de los minutos.
@@ -30,7 +32,7 @@ const MINUTOS_DEL_DIA = 24 * 60;
   styleUrl: './hora.component.scss',
   standalone: false
 })
-export class HoraComponent {
+export class HoraComponent implements OnDestroy {
 
   /** `HH:mm` en 24 h. Se guarda así para poder ordenar y comparar como texto. */
   @Input() valor = '08:00';
@@ -44,10 +46,13 @@ export class HoraComponent {
 
   abierto = false;
 
-  /** El panel se despliega hacia arriba cuando abajo no cabe. */
-  arriba = false;
+  @ViewChild('panel') private panel?: ElementRef<HTMLElement>;
+  @ViewChild('campo') private campo?: ElementRef<HTMLElement>;
 
-  constructor(private readonly host: ElementRef<HTMLElement>) {}
+  constructor(
+    private readonly host: ElementRef<HTMLElement>,
+    private readonly cd: ChangeDetectorRef
+  ) {}
 
   /** `8:30 p.m.`, o `Final del día` cuando son las 23:59. */
   get texto(): string {
@@ -75,14 +80,54 @@ export class HoraComponent {
   }
 
   alternar(): void {
-    this.abierto = !this.abierto;
-    if (this.abierto) {
-      // La hoja recorta lo que se sale de su cuerpo: abajo del todo, un panel
-      // que baja queda fuera de vista hasta que alguien adivine que hay que
-      // desplazar. Hacia arriba solo si arriba SÍ cabe.
-      const caja = this.host.nativeElement.getBoundingClientRect();
-      this.arriba = window.innerHeight - caja.bottom < ALTO_PANEL && caja.top > ALTO_PANEL;
+    this.abierto ? this.cerrar() : this.abrir();
+  }
+
+  private abrir(): void {
+    this.abierto = true;
+    // Pintar el panel AHORA y medirlo en el mismo turno. Con un setTimeout la
+    // medida corría antes de que la vista existiera y el panel se quedaba en
+    // la esquina; y como todo pasa sin ceder el hilo, no hay un fotograma
+    // intermedio donde se vea saltar.
+    this.cd.detectChanges();
+    this.ubicar();
+    this.soltar = seguirAlCampo(() => this.ubicar(), () => this.cerrarYRefrescar());
+  }
+
+  private cerrar(): void {
+    this.abierto = false;
+    this.soltar?.();
+    this.soltar = undefined;
+  }
+
+  /** Cerrar desde un evento de fuera de Angular necesita avisar a la vista. */
+  private cerrarYRefrescar(): void {
+    this.cerrar();
+    this.cd.detectChanges();
+  }
+
+  ngOnDestroy(): void {
+    this.cerrar();
+  }
+
+  /** Suelta los escuchas del panel abierto. */
+  private soltar?: () => void;
+
+  /**
+   * Se escribe en el estilo del elemento y no por binding: el binding depende
+   * de otro ciclo de detección, y hasta que llegue el panel ya se dibujó.
+   *
+   * <p>Pegado al borde DERECHO del campo: es el control de más a la derecha de
+   * su fila, y así el panel crece hacia adentro del formulario.</p>
+   */
+  private ubicar(): void {
+    if (!this.abierto || !this.panel || !this.campo) {
+      return;
     }
+    const donde = ubicarPanel(this.campo.nativeElement, this.panel.nativeElement, 'derecha');
+    const estilo = this.panel.nativeElement.style;
+    estilo.top = `${donde.top}px`;
+    estilo.left = `${donde.left}px`;
   }
 
   correrHora(pasos: number): void {
@@ -117,13 +162,13 @@ export class HoraComponent {
   @HostListener('document:pointerdown', ['$event'])
   alTocarFuera(evento: Event): void {
     if (this.abierto && !this.host.nativeElement.contains(evento.target as Node)) {
-      this.abierto = false;
+      this.cerrar();
     }
   }
 
   @HostListener('document:keydown.escape')
   alEscapar(): void {
-    this.abierto = false;
+    this.cerrar();
   }
 
   /** Minutos transcurridos del día. Toda la aritmética del selector vive acá. */

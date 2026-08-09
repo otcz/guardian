@@ -1,11 +1,11 @@
-<button type="button" class="campo" [class.abierto]="abierto"
+<button #campo type="button" class="campo" [class.abierto]="abierto"
         [attr.aria-label]="etiquetaAccesible" [attr.aria-expanded]="abierto"
         (click)="alternar()">
   <i class="pi pi-clock" aria-hidden="true"></i>
   <span class="texto">{{ texto }}</span>
 </button>
 
-<div class="panel" [class.arriba]="arriba" *ngIf="abierto"
+<div #panel class="panel" *ngIf="abierto"
      role="dialog" [attr.aria-label]="etiquetaAccesible">
 
   <!-- Tres ruedas con flecha arriba y abajo. El valor del medio se lee, no se
