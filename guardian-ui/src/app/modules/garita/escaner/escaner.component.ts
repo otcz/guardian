@@ -1,6 +1,12 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  AfterViewChecked,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Html5Qrcode } from 'html5-qrcode';
 
 import { AccesoService } from '../../../core/services/acceso.service';
 import { AdminService } from '../../../core/services/admin.service';
@@ -17,23 +23,12 @@ import {
 
 type Etapa = 'escaneando' | 'verificando' | 'ficha' | 'registrado';
 
-export type ModoEntrada = 'CAMARA' | 'DOCUMENTO' | 'HUELLA';
-
-interface OpcionModo {
-  valor: ModoEntrada;
-  etiqueta: string;
-  icono: string;
-  disponible: boolean;
-}
-
 /**
  * Prefijo de los códigos de GUARDIAN: GRD1 para credenciales, GRDI para
  * invitaciones. Sirve para que UN solo campo atienda al lector USB —que
  * "teclea" lo que escanea— sin preguntarle al guardia qué acaba de leer.
  */
 const PREFIJO_CODIGO = 'GRD';
-
-const ID_LECTOR = 'gd-lector';
 
 /** Dónde recuerda esta tablet si el guardia dejó el paso automático activo. */
 const CLAVE_AUTO = 'guardian.porteria.auto';
@@ -52,13 +47,12 @@ const SEGUNDOS_AUTO = 10;
  * lectura de la MISMA credencial en ese tiempo se ignora en vez de abrir una
  * ficha nueva.
  *
- * <p>Sin esto, dejar el QR o la cédula frente al lector después de registrar
- * —con paso automático, o simplemente porque el residente no guardó el
- * teléfono de una— hace que la cámara la vuelva a leer, abra una ficha nueva
- * y (con paso automático) la registre otra vez sola. Como la presencia ya
- * cambió, sale en el sentido contrario: entra, sale, entra, sale, cada pocos
- * segundos, para siempre. Es la misma persona que no se movió, no alguien
- * nuevo.</p>
+ * <p>Sin esto, pasar dos veces el mismo código por el lector —o que el lector
+ * repita la lectura, que es lo normal si el QR se queda al frente— abre una
+ * ficha nueva y (con paso automático) la registra otra vez sola. Como la
+ * presencia ya cambió, sale en el sentido contrario: entra, sale, entra,
+ * sale, cada pocos segundos, para siempre. Es la misma persona que no se
+ * movió, no alguien nuevo.</p>
  */
 const SEGUNDOS_ENFRIAMIENTO = 20;
 
@@ -68,6 +62,12 @@ const SEGUNDOS_ENFRIAMIENTO = 20;
  * <p>Todo el diseño obedece a que esto se usa de pie, con una tablet, de noche
  * y con gente esperando: la foto manda, el veredicto se lee de un vistazo, y
  * después del escaneo solo queda un toque (a pie o placa).</p>
+ *
+ * <p>Se identifica por UN solo campo. El lector de QR y el de código de barras
+ * son teclados: escriben ahí lo que leen. La cédula tecleada cae en el mismo
+ * sitio y el prefijo distingue un código de GUARDIAN de un número de documento.
+ * No hay modos que elegir — el guardia no tiene que decirle al sistema qué
+ * acaba de pasar por el lector.</p>
  */
 @Component({
   selector: 'gd-escaner',
@@ -75,7 +75,7 @@ const SEGUNDOS_ENFRIAMIENTO = 20;
   styleUrl: './escaner.component.scss',
   standalone: false
 })
-export class EscanerComponent implements OnInit, OnDestroy {
+export class EscanerComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   etapa: Etapa = 'escaneando';
   ficha: FichaVerificacion | null = null;
@@ -84,24 +84,8 @@ export class EscanerComponent implements OnInit, OnDestroy {
   /** Contadores del encabezado. Se refrescan tras cada registro. */
   presencia: Presencia | null = null;
 
-  /**
-   * Cómo se está identificando a quien llega. Son los tres lectores que hay en
-   * una portería de verdad, y NO tres formas de hacer lo mismo: la cámara lee
-   * el QR firmado; el documento cubre el lector de código de barras y la
-   * cédula tecleada; la huella espera hardware.
-   */
-  modoEntrada: ModoEntrada = 'CAMARA';
-
-  /** Lo que se escanea o se teclea en el modo Documento. */
+  /** Lo que el lector escribe o el guardia teclea. */
   entradaManual = '';
-
-  readonly modos: OpcionModo[] = [
-    { valor: 'CAMARA', etiqueta: 'Cámara', icono: 'pi-camera', disponible: true },
-    { valor: 'DOCUMENTO', etiqueta: 'Documento', icono: 'pi-id-card', disponible: true },
-    // Sin lector conectado no se puede prometer: se ve, se entiende que existe,
-    // y dice por qué no se puede usar todavía.
-    { valor: 'HUELLA', etiqueta: 'Huella', icono: 'pi-stop-circle', disponible: false }
-  ];
 
   /**
    * Sentido elegido por el guardia cuando corrige el inferido (CONTEXT.md §4).
@@ -145,7 +129,16 @@ export class EscanerComponent implements OnInit, OnDestroy {
   /** Para que la pantalla diga el número real y no uno escrito a mano. */
   readonly SEGUNDOS_AUTO = SEGUNDOS_AUTO;
 
-  private lector: Html5Qrcode | null = null;
+  /**
+   * El campo donde escribe el lector. Un lector USB teclea en lo que tenga el
+   * foco: si el foco se pierde, el escaneo se va a la nada y la portería deja
+   * de funcionar sin decir por qué.
+   */
+  @ViewChild('codigo') private campoCodigo?: ElementRef<HTMLInputElement>;
+
+  /** El mismo papel, pero con una ficha en pantalla y paso automático puesto. */
+  @ViewChild('siguiente') private campoSiguiente?: ElementRef<HTMLInputElement>;
+
   private procesando = false;
   private cuenta: ReturnType<typeof setInterval> | null = null;
 
@@ -174,10 +167,48 @@ export class EscanerComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.autoRegistro = localStorage.getItem(CLAVE_AUTO) === 'S';
     this.cargarPresencia();
-    this.iniciarCamara();
     // El motivo se muestra con el texto del catálogo, no con el código:
     // "VEHICULO_INACTIVO" no es algo que se le pueda leer a nadie de noche.
     this.admin.parametros('MOTIVO_DENEGACION').subscribe(m => (this.motivos = m));
+  }
+
+  /**
+   * El campo recupera el foco cada vez que vuelve a existir.
+   *
+   * <p>No basta el atributo `autofocus`: el campo se destruye al abrir una
+   * ficha y vuelve a crearse al cerrarla, y el navegador solo lo honra al
+   * cargar la página. Sin esto, el guardia pasa el segundo código por el
+   * lector y no pasa nada — el lector teclea, pero no hay dónde.</p>
+   *
+   * <p>Solo se toma el foco cuando NADIE lo tiene. Reclamarlo siempre se lo
+   * quitaría al guardia en cuanto tocara el botón de paso automático o
+   * cualquier otro control, que es peor que el problema que resuelve.</p>
+   *
+   * <p>Y se toma SELECCIONANDO lo que haya escrito. Cancelar una ficha deja el
+   * texto anterior a propósito —para corregir un dígito mal tecleado sin
+   * volver a escribirlo entero— pero el lector teclea al final de lo que
+   * encuentre: sin seleccionar, el siguiente escaneo se pegaría detrás del
+   * documento anterior y saldría un número que no es de nadie. Seleccionado,
+   * el escaneo lo reemplaza, y el guardia que hace clic para corregir no pasa
+   * por aquí y conserva su cursor.</p>
+   */
+  ngAfterViewChecked(): void {
+    const activo = document.activeElement;
+    const nadieEscribe = !activo || activo === document.body;
+    if (!nadieEscribe) {
+      return;
+    }
+    // Con la ficha abierta el que recibe al siguiente de la fila es el campo
+    // del pie, no el de la pantalla de escaneo — que ni siquiera existe.
+    const campo = this.campoCodigo?.nativeElement ?? this.campoSiguiente?.nativeElement;
+    if (!campo) {
+      return;
+    }
+    campo.focus();
+    // La selección va un turno después: al recrearse el campo, ngModel escribe
+    // el valor en un ciclo posterior y deja el cursor al final, deshaciendo un
+    // select() hecho aquí mismo. Comprobado — no es precaución teórica.
+    setTimeout(() => campo.select());
   }
 
   private cargarPresencia(): void {
@@ -188,81 +219,20 @@ export class EscanerComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.detenerCamara();
     this.detenerCuenta();
   }
 
-  // ── Cámara ───────────────────────────────────────────────────────────────
-
-  private iniciarCamara(): void {
-    this.lector = new Html5Qrcode(ID_LECTOR);
-
-    this.lector
-      .start(
-        { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 240, height: 240 } },
-        texto => this.alLeer(texto),
-        () => {
-          // El callback de "no encontré nada en este cuadro" se dispara varias
-          // veces por segundo. Ignorarlo es lo correcto: no es un error.
-        }
-      )
-      .catch(() => {
-        // Caer al documento y no dejar la pantalla muerta: la fila sigue ahí.
-        this.modoEntrada = 'DOCUMENTO';
-        this.error = 'No pudimos abrir la cámara. Usa el documento.';
-      });
-  }
-
-  private detenerCamara(): void {
-    if (!this.lector) {
-      return;
-    }
-    this.lector.stop().catch(() => undefined);
-    this.lector = null;
-  }
-
-  private alLeer(payload: string): void {
-    // La misma credencial que se acaba de registrar, todavía frente a la
-    // cámara: no es alguien nuevo. Se ignora entera y sin abrir ficha —
-    // rompe el ciclo entra-sale-entra-sale del paso automático.
-    if (this.enEnfriamiento(payload)) {
-      return;
-    }
-    // Con paso automático la cámara NO se apaga sobre la ficha: es lo que
-    // permite que el siguiente en la fila empuje al anterior. Fuera de ese
-    // modo el comportamiento es el de siempre — se apaga y se decide con
-    // calma.
-    if (this.etapa === 'ficha') {
-      this.alLlegarOtro(payload);
-      return;
-    }
-    if (this.etapa !== 'escaneando') {
-      return;
-    }
-    // La cámara sigue leyendo el mismo QR mientras esté al frente. Sin esta
-    // guarda se dispararían decenas de peticiones por un solo escaneo.
-    if (this.procesando) {
-      return;
-    }
-    this.procesando = true;
-    if (!this.autoRegistro) {
-      this.detenerCamara();
-    }
-    this.verificar(payload);
-  }
-
   /**
-   * Alguien nuevo se paró frente al lector con una ficha todavía en pantalla.
+   * Alguien nuevo pasó su código por el lector con una ficha todavía en pantalla.
    *
    * <p>Se registra la anterior con el default y se pasa a la nueva. Sin esto,
    * el que llega tendría que esperar a que se agote la cuenta del que ya se
    * fue.</p>
    */
   private alLlegarOtro(lectura: string): void {
-    // La misma credencial delante de la cámara no es alguien nuevo: es el QR
-    // que sigue ahí. Y sin ficha permitida no hay nada que registrar solo —
-    // un rechazo se resuelve mirándolo, no dejando que lo empujen.
+    // El mismo código pasado dos veces no es alguien nuevo. Y sin ficha
+    // permitida no hay nada que registrar solo — un rechazo se resuelve
+    // mirándolo, no dejando que lo empujen.
     const esElMismo = lectura === this.ficha?.payload || lectura === this.ficha?.documento;
     if (!this.autoRegistro || this.registrando || esElMismo || !this.ficha?.permitido) {
       return;
@@ -275,30 +245,31 @@ export class EscanerComponent implements OnInit, OnDestroy {
   // ── Flujo ────────────────────────────────────────────────────────────────
 
   /**
-   * Un solo campo para el lector de código de barras Y para la cédula tecleada.
+   * El único punto de entrada: lector de QR, lector de código de barras o
+   * cédula tecleada.
    *
-   * <p>Un lector USB "teclea" lo que escanea en el campo que tenga el foco, así
-   * que aquí puede caer el código de barras de una cédula o el QR de GUARDIAN.
-   * El prefijo distingue los dos mundos sin preguntarle nada al guardia, que es
-   * quien menos tiempo tiene para responder preguntas.</p>
+   * <p>Los dos lectores son teclados — escriben lo que leen en el campo que
+   * tenga el foco—, así que aquí puede caer el QR de GUARDIAN o el código de
+   * barras de una cédula. El prefijo distingue los dos mundos sin preguntarle
+   * nada al guardia, que es quien menos tiempo tiene para responder
+   * preguntas.</p>
    */
   verificarEntradaManual(): void {
     const texto = this.entradaManual.trim();
     if (!texto) {
       return;
     }
-    // Mismo freno que en la cámara: el lector de barras y la cédula tecleada
-    // pueden repetir la misma lectura segundos después de procesarla. No se
-    // limpia el campo: si esto dispara es porque ya se proceso, y borrarlo
-    // ahora seria justo el problema que se corrigio mas abajo — que el
-    // guardia pierda lo que escribio sin haber terminado nada nuevo.
+    // El lector repite la misma lectura si el código se queda al frente, y el
+    // guardia puede pasarlo dos veces. No se limpia el campo: si esto dispara
+    // es porque ya se proceso, y borrarlo ahora seria justo el problema que se
+    // corrigio antes — que el guardia pierda lo que escribio sin haber
+    // terminado nada nuevo.
     if (this.enEnfriamiento(texto)) {
       return;
     }
 
-    // El lector de barras teclea igual sobre una ficha abierta que sobre la
-    // pantalla de escaneo. Si ya hay alguien en pantalla, el que acaba de
-    // llegar lo empuja — exactamente como con la cámara.
+    // El lector teclea igual sobre una ficha abierta que sobre la pantalla de
+    // escaneo. Si ya hay alguien en pantalla, el que acaba de llegar lo empuja.
     if (this.etapa === 'ficha') {
       this.entradaManual = '';
       this.alLlegarOtro(texto);
@@ -341,21 +312,6 @@ export class EscanerComponent implements OnInit, OnDestroy {
         // número entero. reiniciar() sí lo borra, y por eso no se usa acá.
       }
     });
-  }
-
-  elegirModo(modo: ModoEntrada): void {
-    if (modo === this.modoEntrada || !this.modos.find(m => m.valor === modo)?.disponible) {
-      return;
-    }
-    this.modoEntrada = modo;
-    this.error = null;
-    this.entradaManual = '';
-
-    if (modo === 'CAMARA') {
-      this.iniciarCamara();
-    } else {
-      this.detenerCamara();
-    }
   }
 
   private verificar(payload: string): void {
@@ -520,21 +476,14 @@ export class EscanerComponent implements OnInit, OnDestroy {
     this.limpiarFicha();
     this.eventoRegistrado = null;
     this.etapa = 'escaneando';
-
-    // Vuelve al modo que el guardia venía usando: si eligió documento porque el
-    // lector de barras está en esa puerta, no tiene por qué reelegirlo cada vez.
-    // Con paso automático la cámara nunca se apagó, así que no hay que
-    // reabrirla — hacerlo dos veces deja dos streams peleando por el mismo
-    // dispositivo.
-    if (this.modoEntrada === 'CAMARA' && !this.lector) {
-      this.iniciarCamara();
-    }
+    // El foco vuelve solo al campo en ngAfterViewChecked: el lector necesita
+    // dónde escribir antes de que llegue el siguiente.
   }
 
   /**
    * Si esta lectura es la misma credencial que se acaba de registrar y el
    * enfriamiento todavía no pasó. Compara contra payload Y documento porque la
-   * misma persona puede volver a aparecer por cualquiera de los dos lectores.
+   * misma persona puede volver a pasar el QR o la cédula.
    */
   private enEnfriamiento(lectura: string): boolean {
     const previa = this.ultimaProcesada;

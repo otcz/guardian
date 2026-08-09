@@ -8,10 +8,10 @@ import javax.validation.constraints.Size;
 /**
  * Identificar a alguien por su documento en vez de por su QR.
  *
- * <p>Es el camino que comparten los tres lectores de la porteria: el de codigo
- * de barras —que del PDF417 de la cedula saca el numero, no un payload de
- * GUARDIAN—, el guardia tecleando la cedula, y el lector de huella cuando lo
- * haya.</p>
+ * <p>Es el camino que comparten el lector de codigo de barras —que del PDF417
+ * de la cedula saca el numero, no un payload de GUARDIAN— y el guardia
+ * tecleando la cedula. Tambien responde por un invitado que llega sin su
+ * codigo: el documento que entrega es el que su anfitrion declaro.</p>
  *
  * <p><b>Un documento NO es un secreto y un QR firmado si.</b> Por este camino
  * el control real es el que ya manda en la garita: la foto grande y el guardia

@@ -70,9 +70,9 @@ public class AccesoController {
     /**
      * Paso 1, por el otro camino: identificar por documento.
      *
-     * <p>Lo usan los tres lectores de la porteria — el de codigo de barras, la
-     * cedula tecleada y la huella—, y devuelve la MISMA ficha: lo que cambia es
-     * como se llego a ella.</p>
+     * <p>Lo usan el lector de codigo de barras y la cedula tecleada, y devuelve
+     * la MISMA ficha que el QR: lo que cambia es como se llego a ella. Tambien
+     * responde por un invitado que llega sin su codigo y entrega la cedula.</p>
      */
     @PostMapping(ApiEndpoint.ACCESO_VERIFICAR_DOCUMENTO)
     public ResponseEntity<FichaVerificacionResponse> verificarPorDocumento(

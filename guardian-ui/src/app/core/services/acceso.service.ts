@@ -48,9 +48,9 @@ export class AccesoService {
   /**
    * El otro camino a la misma ficha: por documento y no por QR.
    *
-   * <p>Lo usan los tres lectores de la portería — el de código de barras (del
-   * PDF417 de una cédula sale el número, no un payload), la cédula tecleada y
-   * la huella cuando la haya.</p>
+   * <p>Lo usan el lector de código de barras —del PDF417 de una cédula sale el
+   * número, no un payload— y la cédula tecleada. También responde por un
+   * invitado que llega sin su código y entrega la cédula.</p>
    */
   verificarPorDocumento(documento: string): Observable<FichaVerificacion> {
     return this.http.post<FichaVerificacion>(
