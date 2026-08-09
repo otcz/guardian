@@ -328,4 +328,65 @@ class InvitacionServiceImplTest {
         assertThat(publica.getAnfitrionNombre()).isNull();
         assertThat(publica.getEstado()).isEqualTo("REVOCADA");
     }
+
+    // ── Identificacion por documento en la porteria ──────────────────────────
+
+    @Test
+    @DisplayName("sin invitaciones a ese documento no hay a quien responder")
+    void porDocumentoSinCandidatas() {
+        when(invitacionRepository.buscarPorDocumentoInvitado(1L, "999"))
+                .thenReturn(java.util.Collections.emptyList());
+
+        assertThat(servicio.buscarPorDocumento(1L, "999")).isEmpty();
+    }
+
+    @Test
+    @DisplayName("con una vigente y una vencida al mismo documento gana la vigente")
+    void porDocumentoPrefiereLaQuePuedePasar() {
+        GdInvitacion vencida = invitacionVigente();
+        vencida.setId(1L);
+        vencida.setVigenciaHasta(new Date(System.currentTimeMillis() - DIA_MILIS));
+
+        GdInvitacion vigente = invitacionVigente();
+        vigente.setId(2L);
+
+        // El repositorio las entrega por fin de vigencia descendente; la
+        // vencida va primera a proposito para que elegir la ultima no baste.
+        when(invitacionRepository.buscarPorDocumentoInvitado(1L, "999"))
+                .thenReturn(java.util.Arrays.asList(vencida, vigente));
+
+        assertThat(servicio.buscarPorDocumento(1L, "999"))
+                .map(GdInvitacion::getId)
+                .contains(2L);
+    }
+
+    @Test
+    @DisplayName("si ninguna sirve devuelve la mas reciente, para poder decir por que no")
+    void porDocumentoDevuelveLaMasRecienteCuandoNingunaSirve() {
+        GdInvitacion vieja = invitacionVigente();
+        vieja.setId(1L);
+        vieja.setVigenciaHasta(new Date(System.currentTimeMillis() - 10 * DIA_MILIS));
+
+        GdInvitacion reciente = invitacionVigente();
+        reciente.setId(2L);
+        reciente.setActivo(Codigos.NO);   // revocada
+
+        when(invitacionRepository.buscarPorDocumentoInvitado(1L, "999"))
+                .thenReturn(java.util.Arrays.asList(reciente, vieja));
+
+        // Devolverla es lo que deja a la porteria decir "revocada" en vez de
+        // "no hay nadie con ese documento".
+        assertThat(servicio.buscarPorDocumento(1L, "999"))
+                .map(GdInvitacion::getId)
+                .contains(2L);
+    }
+
+    @Test
+    @DisplayName("un documento en blanco no llega a la base")
+    void porDocumentoEnBlancoNoConsulta() {
+        assertThat(servicio.buscarPorDocumento(1L, "   ")).isEmpty();
+        assertThat(servicio.buscarPorDocumento(1L, null)).isEmpty();
+        org.mockito.Mockito.verify(invitacionRepository, org.mockito.Mockito.never())
+                .buscarPorDocumentoInvitado(any(), any());
+    }
 }

@@ -156,6 +156,17 @@ public class AccesoServiceImpl implements AccesoService {
                 .findByConjuntoIdAndDocumento(guardia.getConjuntoId(), documento);
 
         if (!encontrada.isPresent()) {
+            // Antes de darlo por desconocido: puede ser un INVITADO que llega
+            // sin el codigo —bateria muerta, link que no le llego— y entrega la
+            // cedula. Ese documento no es un dato suelto: es el que el
+            // anfitrion declaro al invitarlo. Sin esta rama, la porteria le
+            // decia "no hay nadie registrado" a alguien que si estaba invitado.
+            Optional<GdInvitacion> invitado = invitacionService
+                    .buscarPorDocumento(guardia.getConjuntoId(), documento);
+            if (invitado.isPresent()) {
+                return verificarInvitacion(invitado.get(), request.getPuntoAccesoId(), guardia);
+            }
+
             // Queda registrado igual: alguien probando cedulas en la porteria
             // es exactamente lo que el administrador necesita poder ver.
             registrarDenegacion(null, null, Codigos.MOTIVO_FIRMA_INVALIDA,
@@ -185,6 +196,24 @@ public class AccesoServiceImpl implements AccesoService {
         comoQr.setPayload(credencialQrService.construirPayload(credencial.get()));
         comoQr.setPuntoAccesoId(request.getPuntoAccesoId());
         return verificar(comoQr, guardia);
+    }
+
+    /**
+     * Un invitado identificado por documento entra por la MISMA puerta que si
+     * hubiera mostrado el codigo.
+     *
+     * <p>Se le arma el payload de su invitacion y se delega: vigencia,
+     * revocacion, casa y presencia las decide {@link AccesoInvitadoService} en
+     * un solo sitio. Ademas la ficha vuelve con ese payload, que es lo que el
+     * guardia necesita para poder registrar el paso.</p>
+     */
+    private FichaVerificacionResponse verificarInvitacion(GdInvitacion invitacion,
+                                                          Long puntoAccesoId,
+                                                          UsuarioAutenticado guardia) {
+        VerificarQrRequest comoQr = new VerificarQrRequest();
+        comoQr.setPayload(invitacionService.construirPayload(invitacion));
+        comoQr.setPuntoAccesoId(puntoAccesoId);
+        return accesoInvitadoService.verificar(invitacion, comoQr, guardia);
     }
 
     // ─────────────────────────────────────────────────────────────────────────

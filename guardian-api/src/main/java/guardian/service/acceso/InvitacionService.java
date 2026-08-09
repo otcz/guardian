@@ -56,5 +56,21 @@ public interface InvitacionService {
      */
     Optional<GdInvitacion> resolver(String payload);
 
+    /**
+     * La invitacion que responde por ese documento en la porteria.
+     *
+     * <p>Para cuando el invitado llega sin el codigo —se le acabo la bateria,
+     * no le llego el link, lo borro— y entrega la cedula. El documento no es
+     * un dato suelto: es el que el anfitrion declaro al invitarlo, y el mismo
+     * que la ficha le pide al guardia comparar contra el documento fisico.</p>
+     *
+     * <p>Si hay varias a ese documento devuelve la que puede pasar AHORA; si
+     * ninguna puede, la mas reciente, para que la porteria diga "vencio" o
+     * "todavia no empieza" en vez de "no existe". La evaluacion de vigencia,
+     * revocacion y usos sigue siendo de AccesoInvitadoService: aca solo se
+     * elige de cual hablar.</p>
+     */
+    Optional<GdInvitacion> buscarPorDocumento(Long conjuntoId, String documento);
+
     String construirPayload(GdInvitacion invitacion);
 }

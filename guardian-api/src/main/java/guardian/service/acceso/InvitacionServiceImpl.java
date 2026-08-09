@@ -233,6 +233,42 @@ public class InvitacionServiceImpl implements InvitacionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Optional<GdInvitacion> buscarPorDocumento(Long conjuntoId, String documento) {
+        if (documento == null || documento.trim().isEmpty()) {
+            return Optional.empty();
+        }
+
+        List<GdInvitacion> candidatas = invitacionRepository
+                .buscarPorDocumentoInvitado(conjuntoId, documento.trim());
+        if (candidatas.isEmpty()) {
+            return Optional.empty();
+        }
+
+        // La que puede pasar ahora manda sobre la mas reciente: quien tiene una
+        // invitacion vigente y otra vencida del mes pasado entra, no se le
+        // muestra la vencida. Si ninguna puede, la primera de la lista —la de
+        // vigencia mas larga— es de la que la porteria tiene que hablar.
+        Date ahora = new Date();
+        return Optional.of(candidatas.stream()
+                .filter(i -> puedePasarAhora(i, ahora))
+                .findFirst()
+                .orElse(candidatas.get(0)));
+    }
+
+    /**
+     * Solo lo que depende de la invitacion misma. La casa, la presencia y el
+     * registro del intento los evalua AccesoInvitadoService, que es el dueno de
+     * esas reglas: aca duplicarlas seria tener dos porterias.
+     */
+    private boolean puedePasarAhora(GdInvitacion invitacion, Date ahora) {
+        return invitacion.puedeOperar()
+                && !invitacion.aunNoVigente(ahora)
+                && !invitacion.vencida(ahora)
+                && !invitacion.agotada();
+    }
+
+    @Override
     public String construirPayload(GdInvitacion invitacion) {
         return PREFIJO + SEPARADOR + invitacion.getCodigoPublico()
                 + SEPARADOR + invitacion.getFirmaHash();
