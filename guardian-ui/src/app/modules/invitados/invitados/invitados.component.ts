@@ -35,7 +35,30 @@ export class InvitadosComponent implements OnInit {
   invitacionARevocar: Invitacion | null = null;
 
   /** Piso del selector: una visita no puede agendarse en el pasado. */
-  readonly ahora = this.ahoraIso();
+  readonly hoy = this.hoyIso();
+
+  /**
+   * Las horas que se pueden elegir, cada media hora.
+   *
+   * <p>El selector nativo de fecha-y-hora obligaba a buscar el minuto en una
+   * rueda de sesenta valores. Nadie invita a alguien a las 19:49: en una visita
+   * la media hora es toda la precisión que hace falta, y así la hora se elige
+   * de una lista corta en vez de rodando.</p>
+   *
+   * <p>23:59 va aparte al final porque no es una hora a la que se cite a
+   * nadie: es "hasta que termine el día", y es el fin por defecto.</p>
+   */
+  readonly horas: string[] = InvitadosComponent.construirHoras();
+
+  /**
+   * Casi toda visita es para hoy o para mañana. Ese caso no debería costar
+   * abrir un calendario: se resuelve con un toque y el calendario queda para
+   * la excepción, que es el fin de semana o el mes que viene.
+   */
+  readonly atajos: { etiqueta: string; fecha: string }[] = [
+    { etiqueta: 'Hoy', fecha: this.diaIso(0) },
+    { etiqueta: 'Mañana', fecha: this.diaIso(1) }
+  ];
 
   // Sin tope de ingresos: la visita la acota su ventana. El invitado que sale
   // a comprar y vuelve gastaba su único cupo y se quedaba afuera.
@@ -43,18 +66,32 @@ export class InvitadosComponent implements OnInit {
     nombreInvitado: ['', [Validators.required]],
     documentoInvitado: ['', [Validators.required]],
     placa: [''],
-    inicio: [this.ahoraIso(), [Validators.required]],
-    fin: [this.finDelDiaIso(), [Validators.required]]
+    inicioFecha: [this.hoyIso(), [Validators.required]],
+    inicioHora: [this.horaRedondeada(), [Validators.required]],
+    finFecha: [this.hoyIso(), [Validators.required]],
+    finHora: ['23:59', [Validators.required]]
   });
 
+  /** Las dos mitades vueltas a juntar, que es lo que viaja y se compara. */
+  get inicio(): string {
+    const v = this.formulario.getRawValue();
+    return `${v.inicioFecha}T${v.inicioHora}`;
+  }
+
+  get fin(): string {
+    const v = this.formulario.getRawValue();
+    return `${v.finFecha}T${v.finHora}`;
+  }
+
   get inicioEnPasado(): boolean {
-    const campo = this.formulario.controls.inicio;
-    return campo.touched && campo.value < this.ahoraIso();
+    const campo = this.formulario.controls.inicioFecha;
+    return campo.touched && this.inicio < this.ahoraIso();
   }
 
   get finAntesDelInicio(): boolean {
-    const fin = this.formulario.controls.fin;
-    return fin.touched && fin.value <= this.formulario.controls.inicio.value;
+    const fin = this.formulario.controls.finFecha;
+    return (fin.touched || this.formulario.controls.finHora.touched)
+      && this.fin <= this.inicio;
   }
 
   /**
@@ -63,10 +100,37 @@ export class InvitadosComponent implements OnInit {
    * cosa, y un fin que quedó antes del inicio nunca llega al servidor.
    */
   alCambiarInicio(): void {
-    const inicio = this.formulario.controls.inicio.value;
-    if (this.formulario.controls.fin.value <= inicio) {
-      this.formulario.controls.fin.setValue(`${inicio.slice(0, 10)}T23:59`);
+    if (this.fin <= this.inicio) {
+      this.formulario.controls.finFecha.setValue(this.formulario.controls.inicioFecha.value);
+      this.formulario.controls.finHora.setValue('23:59');
     }
+  }
+
+  usarAtajo(atajo: { fecha: string }): void {
+    this.formulario.controls.inicioFecha.setValue(atajo.fecha);
+    this.alCambiarInicio();
+  }
+
+  /** 00:00, 00:30, … 23:30, y 23:59 al final como "fin del día". */
+  private static construirHoras(): string[] {
+    const lista: string[] = [];
+    for (let minutos = 0; minutos < 24 * 60; minutos += 30) {
+      const hh = String(Math.floor(minutos / 60)).padStart(2, '0');
+      const mm = String(minutos % 60).padStart(2, '0');
+      lista.push(`${hh}:${mm}`);
+    }
+    lista.push('23:59');
+    return lista;
+  }
+
+  /**
+   * La media hora en curso, para que el inicio por defecto sea una hora que
+   * SÍ está en la lista. Con 19:49 el select no tendría nada seleccionado.
+   */
+  private horaRedondeada(): string {
+    const ahora = new Date();
+    const hh = String(ahora.getHours()).padStart(2, '0');
+    return `${hh}:${ahora.getMinutes() < 30 ? '00' : '30'}`;
   }
 
   constructor(private readonly residente: ResidenteService) {}
@@ -103,8 +167,8 @@ export class InvitadosComponent implements OnInit {
     }
 
     const datos = this.formulario.getRawValue();
-    if (datos.fin <= datos.inicio) {
-      this.formulario.controls.fin.markAsTouched();
+    if (this.fin <= this.inicio) {
+      this.formulario.controls.finFecha.markAsTouched();
       return;
     }
     this.guardando = true;
@@ -115,8 +179,8 @@ export class InvitadosComponent implements OnInit {
     // inicio ya vencido nacería en el pasado. El backend lo lee como "desde
     // ahora". Las horas van CON el offset local: sin él, el servidor las leería
     // como UTC y la invitación moriría horas antes de lo que dice la pantalla.
-    const empiezaYa = datos.inicio <= this.ahoraIso();
-    const desde = empiezaYa ? null : this.conOffsetLocal(datos.inicio);
+    const empiezaYa = this.inicio <= this.ahoraIso();
+    const desde = empiezaYa ? null : this.conOffsetLocal(this.inicio);
 
     this.residente
       .crearInvitacion({
@@ -124,13 +188,18 @@ export class InvitadosComponent implements OnInit {
         documentoInvitado: datos.documentoInvitado,
         placa: datos.placa || null,
         vigenciaDesde: desde,
-        vigenciaHasta: this.conOffsetLocal(datos.fin)
+        vigenciaHasta: this.conOffsetLocal(this.fin)
       })
       .subscribe({
         next: creada => {
           this.guardando = false;
           this.mostrarAlta = false;
-          this.formulario.reset({ inicio: this.ahoraIso(), fin: this.finDelDiaIso() });
+          this.formulario.reset({
+            inicioFecha: this.hoyIso(),
+            inicioHora: this.horaRedondeada(),
+            finFecha: this.hoyIso(),
+            finHora: '23:59'
+          });
           this.cargar();
           // Abrir el QR de una vez: crear y compartir son un solo gesto.
           this.qrAbierto = creada;
@@ -249,18 +318,21 @@ export class InvitadosComponent implements OnInit {
   // La ventana de la visita se pinta con el pipe rangoFechas: lo comparten
   // esta pantalla, la página del invitado y la tabla del administrador.
 
-  /** Ahora mismo, en el formato que entiende un `datetime-local`. */
+  /** Ahora mismo, como `YYYY-MM-DDTHH:mm`, para comparar contra el formulario. */
   private ahoraIso(): string {
     return this.aValorLocal(new Date());
   }
 
-  /**
-   * El final del día de hoy. Es el fin por defecto: la visita típica se acaba
-   * ese mismo día, y quien la quiera más larga corre la fecha.
-   */
-  private finDelDiaIso(): string {
-    const hoy = new Date();
-    return `${this.aValorLocal(hoy).slice(0, 10)}T23:59`;
+  /** Hoy, en el formato que entiende un `<input type="date">`. */
+  private hoyIso(): string {
+    return this.aValorLocal(new Date()).slice(0, 10);
+  }
+
+  /** El día de hoy corrido `dias` días. */
+  private diaIso(dias: number): string {
+    const fecha = new Date();
+    fecha.setDate(fecha.getDate() + dias);
+    return this.aValorLocal(fecha).slice(0, 10);
   }
 
   private aValorLocal(momento: Date): string {

@@ -39,22 +39,45 @@
           </div>
           <!-- Con hora, y no un día suelto: la visita de las 7 de la noche no
                tiene por qué valer desde las 6 de la mañana, y la mamá que viene
-               el viernes y se va el domingo es una sola invitación. -->
-          <div class="campo">
-            <label for="i-inicio">Inicio</label>
-            <input id="i-inicio" type="datetime-local" formControlName="inicio"
-                   [min]="ahora" (change)="alCambiarInicio()">
+               el viernes y se va el domingo es una sola invitación.
+
+               Fecha y hora van SEPARADAS. Juntas, el navegador abría su propio
+               panel con una rueda de sesenta minutos encima del formulario: se
+               elegía el minuto exacto de una visita, que a nadie le importa, y
+               tapaba los campos de atrás. Acá el día se elige en el calendario
+               de siempre y la hora es una lista de medias horas. -->
+          <div class="campo campo--momento">
+            <label for="i-inicio-fecha">Inicio</label>
+            <div class="momento">
+              <input id="i-inicio-fecha" type="date" formControlName="inicioFecha"
+                     [min]="hoy" (change)="alCambiarInicio()">
+              <select id="i-inicio-hora" formControlName="inicioHora"
+                      aria-label="Hora de inicio" (change)="alCambiarInicio()">
+                <option *ngFor="let hora of horas" [value]="hora">{{ hora }}</option>
+              </select>
+            </div>
+            <!-- Los atajos del 90% de las visitas: hoy o mañana. -->
+            <div class="atajos">
+              <button type="button" *ngFor="let atajo of atajos"
+                      [class.activo]="formulario.controls.inicioFecha.value === atajo.fecha"
+                      (click)="usarAtajo(atajo)">{{ atajo.etiqueta }}</button>
+            </div>
             <small class="error" *ngIf="inicioEnPasado">La visita no puede ser en el pasado</small>
           </div>
-          <div class="campo">
-            <label for="i-fin">
+          <div class="campo campo--momento">
+            <label for="i-fin-fecha">
               Fin
               <i class="pi pi-info-circle ayuda"
                  pTooltip="Puede entrar y salir hasta esa hora"
                  tooltipPosition="top"></i>
             </label>
-            <input id="i-fin" type="datetime-local" formControlName="fin"
-                   [min]="formulario.controls.inicio.value">
+            <div class="momento">
+              <input id="i-fin-fecha" type="date" formControlName="finFecha"
+                     [min]="formulario.controls.inicioFecha.value">
+              <select id="i-fin-hora" formControlName="finHora" aria-label="Hora de fin">
+                <option *ngFor="let hora of horas" [value]="hora">{{ hora }}</option>
+              </select>
+            </div>
             <small class="error" *ngIf="finAntesDelInicio">El fin tiene que ser después del inicio</small>
           </div>
           <div class="campo">

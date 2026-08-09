@@ -88,8 +88,10 @@
     color: var(--text-muted);
   }
 
-  input {
+  input,
+  select {
     padding: 0.65rem 0.75rem;
+    font: inherit;
     color: var(--text-strong);
     background: var(--bg-base);
     border: 1px solid transparent;
@@ -106,6 +108,56 @@
   .error {
     font-size: var(--t-xs);
     color: var(--deny);
+  }
+}
+
+/* Fecha y hora, uno al lado del otro. La fecha manda —es lo que se decide
+   primero— y por eso se lleva el espacio que sobra; la hora es una lista y
+   ocupa lo que ocupa. Se apilan solos cuando la hoja es angosta. */
+.campo--momento {
+  flex: 1 1 260px;
+}
+
+.momento {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-1);
+
+  input[type='date'] {
+    flex: 2 1 130px;
+  }
+
+  select {
+    flex: 1 1 90px;
+    cursor: pointer;
+  }
+}
+
+/* Hoy y mañana de un toque. Van DEBAJO del campo y no encima: quien viene a
+   corregir una fecha ya sabe cuál quiere, y arriba se leerían como el título
+   de la sección. */
+.atajos {
+  display: flex;
+  gap: var(--e-1);
+
+  button {
+    padding: 0.25rem 0.6rem;
+    font-size: var(--t-xs);
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid var(--border-default);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color var(--transicion), border-color var(--transicion);
+
+    &:hover {
+      color: var(--text-strong);
+    }
+
+    &.activo {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
   }
 }
 
