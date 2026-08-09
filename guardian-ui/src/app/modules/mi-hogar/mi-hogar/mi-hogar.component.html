@@ -293,12 +293,12 @@
         <h2 class="gd-titulo-seccion">Mis vehículos</h2>
         <button type="button" class="agregar"
                 (click)="mostrarAltaVehiculo = true"
-                aria-label="Pedir vehículo">
+                aria-label="Registrar vehículo">
           <i class="pi pi-plus"></i>
         </button>
       </div>
 
-      <gd-hoja [abierta]="mostrarAltaVehiculo" titulo="Pedir vehículo"
+      <gd-hoja [abierta]="mostrarAltaVehiculo" titulo="Registrar vehículo"
                subtitulo="La administración lo autoriza"
                (cerrar)="mostrarAltaVehiculo = false">
       <form id="alta-vehiculo" class="alta"
@@ -436,7 +436,7 @@
         <i class="pi pi-car"></i>
         <p>No hay vehículos en tu casa</p>
         <button type="button" class="principal" (click)="mostrarAltaVehiculo = true">
-          Pedir vehículo
+          Registrar vehículo
         </button>
       </div>
     </section>
