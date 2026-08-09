@@ -22,6 +22,11 @@ export interface FichaVerificacion {
   permitido: boolean;
   motivoDenegacion: string | null;
   mensaje: string | null;
+  /**
+   * Lo que escribió la administración al deshabilitar, tal cual. Null cuando
+   * la denegación no viene de un bloqueo (credencial vencida, firma inválida).
+   */
+  motivoBloqueo: string | null;
   fotoUrl: string | null;
   nombreCompleto: string | null;
   /** Null en invitados: declaran solo el número. */

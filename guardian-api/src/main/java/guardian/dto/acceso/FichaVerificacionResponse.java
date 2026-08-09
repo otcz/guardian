@@ -26,6 +26,19 @@ public class FichaVerificacionResponse {
     /** Mensaje ya redactado para mostrar en pantalla. */
     private String mensaje;
 
+    /**
+     * El motivo que ESCRIBIO la administracion al deshabilitar, tal cual.
+     *
+     * <p>Distinto de {@link #mensaje}, que es la frase fija del sistema
+     * ("Puede salir, pero no volver a entrar"). Este dice POR QUE, y es lo que
+     * el guardia necesita para responderle a quien tiene enfrente en vez de
+     * mandarlo a la administracion sin explicacion.</p>
+     *
+     * <p>Null cuando la denegacion no viene de un bloqueo administrativo — una
+     * credencial vencida o una firma invalida no tienen motivo escrito.</p>
+     */
+    private String motivoBloqueo;
+
     // ── Identidad ────────────────────────────────────────────────────────────
 
     /**

@@ -105,6 +105,14 @@
       <!-- Se muestra SIEMPRE que venga, no solo en los rechazos: un "puede
            salir, pero no volver a entrar" quedaba invisible bajo el verde. -->
       <p class="motivo" *ngIf="ficha.mensaje">{{ ficha.mensaje }}</p>
+
+      <!-- El POR QUÉ, escrito por la administración. Sin esto el guardia sabe
+           que no puede entrar pero no tiene nada que responderle a quien tiene
+           enfrente, y lo manda a la administración a preguntar. -->
+      <p class="razon" *ngIf="ficha.motivoBloqueo">
+        <i class="pi pi-lock" aria-hidden="true"></i>
+        {{ ficha.motivoBloqueo }}
+      </p>
     </div>
 
     <!-- INVITADO: sin foto en el sistema; el control es el documento fisico. -->

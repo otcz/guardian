@@ -316,6 +316,28 @@ section {
   opacity: 0.9;
 }
 
+/* El motivo escrito por la administración, dentro del mismo bloque de estado
+   pero con su propio recuadro: es una cita de otra persona, no una frase del
+   sistema, y mezclarla con el mensaje fijo confundía las dos cosas. */
+.razon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.15rem 0 0;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  color: inherit;
+  background: var(--bg-surface);
+  border-radius: var(--r-full);
+
+  i {
+    font-size: 0.75rem;
+    opacity: 0.8;
+  }
+}
+
 /* Banda que distingue al invitado de un residente al primer vistazo. */
 .banda-invitado {
   display: flex;

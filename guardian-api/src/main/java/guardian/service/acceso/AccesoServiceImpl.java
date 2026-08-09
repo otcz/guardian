@@ -122,6 +122,10 @@ public class AccesoServiceImpl implements AccesoService {
         return FichaVerificacionResponse.builder()
                 .permitido(true)
                 .mensaje(soloSalida ? MensajesGlobales.SOLO_SALIDA : null)
+                // Tambien en la salida: el guardia le dice a la persona por que
+                // no va a poder volver a entrar, en vez de mandarla a preguntar.
+                .motivoBloqueo(soloSalida
+                        ? motivoBloqueoDe(motivo, persona, casa.orElse(null)) : null)
                 .fotoUrl(persona.getFotoUrl())
                 .nombreCompleto(persona.getNombreCompleto())
                 .tipoDocumento(persona.getTipoDocumento())
@@ -637,6 +641,7 @@ public class AccesoServiceImpl implements AccesoService {
                 .permitido(false)
                 .motivoDenegacion(motivo)
                 .mensaje(mensajeDe(motivo))
+                .motivoBloqueo(motivoBloqueoDe(motivo, persona, casa))
                 .fotoUrl(persona.getFotoUrl())
                 .nombreCompleto(persona.getNombreCompleto())
                 .tipoDocumento(persona.getTipoDocumento())
@@ -645,6 +650,26 @@ public class AccesoServiceImpl implements AccesoService {
                 .edad(EdadUtil.calcular(persona.getFechaNacimiento()))
                 .vehiculos(Collections.emptyList())
                 .build();
+    }
+
+    /**
+     * El texto que escribio la administracion al deshabilitar, sacado de QUIEN
+     * esta bloqueado de verdad.
+     *
+     * <p>Persona y casa se bloquean por separado y con motivos distintos —"no
+     * autorizado" no es lo mismo que "la casa esta en mora"—, asi que se lee
+     * el de la entidad que produjo la denegacion y no el primero que haya.</p>
+     */
+    private String motivoBloqueoDe(String motivo, GdPersona persona, GdCasa casa) {
+        if (Codigos.MOTIVO_PERSONA_BLOQUEADA.equals(motivo)) {
+            return persona != null ? persona.getMotivoBloqueo() : null;
+        }
+        if (Codigos.MOTIVO_CASA_BLOQUEADA.equals(motivo)) {
+            return casa != null ? casa.getMotivoBloqueo() : null;
+        }
+        // El resto —credencial vencida, firma invalida, inactiva— no nace de un
+        // bloqueo administrativo y no tiene motivo escrito por nadie.
+        return null;
     }
 
     private String mensajeDe(String motivo) {
