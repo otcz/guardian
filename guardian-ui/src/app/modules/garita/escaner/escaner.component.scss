@@ -228,6 +228,12 @@ section {
     border-color: var(--ok);
   }
 
+  /* Ámbar: no es un rechazo —la persona sí sale— pero tampoco está en orden.
+     En verde el guardia leía "todo bien" sobre alguien deshabilitado. */
+  &.solo-salida {
+    border-color: var(--warn);
+  }
+
   &.deny {
     border-color: var(--deny);
   }
@@ -278,13 +284,26 @@ section {
     color: var(--deny);
     background: var(--deny-soft);
   }
+
+  .solo-salida & {
+    color: var(--warn);
+    background: var(--warn-soft);
+  }
 }
 
+/* Sigue el color del veredicto: el mismo párrafo explica un rechazo (rojo) y
+   un "solo puede salir" (ámbar). Fijo en rojo, el aviso ámbar se leía como
+   una negación y el guardia no lo dejaba salir. */
 .motivo {
   margin: 0;
   text-align: center;
   font-size: 0.95rem;
+  font-weight: 600;
   color: var(--deny);
+
+  .solo-salida & {
+    color: var(--warn);
+  }
 }
 
 /* Banda que distingue al invitado de un residente al primer vistazo. */

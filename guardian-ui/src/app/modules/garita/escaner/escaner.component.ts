@@ -564,6 +564,33 @@ export class EscanerComponent implements OnInit, OnDestroy {
 
   // ── Presentación ─────────────────────────────────────────────────────────
 
+  /**
+   * Alguien DESHABILITADO que está adentro: el servidor le permite salir
+   * —retener a una persona dentro del conjunto no protege a nadie— pero no
+   * volver a entrar, y lo avisa mandando un mensaje con la ficha en verde.
+   *
+   * <p>Es el único caso donde `permitido` es true y aun así hay algo que
+   * decir. Sin distinguirlo, la pantalla pintaba el mismo verde que a un
+   * residente al día y el guardia no tenía forma de saberlo.</p>
+   */
+  get soloSalida(): boolean {
+    return !!this.ficha?.permitido && !!this.ficha?.mensaje;
+  }
+
+  get textoVeredicto(): string {
+    if (!this.ficha?.permitido) {
+      return 'NO PUEDE PASAR';
+    }
+    return this.soloSalida ? 'SOLO PUEDE SALIR' : 'PUEDE PASAR';
+  }
+
+  get iconoVeredicto(): string {
+    if (!this.ficha?.permitido) {
+      return 'pi-times-circle';
+    }
+    return this.soloSalida ? 'pi-exclamation-triangle' : 'pi-check-circle';
+  }
+
   get textoSentido(): string {
     const sentido: Sentido | null | undefined =
       this.sentidoCorregido ?? this.ficha?.sentidoSugerido;

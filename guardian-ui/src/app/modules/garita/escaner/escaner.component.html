@@ -87,15 +87,23 @@
   <!-- FICHA -->
   <section class="ficha"
            *ngIf="etapa === 'ficha' && ficha"
-           [class.ok]="ficha.permitido"
+           [class.ok]="ficha.permitido && !soloSalida"
+           [class.solo-salida]="soloSalida"
            [class.deny]="!ficha.permitido">
 
+    <!-- Tres veredictos y no dos. "Solo salida" es alguien DESHABILITADO que
+         está adentro: se le deja salir —retenerlo no protege a nadie— pero
+         pintarlo del mismo verde que a un residente al día le decía al guardia
+         que todo estaba en orden, y no lo estaba. -->
     <div class="veredicto">
-      <i class="pi" [ngClass]="ficha.permitido ? 'pi-check-circle' : 'pi-times-circle'"></i>
-      <span>{{ ficha.permitido ? 'PUEDE PASAR' : 'NO PUEDE PASAR' }}</span>
+      <i class="pi" [ngClass]="iconoVeredicto"></i>
+      <span>{{ textoVeredicto }}</span>
     </div>
 
-    <p class="motivo" *ngIf="!ficha.permitido && ficha.mensaje">{{ ficha.mensaje }}</p>
+    <!-- El mensaje se muestra SIEMPRE que venga, no solo en los rechazos. Antes
+         un "puede salir, pero no volver a entrar" quedaba invisible bajo un
+         PUEDE PASAR en verde. -->
+    <p class="motivo" *ngIf="ficha.mensaje">{{ ficha.mensaje }}</p>
 
     <!-- INVITADO: sin foto en el sistema; el control es el documento fisico. -->
     <div class="banda-invitado" *ngIf="ficha.esInvitado">
@@ -143,7 +151,11 @@
         <div class="acciones" *ngIf="ficha.permitido">
           <p class="sentido">
             Registrar {{ textoSentido }}
-            <button type="button" class="corregir" (click)="alternarSentido()">
+            <!-- Con "solo salida" NO se ofrece cambiar el sentido: el servidor
+                 rechaza esa entrada, y un botón que lleva a un rechazo seguro
+                 solo le hace perder el toque al guardia con gente esperando. -->
+            <button type="button" class="corregir" *ngIf="!soloSalida"
+                    (click)="alternarSentido()">
               Cambiar a {{ textoSentidoOpuesto }}
             </button>
           </p>
