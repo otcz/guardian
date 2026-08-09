@@ -11,8 +11,12 @@
        En escritorio no aplica: ahí no se arrastra, se hace clic fuera. -->
   <div class="tirador"></div>
 
-  <header class="encabezado" *ngIf="titulo">
-    <div class="textos">
+  <!-- La cabecera se dibuja SIEMPRE, tenga título o no: acá vive la X, y
+       colgarla del título dejaba sin forma de cerrar a las hojas que no lo
+       llevan —la del código del invitado, sin ir más lejos—. Sin título la
+       cabecera es solo la X y no separa nada. -->
+  <header class="encabezado" [class.sin-titulo]="!titulo">
+    <div class="textos" *ngIf="titulo">
       <h2 class="titulo">{{ titulo }}</h2>
       <!-- El contexto va en su propia línea y no dentro del título: en el
            back-office los títulos como "Administrador de SANTA BARBARA"

@@ -63,6 +63,14 @@
   .textos {
     min-width: 0;
   }
+
+  /* Sin título la cabecera es solo la X: va a la derecha por sí sola y no
+     tiene nada de qué separarse. En el móvil, donde la X no se dibuja, queda
+     en nada y no deja un hueco arriba del contenido. */
+  &.sin-titulo {
+    justify-content: flex-end;
+    margin-bottom: 0;
+  }
 }
 
 .titulo {
