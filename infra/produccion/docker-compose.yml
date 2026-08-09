@@ -154,6 +154,39 @@ services:
           cpus: "1"
           memory: 256m
 
+  # ── Salida a internet ────────────────────────────────────────────────────
+  # El servidor esta detras de NAT (192.168.100.246, salida 138.0.89.38) y no
+  # se le puede apuntar un dominio sin abrir puertos en el router de la
+  # oficina. El tunel resuelve eso al reves: es el servidor el que abre la
+  # conexion HACIA Cloudflare, asi que no hay nada que abrir ni una IP fija
+  # que mantener.
+  #
+  # Apunta a guardian-web por NOMBRE DE CONTENEDOR, no a 127.0.0.1: los dos
+  # estan en la misma red de Docker, y asi el tunel no depende del puerto
+  # publicado en el host.
+  #
+  # El token lo entrega el panel de Cloudflare al crear el tunel y vale por si
+  # solo — va en /data/guardian/.env, nunca en el repositorio.
+  guardian-tunel:
+    image: cloudflare/cloudflared:latest
+    container_name: guardian-tunel
+    restart: unless-stopped
+    # --no-autoupdate: que se actualice solo dentro del contenedor deja una
+    # version distinta de la de la imagen y borra la trazabilidad. Se actualiza
+    # con `docker compose pull guardian-tunel`.
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${GUARDIAN_CLOUDFLARE_TOKEN}
+    depends_on:
+      - guardian-web
+    networks:
+      - guardian
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 256m
+
   # ── Respaldo ─────────────────────────────────────────────────────────────
   # Un contenedor y no un cron del host: se levanta y se cae con el stack, y
   # no queda una linea suelta en un crontab que nadie recuerda haber puesto.

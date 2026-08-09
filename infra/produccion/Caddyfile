@@ -19,6 +19,14 @@
 		output stdout
 		format console
 	}
+	servers {
+		# Delante hay un tunel de Cloudflare que corre en la MISMA red de
+		# Docker, con IP privada. Declararlo de confianza es lo que hace que
+		# {client_ip} sea la del residente y no la del contenedor del tunel.
+		# Sin esto, el freno de fuerza bruta del login contaria a todo el
+		# conjunto como un solo atacante y bloquearia a todo el mundo junto.
+		trusted_proxies static private_ranges
+	}
 }
 
 :80 {
@@ -27,10 +35,10 @@
 	# que se pasa tal cual: nada de strip_prefix.
 	handle /api/* {
 		reverse_proxy guardian-api:8080 {
-			# Sin esto el backend ve la IP del contenedor de Caddy en todos
-			# los intentos de ingreso, y el freno de fuerza bruta del login
-			# contaria a todo el conjunto como un solo atacante.
-			header_up X-Real-IP {remote_host}
+			# {client_ip} y no {remote_host}: el primero atraviesa los proxies
+			# declarados de confianza arriba y entrega la IP real del
+			# residente; el segundo entregaria la del tunel.
+			header_up X-Real-IP {client_ip}
 		}
 	}
 
