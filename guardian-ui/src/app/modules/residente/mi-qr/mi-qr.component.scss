@@ -168,14 +168,16 @@
   width: var(--tactil);
   height: var(--tactil);
   flex: 0 0 auto;
-  overflow: hidden;
   border-radius: var(--r-full);
   background: var(--bg-soft);
 
+  /* El recorte circular lo hace la IMAGEN. Con overflow:hidden en el
+     contenedor, la insignia de "cambiar foto" quedaba cortada por el círculo. */
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: inherit;
   }
 }
 
@@ -184,21 +186,24 @@
    único contenido es el código. */
 .cambiar-foto {
   position: absolute;
-  right: -2px;
-  bottom: -2px;
+  right: -3px;
+  bottom: -3px;
   display: grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   color: var(--text-inverse);
   background: var(--accent);
+  /* El anillo del color de la tarjeta la despega de la foto: sin él, sobre una
+     imagen oscura se confunde con el borde del retrato. */
   border: 2px solid var(--bg-surface);
   border-radius: var(--r-full);
+  box-shadow: var(--shadow-card);
   cursor: pointer;
 
   i {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
   }
 
   &:hover {

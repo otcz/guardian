@@ -252,16 +252,19 @@ section {
   width: 44px;
   height: 44px;
   flex: 0 0 auto;
-  overflow: hidden;
   display: grid;
   place-items: center;
   border-radius: var(--r-full);
   background: var(--bg-soft);
 
+  /* El recorte circular lo hace la IMAGEN, no el contenedor. Con
+     overflow:hidden acá, la insignia de "cambiar foto" —que sobresale a
+     propósito— quedaba cortada por el borde del círculo. */
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: inherit;
   }
 
   i {
@@ -285,21 +288,25 @@ section {
    tiene— así que no necesita competir con las demás acciones por espacio. */
 .cambiar-foto {
   position: absolute;
-  right: -2px;
-  bottom: -2px;
+  right: -3px;
+  bottom: -3px;
   display: grid;
   place-items: center;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   color: var(--text-inverse);
   background: var(--accent);
+  /* El anillo del color de la tarjeta la despega de la foto: sin él, sobre una
+     imagen oscura la insignia se confunde con el borde del avatar. */
   border: 2px solid var(--bg-surface);
   border-radius: var(--r-full);
+  box-shadow: var(--shadow-card);
   cursor: pointer;
 
   i {
-    font-size: 0.6rem;
+    /* Tamaño real del glifo: a 0.6rem la cámara era una mancha sin forma. */
+    font-size: 0.75rem;
     color: var(--text-inverse);
   }
 

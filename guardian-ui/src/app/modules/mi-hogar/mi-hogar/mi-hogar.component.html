@@ -198,10 +198,12 @@
 
             <!-- Solo en la propia fila: nadie puede ponerle la cara a otro,
                  ni siquiera el titular. -->
+            <!-- tooltipPosition="right" y no "top": arriba se montaba sobre la
+                 fila anterior y tapaba el nombre de otra persona. -->
             <button type="button" class="cambiar-foto" *ngIf="familiar.esUsuarioActual"
                     (click)="abrirCambioFoto()"
                     aria-label="Cambiar tu foto"
-                    pTooltip="Cambiar tu foto" tooltipPosition="top">
+                    pTooltip="Cambiar tu foto" tooltipPosition="right">
               <i class="pi pi-camera"></i>
             </button>
           </div>
