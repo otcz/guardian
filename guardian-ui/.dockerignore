@@ -1,0 +1,13 @@
+# Sin esto, el COPY del build manda node_modules entero al demonio de Docker
+# —cientos de megas y decenas de miles de archivos— y ademas pisa el
+# node_modules que acaba de instalar `npm ci` dentro de la imagen, que es lo
+# unico compilado contra la arquitectura correcta.
+node_modules/
+dist/
+.angular/
+
+# Nada de esto influye en el build y todo invalida la cache al cambiar.
+.git/
+.vscode/
+.idea/
+*.log

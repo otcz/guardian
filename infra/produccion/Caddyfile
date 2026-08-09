@@ -1,0 +1,75 @@
+# ============================================================================
+# GUARDIAN — puerta de entrada
+# ============================================================================
+# Caddy sirve el frontend Y hace de proxy del API bajo el MISMO origen. Por eso
+# environment.prod.ts puede usar apiUrl: "/api" y no hay CORS que configurar ni
+# un host que mantener sincronizado entre las dos mitades.
+#
+# Escucha en HTTP y no en HTTPS a proposito: el TLS lo termina quien esta
+# delante — Cloudflare Tunnel cuando exista el dominio, o `tailscale serve`
+# mientras tanto. Poner Caddy a pedir certificados aca obligaria a exponerlo a
+# internet, que es justo lo que el tunel evita.
+# ============================================================================
+
+{
+	# Sin puerto administrativo: nadie lo usa y es una superficie menos.
+	admin off
+	# El log en stdout lo recoge Docker, como el resto del stack.
+	log {
+		output stdout
+		format console
+	}
+}
+
+:80 {
+	# ── API ──────────────────────────────────────────────────────────────
+	# El backend espera las rutas CON el prefijo /api (ApiEndpoint.API), asi
+	# que se pasa tal cual: nada de strip_prefix.
+	handle /api/* {
+		reverse_proxy guardian-api:8080 {
+			# Sin esto el backend ve la IP del contenedor de Caddy en todos
+			# los intentos de ingreso, y el freno de fuerza bruta del login
+			# contaria a todo el conjunto como un solo atacante.
+			header_up X-Real-IP {remote_host}
+		}
+	}
+
+	# Actuator fuera: el healthcheck lo consulta el propio compose por la red
+	# interna. Publicarlo solo regala version de Spring y estado interno.
+	handle /actuator/* {
+		respond 404
+	}
+
+	# ── Frontend ─────────────────────────────────────────────────────────
+	handle {
+		root * /srv
+
+		# El bundle lleva hash en el nombre: puede cachearse para siempre.
+		# index.html y el service worker NO — si se cachean, un residente se
+		# queda con la version vieja hasta que borre datos del navegador.
+		@inmutable path /*.js /*.css /media/* /assets/*
+		header @inmutable Cache-Control "public, max-age=31536000, immutable"
+
+		@volatil path /index.html /ngsw.json /ngsw-worker.js /manifest.webmanifest
+		header @volatil Cache-Control "no-cache"
+
+		# Una aplicacion de una sola pagina: cualquier ruta que no sea un
+		# archivo la resuelve el router de Angular, no un 404 del servidor.
+		try_files {path} /index.html
+		file_server
+	}
+
+	# ── Cabeceras de seguridad ───────────────────────────────────────────
+	header {
+		# El QR del residente no tiene por que poder incrustarse en otro sitio.
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# El navegador no necesita ninguna de estas: la camara se quito de la
+		# porteria y la aplicacion no usa microfono ni ubicacion.
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	encode gzip zstd
+}

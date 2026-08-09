@@ -1,6 +1,10 @@
 ### Secretos / credenciales (NUNCA subir al repo) ###
 .gcp-keys/
 infra/.env
+# Cualquier .env bajo infra/, no solo el de la raiz: el de produccion vive en
+# el servidor (/data/guardian/.env), pero basta que alguien haga una copia
+# local para probar y quedaria a un `git add .` de publicarse.
+infra/**/.env
 *.env.local
 **/application-local.properties
 **/application-local.yml

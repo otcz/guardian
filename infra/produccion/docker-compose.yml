@@ -1,0 +1,208 @@
+name: guardian
+
+# ============================================================================
+# GUARDIAN — stack de produccion (servidor jfzambrano)
+# ============================================================================
+# Se levanta desde el checkout del repositorio en el servidor:
+#
+#   cd /data/guardian/repo
+#   docker compose -f infra/produccion/docker-compose.yml up -d --build
+#
+# Convenciones que hereda del stack de hermes que ya corre en esta maquina:
+#   - Los secretos viven FUERA del repositorio, en /data/guardian/.env (modo
+#     600). Nunca se copian al chat ni a git.
+#   - Los datos van al disco grande (/data), no al disco raiz de 98 GB.
+#   - Nada publica puertos en 0.0.0.0. Lo unico que escucha en el host es el
+#     proxy, y solo en loopback: quien lo expone hacia afuera es el tunel de
+#     Cloudflare o `tailscale serve`, no Docker.
+#
+# OJO con el puerto 8080 de esta maquina: Tailscale Funnel lo publica a
+# internet (va al explorador de hermes). GUARDIAN usa 8090 justamente para no
+# quedar expuesto sin haberlo decidido.
+# ============================================================================
+
+services:
+
+  # ── Base de datos ────────────────────────────────────────────────────────
+  guardian-db:
+    image: postgres:14
+    container_name: guardian-db
+    restart: unless-stopped
+    # La MISMA version que en desarrollo. Con ddl-auto=update, un salto de
+    # version mayor en produccion se descubre cuando Hibernate ya toco el
+    # esquema — tarde.
+    environment:
+      POSTGRES_USER: ${GUARDIAN_DB_USUARIO}
+      POSTGRES_PASSWORD: ${GUARDIAN_DB_CLAVE}
+      POSTGRES_DB: ${GUARDIAN_DB_NOMBRE}
+      TZ: ${GUARDIAN_ZONA_HORARIA}
+    # SIN puerto en el host: 5432 ya lo tiene hermes-pg, y de todos modos la
+    # base no tiene por que ser alcanzable desde fuera de su red. Se consulta
+    # con `docker exec guardian-db psql -U ... -d ...`, igual que hermes.
+    volumes:
+      - /data/guardian/postgres:/var/lib/postgresql/data
+    networks:
+      - guardian
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${GUARDIAN_DB_USUARIO} -d ${GUARDIAN_DB_NOMBRE}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 4g
+
+  # ── Backend ──────────────────────────────────────────────────────────────
+  guardian-api:
+    build:
+      context: ../../guardian-api
+      dockerfile: Dockerfile
+    image: guardian-api:local
+    container_name: guardian-api
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://guardian-db:5432/${GUARDIAN_DB_NOMBRE}
+      SPRING_DATASOURCE_USERNAME: ${GUARDIAN_DB_USUARIO}
+      SPRING_DATASOURCE_PASSWORD: ${GUARDIAN_DB_CLAVE}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+      # Mismo origen: el navegador nunca habla directo con el backend, siempre
+      # a traves del proxy. Se deja el del tailnet para poder probar el API
+      # con curl desde otro equipo sin abrir CORS de par en par.
+      GUARDIAN_ALLOWED_ORIGINS: ${GUARDIAN_ALLOWED_ORIGINS}
+
+      # Los dos secretos son distintos a proposito: comprometer la sesion de un
+      # usuario no debe permitir fabricar credenciales de acceso.
+      # Si GUARDIAN_QR_HMAC_SECRET cambia, TODOS los QR emitidos dejan de
+      # validar y hay que reemitirlos. No rotarlo a la ligera.
+      GUARDIAN_JWT_SECRET: ${GUARDIAN_JWT_SECRET}
+      GUARDIAN_QR_HMAC_SECRET: ${GUARDIAN_QR_HMAC_SECRET}
+
+      GUARDIAN_SUPER_ADMIN_DOCUMENTO: ${GUARDIAN_SUPER_ADMIN_DOCUMENTO}
+      GUARDIAN_SUPER_ADMIN_CLAVE: ${GUARDIAN_SUPER_ADMIN_CLAVE}
+
+      # Las columnas de fecha guardan hora de PARED, no el instante: si el
+      # proceso corriera en UTC, lo ya guardado se leeria cinco horas corrido.
+      GUARDIAN_ZONA_HORARIA: ${GUARDIAN_ZONA_HORARIA}
+      TZ: ${GUARDIAN_ZONA_HORARIA}
+
+      GUARDIAN_SMTP_HOST: ${GUARDIAN_SMTP_HOST:-}
+      GUARDIAN_SMTP_PUERTO: ${GUARDIAN_SMTP_PUERTO:-587}
+      GUARDIAN_SMTP_USUARIO: ${GUARDIAN_SMTP_USUARIO:-}
+      GUARDIAN_SMTP_CLAVE: ${GUARDIAN_SMTP_CLAVE:-}
+      GUARDIAN_CORREO_REMITENTE: ${GUARDIAN_CORREO_REMITENTE:-no-responder@guardian.local}
+      GUARDIAN_CORREO_NOMBRE: ${GUARDIAN_CORREO_NOMBRE:-GUARDIAN}
+
+      STORAGE_TYPE: local
+      STORAGE_LOCAL_PATH: /data/fotos
+      PORT: "8080"
+
+      # Techo explicito de heap. Sin el, la JVM toma una fraccion de los 61 GB
+      # de la maquina y el limite del contenedor la mata antes de que el
+      # recolector haga nada.
+      JAVA_TOOL_OPTIONS: "-Xmx1g -XX:MaxMetaspaceSize=256m"
+    volumes:
+      # Las fotos son el control real de la porteria: van al disco grande y
+      # entran en el respaldo, no a un volumen anonimo de Docker.
+      - /data/guardian/fotos:/data/fotos
+    depends_on:
+      guardian-db:
+        condition: service_healthy
+    networks:
+      - guardian
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 2g
+
+  # ── Frontend y puerta de entrada ─────────────────────────────────────────
+  guardian-web:
+    build:
+      context: ../../guardian-ui
+      dockerfile: Dockerfile
+    image: guardian-web:local
+    container_name: guardian-web
+    restart: unless-stopped
+    # SOLO loopback. Lo que lo saca a internet es el tunel de Cloudflare; lo
+    # que lo hace visible en el tailnet es `tailscale serve`. Publicarlo en
+    # 0.0.0.0 lo dejaria servido a toda la red de la oficina sin querer.
+    ports:
+      - "127.0.0.1:8090:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - guardian-api
+    networks:
+      - guardian
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/ >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 256m
+
+  # ── Respaldo ─────────────────────────────────────────────────────────────
+  # Un contenedor y no un cron del host: se levanta y se cae con el stack, y
+  # no queda una linea suelta en un crontab que nadie recuerda haber puesto.
+  guardian-backup:
+    image: postgres:14
+    container_name: guardian-backup
+    restart: unless-stopped
+    environment:
+      PGPASSWORD: ${GUARDIAN_DB_CLAVE}
+      TZ: ${GUARDIAN_ZONA_HORARIA}
+      RETENCION_DIAS: ${GUARDIAN_RETENCION_RESPALDOS:-14}
+    volumes:
+      - /data/guardian/backups:/respaldos
+    depends_on:
+      guardian-db:
+        condition: service_healthy
+    networks:
+      - guardian
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        echo "[respaldo] en marcha, retencion $${RETENCION_DIAS} dias"
+        while true; do
+          ARCHIVO="/respaldos/guardian-$$(date +%Y%m%d-%H%M).sql.gz"
+          # -Fp comprimido con gzip y no -Fc: un volcado en texto plano se
+          # puede inspeccionar y restaurar con psql en cualquier maquina, sin
+          # depender de que la version de pg_restore coincida.
+          if pg_dump -h guardian-db -U "${GUARDIAN_DB_USUARIO}" -d "${GUARDIAN_DB_NOMBRE}" \
+               | gzip > "$$ARCHIVO.parcial"; then
+            # El renombrado al final es lo que hace atomico el respaldo: si el
+            # volcado se corta a la mitad, queda un .parcial y no un .sql.gz
+            # corrupto que parece bueno hasta el dia que haga falta.
+            mv "$$ARCHIVO.parcial" "$$ARCHIVO"
+            echo "[respaldo] $$ARCHIVO ($$(du -h "$$ARCHIVO" | cut -f1))"
+          else
+            rm -f "$$ARCHIVO.parcial"
+            echo "[respaldo] FALLO el volcado" >&2
+          fi
+          find /respaldos -name "guardian-*.sql.gz" -mtime +$${RETENCION_DIAS} -delete
+          sleep 86400
+        done
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 512m
+
+networks:
+  guardian:
+    name: guardian
+    # Red propia: los contenedores de hermes no tienen por que ver la base de
+    # GUARDIAN ni al reves.
