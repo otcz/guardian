@@ -251,25 +251,38 @@ section {
 .identidad {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 0.45rem;
   /* Pide más ancho que la foto: si algo tiene que bajar de renglón primero,
      que no sea la columna donde están los botones. */
   flex: 1 1 320px;
   min-width: 0;
+
+  /* Las acciones se despegan de la identidad: arriba QUIÉN es, abajo QUÉ se
+     registra. Sin este respiro los botones parecían parte de los datos. */
+  .acciones {
+    margin-top: 0.5rem;
+  }
 }
 
-/* Verde o rojo, sin matices: es lo primero que se lee. */
+/* Verde o rojo, sin matices: es lo primero que se lee. Bloque unico con el
+   motivo adentro — el motivo explica el veredicto, no es un texto aparte. */
 .veredicto {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  gap: 0.3rem;
   width: 100%;
-  padding: 0.7rem;
-  font-size: 1.15rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+
+  .titular {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+  }
 
   i {
     font-size: 1.4rem;
@@ -291,19 +304,16 @@ section {
   }
 }
 
-/* Sigue el color del veredicto: el mismo párrafo explica un rechazo (rojo) y
-   un "solo puede salir" (ámbar). Fijo en rojo, el aviso ámbar se leía como
-   una negación y el guardia no lo dejaba salir. */
+/* Hereda el color del veredicto que lo contiene: el mismo párrafo explica un
+   rechazo (rojo) y un "solo puede salir" (ámbar). Fijo en rojo, el aviso
+   ámbar se leía como una negación y el guardia no lo dejaba salir. */
 .motivo {
   margin: 0;
   text-align: center;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  color: var(--deny);
-
-  .solo-salida & {
-    color: var(--warn);
-  }
+  color: inherit;
+  opacity: 0.9;
 }
 
 /* Banda que distingue al invitado de un residente al primer vistazo. */
@@ -385,27 +395,33 @@ section {
    donde arranca todo lo demás de su lado, y el ojo lo encuentra sin buscarlo. */
 h1 {
   margin: 0;
-  font-size: 1.5rem;
-  line-height: 1.15;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--text-strong);
 }
 
 .datos {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
-  font-size: 0.95rem;
-  color: var(--text-default);
+  font-size: 0.9rem;
+  color: var(--text-muted);
 
+  /* La casa es el unico dato que se pinta: es lo que el guardia dice en voz
+     alta ("va para la 101") y lo que confirma con quien llega. */
   .casa {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
     padding: 0.25rem 0.7rem;
+    font-size: 0.9rem;
     font-weight: 700;
     color: var(--accent);
     background: var(--accent-soft);
-    border-radius: 999px;
+    border-radius: var(--r-full);
   }
 }
 
@@ -419,12 +435,39 @@ h1 {
   margin-top: 0.35rem;
 }
 
+/* El sentido y su corrección en un solo renglón, separados a los extremos:
+   lo que se va a registrar a la izquierda, la excepción a la derecha. */
 .sentido {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
   margin: 0 0 0.15rem;
+}
+
+/* Entrada en azul y salida en gris: son direcciones, no permisos. Pintarlas
+   de verde o rojo competiría con el veredicto, que es el que manda. */
+.rumbo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.08em;
-  color: var(--text-muted);
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: var(--r-full);
+
+  &.saliendo {
+    color: var(--text-default);
+    background: var(--bg-soft);
+  }
+
+  i {
+    font-size: 0.85rem;
+  }
 }
 
 // La corrección es la excepción, no el flujo: discreta al lado del sentido,
@@ -447,23 +490,58 @@ h1 {
   }
 }
 
+/* Icono en su propio recuadro y texto alineado a la izquierda: las opciones se
+   leen en columna, y con todo centrado las placas bailaban de renglón a
+   renglón segun su largo. Ahora arrancan todas en el mismo eje. */
 .opcion {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.9rem;
+  gap: 0.7rem;
+  min-height: 58px;
+  padding: 0.6rem 0.9rem;
   font-size: 1.05rem;
   font-weight: 600;
+  text-align: left;
   color: var(--text-inverse);
   background: var(--ok);
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
+  transition: filter var(--transicion);
+
+  .simbolo {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    /* Vidrio sobre el verde: separa el icono del texto sin meter otro color. */
+    background: rgb(255 255 255 / 18%);
+
+    i {
+      font-size: 1.05rem;
+    }
+  }
+
+  .etiqueta {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    min-width: 0;
+    /* La placa manda: el guardia la compara con el carro que tiene enfrente. */
+    letter-spacing: 0.04em;
+  }
 
   small {
     font-weight: 400;
+    font-size: 0.8rem;
+    letter-spacing: normal;
     opacity: 0.85;
+  }
+
+  &:hover {
+    filter: brightness(1.06);
   }
 
   &:active {

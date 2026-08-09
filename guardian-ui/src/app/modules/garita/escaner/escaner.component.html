@@ -95,15 +95,17 @@
          está adentro: se le deja salir —retenerlo no protege a nadie— pero
          pintarlo del mismo verde que a un residente al día le decía al guardia
          que todo estaba en orden, y no lo estaba. -->
+    <!-- Veredicto y motivo son UN bloque: el motivo explica el veredicto, y
+         suelto en el aire se leía como un texto sin dueño. -->
     <div class="veredicto">
-      <i class="pi" [ngClass]="iconoVeredicto"></i>
-      <span>{{ textoVeredicto }}</span>
+      <div class="titular">
+        <i class="pi" [ngClass]="iconoVeredicto"></i>
+        <span>{{ textoVeredicto }}</span>
+      </div>
+      <!-- Se muestra SIEMPRE que venga, no solo en los rechazos: un "puede
+           salir, pero no volver a entrar" quedaba invisible bajo el verde. -->
+      <p class="motivo" *ngIf="ficha.mensaje">{{ ficha.mensaje }}</p>
     </div>
-
-    <!-- El mensaje se muestra SIEMPRE que venga, no solo en los rechazos. Antes
-         un "puede salir, pero no volver a entrar" quedaba invisible bajo un
-         PUEDE PASAR en verde. -->
-    <p class="motivo" *ngIf="ficha.mensaje">{{ ficha.mensaje }}</p>
 
     <!-- INVITADO: sin foto en el sistema; el control es el documento fisico. -->
     <div class="banda-invitado" *ngIf="ficha.esInvitado">
@@ -149,8 +151,13 @@
         <!-- Un solo toque: el sentido ya viene inferido. Corregirlo es la
              excepción (primer día del sistema, alguien que entró sin escanear). -->
         <div class="acciones" *ngIf="ficha.permitido">
-          <p class="sentido">
-            Registrar {{ textoSentido }}
+          <!-- La flecha dice el sentido antes que la palabra: a un metro y de
+               noche, el simbolo llega primero que el texto. -->
+          <div class="sentido">
+            <span class="rumbo" [class.saliendo]="textoSentido === 'SALIDA'">
+              <i class="pi" [ngClass]="iconoSentido"></i>
+              {{ textoSentido }}
+            </span>
             <!-- Con "solo salida" NO se ofrece cambiar el sentido: el servidor
                  rechaza esa entrada, y un botón que lleva a un rechazo seguro
                  solo le hace perder el toque al guardia con gente esperando. -->
@@ -158,22 +165,25 @@
                     (click)="alternarSentido()">
               Cambiar a {{ textoSentidoOpuesto }}
             </button>
-          </p>
+          </div>
 
           <button type="button" class="opcion" [class.porDefecto]="cuentaCorriendo"
                   (click)="registrar('PEATON')">
-            <i class="pi pi-user"></i> A pie
+            <span class="simbolo"><i class="pi pi-user"></i></span>
+            <span class="etiqueta">A pie</span>
           </button>
 
           <button type="button"
                   class="opcion"
                   *ngFor="let vehiculo of ficha.vehiculos"
                   (click)="registrar('VEHICULO', vehiculo)">
-            <i class="pi pi-car"></i>
-            {{ vehiculo.placa }}
-            <small *ngIf="vehiculo.marca || vehiculo.color">
-              {{ vehiculo.marca }} {{ vehiculo.color }}
-            </small>
+            <span class="simbolo"><i class="pi pi-car"></i></span>
+            <span class="etiqueta">
+              {{ vehiculo.placa }}
+              <small *ngIf="vehiculo.marca || vehiculo.color">
+                {{ vehiculo.marca }} {{ vehiculo.color }}
+              </small>
+            </span>
           </button>
 
           <!-- Placa declarada en la invitacion: la unica valida para el invitado. -->
@@ -181,8 +191,8 @@
                   class="opcion"
                   *ngIf="ficha.esInvitado && ficha.invitacionPlaca"
                   (click)="registrar('VEHICULO')">
-            <i class="pi pi-car"></i>
-            {{ ficha.invitacionPlaca }}
+            <span class="simbolo"><i class="pi pi-car"></i></span>
+            <span class="etiqueta">{{ ficha.invitacionPlaca }}</span>
           </button>
         </div>
       </div>

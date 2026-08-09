@@ -597,6 +597,11 @@ export class EscanerComponent implements OnInit, OnDestroy {
     return sentido === 'S' ? 'SALIDA' : 'ENTRADA';
   }
 
+  /** La flecha del sentido: entra hacia adentro, sale hacia afuera. */
+  get iconoSentido(): string {
+    return this.textoSentido === 'SALIDA' ? 'pi-sign-out' : 'pi-sign-in';
+  }
+
   get textoSentidoOpuesto(): string {
     return this.textoSentido === 'SALIDA' ? 'ENTRADA' : 'SALIDA';
   }
