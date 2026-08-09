@@ -13,6 +13,8 @@ import { MotivoAccesoPipe } from './motivo-acceso.pipe';
 import { RangoFechasPipe } from './rango-fechas.pipe';
 import { FiltroColumnaComponent } from './tabla/filtro-columna.component';
 import { VolverComponent } from './volver/volver.component';
+import { FechaComponent } from './fecha/fecha.component';
+import { HoraComponent } from './hora/hora.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +26,9 @@ import { VolverComponent } from './volver/volver.component';
     MotivoAccesoPipe,
     RangoFechasPipe,
     FiltroColumnaComponent,
-    VolverComponent
+    VolverComponent,
+    FechaComponent,
+    HoraComponent
   ],
   imports: [CommonModule, FormsModule, TooltipModule, RouterModule],
   exports: [
@@ -36,7 +40,9 @@ import { VolverComponent } from './volver/volver.component';
     MotivoAccesoPipe,
     RangoFechasPipe,
     FiltroColumnaComponent,
-    VolverComponent
+    VolverComponent,
+    FechaComponent,
+    HoraComponent
   ]
 })
 export class SharedModule { }

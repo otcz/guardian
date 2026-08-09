@@ -63,28 +63,42 @@
               </div>
             </div>
 
+            <!-- El día y la hora van envueltos: en un teléfono, lo que no cabe
+                 al lado del rótulo tiene que bajar COMPLETO. Sueltos, la hora
+                 se descolgaba sola a la línea de abajo y la fila se leía como
+                 dos datos distintos. -->
             <div class="linea">
-              <label for="i-inicio-fecha">Desde</label>
-              <input id="i-inicio-fecha" type="date" formControlName="inicioFecha"
-                     [min]="hoy" (change)="alCambiarInicio()">
-              <select id="i-inicio-hora" formControlName="inicioHora"
-                      aria-label="Hora de inicio" (change)="alCambiarInicio()">
-                <option *ngFor="let hora of horas" [value]="hora.valor">{{ hora.etiqueta }}</option>
-              </select>
+              <span class="rotulo">Desde</span>
+              <div class="par">
+                <gd-fecha [valor]="formulario.controls.inicioFecha.value"
+                          [min]="hoy"
+                          etiquetaAccesible="Día de inicio"
+                          (valorChange)="fijarInicioFecha($event)"></gd-fecha>
+                <gd-hora [valor]="formulario.controls.inicioHora.value"
+                         etiquetaAccesible="Hora de inicio"
+                         (valorChange)="fijarInicioHora($event)"></gd-hora>
+              </div>
             </div>
 
             <div class="linea">
-              <label for="i-fin-fecha">
+              <span class="rotulo">
                 Hasta
                 <i class="pi pi-info-circle ayuda"
                    pTooltip="Puede entrar y salir hasta esa hora"
                    tooltipPosition="top"></i>
-              </label>
-              <input id="i-fin-fecha" type="date" formControlName="finFecha"
-                     [min]="formulario.controls.inicioFecha.value">
-              <select id="i-fin-hora" formControlName="finHora" aria-label="Hora de fin">
-                <option *ngFor="let hora of horas" [value]="hora.valor">{{ hora.etiqueta }}</option>
-              </select>
+              </span>
+              <div class="par">
+                <gd-fecha [valor]="formulario.controls.finFecha.value"
+                          [min]="formulario.controls.inicioFecha.value"
+                          etiquetaAccesible="Día de fin"
+                          (valorChange)="fijarFinFecha($event)"></gd-fecha>
+                <!-- Solo el fin ofrece "final del día": es su valor por defecto
+                     y no tiene sentido empezar una visita a las 11:59 p.m. -->
+                <gd-hora [valor]="formulario.controls.finHora.value"
+                         [conFinDelDia]="true"
+                         etiquetaAccesible="Hora de fin"
+                         (valorChange)="fijarFinHora($event)"></gd-hora>
+              </div>
             </div>
 
             <small class="error" *ngIf="inicioEnPasado">La visita no puede ser en el pasado</small>

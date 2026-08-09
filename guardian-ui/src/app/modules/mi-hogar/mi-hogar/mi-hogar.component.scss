@@ -239,6 +239,18 @@ section {
 
 /* ── Filas de la lista ───────────────────────────────────────────────────── */
 .miembro {
+  /* En un teléfono la fila no da para el nombre Y todas las marcas de estado.
+     Sin permitirle envolver, quien acumula marcas —"Adentro" más
+     "Deshabilitado" más el candado— dejaba el nombre en nueve píxeles: el
+     único dato que sirve para saber de quién es la fila, ilegible. */
+  flex-wrap: wrap;
+
+  /* El nombre se lleva la primera línea y las marcas bajan a la segunda
+     cuando no caben. En una pantalla ancha todo sigue en una sola línea. */
+  .datos {
+    flex: 1 1 60%;
+  }
+
   &.inactivo {
     .avatar,
     .datos {

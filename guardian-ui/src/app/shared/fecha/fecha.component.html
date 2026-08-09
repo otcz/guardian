@@ -1,0 +1,37 @@
+<button type="button" class="campo" [class.abierto]="abierto"
+        [attr.aria-label]="etiquetaAccesible" [attr.aria-expanded]="abierto"
+        (click)="alternar()">
+  <i class="pi pi-calendar" aria-hidden="true"></i>
+  <span class="texto">{{ texto }}</span>
+</button>
+
+<div class="panel" [class.arriba]="arriba" *ngIf="abierto"
+     role="dialog" [attr.aria-label]="etiquetaAccesible">
+
+  <div class="mes">
+    <button type="button" class="mover" (click)="correrMes(-1)" aria-label="Mes anterior">
+      <i class="pi pi-chevron-left"></i>
+    </button>
+    <span class="nombre">{{ tituloMes }}</span>
+    <button type="button" class="mover" (click)="correrMes(1)" aria-label="Mes siguiente">
+      <i class="pi pi-chevron-right"></i>
+    </button>
+  </div>
+
+  <div class="encabezado">
+    <span *ngFor="let dia of dias">{{ dia }}</span>
+  </div>
+
+  <div class="semana" *ngFor="let semana of semanas">
+    <!-- El hueco va como span y no como botón: un botón vacío igual recibe el
+         foco al tabular y no lleva a ninguna parte. -->
+    <ng-container *ngFor="let dia of semana">
+      <span class="hueco" *ngIf="!dia"></span>
+      <button type="button" class="dia" *ngIf="dia"
+              [class.elegido]="esElegido(dia)"
+              [class.hoy]="esHoy(dia)"
+              [disabled]="esApagado(dia)"
+              (click)="elegir(dia)">{{ numeroDe(dia) }}</button>
+    </ng-container>
+  </div>
+</div>

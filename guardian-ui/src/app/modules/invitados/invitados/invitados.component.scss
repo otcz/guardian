@@ -147,48 +147,38 @@
   }
 
   /* El rótulo con ancho propio: sin él, "Desde" y "Hasta" miden distinto y
-     las dos fechas quedan corridas una respecto de la otra. */
+     las dos fechas quedan corridas una respecto de la otra. Cuando el ancho
+     no alcanza, lo que baja es el rótulo — el día y la hora siguen juntos. */
   .linea {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: var(--e-2);
+    gap: var(--e-1) var(--e-2);
 
-    > label {
-      flex: 0 0 3.5rem;
+    > .rotulo {
+      flex: 0 0 3.2rem;
       display: flex;
       align-items: center;
       gap: var(--e-1);
       font-size: var(--t-sm);
       color: var(--text-muted);
     }
-
-    input[type='date'] {
-      flex: 2 1 140px;
-    }
-
-    select {
-      flex: 1 1 118px;
-      cursor: pointer;
-    }
   }
 
-  /* Sobre el fondo del bloque los campos van en superficie, no al revés: es
-     lo que los separa del panel que los contiene. */
-  input,
-  select {
-    padding: 0.55rem 0.7rem;
-    font: inherit;
-    color: var(--text-strong);
-    background: var(--bg-surface);
-    border: 1px solid var(--border-default);
-    border-radius: var(--r-sm);
+  /* Bases chicas y encogibles a proposito: en un telefono angosto los dos
+     controles se aprietan, pero NUNCA se parten en dos lineas. */
+  .par {
+    flex: 1 1 200px;
+    display: flex;
+    gap: var(--e-1);
     min-width: 0;
-    transition: border-color var(--transicion);
 
-    &:focus {
-      border-color: var(--accent);
-      outline: none;
+    gd-fecha {
+      flex: 3 1 116px;
+    }
+
+    gd-hora {
+      flex: 2 1 94px;
     }
   }
 

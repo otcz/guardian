@@ -1,0 +1,55 @@
+<button type="button" class="campo" [class.abierto]="abierto"
+        [attr.aria-label]="etiquetaAccesible" [attr.aria-expanded]="abierto"
+        (click)="alternar()">
+  <i class="pi pi-clock" aria-hidden="true"></i>
+  <span class="texto">{{ texto }}</span>
+</button>
+
+<div class="panel" [class.arriba]="arriba" *ngIf="abierto"
+     role="dialog" [attr.aria-label]="etiquetaAccesible">
+
+  <!-- Tres ruedas con flecha arriba y abajo. El valor del medio se lee, no se
+       escribe: escribir una hora en un teléfono abre el teclado numérico
+       encima de todo y hay que validar lo que se teclee. -->
+  <div class="ruedas">
+
+    <div class="rueda">
+      <button type="button" (click)="correrHora(1)" aria-label="Una hora más">
+        <i class="pi pi-chevron-up"></i>
+      </button>
+      <span class="valor">{{ horaTexto }}</span>
+      <button type="button" (click)="correrHora(-1)" aria-label="Una hora menos">
+        <i class="pi pi-chevron-down"></i>
+      </button>
+    </div>
+
+    <span class="dos-puntos">:</span>
+
+    <div class="rueda">
+      <button type="button" (click)="correrMinutos(1)" aria-label="Un cuarto de hora más">
+        <i class="pi pi-chevron-up"></i>
+      </button>
+      <span class="valor">{{ minutoTexto }}</span>
+      <button type="button" (click)="correrMinutos(-1)" aria-label="Un cuarto de hora menos">
+        <i class="pi pi-chevron-down"></i>
+      </button>
+    </div>
+
+    <!-- Las dos flechas hacen lo mismo porque solo hay dos valores; están las
+         dos para que la columna se vea y se opere igual que las otras. -->
+    <div class="rueda">
+      <button type="button" (click)="alternarMitad()" aria-label="Cambiar entre mañana y tarde">
+        <i class="pi pi-chevron-up"></i>
+      </button>
+      <span class="valor mitad">{{ mitad }}</span>
+      <button type="button" (click)="alternarMitad()" aria-label="Cambiar entre mañana y tarde">
+        <i class="pi pi-chevron-down"></i>
+      </button>
+    </div>
+  </div>
+
+  <button type="button" class="fin-dia" *ngIf="conFinDelDia"
+          [class.activo]="esFinDelDia" (click)="elegirFinDelDia()">
+    Final del día
+  </button>
+</div>

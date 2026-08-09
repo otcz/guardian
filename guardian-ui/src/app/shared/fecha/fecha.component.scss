@@ -1,0 +1,156 @@
+:host {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+/* El campo cerrado. Se ve como un input porque hace de input. */
+.campo {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+  color: var(--text-strong);
+  text-align: left;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: border-color var(--transicion);
+
+  &:hover,
+  &.abierto {
+    border-color: var(--accent);
+  }
+
+  i {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .texto {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+.panel {
+  position: absolute;
+  z-index: var(--z-panel, 60);
+  top: calc(100% + 0.35rem);
+  left: 0;
+  /* Nunca más angosto que su contenido ni más ancho que la pantalla del
+     teléfono: el calendario tiene siete columnas y no se puede comprimir. */
+  min-width: 15.5rem;
+  max-width: calc(100vw - 2rem);
+  padding: var(--e-3);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-card);
+
+  &.arriba {
+    top: auto;
+    bottom: calc(100% + 0.35rem);
+  }
+}
+
+.mes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-2);
+  margin-bottom: var(--e-2);
+
+  .nombre {
+    font-size: var(--t-sm);
+    font-weight: 600;
+    color: var(--text-strong);
+    text-transform: capitalize;
+  }
+
+  .mover {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    color: var(--text-muted);
+    background: transparent;
+    border: 0;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--text-strong);
+      background: var(--bg-base);
+    }
+  }
+}
+
+.encabezado,
+.semana {
+  display: flex;
+  gap: 2px;
+}
+
+.encabezado {
+  margin-bottom: 2px;
+
+  span {
+    flex: 1 1 0;
+    text-align: center;
+    font-size: var(--t-xs);
+    color: var(--text-muted);
+  }
+}
+
+.hueco,
+.dia {
+  flex: 1 1 0;
+  min-width: 0;
+  /* Cuadrado: sin esto los días quedan óvalos y la cuadrícula se lee torcida. */
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  font-size: var(--t-sm);
+}
+
+.dia {
+  color: var(--text-strong);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background var(--transicion), color var(--transicion);
+
+  &:hover:not(:disabled) {
+    background: var(--bg-base);
+  }
+
+  /* Hoy se marca con el borde y el elegido con el relleno: si los dos usaran
+     relleno, el día de hoy parecería seleccionado sin estarlo. */
+  &.hoy {
+    border-color: var(--border-strong);
+  }
+
+  &.elegido {
+    color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+
+  &:disabled {
+    color: var(--text-muted);
+    opacity: 0.4;
+    cursor: default;
+  }
+}

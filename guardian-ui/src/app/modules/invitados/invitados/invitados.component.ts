@@ -38,22 +38,6 @@ export class InvitadosComponent implements OnInit {
   readonly hoy = this.hoyIso();
 
   /**
-   * Las horas que se pueden elegir, cada media hora.
-   *
-   * <p>El selector nativo de fecha-y-hora obligaba a buscar el minuto en una
-   * rueda de sesenta valores. Nadie invita a alguien a las 19:49: en una visita
-   * la media hora es toda la precisión que hace falta, y así la hora se elige
-   * de una lista corta en vez de rodando.</p>
-   *
-   * <p>Se guarda en 24 h y se muestra en 12 h: el valor tiene que ordenarse y
-   * compararse como texto, pero quien invita piensa en "7 de la noche".</p>
-   *
-   * <p>23:59 va al final porque no es una hora a la que se cite a nadie: es
-   * "hasta que termine el día", y es el fin por defecto.</p>
-   */
-  readonly horas: { valor: string; etiqueta: string }[] = InvitadosComponent.construirHoras();
-
-  /**
    * Casi toda visita es para hoy o para mañana. Ese caso no debería costar
    * abrir un calendario: se resuelve con un toque y el calendario queda para
    * la excepción, que es el fin de semana o el mes que viene.
@@ -114,32 +98,38 @@ export class InvitadosComponent implements OnInit {
     this.alCambiarInicio();
   }
 
-  /** 00:00, 00:30, … 23:30, y 23:59 al final como "fin del día". */
-  private static construirHoras(): { valor: string; etiqueta: string }[] {
-    const lista: { valor: string; etiqueta: string }[] = [];
-    for (let minutos = 0; minutos < 24 * 60; minutos += 30) {
-      lista.push(InvitadosComponent.hora(minutos));
-    }
-    lista.push(InvitadosComponent.hora(23 * 60 + 59));
-    return lista;
+  fijarInicioFecha(fecha: string): void {
+    this.formulario.controls.inicioFecha.setValue(fecha);
+    this.formulario.controls.inicioFecha.markAsTouched();
+    this.alCambiarInicio();
   }
 
-  /** 1170 → `{ valor: '19:30', etiqueta: '7:30 p.m.' }`. */
-  private static hora(minutosDelDia: number): { valor: string; etiqueta: string } {
-    const h = Math.floor(minutosDelDia / 60);
-    const m = minutosDelDia % 60;
-    // Las 12 no son las 0: mediodía y medianoche se escriben igual y solo las
-    // distingue el sufijo.
-    const doce = h % 12 === 0 ? 12 : h % 12;
-    return {
-      valor: `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`,
-      etiqueta: `${doce}:${String(m).padStart(2, '0')} ${h < 12 ? 'a.m.' : 'p.m.'}`
-    };
+  fijarInicioHora(hora: string): void {
+    this.formulario.controls.inicioHora.setValue(hora);
+    this.formulario.controls.inicioHora.markAsTouched();
+    this.alCambiarInicio();
   }
 
   /**
-   * La media hora en curso, para que el inicio por defecto sea una hora que
-   * SÍ está en la lista. Con 19:49 el select no tendría nada seleccionado.
+   * Los selectores propios NO marcan el campo como tocado.
+   *
+   * <p>Un `<input>` nativo lo hace solo al perder el foco, y de eso dependen
+   * los mensajes de error. Sin marcarlo a mano, alguien podía dejar el fin
+   * antes del inicio y no ver ninguna advertencia hasta pulsar Crear.</p>
+   */
+  fijarFinFecha(fecha: string): void {
+    this.formulario.controls.finFecha.setValue(fecha);
+    this.formulario.controls.finFecha.markAsTouched();
+  }
+
+  fijarFinHora(hora: string): void {
+    this.formulario.controls.finHora.setValue(hora);
+    this.formulario.controls.finHora.markAsTouched();
+  }
+
+  /**
+   * La media hora en curso: el inicio por defecto cae en una hora que el
+   * selector puede representar. Con 19:49 no quedaría nada marcado.
    */
   private horaRedondeada(): string {
     const ahora = new Date();

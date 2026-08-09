@@ -1,0 +1,150 @@
+:host {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.campo {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+  color: var(--text-strong);
+  text-align: left;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: border-color var(--transicion);
+
+  &:hover,
+  &.abierto {
+    border-color: var(--accent);
+  }
+
+  i {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .texto {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+.panel {
+  position: absolute;
+  z-index: var(--z-panel, 60);
+  top: calc(100% + 0.35rem);
+  /* Anclado a la derecha: es el control de más a la derecha de su fila, y
+     abriendo hacia la izquierda nunca se sale de la pantalla del teléfono. */
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  max-width: calc(100vw - 2rem);
+  padding: var(--e-3);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-card);
+
+  &.arriba {
+    top: auto;
+    bottom: calc(100% + 0.35rem);
+  }
+}
+
+.ruedas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-1);
+}
+
+.rueda {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Blanco de toque cómodo con el pulgar: por debajo de ~2rem la flecha se
+       falla y el usuario acaba pulsando dos veces. */
+    width: 2.2rem;
+    height: 2rem;
+    color: var(--text-muted);
+    background: transparent;
+    border: 0;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: color var(--transicion), background var(--transicion);
+
+    &:hover {
+      color: var(--accent);
+      background: var(--bg-base);
+    }
+
+    i {
+      font-size: 0.8rem;
+    }
+  }
+
+  .valor {
+    /* Tabular para que el número no baile al pasar de 9 a 10 ni de 00 a 45. */
+    font-variant-numeric: tabular-nums;
+    min-width: 2.4rem;
+    padding: 0.3rem 0;
+    font-size: var(--t-md, 1rem);
+    font-weight: 600;
+    color: var(--text-strong);
+    text-align: center;
+    background: var(--bg-base);
+    border-radius: var(--r-sm);
+  }
+
+  .valor.mitad {
+    min-width: 3.1rem;
+    font-size: var(--t-sm);
+  }
+}
+
+.dos-puntos {
+  /* Bajado hasta la fila del valor: centrado en la columna quedaba flotando
+     entre las dos flechas y no entre los dos números. */
+  align-self: center;
+  margin-top: 0;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.fin-dia {
+  padding: 0.4rem;
+  font: inherit;
+  font-size: var(--t-sm);
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px dashed var(--border-default);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: color var(--transicion), border-color var(--transicion);
+
+  &:hover {
+    color: var(--text-strong);
+  }
+
+  &.activo {
+    color: var(--accent);
+    border-color: var(--accent);
+    border-style: solid;
+    font-weight: 600;
+  }
+}
