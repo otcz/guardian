@@ -113,8 +113,6 @@ public final class MensajesGlobales {
     // ── Administracion ───────────────────────────────────────────────────────
     public static final String DOCUMENTO_YA_REGISTRADO =
             "Ya existe una persona con ese numero de documento.";
-    public static final String TELEFONO_YA_REGISTRADO =
-            "Ese telefono ya esta registrado por otra persona.";
     public static final String CORREO_REQUERIDO_CON_CUENTA =
             "Escribe el correo: es por donde la persona recupera su PIN.";
     public static final String PLACA_YA_REGISTRADA =

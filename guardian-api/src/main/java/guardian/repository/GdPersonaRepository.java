@@ -11,11 +11,9 @@ public interface GdPersonaRepository
 
     Optional<GdPersona> findByConjuntoIdAndDocumento(Long conjuntoId, String documento);
 
-    // Unicidad GLOBAL: el documento y el telefono identifican a una persona en
-    // todo el sistema, no dentro de su sede.
+    // Unicidad GLOBAL: el documento identifica a una persona en todo el
+    // sistema, no dentro de su sede.
     Optional<GdPersona> findByDocumento(String documento);
-
-    Optional<GdPersona> findByTelefono(String telefono);
 
     boolean existsByConjuntoIdAndDocumento(Long conjuntoId, String documento);
 

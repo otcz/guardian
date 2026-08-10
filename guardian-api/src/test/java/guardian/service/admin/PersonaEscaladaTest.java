@@ -70,7 +70,6 @@ class PersonaEscaladaTest {
         conjunto.setId(1L);
 
         lenient().when(personaRepository.findByDocumento(any())).thenReturn(Optional.empty());
-        lenient().when(personaRepository.findByTelefono(any())).thenReturn(Optional.empty());
         lenient().when(conjuntoRepository.findById(1L)).thenReturn(Optional.of(conjunto));
         lenient().when(personaRepository.save(any())).thenAnswer(inv -> {
             guardian.entity.persona.GdPersona p = inv.getArgument(0);

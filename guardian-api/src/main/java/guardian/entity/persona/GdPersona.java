@@ -37,8 +37,13 @@ import java.util.Date;
                 // Unicidad GLOBAL, no por sede: una cedula identifica a UNA
                 // persona en todo el sistema. Asi la misma persona no puede
                 // existir dos veces aunque las sedes sean distintas.
-                @UniqueConstraint(name = "UK_PERSONA_DOCUMENTO", columnNames = "DOCUMENTO"),
-                @UniqueConstraint(name = "UK_PERSONA_TELEFONO", columnNames = "TELEFONO")
+                //
+                // El telefono NO va aca a proposito: es un dato de contacto,
+                // no una llave (nada en el sistema busca por telefono), y en
+                // la vida real una casa comparte un solo numero entre varios
+                // miembros. Exigirlo unico le impedia a una pareja registrarse
+                // con el mismo celular.
+                @UniqueConstraint(name = "UK_PERSONA_DOCUMENTO", columnNames = "DOCUMENTO")
         }
 )
 public class GdPersona extends BaseEntity {

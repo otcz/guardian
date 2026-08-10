@@ -98,7 +98,6 @@ public class PersonaServiceImpl implements PersonaService {
         if (personaRepository.findByDocumento(documento).isPresent()) {
             throw GuardianException.conflicto(MensajesGlobales.DOCUMENTO_YA_REGISTRADO);
         }
-        exigirTelefonoLibre(request.getTelefono(), null);
 
         GdConjunto conjunto = conjuntoRepository.findById(ejecutor.getConjuntoId())
                 .orElseThrow(() -> GuardianException.noEncontrado(MensajesGlobales.NO_ENCONTRADO));
@@ -185,7 +184,6 @@ public class PersonaServiceImpl implements PersonaService {
                 .ifPresent(otra -> {
                     throw GuardianException.conflicto(MensajesGlobales.DOCUMENTO_YA_REGISTRADO);
                 });
-        exigirTelefonoLibre(request.getTelefono(), id);
 
         persona.setDocumento(documento);
         aplicar(persona, request);
@@ -292,37 +290,6 @@ public class PersonaServiceImpl implements PersonaService {
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
-     * El telefono tambien es unico en todo el sistema: es la via por la que la
-     * administracion contacta a una casa, y dos personas con el mismo numero
-     * dejan la notificacion sin dueno.
-     *
-     * @param idPersona la persona que se esta editando, o null en un alta.
-     */
-    // NO se exige que el correo sea unico, y es a proposito.
-    //
-    // Se penso al reves —"si dos personas comparten uno, el codigo de
-    // recuperacion llega al buzon equivocado"— y esta mal: la recuperacion
-    // busca por DOCUMENTO y solo lee el correo para enviar. Nada en el sistema
-    // usa el correo como llave, asi que el codigo siempre sale al buzon de su
-    // dueno aunque ese buzon sea compartido.
-    //
-    // Y compartirlo es lo normal en un conjunto: el hijo menor con tarjeta de
-    // identidad que tiene cuenta usa el correo de la mama, y al adulto mayor
-    // se lo maneja un familiar. Exigir uno distinto por persona los obligaria
-    // a inventarse correos que nadie revisa — y ahi si se pierde el codigo.
-
-    private void exigirTelefonoLibre(String telefono, Long idPersona) {
-        if (telefono == null || telefono.trim().isEmpty()) {
-            return;
-        }
-        personaRepository.findByTelefono(telefono.trim())
-                .filter(otra -> idPersona == null || !otra.getId().equals(idPersona))
-                .ifPresent(otra -> {
-                    throw GuardianException.conflicto(MensajesGlobales.TELEFONO_YA_REGISTRADO);
-                });
-    }
-
-    /**
      * Resuelve una persona del panel.
      *
      * <p>Si no esta en la lista, tampoco se puede operar por id: el ejecutor
@@ -363,9 +330,14 @@ public class PersonaServiceImpl implements PersonaService {
         persona.setApellidos(request.getApellidos().trim());
         persona.setFechaNacimiento(request.getFechaNacimiento());
         persona.setFotoUrl(request.getFotoUrl());
+        // Ni telefono ni correo se exigen unicos, y es a proposito: son datos
+        // de contacto, no llaves. La recuperacion de clave busca por
+        // DOCUMENTO y solo lee el correo para enviar, asi que compartirlo no
+        // extravia nada — y compartirlo es lo normal en una casa (el hijo
+        // menor usa el correo de la mama, la pareja comparte un celular). Exigir
+        // uno distinto por persona obligaria a inventar datos que nadie revisa.
         persona.setTelefono(request.getTelefono());
-        // Minusculas y sin espacios: el correo se usa despues para buscar a
-        // quien pide restablecer su clave, y "Ana@X.com" no encontraria la fila
+        // Minusculas y sin espacios: "Ana@X.com" no encontraria la fila
         // guardada como "ana@x.com".
         persona.setEmail(CorreoUtil.normalizar(request.getEmail()));
     }
