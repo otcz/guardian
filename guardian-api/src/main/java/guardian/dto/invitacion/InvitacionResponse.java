@@ -19,8 +19,15 @@ public class InvitacionResponse {
     private Date vigenciaDesde;
     private Date vigenciaHasta;
 
-    /** VIGENTE | NO_VIGENTE | AGOTADA | VENCIDA | REVOCADA — derivado, no almacenado. */
+    /**
+     * PENDIENTE | RECHAZADA | VIGENTE | NO_VIGENTE | AGOTADA | VENCIDA |
+     * REVOCADA. Las dos primeras vienen de {@code estadoAprobacion}; el resto
+     * se deriva de la vigencia y solo aplica una vez APROBADA.
+     */
     private String estado;
+
+    /** Solo si estado es RECHAZADA. Lo lee el anfitrion para saber por que. */
+    private String motivoRechazo;
 
     private String casaIdentificador;
     private String anfitrionNombre;

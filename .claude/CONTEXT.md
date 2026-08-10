@@ -22,7 +22,7 @@ con hora, persona, vehículo, guardia que atendió y punto de acceso.
 |---|---|---|
 | **Residente** | App móvil (PWA) | Ve su QR, registra sus vehículos |
 | **Titular** | App móvil | Lo del residente + administra quién vive en su casa |
-| **Invitado** (F2) | Link, sin cuenta | Muestra un QR temporal que le generó la familia |
+| **Invitado** (F2) | Link, sin cuenta | Muestra un QR temporal que le generó la familia, aprobado por el administrador |
 | **Guardia** | App de garita | Escanea, verifica la foto, marca a pie/vehículo |
 | **Administrador** | Panel web | Habilita y deshabilita casas, personas, vehículos y guardias |
 
@@ -59,6 +59,22 @@ otra. La revocación es inmediata porque el HMAC se valida contra la fila.
 
 **Invitados (F2) es el caso opuesto**: QR de un solo uso, con vigencia y usos
 máximos, generado por la familia. Ahí sí el token es efímero por naturaleza.
+
+**Pero ya no es autoservicio puro.** La invitación nace `PENDIENTE`
+(`GD_INVITACION.estado_aprobacion`) y el QR no sirve en la portería hasta que
+un administrador la aprueba desde la bandeja de Solicitudes — la ventana de
+vigencia empieza a contar igual, pero de nada sirve si nadie aprobó. Antes de
+esto el residente invitaba y el código quedaba operativo de inmediato; se
+cambió a pedido explícito del dueño del conjunto para que la administración
+tenga visibilidad de cada visita antes de que llegue a la puerta.
+
+**Unirse a un hogar con el código del titular tampoco es autoservicio puro.**
+Usar el código deja una `GD_SOLICITUD_HOGAR` en `PENDIENTE` con los datos
+escritos; la persona, su cuenta y su vínculo con la casa NO existen todavía
+— los crea `SolicitudHogarAdminService.aprobar` cuando un administrador
+decide, el mismo patrón que ya usaba "pedir casa sin código"
+(`GD_SOLICITUD_CASA`). El código del titular no se quema hasta la
+aprobación: si se rechaza, sigue sirviendo para un segundo intento.
 
 ---
 
@@ -100,6 +116,7 @@ a querer ajustar sin esperar un deploy:
 | `CASA_INACTIVA` | El admin deshabilitó la casa completa |
 | `INVITACION_NO_VIGENTE` | La invitación existe pero su ventana aún no empieza |
 | `INVITACION_AGOTADA` | La invitación ya consumió todos sus ingresos |
+| `INVITACION_PENDIENTE_APROBACION` | El administrador todavía no la aprobó |
 | `SIN_CUPO` | Reservado para F4 (control de cupos de parqueadero) |
 
 **Excepción transversal: quien está ADENTRO siempre puede salir.** Una

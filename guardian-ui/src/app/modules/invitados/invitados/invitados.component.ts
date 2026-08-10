@@ -195,7 +195,7 @@ export class InvitadosComponent implements OnInit {
         vigenciaHasta: this.conOffsetLocal(this.fin)
       })
       .subscribe({
-        next: creada => {
+        next: () => {
           this.guardando = false;
           this.mostrarAlta = false;
           this.formulario.reset({
@@ -205,8 +205,12 @@ export class InvitadosComponent implements OnInit {
             finHora: '23:59'
           });
           this.cargar();
-          // Abrir el QR de una vez: crear y compartir son un solo gesto.
-          this.qrAbierto = creada;
+          // Ya NO se abre el código de una vez: la invitación nace pendiente
+          // de aprobación y compartir un QR que todavía no sirve solo deja al
+          // invitado varado en la garita.
+          this.aviso = 'Invitación creada. La administración la tiene que aprobar '
+            + 'antes de que el código sirva en la portería.';
+          setTimeout(() => (this.aviso = null), 6000);
         },
         error: (fallo: HttpErrorResponse) => {
           this.guardando = false;
@@ -307,6 +311,8 @@ export class InvitadosComponent implements OnInit {
 
   etiquetaEstado(estado: EstadoInvitacion): string {
     switch (estado) {
+      case 'PENDIENTE': return 'Pendiente de aprobación';
+      case 'RECHAZADA': return 'Rechazada';
       case 'VIGENTE': return 'Vigente';
       case 'NO_VIGENTE': return 'Aún no vigente';
       case 'AGOTADA': return 'Usada';
@@ -317,6 +323,15 @@ export class InvitadosComponent implements OnInit {
 
   esVigente(invitacion: Invitacion): boolean {
     return invitacion.estado === 'VIGENTE' || invitacion.estado === 'NO_VIGENTE';
+  }
+
+  /** Todavía no sirve en la portería: falta que un administrador la apruebe. */
+  estaPendiente(invitacion: Invitacion): boolean {
+    return invitacion.estado === 'PENDIENTE';
+  }
+
+  estaRechazada(invitacion: Invitacion): boolean {
+    return invitacion.estado === 'RECHAZADA';
   }
 
   // La ventana de la visita se pinta con el pipe rangoFechas: lo comparten

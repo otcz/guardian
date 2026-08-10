@@ -77,6 +77,7 @@ class AccesoInvitadoServiceImplTest {
         invitacion.setDocumentoInvitado("999");
         invitacion.setActivo(Codigos.SI);
         invitacion.setBloqueado(Codigos.NO);
+        invitacion.setEstadoAprobacion(Codigos.SOLICITUD_APROBADA);
         casa.setBloqueado(Codigos.NO);
         invitacion.setVigenciaDesde(new Date(System.currentTimeMillis() - HORA_MILIS));
         invitacion.setVigenciaHasta(new Date(System.currentTimeMillis() + HORA_MILIS));
@@ -161,6 +162,32 @@ class AccesoInvitadoServiceImplTest {
 
         assertThat(ficha.isPermitido()).isFalse();
         assertThat(ficha.getMotivoDenegacion()).isEqualTo(Codigos.MOTIVO_INVITACION_AGOTADA);
+    }
+
+    @Test
+    @DisplayName("pendiente de aprobacion y afuera -> denegada, aunque este vigente")
+    void deniegaPendienteDeAprobacion() {
+        invitacion.setEstadoAprobacion(Codigos.SOLICITUD_PENDIENTE);
+        when(presenciaService.estaAdentroInvitado(20L)).thenReturn(false);
+
+        FichaVerificacionResponse ficha = servicio.verificar(invitacion, verificarRequest(), guardia);
+
+        assertThat(ficha.isPermitido()).isFalse();
+        assertThat(ficha.getMotivoDenegacion())
+                .isEqualTo(Codigos.MOTIVO_INVITACION_PENDIENTE_APROBACION);
+    }
+
+    @Test
+    @DisplayName("pendiente de aprobacion pero ADENTRO -> la salida se permite siempre")
+    void adentroSiemprePuedeSalirAunquePendiente() {
+        invitacion.setEstadoAprobacion(Codigos.SOLICITUD_PENDIENTE);
+        when(presenciaService.estaAdentroInvitado(20L)).thenReturn(true);
+
+        AccesoEventoResponse evento =
+                servicio.registrar(invitacion, registrarRequest(Codigos.MODO_PEATON), guardia);
+
+        assertThat(evento.getSentido()).isEqualTo(Codigos.SALIDA);
+        assertThat(evento.getResultado()).isEqualTo(Codigos.RESULTADO_PERMITIDO);
     }
 
     @Test

@@ -27,11 +27,10 @@ public interface CodigoHogarService {
     HogarPublicoResponse consultar(String codigo);
 
     /**
-     * Crea la persona, su vinculo con la casa y su cuenta, y quema el codigo.
-     *
-     * <p>La cuenta nace con la clave inicial del sistema y cambio obligatorio,
-     * igual que cualquier otra. Sin foto: se la sube ella misma desde Mi QR y
-     * ahi recibe su credencial.</p>
+     * Guarda los datos como una solicitud PENDIENTE. No crea la persona, su
+     * cuenta ni su vinculo con la casa — eso lo hace
+     * {@link guardian.service.admin.SolicitudHogarAdminService#aprobar} cuando
+     * un administrador decide. El codigo sigue sin quemarse hasta entonces.
      */
     void registrar(String codigo, RegistroHogarRequest request);
 }

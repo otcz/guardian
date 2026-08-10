@@ -125,6 +125,10 @@ class InvitacionServiceImplTest {
         assertThat(creada.getUsosMaximos()).isEqualTo(GdInvitacion.SIN_LIMITE);
         assertThat(creada.agotada()).isFalse();
         assertThat(creada.getVigenciaHasta()).isAfter(creada.getVigenciaDesde());
+        // Nace sin servir: un administrador tiene que aprobarla antes de que
+        // el QR funcione en la porteria.
+        assertThat(creada.getEstadoAprobacion()).isEqualTo(Codigos.SOLICITUD_PENDIENTE);
+        assertThat(creada.estaAprobada()).isFalse();
     }
 
     @Test
@@ -293,6 +297,7 @@ class InvitacionServiceImplTest {
         invitacion.setNombreInvitado("Pedro Perez");
         invitacion.setDocumentoInvitado("999");
         invitacion.setActivo(Codigos.SI);
+        invitacion.setEstadoAprobacion(Codigos.SOLICITUD_APROBADA);
         invitacion.setVigenciaDesde(new Date(System.currentTimeMillis() - DIA_MILIS));
         invitacion.setVigenciaHasta(new Date(System.currentTimeMillis() + DIA_MILIS));
         invitacion.setUsosMaximos(1);
@@ -312,6 +317,20 @@ class InvitacionServiceImplTest {
 
         assertThat(publica.getPayload()).isNotNull();
         assertThat(publica.getEstado()).isEqualTo("VIGENTE");
+    }
+
+    @Test
+    @DisplayName("pendiente de aprobar: la pagina publica no reparte el codigo aunque este vigente")
+    void publicaNoEntregaPayloadPendiente() {
+        GdInvitacion pendiente = invitacionVigente();
+        pendiente.setEstadoAprobacion(Codigos.SOLICITUD_PENDIENTE);
+        when(invitacionRepository.buscarPorCodigoPublico("cod"))
+                .thenReturn(Optional.of(pendiente));
+
+        InvitacionPublicaResponse publica = servicio.publica("cod");
+
+        assertThat(publica.getPayload()).isNull();
+        assertThat(publica.getEstado()).isEqualTo(Codigos.SOLICITUD_PENDIENTE);
     }
 
     @Test

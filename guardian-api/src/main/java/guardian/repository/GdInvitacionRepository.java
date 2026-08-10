@@ -44,6 +44,20 @@ public interface GdInvitacionRepository extends JpaRepository<GdInvitacion, Long
 
     List<GdInvitacion> findByConjuntoIdOrderByIdDesc(Long conjuntoId);
 
+    /**
+     * La bandeja del administrador. Con FETCH de casa y anfitrion porque el
+     * mapeo lee nombre e identificador de cada fila.
+     */
+    @Query("SELECT i FROM GdInvitacion i "
+            + "JOIN FETCH i.casa "
+            + "JOIN FETCH i.anfitrion "
+            + "WHERE i.conjuntoId = :conjuntoId AND i.estadoAprobacion = :estado "
+            + "ORDER BY i.fechaCreacion ASC")
+    List<GdInvitacion> listarPorConjuntoYEstadoAprobacion(@Param("conjuntoId") Long conjuntoId,
+                                                          @Param("estado") String estado);
+
+    long countByConjuntoIdAndEstadoAprobacion(Long conjuntoId, String estadoAprobacion);
+
     /** Solo para la eliminacion fisica del anfitrion (exclusiva del admin). */
     void deleteByAnfitrionId(Long anfitrionId);
 }

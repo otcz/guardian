@@ -252,6 +252,8 @@ public class GuardianBootstrapInitializer implements ApplicationRunner {
                 new Opcion(Codigos.MOTIVO_VEHICULO_AJENO, "El vehiculo no es de esa casa"),
                 new Opcion(Codigos.MOTIVO_INVITACION_NO_VIGENTE, "Invitacion aun no vigente"),
                 new Opcion(Codigos.MOTIVO_INVITACION_AGOTADA, "Invitacion sin ingresos disponibles"),
+                new Opcion(Codigos.MOTIVO_INVITACION_PENDIENTE_APROBACION,
+                        "Invitacion esperando aprobacion de la administracion"),
                 new Opcion(Codigos.MOTIVO_INVITADO_SIN_VEHICULO, "El invitado no declaro placa"),
                 new Opcion(Codigos.MOTIVO_ENTRADA_TRAS_SALIDA, "Intento de reingreso con la credencial vencida")));
 

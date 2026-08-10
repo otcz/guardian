@@ -203,6 +203,11 @@
             {{ invitacion.vigenciaDesde | rangoFechas:invitacion.vigenciaHasta }}
             <ng-container *ngIf="invitacion.placa"> · {{ invitacion.placa }}</ng-container>
           </span>
+          <!-- El motivo del rechazo va acá y no en un tooltip: es la única
+               forma que tiene el anfitrión de saber qué corregir. -->
+          <span class="motivo" *ngIf="estaRechazada(invitacion)">
+            {{ invitacion.motivoRechazo || 'La administración no la autorizó.' }}
+          </span>
         </div>
 
         <!-- Si ya entró y todavía no ha salido. Solo se marca a quien está
@@ -215,8 +220,9 @@
 
         <span class="pastilla"
               [class.si]="invitacion.estado === 'VIGENTE'"
-              [class.espera]="invitacion.estado === 'NO_VIGENTE'"
-              [class.no]="invitacion.estado === 'VENCIDA' || invitacion.estado === 'REVOCADA'"
+              [class.espera]="invitacion.estado === 'NO_VIGENTE' || invitacion.estado === 'PENDIENTE'"
+              [class.no]="invitacion.estado === 'VENCIDA' || invitacion.estado === 'REVOCADA'
+                || invitacion.estado === 'RECHAZADA'"
               [class.uso]="invitacion.estado === 'AGOTADA'">
           {{ etiquetaEstado(invitacion.estado) }}
         </span>

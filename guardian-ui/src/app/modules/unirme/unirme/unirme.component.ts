@@ -4,13 +4,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { HogarPublicoService } from '../../../core/services/hogar-publico.service';
-import { CLAVE_INICIAL, HogarPublico, Parametro } from '../../../core/models/admin.model';
+import { HogarPublico, Parametro } from '../../../core/models/admin.model';
 
 /**
  * La pantalla de quien recibió el código de su familia.
  *
  * <p>Sin sesión: llega por un enlace y todavía no existe en el sistema. Al
- * terminar tiene cuenta propia y entra con el PIN inicial.</p>
+ * terminar NO tiene cuenta todavía — queda como solicitud pendiente hasta que
+ * un administrador la apruebe (igual que "pedir casa sin código").</p>
  */
 @Component({
   selector: 'gd-unirme',
@@ -27,8 +28,6 @@ export class UnirmeComponent implements OnInit {
   guardando = false;
   listo = false;
   error: string | null = null;
-
-  readonly claveInicial = CLAVE_INICIAL;
 
   private codigo = '';
 

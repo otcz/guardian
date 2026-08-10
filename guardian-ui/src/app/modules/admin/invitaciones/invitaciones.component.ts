@@ -138,6 +138,8 @@ export class InvitacionesComponent implements OnInit {
 
   etiquetaEstado(estado: EstadoInvitacion): string {
     switch (estado) {
+      case 'PENDIENTE': return 'Pendiente de aprobación';
+      case 'RECHAZADA': return 'Rechazada';
       case 'VIGENTE': return 'Vigente';
       case 'NO_VIGENTE': return 'Aún no vigente';
       case 'AGOTADA': return 'Usada';
@@ -146,7 +148,13 @@ export class InvitacionesComponent implements OnInit {
     }
   }
 
+  /**
+   * PENDIENTE se trata como NO_VIGENTE: todavía no sirve en la portería, pero
+   * el anfitrión sigue pudiendo compartir el link o revocarla de una vez.
+   * RECHAZADA ya es un punto muerto, igual que VENCIDA o AGOTADA.
+   */
   revocable(invitacion: Invitacion): boolean {
-    return invitacion.estado === 'VIGENTE' || invitacion.estado === 'NO_VIGENTE';
+    return invitacion.estado === 'VIGENTE' || invitacion.estado === 'NO_VIGENTE'
+      || invitacion.estado === 'PENDIENTE';
   }
 }

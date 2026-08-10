@@ -98,31 +98,24 @@
       </ng-container>
     </ng-container>
 
-    <!-- Listo: sus credenciales a la vista, que es lo único que necesita ahora. -->
+    <!-- Pendiente: todavía no hay cuenta, solo una solicitud esperando al
+         administrador — igual que "pedir casa sin código". -->
     <div class="exito" *ngIf="listo">
-      <i class="pi pi-check-circle"></i>
-      <h1>Listo</h1>
-      <p>Ya haces parte del hogar. Entra con:</p>
-
-      <div class="credencial">
-        <div class="dato">
-          <span class="etiqueta">Usuario</span>
-          <code>{{ miUsuario }}</code>
-        </div>
-        <div class="dato">
-          <span class="etiqueta">PIN</span>
-          <code>{{ claveInicial }}</code>
-        </div>
-      </div>
+      <i class="pi pi-clock"></i>
+      <h1>Quedaste en espera</h1>
+      <p>
+        El administrador del conjunto tiene que aprobar tu ingreso a la casa
+        de {{ hogar?.titularNombre }}.
+      </p>
 
       <p class="nota">
-        Te vamos a pedir que cambies el PIN al entrar, y una foto para
-        emitir tu código de la portería.
+        Cuando te aprueben, entra con tu documento
+        (<code>{{ miUsuario }}</code>) como usuario.
       </p>
 
       <button type="button" class="principal" (click)="irAlLogin()">
         <i class="pi pi-sign-in"></i>
-        Entrar
+        Ir al inicio
       </button>
     </div>
   </div>

@@ -118,6 +118,9 @@ public class InvitacionServiceImpl implements InvitacionService {
         invitacion.setCodigoPublico(codigo);
         invitacion.setFirmaHash(HmacUtil.firmar(codigo, secretoHmac));
         invitacion.setActivo(Codigos.SI);
+        // El QR nace sin servir: un administrador tiene que aprobarla antes de
+        // que la porteria la deje pasar (ver AccesoInvitadoServiceImpl).
+        invitacion.setEstadoAprobacion(Codigos.SOLICITUD_PENDIENTE);
         invitacion.setUsuarioCreador(anfitrion.getDocumento());
 
         GdInvitacion guardada = invitacionRepository.save(invitacion);
@@ -194,9 +197,11 @@ public class InvitacionServiceImpl implements InvitacionService {
         String estado = estadoDe(invitacion);
 
         // El payload solo viaja mientras el QR sirva de algo. Una invitacion
-        // revocada, vencida o agotada no debe seguir repartiendo un codigo
-        // escaneable — ni el nombre del anfitrion — por un link viejo.
-        boolean util = ESTADO_VIGENTE.equals(estado) || ESTADO_NO_VIGENTE.equals(estado);
+        // pendiente de aprobar, revocada, vencida o agotada no debe seguir
+        // repartiendo un codigo escaneable — ni el nombre del anfitrion — por
+        // un link viejo.
+        boolean util = invitacion.estaAprobada()
+                && (ESTADO_VIGENTE.equals(estado) || ESTADO_NO_VIGENTE.equals(estado));
 
         return InvitacionPublicaResponse.builder()
                 .nombreInvitado(invitacion.getNombreInvitado())
@@ -263,6 +268,7 @@ public class InvitacionServiceImpl implements InvitacionService {
      */
     private boolean puedePasarAhora(GdInvitacion invitacion, Date ahora) {
         return invitacion.puedeOperar()
+                && invitacion.estaAprobada()
                 && !invitacion.aunNoVigente(ahora)
                 && !invitacion.vencida(ahora)
                 && !invitacion.agotada();
@@ -326,6 +332,13 @@ public class InvitacionServiceImpl implements InvitacionService {
     }
 
     private String estadoDe(GdInvitacion invitacion) {
+        // La aprobacion manda sobre todo lo demas: una invitacion pendiente o
+        // rechazada no es "vigente" ni "vencida" todavia, es otra cosa.
+        if (Codigos.SOLICITUD_PENDIENTE.equals(invitacion.getEstadoAprobacion())
+                || Codigos.SOLICITUD_RECHAZADA.equals(invitacion.getEstadoAprobacion())) {
+            return invitacion.getEstadoAprobacion();
+        }
+
         Date ahora = new Date();
         if (!invitacion.estaActivo()) {
             return ESTADO_REVOCADA;
@@ -351,6 +364,7 @@ public class InvitacionServiceImpl implements InvitacionService {
                 .vigenciaDesde(invitacion.getVigenciaDesde())
                 .vigenciaHasta(invitacion.getVigenciaHasta())
                 .estado(estadoDe(invitacion))
+                .motivoRechazo(invitacion.getMotivoRechazo())
                 .casaIdentificador(invitacion.getCasa().getIdentificador())
                 .anfitrionNombre(invitacion.getAnfitrion().getNombreCompleto())
                 .adentro(presenciaService.estaAdentroInvitado(invitacion.getId()))

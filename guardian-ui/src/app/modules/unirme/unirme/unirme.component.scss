@@ -144,41 +144,12 @@ form > .fila {
   }
 }
 
-/* Las credenciales son lo único que importa en esa pantalla: grandes y
-   seleccionables, porque lo primero que hace la gente es copiarlas. */
-.credencial {
-  display: flex;
-  gap: var(--e-2);
-  width: 100%;
-  margin: var(--e-2) 0;
-
-  .dato {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    flex: 1 1 0;
-    min-width: 0;
-    padding: var(--e-3);
-    background: var(--bg-soft);
-    border-radius: var(--r-md);
-  }
-
-  .etiqueta {
-    font-size: var(--t-xs);
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-
-  code {
-    font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
-    font-size: var(--t-lg);
-    font-weight: 700;
-    color: var(--text-strong);
-    -webkit-user-select: all;
-    user-select: all;
-    word-break: break-all;
-  }
+/* El documento va suelto en la nota, no en su propia tarjeta: ya no es LA
+   credencial de la pantalla, es un dato de referencia para más tarde. */
+.nota code {
+  font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+  font-weight: 700;
+  color: var(--text-strong);
+  -webkit-user-select: all;
+  user-select: all;
 }

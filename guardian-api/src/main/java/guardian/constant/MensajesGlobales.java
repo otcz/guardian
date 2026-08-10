@@ -146,6 +146,8 @@ public final class MensajesGlobales {
             "Esa solicitud todavia esta esperando respuesta.";
     public static final String SOLICITUD_AJENA =
             "Esa solicitud no es de tu casa.";
+    public static final String SOLICITUD_HOGAR_YA_PENDIENTE =
+            "Ese codigo ya tiene una solicitud esperando aprobacion.";
     public static final String PLACA_YA_SOLICITADA =
             "Ya hay una solicitud esperando respuesta para esa placa.";
     public static final String EXCEL_VACIO =
@@ -206,6 +208,8 @@ public final class MensajesGlobales {
             "Esta invitacion aun no esta vigente.";
     public static final String INVITACION_AGOTADA_MSG =
             "Esta invitacion ya uso todos sus ingresos.";
+    public static final String INVITACION_PENDIENTE_APROBACION_MSG =
+            "Esta invitacion todavia espera aprobacion de la administracion.";
     public static final String INVITADO_SIN_VEHICULO =
             "El invitado no registro vehiculo en la invitacion.";
 

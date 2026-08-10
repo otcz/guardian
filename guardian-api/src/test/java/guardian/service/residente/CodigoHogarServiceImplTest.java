@@ -9,12 +9,12 @@ import guardian.entity.conjunto.GdConjunto;
 import guardian.entity.persona.GdCodigoHogar;
 import guardian.entity.persona.GdPersona;
 import guardian.entity.persona.GdResidenteCasa;
-import guardian.entity.persona.GdUsuario;
+import guardian.entity.persona.GdSolicitudHogar;
 import guardian.exception.GuardianException;
 import guardian.repository.GdCodigoHogarRepository;
 import guardian.repository.GdPersonaRepository;
 import guardian.repository.GdResidenteCasaRepository;
-import guardian.repository.GdUsuarioRepository;
+import guardian.repository.GdSolicitudHogarRepository;
 import guardian.security.UsuarioAutenticado;
 import guardian.service.admin.ParametroService;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +27,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Date;
@@ -37,18 +36,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * El codigo con el que un familiar se registra dentro de un hogar existente.
+ * El codigo con el que un familiar pide unirse a un hogar existente.
  *
- * <p>Este codigo no abre una puerta: CREA una persona dentro del conjunto, y
- * esa persona termina con credencial para entrar. Por eso todo lo que se
- * prueba aca es lo que acota el dano si se filtra — un solo uso, vencimiento,
- * y que solo el titular pueda emitirlo.</p>
+ * <p>Usarlo NO crea a nadie: solo deja una {@link GdSolicitudHogar} PENDIENTE.
+ * Quien de verdad crea la persona con credencial para entrar es
+ * {@code SolicitudHogarAdminServiceImpl.aprobar}. Por eso todo lo que se
+ * prueba aca es lo que acota el uso del codigo — un solo uso, vencimiento, y
+ * que solo el titular pueda emitirlo — y NO la creacion de la persona.</p>
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -57,9 +58,8 @@ class CodigoHogarServiceImplTest {
     @Mock private GdCodigoHogarRepository codigoRepository;
     @Mock private GdResidenteCasaRepository residenteCasaRepository;
     @Mock private GdPersonaRepository personaRepository;
-    @Mock private GdUsuarioRepository usuarioRepository;
+    @Mock private GdSolicitudHogarRepository solicitudRepository;
     @Mock private ParametroService parametroService;
-    @Mock private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private CodigoHogarServiceImpl servicio;
@@ -97,7 +97,7 @@ class CodigoHogarServiceImplTest {
         lenient().when(personaRepository.findById(10L)).thenReturn(Optional.of(titular));
         lenient().when(personaRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         lenient().when(codigoRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-        lenient().when(passwordEncoder.encode(anyString())).thenReturn("$hash");
+        lenient().when(solicitudRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         lenient().when(residenteCasaRepository
                 .findFirstByPersonaIdAndActivoOrderByIdAsc(any(), anyString()))
@@ -169,45 +169,40 @@ class CodigoHogarServiceImplTest {
     // ── Quien lo usa ────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("registrarse crea persona, vinculo con la casa y cuenta")
-    void registrarseArmaTodo() {
+    @DisplayName("registrarse deja una solicitud PENDIENTE, sin crear a nadie todavia")
+    void registrarQuedaPendiente() {
         when(codigoRepository.findByCodigo("uuid-de-prueba"))
                 .thenReturn(Optional.of(codigoVivo()));
         when(personaRepository.findByDocumento("1099")).thenReturn(Optional.empty());
 
         servicio.registrar("uuid-de-prueba", solicitud("1099", "HIJO"));
 
-        ArgumentCaptor<GdPersona> persona = ArgumentCaptor.forClass(GdPersona.class);
-        verify(personaRepository).save(persona.capture());
-        assertThat(persona.getValue().getDocumento()).isEqualTo("1099");
-        // Entra al conjunto del hogar al que se unio, no a otro.
-        assertThat(persona.getValue().getConjunto().getId()).isEqualTo(1L);
+        ArgumentCaptor<GdSolicitudHogar> captura = ArgumentCaptor.forClass(GdSolicitudHogar.class);
+        verify(solicitudRepository).save(captura.capture());
+        GdSolicitudHogar guardada = captura.getValue();
+        assertThat(guardada.getDocumento()).isEqualTo("1099");
+        assertThat(guardada.getParentesco()).isEqualTo("HIJO");
+        assertThat(guardada.getEstado()).isEqualTo(Codigos.SOLICITUD_PENDIENTE);
 
-        ArgumentCaptor<GdResidenteCasa> enCasa = ArgumentCaptor.forClass(GdResidenteCasa.class);
-        verify(residenteCasaRepository).save(enCasa.capture());
-        assertThat(enCasa.getValue().getCasa().getId()).isEqualTo(5L);
-        assertThat(enCasa.getValue().getParentesco()).isEqualTo("HIJO");
-
-        ArgumentCaptor<GdUsuario> cuenta = ArgumentCaptor.forClass(GdUsuario.class);
-        verify(usuarioRepository).save(cuenta.capture());
-        assertThat(cuenta.getValue().getRol()).isEqualTo(Codigos.ROL_RESIDENTE);
-        assertThat(cuenta.getValue().getActivo()).isEqualTo(Codigos.SI);
-        assertThat(cuenta.getValue().debeCambiarClave()).isTrue();
-        verify(passwordEncoder).encode(Codigos.CLAVE_INICIAL);
+        // Nada de esto existe hasta que un administrador apruebe.
+        verify(personaRepository, never()).save(any());
+        verify(residenteCasaRepository, never()).save(any());
+        // El codigo tampoco se quema en este paso.
+        verify(codigoRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("el codigo se quema: sirve UNA sola vez")
-    void unSoloUso() {
-        GdCodigoHogar codigo = codigoVivo();
-        when(codigoRepository.findByCodigo("uuid-de-prueba")).thenReturn(Optional.of(codigo));
+    @DisplayName("un codigo con una solicitud pendiente no admite una segunda")
+    void unaSolicitudPendienteALaVez() {
+        when(codigoRepository.findByCodigo("uuid-de-prueba"))
+                .thenReturn(Optional.of(codigoVivo()));
+        when(solicitudRepository.existsByCodigoIdAndEstado(any(), eq(Codigos.SOLICITUD_PENDIENTE)))
+                .thenReturn(true);
 
-        servicio.registrar("uuid-de-prueba", solicitud("1099", "HIJO"));
-        assertThat(codigo.estaUsado()).isTrue();
-
-        // El segundo intento con el mismo enlace ya no pasa.
         assertThatThrownBy(() -> servicio.registrar("uuid-de-prueba", solicitud("1100", "HIJO")))
-                .hasMessage(MensajesGlobales.CODIGO_HOGAR_NO_VALIDO);
+                .hasMessage(MensajesGlobales.SOLICITUD_HOGAR_YA_PENDIENTE);
+
+        verify(solicitudRepository, never()).save(any());
     }
 
     @Test

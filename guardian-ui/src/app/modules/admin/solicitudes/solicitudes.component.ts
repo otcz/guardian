@@ -4,13 +4,15 @@ import { Observable, forkJoin } from 'rxjs';
 
 import { AdminService } from '../../../core/services/admin.service';
 import {
+  InvitacionPendienteAdmin,
   SolicitudCasaAdmin,
+  SolicitudHogarAdmin,
   SolicitudVehiculoAdmin
 } from '../../../core/models/admin.model';
 
 /** Lo que se está por rechazar, sin importar de qué bandeja salió. */
 interface Rechazo {
-  tipo: 'CASA' | 'VEHICULO';
+  tipo: 'CASA' | 'VEHICULO' | 'HOGAR' | 'INVITACION';
   id: number;
   titulo: string;
 }
@@ -18,10 +20,10 @@ interface Rechazo {
 /**
  * Bandeja del administrador: todo lo que espera una decisión suya.
  *
- * <p>Las dos clases de solicitud viven en la misma pantalla a propósito. Son la
- * misma pregunta —¿autorizo esto?— y separarlas en dos menús obligaría al
- * administrador a acordarse de revisar dos sitios; el que se le olvide deja a
- * alguien esperando.</p>
+ * <p>Las cuatro clases de solicitud viven en la misma pantalla a propósito. Son
+ * la misma pregunta —¿autorizo esto?— y separarlas en varios menús obligaría al
+ * administrador a acordarse de revisar cada uno; el que se le olvide deja a
+ * alguien esperando en la puerta.</p>
  */
 @Component({
   selector: 'gd-solicitudes',
@@ -33,6 +35,8 @@ export class SolicitudesComponent implements OnInit {
 
   casas: SolicitudCasaAdmin[] = [];
   vehiculos: SolicitudVehiculoAdmin[] = [];
+  hogar: SolicitudHogarAdmin[] = [];
+  invitaciones: InvitacionPendienteAdmin[] = [];
 
   cargando = true;
   resolviendo = false;
@@ -48,7 +52,8 @@ export class SolicitudesComponent implements OnInit {
   }
 
   get vacia(): boolean {
-    return this.casas.length === 0 && this.vehiculos.length === 0;
+    return this.casas.length === 0 && this.vehiculos.length === 0
+      && this.hogar.length === 0 && this.invitaciones.length === 0;
   }
 
   cargar(): void {
@@ -57,11 +62,15 @@ export class SolicitudesComponent implements OnInit {
 
     forkJoin({
       casas: this.admin.solicitudesCasa(),
-      vehiculos: this.admin.solicitudesVehiculo()
+      vehiculos: this.admin.solicitudesVehiculo(),
+      hogar: this.admin.solicitudesHogar(),
+      invitaciones: this.admin.invitacionesPendientes()
     }).subscribe({
-      next: ({ casas, vehiculos }) => {
+      next: ({ casas, vehiculos, hogar, invitaciones }) => {
         this.casas = casas;
         this.vehiculos = vehiculos;
+        this.hogar = hogar;
+        this.invitaciones = invitaciones;
         this.cargando = false;
       },
       error: () => {
@@ -81,6 +90,16 @@ export class SolicitudesComponent implements OnInit {
       'No pudimos autorizar el vehículo.');
   }
 
+  aprobarHogar(solicitud: SolicitudHogarAdmin): void {
+    this.resolver(this.admin.aprobarSolicitudHogar(solicitud.id),
+      'No pudimos aprobar la solicitud.');
+  }
+
+  aprobarInvitacion(invitacion: InvitacionPendienteAdmin): void {
+    this.resolver(this.admin.aprobarInvitacion(invitacion.id),
+      'No pudimos aprobar la invitación.');
+  }
+
   abrirRechazoCasa(solicitud: SolicitudCasaAdmin): void {
     this.rechazando = { tipo: 'CASA', id: solicitud.id, titulo: solicitud.nombreCompleto };
     this.motivo = '';
@@ -91,17 +110,30 @@ export class SolicitudesComponent implements OnInit {
     this.motivo = '';
   }
 
+  abrirRechazoHogar(solicitud: SolicitudHogarAdmin): void {
+    this.rechazando = { tipo: 'HOGAR', id: solicitud.id, titulo: solicitud.nombreCompleto };
+    this.motivo = '';
+  }
+
+  abrirRechazoInvitacion(invitacion: InvitacionPendienteAdmin): void {
+    this.rechazando = { tipo: 'INVITACION', id: invitacion.id, titulo: invitacion.nombreInvitado };
+    this.motivo = '';
+  }
+
   confirmarRechazo(): void {
     const rechazo = this.rechazando;
     if (!rechazo) {
       return;
     }
 
-    const peticion = rechazo.tipo === 'CASA'
-      ? this.admin.rechazarSolicitudCasa(rechazo.id, this.motivo)
-      : this.admin.rechazarSolicitudVehiculo(rechazo.id, this.motivo);
+    const peticiones: Record<Rechazo['tipo'], () => Observable<unknown>> = {
+      CASA: () => this.admin.rechazarSolicitudCasa(rechazo.id, this.motivo),
+      VEHICULO: () => this.admin.rechazarSolicitudVehiculo(rechazo.id, this.motivo),
+      HOGAR: () => this.admin.rechazarSolicitudHogar(rechazo.id, this.motivo),
+      INVITACION: () => this.admin.rechazarInvitacion(rechazo.id, this.motivo)
+    };
 
-    this.resolver(peticion, 'No pudimos rechazar la solicitud.',
+    this.resolver(peticiones[rechazo.tipo](), 'No pudimos rechazar la solicitud.',
       () => (this.rechazando = null));
   }
 

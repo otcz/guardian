@@ -140,7 +140,37 @@ export interface SolicitudVehiculoAdmin {
 export interface ConteoSolicitudes {
   casas: number;
   vehiculos: number;
+  hogar: number;
+  invitados: number;
   pendientes: number;
+}
+
+/**
+ * Alguien pidiendo unirse a un hogar con el código de su titular, en la
+ * bandeja del administrador.
+ */
+export interface SolicitudHogarAdmin {
+  id: number;
+  nombreCompleto: string;
+  documento: string;
+  casaIdentificador: string;
+  parentesco: string;
+  titularNombre: string;
+  estado: string;
+  fechaSolicitud: string;
+}
+
+/** Una invitación esperando aprobación, en la bandeja del administrador. */
+export interface InvitacionPendienteAdmin {
+  id: number;
+  nombreInvitado: string;
+  documentoInvitado: string;
+  casaIdentificador: string;
+  anfitrionNombre: string;
+  vigenciaDesde: string;
+  vigenciaHasta: string;
+  estado: string;
+  fechaSolicitud: string;
 }
 
 export interface Porteria {

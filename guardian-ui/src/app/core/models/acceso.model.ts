@@ -69,7 +69,8 @@ export interface AccesoEvento {
 }
 
 export type EstadoInvitacion =
-  'VIGENTE' | 'NO_VIGENTE' | 'AGOTADA' | 'VENCIDA' | 'REVOCADA';
+  'PENDIENTE' | 'RECHAZADA'
+  | 'VIGENTE' | 'NO_VIGENTE' | 'AGOTADA' | 'VENCIDA' | 'REVOCADA';
 
 export interface Invitacion {
   id: number;
@@ -79,6 +80,8 @@ export interface Invitacion {
   vigenciaDesde: string;
   vigenciaHasta: string;
   estado: EstadoInvitacion;
+  /** Solo si estado es RECHAZADA. */
+  motivoRechazo: string | null;
   casaIdentificador: string;
   anfitrionNombre: string;
   /** Su último paso por la portería fue una ENTRADA: sigue en el conjunto. */

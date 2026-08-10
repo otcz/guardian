@@ -135,6 +135,9 @@ public class AccesoInvitadoServiceImpl implements AccesoInvitadoService {
         if (!invitacion.puedeOperar()) {
             return Codigos.MOTIVO_CREDENCIAL_REVOCADA;
         }
+        if (!invitacion.estaAprobada()) {
+            return Codigos.MOTIVO_INVITACION_PENDIENTE_APROBACION;
+        }
         if (invitacion.getCasa().estaBloqueado()) {
             return Codigos.MOTIVO_CASA_BLOQUEADA;
         }
@@ -300,6 +303,8 @@ public class AccesoInvitadoServiceImpl implements AccesoInvitadoService {
 
     private String mensajeDe(String motivo) {
         switch (motivo) {
+            case Codigos.MOTIVO_INVITACION_PENDIENTE_APROBACION:
+                return MensajesGlobales.INVITACION_PENDIENTE_APROBACION_MSG;
             case Codigos.MOTIVO_INVITACION_NO_VIGENTE:
                 return MensajesGlobales.INVITACION_NO_VIGENTE_MSG;
             case Codigos.MOTIVO_INVITACION_AGOTADA:

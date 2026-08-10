@@ -16,5 +16,7 @@ public class ConteoSolicitudesResponse {
 
     private long casas;
     private long vehiculos;
+    private long hogar;
+    private long invitados;
     private long pendientes;
 }

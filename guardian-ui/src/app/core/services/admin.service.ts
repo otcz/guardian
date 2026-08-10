@@ -11,6 +11,7 @@ import {
   GuardiaPorteria,
   ImportacionCasas,
   ImportacionPersonas,
+  InvitacionPendienteAdmin,
   Parametro,
   Persona,
   PersonaRegistrada,
@@ -20,6 +21,7 @@ import {
   Resumen,
   ConteoSolicitudes,
   SolicitudCasaAdmin,
+  SolicitudHogarAdmin,
   SolicitudVehiculoAdmin,
   Usuario,
   Vehiculo,
@@ -121,8 +123,46 @@ export class AdminService {
       `${this.base}/solicitudes-vehiculo/${id}/rechazar`, { motivo });
   }
 
+  // ── Solicitudes de hogar (código del titular) ────────────────────────────
+  //
+  // Aprobar acá es lo que de verdad crea a la persona, su cuenta y su vínculo
+  // con la casa. Antes de esto no existe nada de eso.
+
+  solicitudesHogar(): Observable<SolicitudHogarAdmin[]> {
+    return this.http.get<SolicitudHogarAdmin[]>(`${this.base}/solicitudes-hogar`);
+  }
+
+  aprobarSolicitudHogar(id: number): Observable<SolicitudHogarAdmin> {
+    return this.http.patch<SolicitudHogarAdmin>(
+      `${this.base}/solicitudes-hogar/${id}/aprobar`, {});
+  }
+
+  rechazarSolicitudHogar(id: number, motivo: string): Observable<SolicitudHogarAdmin> {
+    return this.http.patch<SolicitudHogarAdmin>(
+      `${this.base}/solicitudes-hogar/${id}/rechazar`, { motivo });
+  }
+
+  // ── Invitaciones por aprobar ──────────────────────────────────────────────
+  //
+  // Aprobar acá es lo que deja que el QR ya emitido empiece a servir en la
+  // portería. No crea nada nuevo, solo destraba lo que el residente ya pidió.
+
+  invitacionesPendientes(): Observable<InvitacionPendienteAdmin[]> {
+    return this.http.get<InvitacionPendienteAdmin[]>(`${this.base}/invitaciones/pendientes`);
+  }
+
+  aprobarInvitacion(id: number): Observable<InvitacionPendienteAdmin> {
+    return this.http.patch<InvitacionPendienteAdmin>(
+      `${this.base}/invitaciones/${id}/aprobar`, {});
+  }
+
+  rechazarInvitacion(id: number, motivo: string): Observable<InvitacionPendienteAdmin> {
+    return this.http.patch<InvitacionPendienteAdmin>(
+      `${this.base}/invitaciones/${id}/rechazar`, { motivo });
+  }
+
   /**
-   * El número del aviso del menú: las dos bandejas sumadas.
+   * El número del aviso del menú: las cuatro bandejas sumadas.
    *
    * <p>Endpoint propio y no las listas: esto se pide en cada navegación del
    * panel, y traer las solicitudes enteras para pintar un numerito sería pagar

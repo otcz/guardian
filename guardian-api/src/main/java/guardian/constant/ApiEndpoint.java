@@ -82,8 +82,10 @@ public final class ApiEndpoint {
     public static final String ADMIN_SOLICITUDES_CASA = ADMIN + "/solicitudes-casa";
     /** Bandeja: que placas pidieron autorizar, esperando decision. */
     public static final String ADMIN_SOLICITUDES_VEHICULO = ADMIN + "/solicitudes-vehiculo";
+    /** Bandeja: quien pidio unirse a un hogar con el codigo del titular. */
+    public static final String ADMIN_SOLICITUDES_HOGAR = ADMIN + "/solicitudes-hogar";
     /**
-     * Las dos bandejas sumadas. Es lo que pide el aviso del menu en cada
+     * Las cuatro bandejas sumadas. Es lo que pide el aviso del menu en cada
      * navegacion, y por eso es una sola peticion y no una por bandeja.
      */
     public static final String ADMIN_SOLICITUDES = ADMIN + "/solicitudes";
@@ -115,4 +117,6 @@ public final class ApiEndpoint {
     public static final String GUARDIAS = "/{id}/guardias";
     public static final String CREDENCIAL = "/{id}/credencial";
     public static final String CREDENCIAL_PNG = "/{id}/credencial.png";
+    /** Bandeja: lo que espera decision, dentro de un recurso que no es "solicitud". */
+    public static final String PENDIENTES = "/pendientes";
 }

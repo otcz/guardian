@@ -1,5 +1,6 @@
 package guardian.entity.acceso;
 
+import guardian.constant.Codigos;
 import guardian.entity.base.BaseEntity;
 import guardian.entity.conjunto.GdCasa;
 import guardian.entity.persona.GdPersona;
@@ -121,6 +122,23 @@ public class GdInvitacion extends BaseEntity {
 
     @Column(name = "FIRMA_HASH", nullable = false, length = 100)
     private String firmaHash;
+
+    /**
+     * PENDIENTE, APROBADA o RECHAZADA. Nace PENDIENTE: el QR no sirve en la
+     * porteria hasta que un administrador la apruebe, sin importar que su
+     * ventana de vigencia ya haya empezado.
+     */
+    @Column(name = "ESTADO_APROBACION", nullable = false, length = 20,
+            columnDefinition = "varchar(20) default 'PENDIENTE'")
+    private String estadoAprobacion;
+
+    /** Por que se rechazo. Lo lee el anfitrion, asi que se escribe para el. */
+    @Column(name = "MOTIVO_RECHAZO", length = 200)
+    private String motivoRechazo;
+
+    public boolean estaAprobada() {
+        return Codigos.SOLICITUD_APROBADA.equals(estadoAprobacion);
+    }
 
     public boolean aunNoVigente(Date ahora) {
         return ahora.before(vigenciaDesde);

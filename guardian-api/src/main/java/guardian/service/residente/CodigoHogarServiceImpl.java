@@ -9,19 +9,18 @@ import guardian.entity.conjunto.GdCasa;
 import guardian.entity.persona.GdCodigoHogar;
 import guardian.entity.persona.GdPersona;
 import guardian.entity.persona.GdResidenteCasa;
-import guardian.entity.persona.GdUsuario;
+import guardian.entity.persona.GdSolicitudHogar;
 import guardian.exception.GuardianException;
 import guardian.repository.GdCodigoHogarRepository;
 import guardian.repository.GdPersonaRepository;
 import guardian.repository.GdResidenteCasaRepository;
-import guardian.repository.GdUsuarioRepository;
+import guardian.repository.GdSolicitudHogarRepository;
 import guardian.security.UsuarioAutenticado;
 import guardian.util.CorreoUtil;
 import guardian.service.admin.ParametroService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,9 +39,8 @@ public class CodigoHogarServiceImpl implements CodigoHogarService {
     private final GdCodigoHogarRepository codigoRepository;
     private final GdResidenteCasaRepository residenteCasaRepository;
     private final GdPersonaRepository personaRepository;
-    private final GdUsuarioRepository usuarioRepository;
+    private final GdSolicitudHogarRepository solicitudRepository;
     private final ParametroService parametroService;
-    private final PasswordEncoder passwordEncoder;
 
     @Value("${guardian.hogar.horas-vigencia-codigo}")
     private long horasVigencia;
@@ -150,56 +148,31 @@ public class CodigoHogarServiceImpl implements CodigoHogarService {
         if (personaRepository.findByDocumento(documento).isPresent()) {
             throw GuardianException.conflicto(MensajesGlobales.DOCUMENTO_YA_REGISTRADO);
         }
+        // Un codigo, una solicitud a la vez: si ya hay una esperando, una
+        // segunda persona no puede pisarla mandando la suya por el mismo link.
+        if (solicitudRepository.existsByCodigoIdAndEstado(vinculo.getId(),
+                Codigos.SOLICITUD_PENDIENTE)) {
+            throw GuardianException.conflicto(MensajesGlobales.SOLICITUD_HOGAR_YA_PENDIENTE);
+        }
 
-        GdCasa casa = vinculo.getCasa();
-
-        GdPersona persona = new GdPersona();
-        persona.setConjunto(casa.getConjunto());
-        persona.setTipoDocumento(
-                request.getTipoDocumento() == null || request.getTipoDocumento().trim().isEmpty()
-                        ? Codigos.TIPO_DOCUMENTO_CC
-                        : request.getTipoDocumento());
-        persona.setDocumento(documento);
-        persona.setNombres(request.getNombres().trim());
-        persona.setApellidos(request.getApellidos().trim());
-        persona.setFechaNacimiento(request.getFechaNacimiento());
-        persona.setTelefono(request.getTelefono());
-        persona.setEmail(CorreoUtil.normalizar(request.getEmail()));
-        persona.setActivo(Codigos.SI);
-        persona.setBloqueado(Codigos.NO);
+        GdSolicitudHogar solicitud = new GdSolicitudHogar();
+        solicitud.setCodigo(vinculo);
+        solicitud.setTipoDocumento(request.getTipoDocumento());
+        solicitud.setDocumento(documento);
+        solicitud.setNombres(request.getNombres().trim());
+        solicitud.setApellidos(request.getApellidos().trim());
+        solicitud.setFechaNacimiento(request.getFechaNacimiento());
+        solicitud.setTelefono(request.getTelefono());
+        solicitud.setEmail(CorreoUtil.normalizar(request.getEmail()));
+        solicitud.setParentesco(request.getParentesco());
+        solicitud.setEstado(Codigos.SOLICITUD_PENDIENTE);
         // El auditor deja escrito que entro por un codigo y de quien era, no
         // por la mano del administrador.
-        persona.setUsuarioCreador(vinculo.getTitular().getDocumento());
+        solicitud.setUsuarioCreador(vinculo.getTitular().getDocumento());
+        solicitudRepository.save(solicitud);
 
-        GdPersona guardada = personaRepository.save(persona);
-
-        GdResidenteCasa enLaCasa = new GdResidenteCasa();
-        enLaCasa.setPersona(guardada);
-        enLaCasa.setCasa(casa);
-        enLaCasa.setParentesco(request.getParentesco());
-        enLaCasa.setActivo(Codigos.SI);
-        enLaCasa.setUsuarioCreador(vinculo.getTitular().getDocumento());
-        residenteCasaRepository.save(enLaCasa);
-
-        GdUsuario usuario = new GdUsuario();
-        usuario.setPersona(guardada);
-        usuario.setRol(Codigos.ROL_RESIDENTE);
-        usuario.setClaveHash(passwordEncoder.encode(Codigos.CLAVE_INICIAL));
-        usuario.setRequiereCambioClave(Codigos.SI);
-        usuario.setActivo(Codigos.SI);
-        usuario.setBloqueado(Codigos.NO);
-        usuario.setUsuarioCreador(vinculo.getTitular().getDocumento());
-        usuarioRepository.save(usuario);
-
-        // Quemar el codigo es lo ULTIMO: si algo de arriba falla, la
-        // transaccion revierte y el codigo sigue sirviendo. Al reves, un fallo
-        // dejaria al familiar sin cuenta y sin forma de reintentar.
-        vinculo.setPersonaRegistrada(guardada);
-        vinculo.setUsuarioModificador(documento);
-        codigoRepository.save(vinculo);
-
-        log.info("[hogar] {} se registro en la casa {} con el codigo del titular",
-                documento, casa.getIdentificador());
+        log.info("[hogar] {} pidio unirse a la casa {} con el codigo del titular, queda pendiente",
+                documento, vinculo.getCasa().getIdentificador());
     }
 
     // ─────────────────────────────────────────────────────────────────────────

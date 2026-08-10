@@ -57,6 +57,50 @@
     </table>
   </section>
 
+  <!-- Personas por unirse al hogar con el código del titular ───────────── -->
+  <section class="bandeja" *ngIf="!cargando && hogar.length">
+    <h2>
+      <i class="pi pi-users"></i>
+      Personas por unirse al hogar
+      <span class="cuantas">{{ hogar.length }}</span>
+    </h2>
+
+    <table class="tabla gd-card">
+      <thead>
+        <tr>
+          <th>Quién</th>
+          <th>Documento</th>
+          <th>Casa</th>
+          <th>Entra como</th>
+          <th>Titular</th>
+          <th>Pedida</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let h of hogar">
+          <td class="fuerte">{{ h.nombreCompleto }}</td>
+          <td>{{ h.documento }}</td>
+          <td>{{ h.casaIdentificador }}</td>
+          <td>{{ h.parentesco }}</td>
+          <td>{{ h.titularNombre }}</td>
+          <td>{{ h.fechaSolicitud | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td class="derecha acciones">
+            <button type="button" class="alterno" [disabled]="resolviendo"
+                    (click)="abrirRechazoHogar(h)">
+              Rechazar
+            </button>
+            <button type="button" class="principal" [disabled]="resolviendo"
+                    (click)="aprobarHogar(h)">
+              <i class="pi pi-check"></i>
+              Aprobar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
   <!-- Vehículos por autorizar ───────────────────────────────────────────── -->
   <section class="bandeja" *ngIf="!cargando && vehiculos.length">
     <h2>
@@ -99,6 +143,52 @@
                     (click)="aprobarVehiculo(v)">
               <i class="pi pi-check"></i>
               Autorizar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Invitaciones por aprobar ──────────────────────────────────────────── -->
+  <section class="bandeja" *ngIf="!cargando && invitaciones.length">
+    <h2>
+      <i class="pi pi-ticket"></i>
+      Invitaciones por aprobar
+      <span class="cuantas">{{ invitaciones.length }}</span>
+    </h2>
+
+    <table class="tabla gd-card">
+      <thead>
+        <tr>
+          <th>Invitado</th>
+          <th>Documento</th>
+          <th>Casa</th>
+          <th>Anfitrión</th>
+          <th>Vigencia</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let i of invitaciones">
+          <td class="fuerte">{{ i.nombreInvitado }}</td>
+          <td>{{ i.documentoInvitado }}</td>
+          <td>{{ i.casaIdentificador }}</td>
+          <td>{{ i.anfitrionNombre }}</td>
+          <td>
+            {{ i.vigenciaDesde | date:'dd/MM HH:mm' }}
+            –
+            {{ i.vigenciaHasta | date:'dd/MM HH:mm' }}
+          </td>
+          <td class="derecha acciones">
+            <button type="button" class="alterno" [disabled]="resolviendo"
+                    (click)="abrirRechazoInvitacion(i)">
+              Rechazar
+            </button>
+            <button type="button" class="principal" [disabled]="resolviendo"
+                    (click)="aprobarInvitacion(i)">
+              <i class="pi pi-check"></i>
+              Aprobar
             </button>
           </td>
         </tr>

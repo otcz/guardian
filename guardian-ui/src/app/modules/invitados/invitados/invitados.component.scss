@@ -388,6 +388,13 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
+  /* El motivo del rechazo, bajo la ventana de vigencia. Es lo que el
+     anfitrión tiene que saber antes de volver a invitar. */
+  .motivo {
+    font-size: var(--t-xs);
+    color: var(--deny);
+  }
 }
 
 .pastilla {
