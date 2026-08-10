@@ -151,13 +151,15 @@ public class SolicitudHogarAdminServiceImpl implements SolicitudHogarAdminServic
     }
 
     private SolicitudHogarAdminResponse mapear(GdSolicitudHogar solicitud) {
+        GdPersona titular = solicitud.getCodigo().getTitular();
         return SolicitudHogarAdminResponse.builder()
                 .id(solicitud.getId())
                 .nombreCompleto(solicitud.getNombres() + " " + solicitud.getApellidos())
                 .documento(solicitud.getDocumento())
                 .casaIdentificador(solicitud.getCodigo().getCasa().getIdentificador())
                 .parentesco(solicitud.getParentesco())
-                .titularNombre(solicitud.getCodigo().getTitular().getNombreCompleto())
+                .titularNombre(titular != null
+                        ? titular.getNombreCompleto() : MensajesGlobales.TITULAR_ELIMINADO)
                 .estado(solicitud.getEstado())
                 .fechaSolicitud(solicitud.getFechaCreacion())
                 .build();

@@ -194,6 +194,9 @@ public final class MensajesGlobales {
      */
     public static final String CODIGO_HOGAR_NO_VALIDO =
             "Ese codigo ya no sirve. Pidele uno nuevo al titular de la casa.";
+    /** El titular que genero el codigo ya no existe: lo eliminaron despues. */
+    public static final String TITULAR_ELIMINADO =
+            "Alguien que ya no esta en el conjunto";
     public static final String PARENTESCO_TITULAR_NO =
             "Esa casa ya tiene titular. Elige tu parentesco con el.";
 

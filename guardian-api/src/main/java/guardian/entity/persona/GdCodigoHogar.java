@@ -58,9 +58,15 @@ public class GdCodigoHogar extends BaseEntity {
     @JoinColumn(name = "CASA_ID", nullable = false)
     private GdCasa casa;
 
-    /** El titular que lo genero. A el se le rinde cuentas de quien entro. */
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "TITULAR_ID", nullable = false)
+    /**
+     * El titular que lo genero. A el se le rinde cuentas de quien entro.
+     *
+     * <p>Nullable a proposito, aunque nace siempre con uno: si el titular se
+     * elimina despues, el codigo sigue existiendo como historial de quien
+     * uso ese enlace, solo que ya no sabe decir quien lo genero.</p>
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "TITULAR_ID")
     private GdPersona titular;
 
     /** UUID no adivinable: es la unica llave, igual que en las invitaciones. */

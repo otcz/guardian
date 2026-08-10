@@ -113,7 +113,7 @@ public class CodigoHogarServiceImpl implements CodigoHogarService {
         return HogarPublicoResponse.builder()
                 .conjuntoNombre(vinculo.getCasa().getConjunto().getNombre())
                 .casaIdentificador(vinculo.getCasa().getIdentificador())
-                .titularNombre(vinculo.getTitular().getNombreCompleto())
+                .titularNombre(nombreDelTitular(vinculo))
                 .vigente(vinculo.sirve(new Date()))
                 // Las opciones del formulario viajan aca: esa pantalla no tiene
                 // sesion y no puede pedir el catalogo por su cuenta.
@@ -168,7 +168,8 @@ public class CodigoHogarServiceImpl implements CodigoHogarService {
         solicitud.setEstado(Codigos.SOLICITUD_PENDIENTE);
         // El auditor deja escrito que entro por un codigo y de quien era, no
         // por la mano del administrador.
-        solicitud.setUsuarioCreador(vinculo.getTitular().getDocumento());
+        solicitud.setUsuarioCreador(vinculo.getTitular() != null
+                ? vinculo.getTitular().getDocumento() : null);
         solicitudRepository.save(solicitud);
 
         log.info("[hogar] {} pidio unirse a la casa {} con el codigo del titular, queda pendiente",
@@ -186,6 +187,13 @@ public class CodigoHogarServiceImpl implements CodigoHogarService {
                         ? codigo.getPersonaRegistrada().getNombreCompleto()
                         : null)
                 .build();
+    }
+
+    /** El titular pudo eliminarse despues de generar el codigo. */
+    private String nombreDelTitular(GdCodigoHogar vinculo) {
+        return vinculo.getTitular() != null
+                ? vinculo.getTitular().getNombreCompleto()
+                : MensajesGlobales.TITULAR_ELIMINADO;
     }
 
     private GdPersona personaDe(Long personaId) {

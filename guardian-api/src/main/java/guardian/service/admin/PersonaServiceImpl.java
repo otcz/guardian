@@ -14,6 +14,7 @@ import guardian.entity.persona.GdUsuario;
 import guardian.exception.GuardianException;
 import guardian.repository.GdAccesoEventoRepository;
 import guardian.repository.GdCasaRepository;
+import guardian.repository.GdCodigoHogarRepository;
 import guardian.repository.GdInvitacionRepository;
 import guardian.repository.GdConjuntoRepository;
 import guardian.repository.GdCredencialQrRepository;
@@ -54,6 +55,7 @@ public class PersonaServiceImpl implements PersonaService {
     private final GdUsuarioRepository usuarioRepository;
     private final GdAccesoEventoRepository eventoRepository;
     private final GdInvitacionRepository invitacionRepository;
+    private final GdCodigoHogarRepository codigoHogarRepository;
     private final CredencialQrService credencialQrService;
     private final ParametroService parametroService;
     private final PasswordEncoder passwordEncoder;
@@ -266,6 +268,11 @@ public class PersonaServiceImpl implements PersonaService {
         eventoRepository.desvincularGuardia(id);
         credencialRepository.deleteByPersonaId(id);
         invitacionRepository.deleteByAnfitrionId(id);
+        // El codigo de hogar NO se borra: es el historial de quien invito a
+        // quien. Solo pierde el enlace a una persona que ya no existe, sea
+        // como titular que lo genero o como familiar que lo uso.
+        codigoHogarRepository.desvincularTitular(id);
+        codigoHogarRepository.desvincularPersonaRegistrada(id);
         residenteCasaRepository.deleteByPersonaId(id);
         usuarioRepository.deleteByPersonaId(id);
         personaRepository.delete(persona);
