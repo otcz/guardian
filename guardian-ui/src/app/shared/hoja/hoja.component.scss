@@ -90,7 +90,13 @@
 }
 
 /* Afordancia de escritorio: en el móvil se cierra arrastrando o tocando
-   fuera, y una X ahí solo compite con el pulgar. */
+   fuera, y una X ahí solo compite con el pulgar.
+
+   Con fondo y borde desde el reposo, no transparente hasta el hover: en una
+   hoja con poco contenido —"Cambiar tu foto" es título, una línea y un solo
+   botón— una X sin ningún borde se leía como un carácter suelto, no como un
+   control. Es la misma razón del botón "quitar" de gd-foto-upload; acá pega
+   por ser la X de CADA hoja de la aplicación. */
 .cerrar {
   display: none;
   place-items: center;
@@ -99,16 +105,16 @@
   flex: 0 0 auto;
   margin: -4px -4px 0 0;
   color: var(--text-muted);
-  background: none;
-  border: none;
-  border-radius: var(--r-sm);
+  background: var(--bg-soft);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-full);
   cursor: pointer;
-  transition: background var(--transicion), color var(--transicion);
+  transition: background var(--transicion), color var(--transicion), border-color var(--transicion);
 
   @media (hover: hover) {
     &:hover {
       color: var(--text-strong);
-      background: var(--bg-soft);
+      border-color: var(--border-strong);
     }
   }
 }
