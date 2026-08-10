@@ -389,6 +389,14 @@
               (cerrar)="bloqueando = null">
   </gd-bloqueo>
 
+  <gd-confirmar [abierta]="!!habilitando"
+                titulo="Habilitar"
+                [mensaje]="mensajeHabilitar"
+                textoConfirmar="Habilitar"
+                (confirmar)="confirmarHabilitar()"
+                (cerrar)="habilitando = null">
+  </gd-confirmar>
+
   <!-- ── Acceso a la aplicación ──────────────────────────────────────────
        Todo lo que antes vivía en el panel de Usuarios, aquí, sobre la
        persona que ya se está mirando. -->

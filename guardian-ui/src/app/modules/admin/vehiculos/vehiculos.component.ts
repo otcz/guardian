@@ -178,12 +178,25 @@ export class VehiculosComponent implements OnInit {
   /** Vehículo al que se le va a poner el candado. Null = hoja cerrada. */
   bloqueando: Vehiculo | null = null;
 
+  /** Vehículo que se va a habilitar de nuevo. Null = hoja cerrada. */
+  habilitando: Vehiculo | null = null;
+
   alternarBloqueo(vehiculo: Vehiculo): void {
     if (this.bloqueado(vehiculo)) {
-      this.desbloquear(vehiculo);
+      this.habilitando = vehiculo;
     } else {
       this.bloqueando = vehiculo;
     }
+  }
+
+  get mensajeHabilitar(): string {
+    const vehiculo = this.habilitando;
+    if (!vehiculo) {
+      return '';
+    }
+    return `${vehiculo.placa} está deshabilitado por: `
+      + `${vehiculo.motivoBloqueo || 'sin motivo registrado'}. `
+      + 'Al habilitarlo, vuelve a aparecer en la portería.';
   }
 
   confirmarBloqueo(motivo: string): void {
@@ -205,20 +218,21 @@ export class VehiculosComponent implements OnInit {
     });
   }
 
-  private desbloquear(vehiculo: Vehiculo): void {
-    const seguro = window.confirm(
-      `${vehiculo.placa} está deshabilitado por: ` +
-      `${vehiculo.motivoBloqueo || 'sin motivo registrado'}.\n\n` +
-      '¿Habilitarlo de nuevo? Volverá a aparecer en la portería.');
-    if (!seguro) {
+  confirmarHabilitar(): void {
+    const vehiculo = this.habilitando;
+    if (!vehiculo) {
       return;
     }
 
     this.error = null;
     this.admin.desbloquear('vehiculos', vehiculo.id).subscribe({
-      next: () => this.cargar(),
+      next: () => {
+        this.habilitando = null;
+        this.cargar();
+      },
       error: (fallo: HttpErrorResponse) => {
         this.error = fallo.error?.mensaje ?? 'No pudimos levantar el bloqueo.';
+        this.habilitando = null;
       }
     });
   }

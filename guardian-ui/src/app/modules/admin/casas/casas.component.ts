@@ -147,9 +147,12 @@ export class CasasComponent implements OnInit {
   /** Casa a la que se le va a poner el candado. Null = hoja cerrada. */
   bloqueando: Casa | null = null;
 
+  /** Casa que se va a habilitar de nuevo. Null = hoja cerrada. */
+  habilitando: Casa | null = null;
+
   alternarBloqueo(casa: Casa): void {
     if (this.bloqueada(casa)) {
-      this.desbloquear(casa);
+      this.habilitando = casa;
     } else {
       this.bloqueando = casa;
     }
@@ -174,20 +177,31 @@ export class CasasComponent implements OnInit {
     });
   }
 
-  private desbloquear(casa: Casa): void {
-    const seguro = window.confirm(
-      `${casa.identificador} está deshabilitada por: ` +
-      `${casa.motivoBloqueo || 'sin motivo registrado'}.\n\n` +
-      '¿Habilitarla de nuevo? Sus residentes vuelven a ingresar.');
-    if (!seguro) {
+  get mensajeHabilitar(): string {
+    const casa = this.habilitando;
+    if (!casa) {
+      return '';
+    }
+    return `${casa.identificador} está deshabilitada por: `
+      + `${casa.motivoBloqueo || 'sin motivo registrado'}. `
+      + 'Al habilitarla, sus residentes vuelven a poder ingresar.';
+  }
+
+  confirmarHabilitar(): void {
+    const casa = this.habilitando;
+    if (!casa) {
       return;
     }
 
     this.error = null;
     this.admin.desbloquear('casas', casa.id).subscribe({
-      next: () => this.cargar(),
+      next: () => {
+        this.habilitando = null;
+        this.cargar();
+      },
       error: (fallo: HttpErrorResponse) => {
         this.error = fallo.error?.mensaje ?? 'No pudimos habilitarla.';
+        this.habilitando = null;
       }
     });
   }

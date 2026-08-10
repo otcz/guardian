@@ -178,4 +178,12 @@
               (confirmar)="confirmarBloqueo($event)"
               (cerrar)="bloqueando = null">
   </gd-bloqueo>
+
+  <gd-confirmar [abierta]="!!habilitando"
+                titulo="Habilitar"
+                [mensaje]="mensajeHabilitar"
+                textoConfirmar="Habilitar"
+                (confirmar)="confirmarHabilitar()"
+                (cerrar)="habilitando = null">
+  </gd-confirmar>
 </div>

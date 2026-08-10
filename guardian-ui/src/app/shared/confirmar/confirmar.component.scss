@@ -1,0 +1,16 @@
+:host {
+  display: contents;
+}
+
+.explicacion {
+  margin: 0;
+  color: var(--text-default);
+  font-size: var(--t-sm);
+  line-height: 1.5;
+}
+
+/* Rojo y no azul: la acción peligrosa no se confirma sin leer con el mismo
+   color que "guardar". Mismo criterio que gd-bloqueo. */
+[pie] .principal.peligro {
+  background: var(--deny);
+}

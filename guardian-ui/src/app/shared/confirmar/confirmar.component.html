@@ -1,0 +1,12 @@
+<gd-hoja [abierta]="abierta" [titulo]="titulo" (cerrar)="cerrar.emit()">
+
+  <p class="explicacion">{{ mensaje }}</p>
+
+  <div pie>
+    <button type="button" class="alterno" (click)="cerrar.emit()">Cancelar</button>
+    <button type="button" class="principal" [class.peligro]="peligroso"
+            (click)="confirmar.emit()">
+      {{ textoConfirmar }}
+    </button>
+  </div>
+</gd-hoja>

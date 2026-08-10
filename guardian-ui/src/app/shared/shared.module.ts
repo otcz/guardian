@@ -9,6 +9,7 @@ import { FotoPipe } from './foto-upload/foto.pipe';
 import { DocumentoPipe } from './documento.pipe';
 import { HojaComponent } from './hoja/hoja.component';
 import { BloqueoComponent } from './bloqueo/bloqueo.component';
+import { ConfirmarComponent } from './confirmar/confirmar.component';
 import { MotivoAccesoPipe } from './motivo-acceso.pipe';
 import { RangoFechasPipe } from './rango-fechas.pipe';
 import { FiltroColumnaComponent } from './tabla/filtro-columna.component';
@@ -24,6 +25,7 @@ import { MayusculasDirective } from './mayusculas.directive';
     DocumentoPipe,
     HojaComponent,
     BloqueoComponent,
+    ConfirmarComponent,
     MotivoAccesoPipe,
     RangoFechasPipe,
     FiltroColumnaComponent,
@@ -39,6 +41,7 @@ import { MayusculasDirective } from './mayusculas.directive';
     DocumentoPipe,
     HojaComponent,
     BloqueoComponent,
+    ConfirmarComponent,
     MotivoAccesoPipe,
     RangoFechasPipe,
     FiltroColumnaComponent,

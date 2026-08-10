@@ -285,12 +285,25 @@ export class PersonasComponent implements OnInit {
   /** Persona a la que se le va a poner el candado. Null = hoja cerrada. */
   bloqueando: Persona | null = null;
 
+  /** Persona que se va a habilitar de nuevo. Null = hoja cerrada. */
+  habilitando: Persona | null = null;
+
   alternarBloqueo(persona: Persona): void {
     if (this.bloqueada(persona)) {
-      this.desbloquear(persona);
+      this.habilitando = persona;
     } else {
       this.bloqueando = persona;
     }
+  }
+
+  get mensajeHabilitar(): string {
+    const persona = this.habilitando;
+    if (!persona) {
+      return '';
+    }
+    return `${persona.nombreCompleto} está deshabilitada por: `
+      + `${persona.motivoBloqueo || 'sin motivo registrado'}. `
+      + 'Al habilitarla, vuelve a poder ingresar si su hogar la tiene activa.';
   }
 
   confirmarBloqueo(motivo: string): void {
@@ -312,20 +325,21 @@ export class PersonasComponent implements OnInit {
     });
   }
 
-  private desbloquear(persona: Persona): void {
-    const seguro = window.confirm(
-      `${persona.nombreCompleto} está deshabilitada por: ` +
-      `${persona.motivoBloqueo || 'sin motivo registrado'}.\n\n` +
-      '¿Habilitarla de nuevo? Volverá a ingresar si su hogar la tiene activa.');
-    if (!seguro) {
+  confirmarHabilitar(): void {
+    const persona = this.habilitando;
+    if (!persona) {
       return;
     }
 
     this.error = null;
     this.admin.desbloquear('personas', persona.id).subscribe({
-      next: () => this.cargar(this.texto),
+      next: () => {
+        this.habilitando = null;
+        this.cargar(this.texto);
+      },
       error: (fallo: HttpErrorResponse) => {
         this.error = fallo.error?.mensaje ?? 'No pudimos habilitarla.';
+        this.habilitando = null;
       }
     });
   }
