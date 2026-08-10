@@ -42,6 +42,7 @@
   position: relative;
   display: inline-flex;
   align-items: center;
+  flex: 0 0 auto;
   gap: var(--e-2);
   min-height: var(--tactil);
   padding: 0 var(--e-4);
@@ -50,6 +51,7 @@
   color: var(--accent);
   background: var(--accent-soft);
   border-radius: var(--r-full);
+  white-space: nowrap;
   cursor: pointer;
   transition: filter var(--transicion), transform var(--transicion);
 
