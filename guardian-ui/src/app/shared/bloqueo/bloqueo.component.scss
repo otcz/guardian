@@ -19,6 +19,8 @@
      bloqueo con detalle. Mismo look que un input, alto de sobra y estirable
      si hace falta más. */
   textarea {
+    width: 100%;
+    min-width: 0;
     min-height: calc(var(--tactil) * 2);
     padding: 0.55rem 0.7rem;
     color: var(--text-strong);
