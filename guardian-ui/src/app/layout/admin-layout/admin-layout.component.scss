@@ -280,8 +280,12 @@ main {
     overflow-x: auto;
   }
 
+  /* En el teléfono la barra lateral es una fila: el filo dorado de la marca
+     dejaría un subrayado suelto bajo el logo en vez de separar dos zonas. */
   .marca {
+    margin-bottom: 0;
     padding: 0;
+    border-bottom: none;
 
     .textos small {
       display: none;

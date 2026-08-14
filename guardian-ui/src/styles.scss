@@ -160,9 +160,16 @@ a {
 /* ---------------------------------------------------------------------------
    Marca de agua — el emblema al fondo de un panel.
 
-   Va por `mask` y no por `background-image` para que el color salga del tema:
-   el mismo SVG se pinta navy sobre claro y dorado sobre oscuro sin tener dos
-   archivos.
+   Va por `mask` y no por `background-image` para que el color salga de una
+   variable: un solo SVG sirve para los dos temas y para cualquier tinte.
+
+   Dorado en ambos modos, no navy sobre claro: al 10% sobre blanco el dorado
+   deja un cálido de marca, mientras que el navy deja un gris sucio que se
+   lee como suciedad de render y no como identidad.
+
+   Sangra por el borde inferior derecho a propósito. Un emblema completo y
+   centrado se lee como "hay una imagen detrás del texto"; uno recortado por
+   el marco se lee como parte del papel.
 
    Regla de uso: UNA por vista, y nunca detrás de una tabla ni de una lista
    densa. Es un detalle de identidad en un panel con aire; encima de datos es
@@ -176,12 +183,14 @@ a {
   &::after {
     content: '';
     position: absolute;
-    right: -28px;
-    bottom: -36px;
-    width: 190px;
-    height: 238px;
-    background: var(--marca-navy-800);
-    opacity: 0.06;
+    right: -10%;
+    bottom: -12%;
+    /* Se mide contra el panel: grande en una pantalla de acceso, discreto en
+       una tarjeta, sin un @media por cada sitio donde se use. */
+    height: clamp(200px, 62%, 460px);
+    aspect-ratio: 300 / 375;
+    background: var(--marca-oro-500);
+    opacity: 0.1;
     -webkit-mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
     mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
     pointer-events: none;
@@ -195,8 +204,8 @@ a {
   }
 }
 
+/* Sobre navy el mismo dorado pesa más: baja para quedar igual de tenue. */
 html.dark-mode .gd-watermark::after {
-  background: var(--marca-oro-500);
   opacity: 0.07;
 }
 

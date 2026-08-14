@@ -214,6 +214,29 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Tablas en un teléfono.
+
+   Una tabla de siete columnas no cabe en 375px, y hasta ahora empujaba el
+   ANCHO DE LA PÁGINA: el resultado era toda la aplicación corrida hacia un
+   lado, con el menú y las tarjetas cortados — no solo la tabla.
+
+   `display: block` la convierte en su propia caja de desplazamiento: las
+   columnas conservan un ancho legible y se recorren de lado DENTRO de la
+   tarjeta, mientras la página deja de moverse.
+
+   Va solo aquí abajo: en escritorio la tabla sigue siendo `table` y se
+   estira a lo ancho como siempre.
+   --------------------------------------------------------------------------- */
+@media (max-width: 820px) {
+  .tabla {
+    display: block;
+    overflow-x: auto;
+    /* Que el desplazamiento lateral no arrastre la página al llegar al tope. */
+    overscroll-behavior-x: contain;
+  }
+}
+
 .principal {
   display: inline-flex;
   align-items: center;

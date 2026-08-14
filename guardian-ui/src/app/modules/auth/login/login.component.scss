@@ -65,10 +65,15 @@
   color: var(--panel-marca-texto);
 }
 
+/* En el teléfono el formulario arranca arriba y no centrado: centrado dejaba
+   un hueco blanco de 120px bajo la franja de marca, que se lee como que la
+   pantalla no cargó del todo. Una aplicación nativa empieza donde terminó la
+   cabecera. En escritorio sí se centra: ahí la columna es alta y el
+   formulario suelto arriba se ve caído. */
 .lado-forma {
   display: grid;
-  place-items: center;
-  padding: var(--e-6) var(--e-4) calc(var(--seguro-abajo) + var(--e-6));
+  place-items: start center;
+  padding: var(--e-5) var(--e-4) calc(var(--seguro-abajo) + var(--e-5));
 }
 
 /* Sin tarjeta ni sombra: en un lado propio, un recuadro dentro de otro
@@ -101,6 +106,10 @@
     padding: var(--e-6);
     border-bottom: none;
     border-right: 2px solid var(--marca-oro-500);
+  }
+
+  .lado-forma {
+    place-items: center;
   }
 }
 
