@@ -185,9 +185,11 @@ main {
   content: '';
   position: absolute;
   left: 50%;
-  /* `--seguro-abajo` también: en un teléfono con barra gestual la tabbar
-     mide más que `--alto-tabbar` y el sello se le metería debajo. */
-  bottom: calc(var(--alto-tabbar) + var(--seguro-abajo) + var(--e-3));
+  /* En proporción del panel y no pegado a la barra: así queda centrado en el
+     hueco que deja el contenido en vez de descolgado contra la tabbar, y la
+     proporción se sostiene igual en un teléfono chico que en uno grande.
+     Un valor fijo se veía bien en uno solo. */
+  bottom: 20%;
   transform: translateX(-50%);
   width: min(34%, 128px);
   aspect-ratio: 300 / 375;
