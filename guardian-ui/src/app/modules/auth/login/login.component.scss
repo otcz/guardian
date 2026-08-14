@@ -135,18 +135,31 @@
     place-items: center;
   }
 
-  /* NADA de marca de agua en el lado del formulario.
+  /* El escudo del fondo va COMPLETO y centrado detrás del formulario.
 
-     En escritorio la banda de la izquierda ya lleva el escudo entero,
-     grande y centrado. El segundo, el de `gd-watermark`, se anclaba
-     sangrando por la esquina inferior derecha y quedaba cortado por dos
-     bordes a la vez: una figura partida en la esquina, que es exactamente
-     lo que se lee como torcido. Un emblema por pantalla, completo.
-
-     En el teléfono sí se queda: ahí no hay banda lateral y el escudo va
-     detrás de los campos a propósito —ver el bloque de abajo—. */
+     `gd-watermark` lo ancla sangrando por la esquina inferior derecha, y
+     ahí quedaba cortado por el borde derecho y por el de abajo a la vez:
+     una figura partida en la esquina no se lee como marca de agua, se lee
+     como un dibujo mal puesto. Centrado y entero se lee como el membrete
+     de un papel, que es lo que tiene que ser. */
   .lado-forma.gd-watermark::after {
-    display: none;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    /* Un pelo más ancho que el formulario (368px contra 360px), así asoma
+       por los costados y se entiende que está detrás y no metido dentro. */
+    height: min(78%, 460px);
+    transform: translate(-50%, -50%);
+    opacity: 0.1;
+  }
+
+  /* Igual que en el teléfono: los campos dejan pasar el fondo. Con relleno
+     opaco encima, el escudo se parte en tiras —un pedazo entre Usuario y
+     PIN, otro debajo— y vuelve a verse roto. El campo lo sigue delimitando
+     su borde. */
+  .lado-forma .campo input {
+    background: transparent;
   }
 
   /* La marca crece con la columna. Con el tope del móvil, un escudo de 74px
