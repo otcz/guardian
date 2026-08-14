@@ -52,7 +52,16 @@
   h1 {
     margin: 0;
     font-size: clamp(1.6rem, 5.5vw, 2.2rem);
+    /* Interlineado pegado al texto: con el 1.6 heredado, la caja del título
+       llevaba ~14px de aire abajo que no se ven pero sí cuentan al centrar,
+       y el bloque entero quedaba montado hacia arriba.
+
+       El `letter-spacing` reparte a la derecha de la última letra, así que
+       se compensa con un sangrado del mismo tamaño; sin eso la palabra
+       queda medio espacio corrida a la izquierda del eje. */
+    line-height: 1.1;
     letter-spacing: 0.16em;
+    text-indent: 0.16em;
     color: var(--panel-marca-texto);
   }
 }
@@ -65,7 +74,11 @@
 .lado-forma {
   display: grid;
   place-items: start center;
-  padding: var(--e-5) var(--e-4) calc(var(--seguro-abajo) + var(--e-5));
+  /* El relleno lateral escala con el ancho: en un teléfono angosto un valor
+     fijo se come el formulario, y en uno grande deja el contenido pegado al
+     borde. */
+  padding: var(--e-5) clamp(var(--e-3), 5vw, var(--e-5))
+           calc(var(--seguro-abajo) + var(--e-5));
 }
 
 /* Sin tarjeta ni sombra: en un lado propio, un recuadro dentro de otro
@@ -74,8 +87,18 @@
   display: flex;
   flex-direction: column;
   gap: var(--e-4);
-  width: 100%;
-  max-width: 360px;
+  /* `min()` y no `max-width` a secas: así el ancho NUNCA puede pasarse del
+     espacio disponible, ni siquiera si un hijo pide más de lo que hay. Con
+     `overflow: hidden` de la marca de agua encima, un desborde no se vería
+     como barra sino como contenido cortado — que es justo lo que pasaba. */
+  width: min(360px, 100%);
+  min-width: 0;
+}
+
+/* Ningún control puede empujar el formulario más allá de su caja. */
+.forma :is(input, select, textarea, button) {
+  max-width: 100%;
+  min-width: 0;
 }
 
 .titulo-forma {
