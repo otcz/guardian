@@ -136,6 +136,29 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Teléfono: el escudo va DETRÁS de los campos, no en la esquina.
+
+   La marca de agua de `gd-watermark` se ancla abajo a la derecha, que en una
+   pantalla alta la manda al pie — lejos de donde está la vista mientras se
+   escribe. Acá se sube y se centra para que quede detrás de Usuario y PIN.
+
+   Los campos tienen fondo propio y opaco, así que el escudo no se lee a
+   través de ellos: asoma entre uno y otro y alrededor, que es como se ve un
+   papel con membrete.
+   --------------------------------------------------------------------------- */
+@media (max-width: 879px) {
+  .lado-forma.gd-watermark::after {
+    top: 34%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    height: min(52%, 300px);
+    transform: translate(-50%, -50%);
+    opacity: 0.13;
+  }
+}
+
 .campo {
   display: flex;
   flex-direction: column;
