@@ -9,9 +9,13 @@
   <meta name="viewport"
         content="width=device-width, initial-scale=1, viewport-fit=cover">
   <!-- SVG primero: el navegador que lo entienda lo usa y se ve nítido en
-       cualquier densidad. El .ico queda de respaldo para los que no. -->
-  <link rel="icon" type="image/svg+xml" href="brand/guardian-emblema-oscuro.svg">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+       cualquier densidad. El .ico queda de respaldo para los que no.
+
+       `sizes="any"` NO sobra: sin él Chrome compara tamaños entre los dos
+       iconos, el SVG no declara ninguno y termina perdiendo contra el .ico.
+       Con "any" queda dicho que ese sirve para cualquier tamaño y gana. -->
+  <link rel="icon" type="image/svg+xml" sizes="any" href="brand/guardian-emblema-oscuro.svg">
+  <link rel="icon" type="image/x-icon" sizes="32x32" href="favicon.ico">
   <link rel="apple-touch-icon" href="icons/icon-180x180.png">
   <link rel="manifest" href="manifest.webmanifest">
 

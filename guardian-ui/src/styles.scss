@@ -158,6 +158,55 @@ a {
 }
 
 /* ---------------------------------------------------------------------------
+   Fondo de marca — el emblema grande detrás de una pantalla de acceso.
+
+   Va en las cuatro pantallas sin sesión (entrar, recuperar, unirme, invitado):
+   son la cara del sistema para quien todavía no entró, y el emblema al fondo
+   las convierte en una portada en vez de un formulario suelto.
+
+   Muy tenue a propósito: es identidad, no decoración que compita con el
+   formulario. Y la tarjeta va encima con su fondo sólido, así que el contraste
+   de lo que se lee no depende de esta capa.
+   --------------------------------------------------------------------------- */
+.gd-fondo-marca {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    /* Más ancho que la tarjeta a propósito: si midiera lo mismo quedaría
+       escondido detrás de ella y no se leería como fondo. Se recorta contra
+       los bordes en pantallas angostas, que es justo el efecto buscado. */
+    width: min(105vw, 640px);
+    aspect-ratio: 300 / 375;
+    /* transform y no la propiedad `translate`: más soporte y acá no compite
+       con ninguna animación. */
+    transform: translate(-50%, -50%);
+    background: var(--accent);
+    opacity: 0.07;
+    -webkit-mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
+    mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* El contenido por encima del emblema sin que cada pantalla lo pida. */
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+/* Sobre navy el dorado necesita un punto más para leerse igual de tenue. */
+html.dark-mode .gd-fondo-marca::before {
+  opacity: 0.09;
+}
+
+/* ---------------------------------------------------------------------------
    Marca de agua — el emblema al fondo de un panel.
 
    Va por `mask` y no por `background-image` para que el color salga del tema:
