@@ -151,6 +151,39 @@ main {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   padding-bottom: var(--e-4);
+  /* El contenido va por encima del escudo del fondo. */
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------------------------------------------------------------------------
+   El escudo al fondo del panel del residente.
+
+   Las tres pantallas —Mi QR, Mi hogar, Invitados— tienen poco contenido y
+   mucho vacío debajo: una casa con dos personas y un carro deja media
+   pantalla en negro. El emblema le da fondo a ese vacío y hace que la
+   aplicación se sienta de alguien.
+
+   Va FIJO y no dentro de `main`: main es lo que se desplaza, y ahí el escudo
+   se iría hacia arriba con la lista en vez de quedarse de fondo.
+
+   Anclado abajo a la derecha y sangrando por el borde: completo y centrado
+   competiría con el QR, que es lo único que el guardia tiene que poder leer
+   de esta pantalla.
+   --------------------------------------------------------------------------- */
+.panel::after {
+  content: '';
+  position: fixed;
+  right: -12%;
+  bottom: calc(var(--alto-tabbar) - 6%);
+  width: min(78vw, 420px);
+  aspect-ratio: 300 / 375;
+  background: var(--marca-oro-500);
+  opacity: 0.055;
+  -webkit-mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
+  mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* ── Barra de navegación inferior ──────────────────────────────────────── */
