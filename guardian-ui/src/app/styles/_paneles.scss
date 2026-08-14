@@ -228,7 +228,28 @@
    Va solo aquí abajo: en escritorio la tabla sigue siendo `table` y se
    estira a lo ancho como siempre.
    --------------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------------
+   Encabezado de pantalla en un teléfono.
+
+   `.encabezado` ya envolvía, pero el grupo de acciones de adentro no: "Ver el
+   formato" y "Cargar Excel" quedaban pegados en una sola línea de ~330px, y
+   con "Registrar" al lado la fila se pasaba del ancho de la pantalla y CORRÍA
+   LA PÁGINA ENTERA — no solo los botones.
+   --------------------------------------------------------------------------- */
 @media (max-width: 820px) {
+  .encabezado {
+    .masiva {
+      flex-wrap: wrap;
+    }
+
+    /* Los botones traen `white-space: nowrap`, así que sin permitirles
+       encoger ninguno cede y la fila crece hasta donde haga falta. */
+    > *,
+    .masiva > * {
+      min-width: 0;
+    }
+  }
+
   .tabla {
     display: block;
     overflow-x: auto;
