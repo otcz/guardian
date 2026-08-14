@@ -40,11 +40,14 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    height: min(78%, 300px);
+    height: min(66%, 260px);
     aspect-ratio: 300 / 375;
     transform: translate(-50%, -50%);
     background: var(--marca-oro-500);
-    opacity: 0.16;
+    /* Bajo, no medio: el nombre cae justo sobre las torres del castillo, y a
+       más opacidad las almenas se meten entre las letras. Al 10% el escudo
+       es textura de fondo y la palabra se lee limpia encima. */
+    opacity: 0.1;
     -webkit-mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
     mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
     pointer-events: none;
@@ -98,8 +101,9 @@
 @media (min-width: 880px) {
   .pantalla {
     grid-template-rows: 1fr;
-    /* El formulario un poco más ancho que la marca: es donde se trabaja. */
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    /* Mitad y mitad: con la marca más angosta que el formulario, el eje de
+       la pantalla quedaba corrido a la izquierda y se notaba. */
+    grid-template-columns: 1fr 1fr;
   }
 
   .panel-marca {

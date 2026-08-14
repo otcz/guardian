@@ -234,6 +234,25 @@
     overflow-x: auto;
     /* Que el desplazamiento lateral no arrastre la página al llegar al tope. */
     overscroll-behavior-x: contain;
+
+    /* La barra se deja VISIBLE, y no la del sistema que aparece solo al
+       tocar: una tabla que se desliza sin avisarlo se lee igual que una
+       tabla cortada, y nadie intenta arrastrar lo que cree roto. */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+
+    &::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--border-strong);
+      border-radius: var(--r-full);
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
   }
 }
 
