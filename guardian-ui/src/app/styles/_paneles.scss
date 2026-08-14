@@ -254,6 +254,91 @@
       background: transparent;
     }
   }
+
+  /* -------------------------------------------------------------------------
+     …y cuando la tabla se marca con `tabla--tarjetas`, ni siquiera se desliza:
+     cada fila se convierte en una tarjeta con sus datos etiquetados.
+
+     Deslizar de lado funciona pero nadie lo descubre — una tabla recortada se
+     lee como rota, no como deslizable. Apilada se ve completa de una.
+
+     Cada `td` trae su rótulo en `data-etiqueta`: sin él, la tarjeta sería una
+     lista de valores sueltos sin decir qué es cada uno, porque la cabecera de
+     la tabla deja de dibujarse.
+     ------------------------------------------------------------------------- */
+  .tabla--tarjetas {
+    display: block;
+    overflow: visible;
+    background: none;
+    border: none;
+    box-shadow: none;
+
+    thead {
+      display: none;
+    }
+
+    tbody,
+    tr,
+    td {
+      display: block;
+    }
+
+    tr {
+      margin-bottom: var(--e-3);
+      padding: var(--e-3) var(--e-4);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--r-md);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    td {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--e-3);
+      padding: var(--e-2) 0;
+      border-bottom: 1px solid var(--border-hairline);
+      text-align: right;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      /* El rótulo a la izquierda y el dato a la derecha: la misma lectura de
+         una ficha de datos, y las columnas quedan alineadas entre tarjetas. */
+      &::before {
+        content: attr(data-etiqueta);
+        flex: 0 0 auto;
+        text-align: left;
+        font-size: var(--t-xs);
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+      }
+
+      /* Una celda vacía —la de acciones no lleva rótulo— no dibuja separador
+         ni deja un renglón en blanco. */
+      &:empty {
+        display: none;
+      }
+    }
+
+    /* Las acciones ocupan su propia línea, centradas: al extremo derecho de
+       una tarjeta angosta quedan amontonadas contra el borde. */
+    .acciones {
+      justify-content: center;
+      padding-top: var(--e-3);
+
+      &::before {
+        display: none;
+      }
+    }
+  }
 }
 
 .principal {

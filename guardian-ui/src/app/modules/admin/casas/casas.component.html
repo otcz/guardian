@@ -103,7 +103,7 @@
 
   <p class="gd-muted" *ngIf="cargando">Cargando…</p>
 
-  <table class="tabla gd-card" *ngIf="!cargando">
+  <table class="tabla tabla--tarjetas gd-card" *ngIf="!cargando">
     <thead>
       <tr>
         <th>Casa
@@ -124,10 +124,10 @@
     </thead>
     <tbody>
       <tr *ngFor="let casa of visibles" [class.inactiva]="!activa(casa)">
-        <td class="fuerte">{{ casa.identificador }}</td>
-        <td>{{ casa.residentes }}</td>
-        <td>{{ casa.vehiculos }}</td>
-        <td>
+        <td class="fuerte" data-etiqueta="Casa">{{ casa.identificador }}</td>
+        <td data-etiqueta="Residentes">{{ casa.residentes }}</td>
+        <td data-etiqueta="Vehiculos">{{ casa.vehiculos }}</td>
+        <td data-etiqueta="Estado">
           <span class="pastilla" [class.si]="operativa(casa)" [class.no]="!operativa(casa)"
                 [class.candado]="bloqueada(casa)"
                 [attr.tabindex]="bloqueada(casa) ? 0 : null"
