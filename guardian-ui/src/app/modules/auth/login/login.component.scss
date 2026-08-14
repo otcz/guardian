@@ -59,9 +59,16 @@
        El `letter-spacing` reparte a la derecha de la última letra, así que
        se compensa con un sangrado del mismo tamaño; sin eso la palabra
        queda medio espacio corrida a la izquierda del eje. */
-    line-height: 1.1;
+    /* Pegado al texto: con el 1.6 heredado, la caja del título llevaba aire
+       invisible abajo que igual cuenta al centrar y subía el bloque entero. */
+    line-height: 1;
     letter-spacing: 0.16em;
-    text-indent: 0.16em;
+    /* La MITAD del espaciado, no el espaciado entero. `text-align: center`
+       centra la caja de la línea, que incluye el hueco que queda a la
+       derecha de la última letra; el texto visible aparece corrido media
+       muesca a la izquierda, y con la muesca completa se pasaba al otro
+       lado. */
+    text-indent: 0.08em;
     color: var(--panel-marca-texto);
   }
 }
