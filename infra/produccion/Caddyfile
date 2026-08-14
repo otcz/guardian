@@ -58,7 +58,13 @@
 		@inmutable path /*.js /*.css /media/* /assets/*
 		header @inmutable Cache-Control "public, max-age=31536000, immutable"
 
-		@volatil path /index.html /ngsw.json /ngsw-worker.js /manifest.webmanifest
+		# El icono y la marca NO llevan hash en el nombre y sí cambian: sin una
+		# regla propia, Cloudflare les aplica su TTL por extension —cuatro
+		# horas— y siguio repartiendo el favicon anterior mucho despues de
+		# haberlo reemplazado en el servidor. `no-cache` no es "no guardes":
+		# es "revalida antes de usar", y un 304 sobre un .ico no cuesta nada.
+		@volatil path /index.html /ngsw.json /ngsw-worker.js /manifest.webmanifest \
+			/favicon.ico /brand/* /icons/*
 		header @volatil Cache-Control "no-cache"
 
 		# Una aplicacion de una sola pagina: cualquier ruta que no sea un

@@ -1,62 +1,72 @@
-<div class="pantalla gd-fondo-marca">
-  <form class="tarjeta" [formGroup]="formulario" (ngSubmit)="entrar()">
+<div class="pantalla">
 
-    <div class="marca">
+  <!-- La marca ocupa su propio lado y no un renglón dentro del formulario:
+       es la primera pantalla que ve el residente, y el escudo de 2rem sobre
+       una tarjeta blanca no alcanzaba a decir de quién es esto. -->
+  <aside class="panel-marca">
+    <div class="identidad">
       <i class="gd-emblema" aria-hidden="true"></i>
       <h1>GUARDIAN</h1>
       <p>Control de acceso del conjunto</p>
     </div>
+  </aside>
 
-    <div class="campo">
-      <label for="documento">Usuario</label>
-      <input id="documento"
-             #campoDocumento
-             type="text"
-             autocomplete="username"
-             formControlName="documento"
-             gdMayusculas
-             placeholder="Ej: 1020304050">
-      <small class="error" *ngIf="campoInvalido('documento')">
-        Escribe tu usuario
-      </small>
-    </div>
+  <main class="lado-forma">
+    <form class="forma" [formGroup]="formulario" (ngSubmit)="entrar()">
 
-    <div class="campo">
-      <label for="clave">PIN</label>
-      <div class="clave-envoltura">
-        <input id="clave"
-               [type]="verClave ? 'text' : 'password'"
-               autocomplete="current-password"
-               formControlName="clave" inputmode="numeric" maxlength="4" class="pin">
-        <button type="button"
-                class="ver-clave"
-                (click)="verClave = !verClave"
-                [attr.aria-label]="verClave ? 'Ocultar PIN' : 'Ver PIN'">
-          <i class="pi" [ngClass]="verClave ? 'pi-eye-slash' : 'pi-eye'"></i>
-        </button>
+      <h2 class="titulo-forma">Ingresa a tu cuenta</h2>
+
+      <div class="campo">
+        <label for="documento">Usuario</label>
+        <input id="documento"
+               #campoDocumento
+               type="text"
+               autocomplete="username"
+               formControlName="documento"
+               gdMayusculas
+               placeholder="Ej: 1020304050">
+        <small class="error" *ngIf="campoInvalido('documento')">
+          Escribe tu usuario
+        </small>
       </div>
-      <small class="error" *ngIf="campoInvalido('clave')">
-        Escribe tu PIN
-      </small>
-    </div>
 
-    <label class="recordar">
-      <input type="checkbox" [(ngModel)]="recordar" [ngModelOptions]="{ standalone: true }">
-      <span>Recordar mi usuario</span>
-    </label>
+      <div class="campo">
+        <label for="clave">PIN</label>
+        <div class="clave-envoltura">
+          <input id="clave"
+                 [type]="verClave ? 'text' : 'password'"
+                 autocomplete="current-password"
+                 formControlName="clave" inputmode="numeric" maxlength="4" class="pin">
+          <button type="button"
+                  class="ver-clave"
+                  (click)="verClave = !verClave"
+                  [attr.aria-label]="verClave ? 'Ocultar PIN' : 'Ver PIN'">
+            <i class="pi" [ngClass]="verClave ? 'pi-eye-slash' : 'pi-eye'"></i>
+          </button>
+        </div>
+        <small class="error" *ngIf="campoInvalido('clave')">
+          Escribe tu PIN
+        </small>
+      </div>
 
-    <div class="aviso" *ngIf="error">{{ error }}</div>
+      <label class="recordar">
+        <input type="checkbox" [(ngModel)]="recordar" [ngModelOptions]="{ standalone: true }">
+        <span>Recordar mi usuario</span>
+      </label>
 
-    <button type="submit" class="principal" [disabled]="cargando">
-      <i class="pi" [ngClass]="cargando ? 'pi-spinner pi-spin' : 'pi-sign-in'"></i>
-      {{ cargando ? 'Entrando…' : 'Entrar' }}
-    </button>
+      <div class="aviso" *ngIf="error">{{ error }}</div>
 
-    <a class="olvide" routerLink="/recuperar">¿Olvidaste tu PIN?</a>
+      <button type="submit" class="principal" [disabled]="cargando">
+        <i class="pi" [ngClass]="cargando ? 'pi-spinner pi-spin' : 'pi-sign-in'"></i>
+        {{ cargando ? 'Entrando…' : 'Entrar' }}
+      </button>
 
-    <p class="pie">
-      ¿Primera vez? Tu usuario es tu número de documento y tu PIN es
-      <strong>0000</strong>. Al entrar tendrás que cambiarlo.
-    </p>
-  </form>
+      <a class="olvide" routerLink="/recuperar">¿Olvidaste tu PIN?</a>
+
+      <p class="pie">
+        ¿Primera vez? Tu usuario es tu número de documento y tu PIN es
+        <strong>0000</strong>. Al entrar tendrás que cambiarlo.
+      </p>
+    </form>
+  </main>
 </div>

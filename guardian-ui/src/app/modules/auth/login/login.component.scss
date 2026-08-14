@@ -1,47 +1,90 @@
-/* 100vh primero como respaldo: 100dvh no existe en Safari iOS < 15.4. */
+/* Dos bandas y no una tarjeta flotando en el centro: la marca a un lado y el
+   formulario al otro. Es la gramática de una pantalla de acceso institucional
+   —lo que uno espera de un sistema de control, no de una aplicación de
+   consumo— y de paso el escudo tiene sitio para leerse de verdad.
+
+   100vh primero como respaldo: 100dvh no existe en Safari iOS < 15.4. */
 .pantalla {
   display: grid;
-  place-items: center;
+  /* Móvil: la marca es una franja arriba y el formulario ocupa el resto. La
+     franja es de alto automático, no una fracción de la pantalla: con el
+     teclado abierto una banda proporcional se come el formulario. */
+  grid-template-rows: auto 1fr;
   min-height: 100vh;
   min-height: 100dvh;
-  padding: calc(var(--seguro-arriba) + var(--e-4)) var(--e-4)
-           calc(var(--seguro-abajo) + var(--e-4));
-  background: var(--bg-base);
-}
-
-/* Es la primera pantalla que ve el residente: sin borde y con sombra
-   profunda, la tarjeta se siente un objeto y no un recuadro dibujado. */
-.tarjeta {
-  display: flex;
-  flex-direction: column;
-  gap: var(--e-4);
-  width: 100%;
-  max-width: 380px;
-  padding: var(--e-6) var(--e-5);
   background: var(--bg-surface);
-  border-radius: var(--r-xl);
-  box-shadow: var(--shadow-flotante);
 }
 
-.marca {
+.panel-marca {
+  display: grid;
+  place-items: center;
+  padding: calc(var(--seguro-arriba) + var(--e-6)) var(--e-5) var(--e-6);
+  background: var(--panel-marca-fondo);
+  /* El filo dorado es la firma de la identidad, la misma que lleva la barra
+     lateral del panel de administración. */
+  border-bottom: 2px solid var(--marca-oro-500);
+}
+
+.identidad {
+  max-width: 340px;
   text-align: center;
-  margin-bottom: 0.25rem;
 
   i {
-    font-size: 2rem;
-    color: var(--accent);
+    /* El emblema hereda el font-size — ver .gd-emblema en styles.scss. */
+    font-size: clamp(2.6rem, 8vw, 4rem);
+    color: var(--marca-oro-500);
   }
 
   h1 {
-    margin: 0.4rem 0 0.15rem;
-    font-size: 1.4rem;
-    letter-spacing: 0.1em;
+    margin: var(--e-3) 0 var(--e-1);
+    font-size: clamp(1.6rem, 5vw, 2.1rem);
+    letter-spacing: 0.16em;
+    color: var(--panel-marca-texto);
   }
 
   p {
     margin: 0;
-    font-size: 0.85rem;
-    color: var(--text-muted);
+    font-size: var(--t-sm);
+    color: var(--panel-marca-texto-2);
+  }
+}
+
+.lado-forma {
+  display: grid;
+  place-items: center;
+  padding: var(--e-6) var(--e-4) calc(var(--seguro-abajo) + var(--e-6));
+}
+
+/* Sin tarjeta ni sombra: en un lado propio, un recuadro dentro de otro
+   recuadro solo agrega un borde que no separa nada. */
+.forma {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  width: 100%;
+  max-width: 360px;
+}
+
+.titulo-forma {
+  margin: 0;
+  font-size: var(--t-lg);
+  color: var(--text-strong);
+}
+
+/* Escritorio: las dos bandas se ponen lado a lado. Es del CASCARÓN de la
+   pantalla, no de un layout interno — la misma excepción que ya hacen
+   admin-layout y gd-hoja. */
+@media (min-width: 880px) {
+  .pantalla {
+    grid-template-rows: 1fr;
+    /* El formulario un poco más ancho que la marca: es donde se trabaja. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  }
+
+  .panel-marca {
+    padding: var(--e-6);
+    border-bottom: none;
+    border-right: 2px solid var(--marca-oro-500);
   }
 }
 
@@ -63,9 +106,11 @@
        en vez de los 22.4px que define el sistema. Las dos puertas de la
        aplicación —login y cambiar PIN— tienen que mostrarlo del mismo tamaño. */
     color: var(--text-strong);
-    background: var(--bg-surface);
+    /* Hundido y no del color del panel: ahora el formulario vive sobre la
+       superficie, y un campo blanco sobre blanco solo lo dibujaba el borde. */
+    background: var(--bg-base);
     border: 1px solid var(--border-default);
-    border-radius: 8px;
+    border-radius: var(--r-sm);
 
     &:focus {
       border-color: var(--accent);
