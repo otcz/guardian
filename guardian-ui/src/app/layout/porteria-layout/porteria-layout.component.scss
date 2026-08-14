@@ -38,9 +38,12 @@
   align-items: center;
   gap: 0.6rem;
 
+  /* Dorado de marca y no el verde de "operativo": esto es el emblema, no un
+     indicador de estado. El verde acá competía con el veredicto de la ficha,
+     que es el único sitio de la garita donde el verde debe significar algo. */
   > i {
     font-size: 1.35rem;
-    color: var(--ok);
+    color: var(--oro-inverso);
   }
 
   .textos {

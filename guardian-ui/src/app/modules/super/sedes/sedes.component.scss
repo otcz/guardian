@@ -257,7 +257,7 @@ main {
 
   code {
     padding: 1px 6px;
-    font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+    font-family: var(--fuente-mono);
     font-size: var(--t-sm);
     font-weight: 700;
     color: var(--text-strong);

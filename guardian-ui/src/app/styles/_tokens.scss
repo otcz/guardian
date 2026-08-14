@@ -10,47 +10,99 @@
    cuando tiene que compararle la cara a alguien.
    --------------------------------------------------------------------------- */
 
+/* ---------------------------------------------------------------------------
+   Paleta de marca. Son los ÚNICOS hex del proyecto: todo lo demás abajo se
+   deriva de acá, y ningún componente los usa directo — usa los semánticos.
+
+   Navy institucional y dorado: el conjunto es de casas fiscales militares, y
+   la identidad tiene que leerse como una credencial, no como una app de
+   consumo. El concepto es un escudo con castillo de tres torres y puerta
+   dorada — perímetro protegido con acceso controlado.
+   --------------------------------------------------------------------------- */
+:root {
+  --marca-navy-950: #0b1624;
+  --marca-navy-900: #0f1e30;
+  --marca-navy-800: #12233a;   /* primario de marca */
+  --marca-navy-700: #1b3555;
+  --marca-navy-600: #28496f;
+  --marca-navy-100: #dce4ee;
+
+  --marca-oro-700: #96701c;
+  --marca-oro-600: #b78722;    /* dorado sobre fondo CLARO (contraste AA) */
+  --marca-oro-500: #d9a62e;    /* acento de marca, sobre fondo OSCURO */
+  --marca-oro-400: #e2b95c;
+  --marca-oro-100: #faf1dc;
+
+  --marca-gris-50: #f7f8fa;
+  --marca-gris-100: #eef0f4;
+  --marca-gris-200: #e3e6eb;
+  --marca-gris-300: #c9ced6;
+  --marca-gris-500: #8a93a1;
+  --marca-gris-600: #5a6472;
+  --marca-gris-800: #2b3440;
+
+  --marca-verde-600: #1e7a46;
+  --marca-verde-100: #e1f3e8;
+  --marca-rojo-600: #b33a3a;
+  --marca-rojo-100: #f9e5e5;
+  --marca-ambar-600: #a66a00;
+  --marca-ambar-100: #fbf0da;
+}
+
 :root {
   /* Le dice al navegador de qué color es el fondo: los controles nativos, la
      barra de scroll y el cursor de texto se pintan acordes. Sin esto, en modo
      oscuro salen selectores blancos y una barra de scroll clara. */
   color-scheme: light;
 
-  --bg-base: #f4f6f8;
+  --bg-base: var(--marca-gris-50);
   --bg-surface: #ffffff;
-  --bg-soft: #eef1f5;
-  --bg-inverse: #10151c;
+  --bg-soft: var(--marca-gris-100);
+  --bg-inverse: var(--marca-navy-950);
 
-  --text-strong: #14181f;
-  --text-default: #39424e;
-  /* #5a6675 y no #6b7684: sube de 4.7:1 a ~6:1 sobre blanco. El residente
-     lee el detalle de una fila caminando y con sol. El valor oscuro NO se
-     toca: la garita de noche ya está calibrada. */
-  --text-muted: #5a6675;
+  --text-strong: #17202b;
+  --text-default: var(--marca-gris-800);
+  /* Gris 600 y no el 500 de la paleta: sube de ~3.4:1 a ~6:1 sobre blanco. El
+     residente lee el detalle de una fila caminando y con sol, así que el gris
+     claro de marca se queda para decoración, nunca para texto. El valor
+     oscuro NO se toca: la garita de noche ya está calibrada. */
+  --text-muted: var(--marca-gris-600);
   --text-inverse: #ffffff;
 
-  --border-default: #d9dfe6;
-  --border-strong: #b9c2cc;
+  --border-default: var(--marca-gris-200);
+  --border-strong: var(--marca-gris-300);
 
-  --accent: #1f6feb;
-  --accent-soft: #e8f0fe;
+  /* Sobre fondo claro la acción es el navy, no el dorado: el dorado 500 sobre
+     blanco no llega a 4.5:1 y sería ilegible en un botón. */
+  --accent: var(--marca-navy-800);
+  --accent-soft: var(--marca-navy-100);
+
+  /* El dorado es el ACENTO de marca, no la acción: filos, estado activo y el
+     anillo de foco. Sobre claro va el 600, que sí pasa AA. */
+  --oro: var(--marca-oro-600);
+  /* El mismo dorado, pero para lo que va sobre `--bg-inverse` — la cabecera de
+     la garita, que se voltea con el tema. Cuando el fondo de página es claro
+     esa franja es oscura, así que ahí el dorado puede ser el 500. */
+  --oro-inverso: var(--marca-oro-500);
 
   /* Verde y rojo del veredicto de la portería. Se leen a un metro. */
-  --ok: #1a7f52;
-  --ok-soft: #e4f5ec;
-  --deny: #c0362c;
-  --deny-soft: #fdeceb;
-  --warn: #b06f00;
-  --warn-soft: #fdf3e2;
+  --ok: var(--marca-verde-600);
+  --ok-soft: var(--marca-verde-100);
+  --deny: var(--marca-rojo-600);
+  --deny-soft: var(--marca-rojo-100);
+  --warn: var(--marca-ambar-600);
+  --warn-soft: var(--marca-ambar-100);
 
-  --shadow-card: 0 1px 2px rgba(16, 21, 28, 0.06), 0 2px 8px rgba(16, 21, 28, 0.04);
-  --shadow-flotante: 0 8px 24px rgba(16, 21, 28, 0.12);
-  --sombra-barra: inset 0 1px 0 var(--border-hairline), 0 -2px 12px rgba(16, 21, 28, 0.06);
-  --anillo-foco: var(--accent);
+  --shadow-card: 0 1px 2px rgba(11, 22, 36, 0.06), 0 2px 8px rgba(11, 22, 36, 0.05);
+  --shadow-flotante: 0 8px 24px rgba(11, 22, 36, 0.14);
+  --sombra-barra: inset 0 1px 0 var(--border-hairline), 0 -2px 12px rgba(11, 22, 36, 0.06);
+  /* Dorado y no el color de acción: sobre un botón navy el anillo navy no se
+     ve, y el foco tiene que distinguirse de lo que está enfocando. */
+  --anillo-foco: var(--oro);
   /* Separador de 1px real en pantallas retina, como el hairline nativo. */
-  --border-hairline: rgba(16, 21, 28, 0.08);
-  --overlay: rgba(16, 21, 28, 0.45);
-  --presionado: rgba(16, 21, 28, 0.05);
+  --border-hairline: rgba(11, 22, 36, 0.08);
+  --overlay: rgba(11, 22, 36, 0.5);
+  --presionado: rgba(11, 22, 36, 0.05);
 
   /* El QR va SIEMPRE sobre blanco, tambien en modo oscuro: un codigo
      invertido no escanea. Por eso este token NO cambia entre temas. */
@@ -82,6 +134,19 @@
   --t-lg: 1.1rem;
   --t-xl: 1.4rem;
   --t-2xl: 1.75rem;
+
+  /* Tres familias con un trabajo cada una. Las de sistema van de respaldo y
+     no de adorno: las fuentes se sirven desde Google y la garita puede
+     quedarse sin red, así que la aplicación tiene que verse bien igual.
+
+     - display: condensada, aire de señalética institucional. Títulos.
+     - body:    todo el texto de interfaz.
+     - mono:    datos que se comparan carácter a carácter — placa, documento,
+                hora, PIN. En una proporcional, 0/O y 1/l se confunden justo
+                cuando el guardia está cotejando una cédula. */
+  --fuente-display: 'Barlow Semi Condensed', system-ui, 'Segoe UI', sans-serif;
+  --fuente-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --fuente-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', Consolas, monospace;
 
   /* Area tactil minima. Debajo de 44px el dedo falla, y en la portería un
      toque fallido es una persona esperando más. */
@@ -122,22 +187,34 @@
 html.dark-mode {
   color-scheme: dark;
 
-  --bg-base: #0e1420;
-  --bg-surface: #161d2b;
-  --bg-soft: #1e2636;
-  --bg-inverse: #f4f6f8;
+  --bg-base: var(--marca-navy-950);
+  --bg-surface: var(--marca-navy-900);
+  --bg-soft: var(--marca-navy-800);
+  --bg-inverse: var(--marca-gris-50);
 
-  --text-strong: #f2f5f9;
-  --text-default: #c5cedb;
-  --text-muted: #8b97a8;
-  --text-inverse: #10151c;
+  --text-strong: #e9edf3;
+  --text-default: #a7b4c4;
+  --text-muted: #7c8a9c;
+  --text-inverse: var(--marca-navy-950);
 
-  --border-default: #2a3446;
-  --border-strong: #3b4761;
+  --border-default: #22344e;
+  --border-strong: #31496b;
 
-  --accent: #5b9bff;
-  --accent-soft: #1b2740;
+  /* Se invierte la regla de la marca: sobre navy el dorado SÍ pasa contraste
+     y es lo que manda, así que en oscuro el dorado pasa de acento a acción.
+     `--text-inverse` ya es oscuro acá, así que un botón queda dorado con
+     texto navy — legible y en marca sin tocar ningún componente. */
+  --accent: var(--marca-oro-500);
+  --accent-soft: var(--marca-navy-700);
+  --oro: var(--marca-oro-500);
+  /* Acá la franja invertida es CLARA, así que el dorado tiene que bajar dos
+     pasos para seguir leyéndose sobre ella. */
+  --oro-inverso: var(--marca-oro-700);
 
+  /* Estos NO salen de la paleta de marca a propósito. Son el veredicto de la
+     portería, que se lee de noche a un metro de distancia: el rojo apagado
+     de marca sirve para una pastilla en un reporte, no para decirle al
+     guardia que a esa persona no la deje entrar. */
   --ok: #45c78d;
   --ok-soft: #12291f;
   --deny: #ff6b5e;
@@ -148,8 +225,8 @@ html.dark-mode {
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.3);
   --shadow-flotante: 0 8px 24px rgba(0, 0, 0, 0.5);
   --sombra-barra: inset 0 1px 0 var(--border-hairline), 0 -2px 12px rgba(0, 0, 0, 0.4);
-  --anillo-foco: var(--accent);
+  --anillo-foco: var(--oro);
   --border-hairline: rgba(255, 255, 255, 0.08);
-  --overlay: rgba(0, 0, 0, 0.6);
+  --overlay: rgba(0, 0, 0, 0.65);
   --presionado: rgba(255, 255, 255, 0.06);
 }

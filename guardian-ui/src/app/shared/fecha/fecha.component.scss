@@ -140,7 +140,10 @@
   }
 
   &.elegido {
-    color: #fff;
+    /* El token y no un blanco fijo: en modo oscuro el color de acción es el
+       dorado de marca, y blanco sobre dorado no se lee. `--text-inverse` ya
+       es blanco en claro y navy en oscuro. */
+    color: var(--text-inverse);
     background: var(--accent);
     border-color: var(--accent);
     font-weight: 600;

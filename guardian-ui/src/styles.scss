@@ -16,7 +16,7 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--fuente-body);
   background: var(--bg-base);
   color: var(--text-strong);
   -webkit-font-smoothing: antialiased;
@@ -68,10 +68,22 @@ button {
   color: inherit;
 }
 
+/* Los títulos van en la condensada de marca: es lo que le da a la aplicación
+   el aire de señalética institucional y no de panel genérico. El texto de
+   interfaz NO la usa — condensada en párrafo se lee peor. */
 h1, h2, h3, h4 {
   margin: 0;
+  font-family: var(--fuente-display);
   font-weight: 600;
+  letter-spacing: 0.01em;
   color: var(--text-strong);
+}
+
+/* Datos que se comparan carácter a carácter: placa, documento, hora, PIN.
+   Ver por qué en el token --fuente-mono. */
+.gd-dato {
+  font-family: var(--fuente-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 a {
@@ -120,6 +132,72 @@ a {
 .gd-muted {
   color: var(--text-muted);
   font-size: var(--t-sm);
+}
+
+/* ---------------------------------------------------------------------------
+   Emblema de marca — el escudo de GUARDIAN donde antes iba `pi pi-shield`.
+
+   Va por `mask` sobre `currentColor` y no como <img>: así toma el color del
+   texto de quien lo contiene, y cada pantalla ya tiene resuelto qué color se
+   lee sobre su fondo. Con dos archivos —uno dorado y uno navy— habría que
+   cambiar el `src` según el tema desde TypeScript.
+
+   `height: 1em` para que herede el `font-size` que cada sitio ya le daba al
+   icono anterior: ningún componente necesita tocar su SCSS.
+   --------------------------------------------------------------------------- */
+.gd-emblema {
+  display: inline-block;
+  height: 1em;
+  /* El escudo es más alto que ancho; sin esto saldría cuadrado y aplastado. */
+  aspect-ratio: 300 / 375;
+  flex: 0 0 auto;
+  vertical-align: -0.14em;
+  background: currentColor;
+  -webkit-mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
+  mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
+}
+
+/* ---------------------------------------------------------------------------
+   Marca de agua — el emblema al fondo de un panel.
+
+   Va por `mask` y no por `background-image` para que el color salga del tema:
+   el mismo SVG se pinta navy sobre claro y dorado sobre oscuro sin tener dos
+   archivos.
+
+   Regla de uso: UNA por vista, y nunca detrás de una tabla ni de una lista
+   densa. Es un detalle de identidad en un panel con aire; encima de datos es
+   ruido que hay que leer a través.
+   --------------------------------------------------------------------------- */
+.gd-watermark {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: -28px;
+    bottom: -36px;
+    width: 190px;
+    height: 238px;
+    background: var(--marca-navy-800);
+    opacity: 0.06;
+    -webkit-mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
+    mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* El contenido por encima del emblema, sin que cada hijo tenga que pedirlo. */
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+html.dark-mode .gd-watermark::after {
+  background: var(--marca-oro-500);
+  opacity: 0.07;
 }
 
 /* ---------------------------------------------------------------------------
@@ -276,7 +354,7 @@ a {
    queda visiblemente descuadrado dentro de su caja.
    --------------------------------------------------------------------------- */
 input.pin {
-  font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+  font-family: var(--fuente-mono);
   font-size: var(--t-xl);
   font-weight: 700;
   letter-spacing: 0.6em;

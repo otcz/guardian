@@ -542,7 +542,7 @@ section {
   border-radius: var(--r-md);
 
   code {
-    font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+    font-family: var(--fuente-mono);
     font-size: var(--t-xs);
     color: var(--text-strong);
     word-break: break-all;

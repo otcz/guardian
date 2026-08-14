@@ -26,11 +26,16 @@
   height: 100dvh;
 }
 
+/* El filo dorado bajo la marca es la firma de la identidad: la misma línea
+   que lleva la cabecera en el resto del sistema, acá en horizontal porque el
+   cascarón del back-office es una barra lateral y no una superior. */
 .marca {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  padding: 0.25rem 0.5rem 1rem;
+  margin-bottom: 0.75rem;
+  padding: 0.25rem 0.5rem 0.85rem;
+  border-bottom: 2px solid var(--oro);
 
   i {
     font-size: 1.4rem;
@@ -43,6 +48,7 @@
     line-height: 1.15;
 
     strong {
+      font-family: var(--fuente-display);
       letter-spacing: 0.08em;
       color: var(--text-strong);
     }

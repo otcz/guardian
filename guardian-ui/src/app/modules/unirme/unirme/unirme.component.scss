@@ -147,7 +147,7 @@ form > .fila {
 /* El documento va suelto en la nota, no en su propia tarjeta: ya no es LA
    credencial de la pantalla, es un dato de referencia para más tarde. */
 .nota code {
-  font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
+  font-family: var(--fuente-mono);
   font-weight: 700;
   color: var(--text-strong);
   -webkit-user-select: all;

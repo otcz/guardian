@@ -2,8 +2,8 @@
   "name": "GUARDIAN — Control de acceso",
   "short_name": "GUARDIAN",
   "lang": "es",
-  "theme_color": "#f4f6f8",
-  "background_color": "#f4f6f8",
+  "theme_color": "#12233a",
+  "background_color": "#0b1624",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",
@@ -35,6 +35,12 @@
     {
       "src": "icons/icon-152x152.png",
       "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon-180x180.png",
+      "sizes": "180x180",
       "type": "image/png",
       "purpose": "maskable any"
     },
