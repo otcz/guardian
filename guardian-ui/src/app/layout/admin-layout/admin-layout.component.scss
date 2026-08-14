@@ -262,58 +262,107 @@ main {
 }
 
 /* En pantallas angostas el sidebar pasa a barra superior con scroll. */
+/* La cabecera del teléfono no existe en escritorio: ahí la barra lateral
+   está siempre a la vista y no hay nada que abrir. */
+.barra-movil {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Teléfono: la barra lateral pasa a ser un CAJÓN.
+
+   Antes se convertía en una fila horizontal con desplazamiento: nueve
+   secciones en fila obligaban a arrastrar la cabecera para encontrar
+   cualquiera, y la que uno buscaba casi nunca estaba a la vista. Un cajón
+   que se abre y se cierra es lo que hace una aplicación nativa, y de paso
+   le devuelve el ancho completo al contenido.
+   --------------------------------------------------------------------------- */
 @media (max-width: 820px) {
   .oficina {
     flex-direction: column;
   }
 
-  .lateral {
-    flex: 0 0 auto;
-    flex-direction: row;
+  .barra-movil {
+    display: flex;
     align-items: center;
-    gap: 0.5rem;
-    height: auto;
-    position: static;
-    padding: 0.5rem 0.75rem;
-    border-right: none;
-    border-bottom: 1px solid var(--border-default);
-    overflow-x: auto;
-  }
+    gap: var(--e-3);
+    position: sticky;
+    top: 0;
+    z-index: var(--z-cabecera);
+    padding: calc(var(--seguro-arriba) + var(--e-2)) var(--e-4) var(--e-2);
+    background: var(--panel-marca-fondo);
+    color: var(--panel-marca-texto);
+    border-bottom: 2px solid var(--oro-inverso);
 
-  /* En el teléfono la barra lateral es una fila: el filo dorado de la marca
-     dejaría un subrayado suelto bajo el logo en vez de separar dos zonas. */
-  .marca {
-    margin-bottom: 0;
-    padding: 0;
-    border-bottom: none;
+    .gd-emblema {
+      font-size: 1.5rem;
+      color: var(--marca-oro-500);
+    }
 
-    .textos small {
-      display: none;
+    strong {
+      font-family: var(--fuente-display);
+      letter-spacing: 0.08em;
     }
   }
 
-  .secciones,
-  .atajos {
-    flex-direction: row;
-    margin: 0;
-    padding: 0;
+  .hamburguesa {
+    display: grid;
+    place-items: center;
+    width: var(--tactil);
+    height: var(--tactil);
+    /* Compensa el relleno propio del botón para que el icono quede alineado
+       con el borde del contenido y no flotando hacia dentro. */
+    margin-left: calc(var(--e-3) * -1);
+    color: var(--panel-marca-texto);
+    background: none;
     border: none;
+    cursor: pointer;
 
-    a,
-    button {
-      width: auto;
-      border-left: none;
-      white-space: nowrap;
+    i {
+      font-size: 1.35rem;
     }
   }
 
-  .pie {
-    margin: 0 0 0 auto;
-    padding: 0;
-    border: none;
+  .aviso-movil {
+    margin-left: auto;
+    min-width: 22px;
+    padding: 1px 7px;
+    text-align: center;
+    font-size: var(--t-xs);
+    font-weight: 700;
+    color: var(--marca-navy-950);
+    background: var(--marca-oro-500);
+    border-radius: var(--r-full);
+  }
 
-    .quien {
-      display: none;
+  .velo-menu {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-hoja);
+    background: var(--overlay);
+    animation: gd-velo var(--dur-media) var(--curva-entrada);
+  }
+
+  .lateral {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: calc(var(--z-hoja) + 1);
+    flex: 0 0 auto;
+    width: min(80vw, 290px);
+    height: 100dvh;
+    padding: calc(var(--seguro-arriba) + var(--e-4)) var(--e-3)
+             calc(var(--seguro-abajo) + var(--e-4));
+    border-right: 1px solid var(--border-default);
+    overflow-y: auto;
+    /* Cerrado vive fuera de la pantalla, no oculto con display: así entra y
+       sale deslizándose en vez de aparecer de golpe. */
+    transform: translateX(-100%);
+    transition: transform var(--dur-media) var(--curva-estandar);
+
+    &.abierta {
+      transform: translateX(0);
     }
   }
 }

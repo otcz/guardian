@@ -1,5 +1,26 @@
 <div class="oficina">
-  <aside class="lateral">
+
+  <!-- Solo en el teléfono. En escritorio la barra lateral está siempre a la
+       vista y esta cabecera no se dibuja. -->
+  <header class="barra-movil">
+    <button type="button" class="hamburguesa" (click)="menuAbierto = true"
+            aria-label="Abrir menú">
+      <i class="pi pi-bars"></i>
+    </button>
+    <i class="gd-emblema" aria-hidden="true"></i>
+    <strong>GUARDIAN</strong>
+    <!-- El aviso de solicitudes viaja acá: con el menú cerrado, el número
+         que vive en la sección quedaría invisible justo cuando importa. -->
+    <span class="aviso-movil" *ngIf="solicitudesPendientes">
+      {{ solicitudesPendientes }}
+    </span>
+  </header>
+
+  <!-- Tocar fuera cierra, que es como se cierra un cajón en cualquier
+       aplicación. Sin él solo quedaría el botón, y nadie lo busca. -->
+  <div class="velo-menu" *ngIf="menuAbierto" (click)="menuAbierto = false"></div>
+
+  <aside class="lateral" [class.abierta]="menuAbierto">
     <div class="marca">
       <i class="gd-emblema" aria-hidden="true"></i>
       <div class="textos">

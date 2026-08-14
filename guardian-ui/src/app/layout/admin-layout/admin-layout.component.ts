@@ -77,8 +77,20 @@ export class AdminLayoutComponent implements OnInit {
       .subscribe(() => this.contarSolicitudes());
   }
 
+  /**
+   * El cajón lateral en el teléfono. En escritorio no se usa: ahí la barra
+   * está siempre a la vista.
+   */
+  menuAbierto = false;
+
   ngOnInit(): void {
     this.contarSolicitudes();
+
+    // Navegar cierra el cajón. Sin esto, tocar una sección deja el menú
+    // abierto encima de la pantalla que se acaba de pedir.
+    this.router.events
+      .pipe(filter(evento => evento instanceof NavigationEnd))
+      .subscribe(() => (this.menuAbierto = false));
   }
 
   private contarSolicitudes(): void {

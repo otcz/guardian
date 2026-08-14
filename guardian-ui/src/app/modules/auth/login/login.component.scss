@@ -31,41 +31,30 @@
      lateral del panel de administración. */
   border-bottom: 2px solid var(--marca-oro-500);
 
-  /* El escudo detrás del nombre, a media opacidad: se reconoce sin pelear
-     con la palabra que tiene encima. El alto sale del panel y no de un
-     literal, así encoge solo en la franja del móvil y crece en la columna
-     del escritorio sin un @media aparte. */
-  &::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    height: min(66%, 260px);
-    aspect-ratio: 300 / 375;
-    transform: translate(-50%, -50%);
-    background: var(--marca-oro-500);
-    /* Bajo, no medio: el nombre cae justo sobre las torres del castillo, y a
-       más opacidad las almenas se meten entre las letras. Al 10% el escudo
-       es textura de fondo y la palabra se lee limpia encima. */
-    opacity: 0.1;
-    -webkit-mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
-    mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
-    pointer-events: none;
-    z-index: 0;
-  }
 }
 
+/* Escudo arriba y nombre debajo. Apilados no se pisan y el bloque se lee de
+   un golpe; con el nombre encima del escudo, las almenas del castillo se
+   metían entre las letras. */
 .identidad {
-  position: relative;
-  z-index: 1;
-  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-3);
   text-align: center;
-  font-size: clamp(1.7rem, 6vw, 2.3rem);
-  letter-spacing: 0.16em;
-  /* El nombre va sobre el escudo: sin un poco de peso extra, la silueta de
-     atrás le quita definición a las letras. */
-  font-weight: 700;
-  color: var(--panel-marca-texto);
+
+  i {
+    /* El emblema hereda el font-size — ver .gd-emblema en styles.scss. */
+    font-size: clamp(3rem, 9vw, 4.6rem);
+    color: var(--marca-oro-500);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(1.6rem, 5.5vw, 2.2rem);
+    letter-spacing: 0.16em;
+    color: var(--panel-marca-texto);
+  }
 }
 
 /* En el teléfono el formulario arranca arriba y no centrado: centrado dejaba
