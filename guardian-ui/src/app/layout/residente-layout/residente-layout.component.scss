@@ -17,6 +17,9 @@
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
+  /* Ancla del escudo del fondo: sin esto su `position: absolute` se cuelga
+     del viewport y se va a la esquina de la pantalla, no a la del panel. */
+  position: relative;
   max-width: var(--ancho-panel);
   margin: 0 auto;
   padding-top: var(--seguro-arriba);
@@ -173,13 +176,19 @@ main {
    --------------------------------------------------------------------------- */
 .panel::after {
   content: '';
-  position: fixed;
-  right: -12%;
-  bottom: calc(var(--alto-tabbar) - 6%);
-  width: min(78vw, 420px);
+  /* Absoluto y no fijo: `.panel` ya no se desplaza —lo hace `main`—, así que
+     ancla igual, y así queda dentro de la caja del panel en vez de contra el
+     borde de la pantalla, que en un móvil ancho lo mandaba lejos del
+     contenido. */
+  position: absolute;
+  right: -6%;
+  bottom: calc(var(--alto-tabbar) + var(--e-4));
+  width: min(88%, 400px);
   aspect-ratio: 300 / 375;
   background: var(--marca-oro-500);
-  opacity: 0.055;
+  /* Al 5.5% sobre este navy no se veía nada: el dorado necesita más cuerpo
+     sobre un fondo oscuro que sobre el blanco del login. */
+  opacity: 0.09;
   -webkit-mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
   mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
   pointer-events: none;
