@@ -17,7 +17,7 @@
 
   <p class="gd-muted" *ngIf="cargando">Cargando…</p>
 
-  <table class="tabla gd-card" *ngIf="!cargando">
+  <table class="tabla tabla--tarjetas gd-card" *ngIf="!cargando">
     <thead>
       <tr>
         <th>Fecha</th>
@@ -51,13 +51,13 @@
     </thead>
     <tbody>
       <tr *ngFor="let evento of eventos">
-        <td>{{ evento.fechaEvento | date:'dd/MM HH:mm:ss' }}</td>
-        <td class="fuerte">
+        <td data-etiqueta="Fecha">{{ evento.fechaEvento | date:'dd/MM HH:mm:ss' }}</td>
+        <td data-etiqueta="Persona" class="fuerte">
           {{ evento.personaNombre ?? 'Desconocido' }}
           <span class="marca-invitado" *ngIf="evento.invitado">Invitado</span>
         </td>
-        <td>{{ evento.casaIdentificador ?? '—' }}</td>
-        <td>
+        <td data-etiqueta="Casa">{{ evento.casaIdentificador ?? '—' }}</td>
+        <td data-etiqueta="Movimiento">
           <span class="movimiento" [class.entrada]="evento.sentido === 'E'"
                 [class.salida]="evento.sentido === 'S'">
             <i class="pi" [ngClass]="evento.sentido === 'E' ? 'pi-sign-in' : 'pi-sign-out'"></i>
@@ -65,13 +65,13 @@
             · {{ evento.modo === 'VEHICULO' ? 'Vehículo' : 'A pie' }}
           </span>
         </td>
-        <td>{{ evento.vehiculoPlaca ?? '—' }}</td>
-        <td>
+        <td data-etiqueta="Vehículo">{{ evento.vehiculoPlaca ?? '—' }}</td>
+        <td data-etiqueta="Resultado">
           <span class="pastilla" [class.si]="permitido(evento)" [class.no]="!permitido(evento)">
             {{ permitido(evento) ? 'Permitido' : (evento.motivoDenegacion | motivoAcceso: motivos) }}
           </span>
         </td>
-        <td>{{ evento.guardiaNombre ?? '—' }}</td>
+        <td data-etiqueta="Guardia">{{ evento.guardiaNombre ?? '—' }}</td>
       </tr>
 
       <!-- Se distinguen los dos vacíos: sin filtro es que no ha pasado nadie;

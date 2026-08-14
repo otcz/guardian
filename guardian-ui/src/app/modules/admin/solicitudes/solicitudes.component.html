@@ -18,7 +18,7 @@
       <span class="cuantas">{{ casas.length }}</span>
     </h2>
 
-    <table class="tabla gd-card">
+    <table class="tabla tabla--tarjetas gd-card">
       <thead>
         <tr>
           <th>Quién</th>
@@ -31,16 +31,16 @@
       </thead>
       <tbody>
         <tr *ngFor="let s of casas">
-          <td class="fuerte">{{ s.nombreCompleto }}</td>
-          <td>{{ s.documento }}</td>
-          <td>
+          <td data-etiqueta="Quién" class="fuerte">{{ s.nombreCompleto }}</td>
+          <td data-etiqueta="Documento">{{ s.documento }}</td>
+          <td data-etiqueta="Casa">
             {{ s.casaIdentificador }}
             <!-- Que la casa esté vacía cambia lo que se está aprobando: esta
                  persona quedaría al mando de ese hogar. -->
             <small class="sin-titular" *ngIf="!s.casaConTitular">sin titular todavía</small>
           </td>
-          <td>{{ s.parentesco }}</td>
-          <td>{{ s.fechaSolicitud | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td data-etiqueta="Entra como">{{ s.parentesco }}</td>
+          <td data-etiqueta="Pedida">{{ s.fechaSolicitud | date:'dd/MM/yyyy HH:mm' }}</td>
           <td class="derecha acciones">
             <button type="button" class="alterno" [disabled]="resolviendo"
                     (click)="abrirRechazoCasa(s)">
@@ -65,7 +65,7 @@
       <span class="cuantas">{{ hogar.length }}</span>
     </h2>
 
-    <table class="tabla gd-card">
+    <table class="tabla tabla--tarjetas gd-card">
       <thead>
         <tr>
           <th>Quién</th>
@@ -79,12 +79,12 @@
       </thead>
       <tbody>
         <tr *ngFor="let h of hogar">
-          <td class="fuerte">{{ h.nombreCompleto }}</td>
-          <td>{{ h.documento }}</td>
-          <td>{{ h.casaIdentificador }}</td>
-          <td>{{ h.parentesco }}</td>
-          <td>{{ h.titularNombre }}</td>
-          <td>{{ h.fechaSolicitud | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td data-etiqueta="Quién" class="fuerte">{{ h.nombreCompleto }}</td>
+          <td data-etiqueta="Documento">{{ h.documento }}</td>
+          <td data-etiqueta="Casa">{{ h.casaIdentificador }}</td>
+          <td data-etiqueta="Entra como">{{ h.parentesco }}</td>
+          <td data-etiqueta="Titular">{{ h.titularNombre }}</td>
+          <td data-etiqueta="Pedida">{{ h.fechaSolicitud | date:'dd/MM/yyyy HH:mm' }}</td>
           <td class="derecha acciones">
             <button type="button" class="alterno" [disabled]="resolviendo"
                     (click)="abrirRechazoHogar(h)">
@@ -109,7 +109,7 @@
       <span class="cuantas">{{ vehiculos.length }}</span>
     </h2>
 
-    <table class="tabla gd-card">
+    <table class="tabla tabla--tarjetas gd-card">
       <thead>
         <tr>
           <th>Placa</th>
@@ -122,18 +122,18 @@
       </thead>
       <tbody>
         <tr *ngFor="let v of vehiculos">
-          <td class="fuerte placa">{{ v.placa }}</td>
-          <td>
+          <td data-etiqueta="Placa" class="fuerte placa">{{ v.placa }}</td>
+          <td data-etiqueta="Vehículo">
             {{ v.tipoNombre }}
             <ng-container *ngIf="v.marcaNombre"> · {{ v.marcaNombre }}</ng-container>
             <ng-container *ngIf="v.colorNombre"> · {{ v.colorNombre }}</ng-container>
           </td>
-          <td>{{ v.casaIdentificador }}</td>
-          <td>
+          <td data-etiqueta="Casa">{{ v.casaIdentificador }}</td>
+          <td data-etiqueta="Lo pidió">
             {{ v.solicitante }}
             <small class="quien">{{ v.documento }}</small>
           </td>
-          <td>{{ v.fechaSolicitud | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td data-etiqueta="Pedida">{{ v.fechaSolicitud | date:'dd/MM/yyyy HH:mm' }}</td>
           <td class="derecha acciones">
             <button type="button" class="alterno" [disabled]="resolviendo"
                     (click)="abrirRechazoVehiculo(v)">
@@ -158,7 +158,7 @@
       <span class="cuantas">{{ invitaciones.length }}</span>
     </h2>
 
-    <table class="tabla gd-card">
+    <table class="tabla tabla--tarjetas gd-card">
       <thead>
         <tr>
           <th>Invitado</th>
@@ -171,11 +171,11 @@
       </thead>
       <tbody>
         <tr *ngFor="let i of invitaciones">
-          <td class="fuerte">{{ i.nombreInvitado }}</td>
-          <td>{{ i.documentoInvitado }}</td>
-          <td>{{ i.casaIdentificador }}</td>
-          <td>{{ i.anfitrionNombre }}</td>
-          <td>
+          <td data-etiqueta="Invitado" class="fuerte">{{ i.nombreInvitado }}</td>
+          <td data-etiqueta="Documento">{{ i.documentoInvitado }}</td>
+          <td data-etiqueta="Casa">{{ i.casaIdentificador }}</td>
+          <td data-etiqueta="Anfitrión">{{ i.anfitrionNombre }}</td>
+          <td data-etiqueta="Vigencia">
             {{ i.vigenciaDesde | date:'dd/MM HH:mm' }}
             –
             {{ i.vigenciaHasta | date:'dd/MM HH:mm' }}

@@ -69,7 +69,7 @@
 
   <p class="gd-muted" *ngIf="cargando">Cargando…</p>
 
-  <table class="tabla gd-card" *ngIf="!cargando">
+  <table class="tabla tabla--tarjetas gd-card" *ngIf="!cargando">
     <thead>
       <tr>
         <th>Placa</th>
@@ -98,12 +98,12 @@
     </thead>
     <tbody>
       <tr *ngFor="let vehiculo of visibles" [class.inactiva]="!activo(vehiculo)">
-        <td class="fuerte">{{ vehiculo.placa }}</td>
-        <td>{{ vehiculo.casaIdentificador }}</td>
-        <td>{{ vehiculo.tipoNombre ?? vehiculo.tipo }}</td>
-        <td>{{ vehiculo.marcaNombre ?? '—' }}</td>
-        <td>{{ vehiculo.colorNombre ?? '—' }}</td>
-        <td>
+        <td data-etiqueta="Placa" class="fuerte">{{ vehiculo.placa }}</td>
+        <td data-etiqueta="Casa">{{ vehiculo.casaIdentificador }}</td>
+        <td data-etiqueta="Tipo">{{ vehiculo.tipoNombre ?? vehiculo.tipo }}</td>
+        <td data-etiqueta="Marca">{{ vehiculo.marcaNombre ?? '—' }}</td>
+        <td data-etiqueta="Color">{{ vehiculo.colorNombre ?? '—' }}</td>
+        <td data-etiqueta="Estado">
           <span class="pastilla" [class.si]="operativo(vehiculo)" [class.no]="!operativo(vehiculo)"
                 [class.candado]="bloqueado(vehiculo)"
                 [attr.tabindex]="bloqueado(vehiculo) ? 0 : null"

@@ -104,7 +104,7 @@
         </div>
       </section>
 
-      <table class="tabla gd-card">
+      <table class="tabla tabla--tarjetas gd-card">
         <thead>
           <tr>
             <th>Sede</th>
@@ -117,14 +117,14 @@
         </thead>
         <tbody>
           <tr *ngFor="let sede of sedes" [class.inactiva]="!activa(sede)">
-            <td>
+            <td data-etiqueta="Sede">
               <span class="nombre-sede">{{ sede.nombre }}</span>
               <span class="datos-sede" *ngIf="sede.direccion">{{ sede.direccion }}</span>
             </td>
-            <td class="numero">{{ sede.casas }}</td>
-            <td class="numero">{{ sede.personas }}</td>
-            <td class="numero">{{ sede.usuarios }}</td>
-            <td>
+            <td data-etiqueta="Casas" class="numero">{{ sede.casas }}</td>
+            <td data-etiqueta="Personas" class="numero">{{ sede.personas }}</td>
+            <td data-etiqueta="Cuentas" class="numero">{{ sede.usuarios }}</td>
+            <td data-etiqueta="Estado">
               <span class="pastilla" [class.si]="activa(sede)" [class.no]="!activa(sede)">
                 {{ activa(sede) ? 'Activa' : 'Inactiva' }}
               </span>

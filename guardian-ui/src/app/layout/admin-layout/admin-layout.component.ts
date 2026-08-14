@@ -83,6 +83,21 @@ export class AdminLayoutComponent implements OnInit {
    */
   menuAbierto = false;
 
+  /* La constante se declara ANTES del campo que la usa: los estáticos se
+     inicializan en orden y al revés queda indefinida al leerla. */
+  private static readonly CLAVE_PLEGADA = 'guardian.menu-plegado';
+
+  /**
+   * Barra plegada a solo iconos, en escritorio. Se recuerda entre sesiones:
+   * quien trabaja con la tabla ancha la pliega una vez, no en cada entrada.
+   */
+  plegada = localStorage.getItem(AdminLayoutComponent.CLAVE_PLEGADA) === 'S';
+
+  alternarPlegado(): void {
+    this.plegada = !this.plegada;
+    localStorage.setItem(AdminLayoutComponent.CLAVE_PLEGADA, this.plegada ? 'S' : 'N');
+  }
+
   ngOnInit(): void {
     this.contarSolicitudes();
 

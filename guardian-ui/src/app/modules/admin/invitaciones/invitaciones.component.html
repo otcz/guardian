@@ -19,7 +19,7 @@
 
   <p class="gd-muted" *ngIf="cargando">Cargando…</p>
 
-  <table class="tabla gd-card" *ngIf="!cargando">
+  <table class="tabla tabla--tarjetas gd-card" *ngIf="!cargando">
     <thead>
       <tr>
         <th>Invitado</th>
@@ -47,13 +47,13 @@
     <tbody>
       <tr *ngFor="let invitacion of visibles"
           [class.inactiva]="!revocable(invitacion)">
-        <td class="fuerte">{{ invitacion.nombreInvitado }}</td>
-        <td>{{ invitacion.documentoInvitado }}</td>
-        <td>{{ invitacion.casaIdentificador }}</td>
-        <td>{{ invitacion.anfitrionNombre }}</td>
-        <td>{{ invitacion.vigenciaDesde | rangoFechas:invitacion.vigenciaHasta }}</td>
-        <td>{{ invitacion.placa ?? '—' }}</td>
-        <td>
+        <td data-etiqueta="Invitado" class="fuerte">{{ invitacion.nombreInvitado }}</td>
+        <td data-etiqueta="Documento">{{ invitacion.documentoInvitado }}</td>
+        <td data-etiqueta="Casa">{{ invitacion.casaIdentificador }}</td>
+        <td data-etiqueta="Anfitrión">{{ invitacion.anfitrionNombre }}</td>
+        <td data-etiqueta="Vigencia">{{ invitacion.vigenciaDesde | rangoFechas:invitacion.vigenciaHasta }}</td>
+        <td data-etiqueta="Placa">{{ invitacion.placa ?? '—' }}</td>
+        <td data-etiqueta="Estado">
           <span class="pastilla"
                 [class.si]="invitacion.estado === 'VIGENTE'"
                 [class.no]="!revocable(invitacion)">

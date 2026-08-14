@@ -45,7 +45,7 @@
 
   <p class="gd-muted" *ngIf="cargando">Cargando…</p>
 
-  <table class="tabla gd-card" *ngIf="!cargando">
+  <table class="tabla tabla--tarjetas gd-card" *ngIf="!cargando">
     <thead>
       <tr>
         <th>Portería</th>
@@ -59,9 +59,9 @@
     </thead>
     <tbody>
       <tr *ngFor="let porteria of porterias" [class.inactiva]="!activa(porteria)">
-        <td class="fuerte">{{ porteria.nombre }}</td>
-        <td>{{ porteria.direccion || '—' }}</td>
-        <td>
+        <td data-etiqueta="Portería" class="fuerte">{{ porteria.nombre }}</td>
+        <td data-etiqueta="Dirección">{{ porteria.direccion || '—' }}</td>
+        <td data-etiqueta="Vehículos">
           <i class="pi marca-vehiculo"
              [ngClass]="permiteVehiculos(porteria) ? 'pi-car' : 'pi-user'"
              [pTooltip]="permiteVehiculos(porteria) ? 'Entran vehículos' : 'Solo a pie'"
@@ -70,7 +70,7 @@
         <!-- La celda ES el botón: el número y la acción de cambiarlo son la
              misma cosa, y un icono aparte en la columna de acciones obligaría
              a buscar cuál de los tres abre esto. -->
-        <td>
+        <td data-etiqueta="Guardias">
           <button type="button" class="guardias" (click)="abrirGuardias(porteria)"
                   [attr.aria-label]="'Guardias de ' + porteria.nombre"
                   pTooltip="Asignar guardias" tooltipPosition="top">
@@ -79,8 +79,8 @@
             <span class="ninguno" *ngIf="!porteria.guardias">Sin asignar</span>
           </button>
         </td>
-        <td>{{ porteria.registros }}</td>
-        <td>
+        <td data-etiqueta="Registros">{{ porteria.registros }}</td>
+        <td data-etiqueta="Estado">
           <span class="pastilla" [class.si]="activa(porteria)" [class.no]="!activa(porteria)">
             {{ activa(porteria) ? 'Habilitada' : 'Deshabilitada' }}
           </span>

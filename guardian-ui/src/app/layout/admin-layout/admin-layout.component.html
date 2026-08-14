@@ -20,7 +20,7 @@
        aplicación. Sin él solo quedaría el botón, y nadie lo busca. -->
   <div class="velo-menu" *ngIf="menuAbierto" (click)="menuAbierto = false"></div>
 
-  <aside class="lateral" [class.abierta]="menuAbierto">
+  <aside class="lateral" [class.abierta]="menuAbierto" [class.plegada]="plegada">
     <div class="marca">
       <i class="gd-emblema" aria-hidden="true"></i>
       <div class="textos">
@@ -28,6 +28,15 @@
         <small>{{ sesion?.sedeNombre || 'Administración' }}</small>
       </div>
     </div>
+
+    <!-- Plegar es de escritorio: en el teléfono la barra ya se esconde
+         entera, y un botón para encogerla dentro del cajón no significa
+         nada. -->
+    <button type="button" class="plegar" (click)="alternarPlegado()"
+            [attr.aria-label]="plegada ? 'Expandir el menú' : 'Plegar el menú'"
+            [pTooltip]="plegada ? 'Expandir' : 'Plegar'" tooltipPosition="right">
+      <i class="pi" [ngClass]="plegada ? 'pi-angle-double-right' : 'pi-angle-double-left'"></i>
+    </button>
 
     <nav class="secciones">
       <a *ngFor="let seccion of secciones"

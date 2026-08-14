@@ -269,6 +269,80 @@ main {
 }
 
 /* ---------------------------------------------------------------------------
+   Escritorio: la barra se pliega a solo iconos.
+
+   No se esconde del todo a propósito. Sin ella no quedaría ninguna forma de
+   navegar y habría que agregar un botón flotante; plegada a iconos se sigue
+   pudiendo saltar de sección y la tabla recupera 160px de ancho, que es para
+   lo que uno la pliega.
+   --------------------------------------------------------------------------- */
+@media (min-width: 821px) {
+  .plegar {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-height: 32px;
+    margin-bottom: var(--e-2);
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: color var(--transicion), background var(--transicion);
+
+    @media (hover: hover) {
+      &:hover {
+        color: var(--text-strong);
+        background: var(--bg-soft);
+      }
+    }
+  }
+
+  .lateral.plegada {
+    flex-basis: 68px;
+    align-items: center;
+
+    /* Los rótulos se van; los iconos se quedan y se centran. El `title` de
+       cada enlace lo pone el tooltip que ya traían. */
+    .marca .textos,
+    .secciones span,
+    .atajos span,
+    .pie .quien {
+      display: none;
+    }
+
+    .marca {
+      justify-content: center;
+      padding-inline: 0;
+    }
+
+    .secciones a,
+    .atajos a,
+    .atajos button {
+      justify-content: center;
+      padding-inline: 0;
+    }
+
+    /* El aviso de solicitudes no cabe al lado del texto porque ya no hay
+       texto: se monta sobre el icono, como una insignia. */
+    .secciones a .aviso {
+      position: absolute;
+      top: 2px;
+      right: 10px;
+      margin: 0;
+    }
+
+    .secciones a {
+      position: relative;
+    }
+
+    .pie {
+      justify-content: center;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
    Teléfono: la barra lateral pasa a ser un CAJÓN.
 
    Antes se convertía en una fila horizontal con desplazamiento: nueve
@@ -280,6 +354,11 @@ main {
 @media (max-width: 820px) {
   .oficina {
     flex-direction: column;
+  }
+
+  /* En el teléfono el cajón se esconde entero: encogerlo no significa nada. */
+  .plegar {
+    display: none;
   }
 
   .barra-movil {
