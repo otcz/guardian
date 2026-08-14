@@ -328,6 +328,13 @@
       }
     }
 
+    /* Una celda SIN rótulo que además no es la de acciones no tiene lugar en
+       una ficha: la foto de la persona era una columna decorativa de la tabla
+       y acá quedaba como un renglón mudo con una silueta suelta arriba. */
+    td:not([data-etiqueta]):not(.acciones) {
+      display: none;
+    }
+
     /* Las acciones ocupan su propia línea, centradas: al extremo derecho de
        una tarjeta angosta quedan amontonadas contra el borde. */
     .acciones {

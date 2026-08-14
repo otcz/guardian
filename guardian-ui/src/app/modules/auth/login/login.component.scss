@@ -157,6 +157,14 @@
     transform: translate(-50%, -50%);
     opacity: 0.13;
   }
+
+  /* Los campos dejan pasar el fondo. Con relleno opaco encima, el escudo se
+     partía en pedazos —un trozo entre Usuario y PIN, otro debajo— y eso no
+     se lee como marca de agua sino como algo mal dibujado. Sin relleno, el
+     escudo pasa entero por detrás y el campo lo sigue delimitando su borde. */
+  .campo input {
+    background: transparent;
+  }
 }
 
 .campo {
