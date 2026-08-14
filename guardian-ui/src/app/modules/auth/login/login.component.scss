@@ -135,6 +135,20 @@
     place-items: center;
   }
 
+  /* NADA de marca de agua en el lado del formulario.
+
+     En escritorio la banda de la izquierda ya lleva el escudo entero,
+     grande y centrado. El segundo, el de `gd-watermark`, se anclaba
+     sangrando por la esquina inferior derecha y quedaba cortado por dos
+     bordes a la vez: una figura partida en la esquina, que es exactamente
+     lo que se lee como torcido. Un emblema por pantalla, completo.
+
+     En el teléfono sí se queda: ahí no hay banda lateral y el escudo va
+     detrás de los campos a propósito —ver el bloque de abajo—. */
+  .lado-forma.gd-watermark::after {
+    display: none;
+  }
+
   /* La marca crece con la columna. Con el tope del móvil, un escudo de 74px
      en un panel de casi mil de ancho se ve perdido en el medio, y eso se lee
      como composición descuidada aunque esté centrado al píxel. */
