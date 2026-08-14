@@ -21,6 +21,10 @@
   place-items: center;
   overflow: hidden;
   isolation: isolate;
+  /* Sin este mínimo la franja se ajusta al alto del nombre —98px— y el
+     escudo de atrás, que se mide contra ella, queda del tamaño de un icono.
+     Con 170px tiene sitio para leerse como fondo. */
+  min-height: 170px;
   padding: calc(var(--seguro-arriba) + var(--e-6)) var(--e-5) var(--e-6);
   background: var(--panel-marca-fondo);
   /* El filo dorado es la firma de la identidad, la misma que lleva la barra
