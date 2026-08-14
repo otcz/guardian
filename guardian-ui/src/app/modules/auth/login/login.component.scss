@@ -134,6 +134,21 @@
   .lado-forma {
     place-items: center;
   }
+
+  /* La marca crece con la columna. Con el tope del móvil, un escudo de 74px
+     en un panel de casi mil de ancho se ve perdido en el medio, y eso se lee
+     como composición descuidada aunque esté centrado al píxel. */
+  .identidad {
+    gap: var(--e-4);
+
+    i {
+      font-size: clamp(4.6rem, 11vw, 9rem);
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 3.4vw, 3.2rem);
+    }
+  }
 }
 
 /* ---------------------------------------------------------------------------
