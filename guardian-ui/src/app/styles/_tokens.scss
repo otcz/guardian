@@ -43,10 +43,9 @@
 
   /* El panel de marca es navy en los DOS temas — es una superficie de marca,
      no una del tema—, así que su texto no puede salir de `--text-inverse`,
-     que sí se voltea. Estos tres no cambian nunca. */
+     que sí se voltea. Estos dos no cambian nunca. */
   --panel-marca-fondo: var(--marca-navy-800);
   --panel-marca-texto: #ffffff;
-  --panel-marca-texto-2: var(--marca-navy-100);
 
   --marca-verde-600: #1e7a46;
   --marca-verde-100: #e1f3e8;

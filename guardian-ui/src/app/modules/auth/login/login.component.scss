@@ -16,37 +16,49 @@
 }
 
 .panel-marca {
+  position: relative;
   display: grid;
   place-items: center;
+  overflow: hidden;
+  isolation: isolate;
   padding: calc(var(--seguro-arriba) + var(--e-6)) var(--e-5) var(--e-6);
   background: var(--panel-marca-fondo);
   /* El filo dorado es la firma de la identidad, la misma que lleva la barra
      lateral del panel de administración. */
   border-bottom: 2px solid var(--marca-oro-500);
+
+  /* El escudo detrás del nombre, a media opacidad: se reconoce sin pelear
+     con la palabra que tiene encima. El alto sale del panel y no de un
+     literal, así encoge solo en la franja del móvil y crece en la columna
+     del escritorio sin un @media aparte. */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: min(78%, 300px);
+    aspect-ratio: 300 / 375;
+    transform: translate(-50%, -50%);
+    background: var(--marca-oro-500);
+    opacity: 0.16;
+    -webkit-mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
+    mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
+    pointer-events: none;
+    z-index: 0;
+  }
 }
 
 .identidad {
-  max-width: 340px;
+  position: relative;
+  z-index: 1;
+  margin: 0;
   text-align: center;
-
-  i {
-    /* El emblema hereda el font-size — ver .gd-emblema en styles.scss. */
-    font-size: clamp(2.6rem, 8vw, 4rem);
-    color: var(--marca-oro-500);
-  }
-
-  h1 {
-    margin: var(--e-3) 0 var(--e-1);
-    font-size: clamp(1.6rem, 5vw, 2.1rem);
-    letter-spacing: 0.16em;
-    color: var(--panel-marca-texto);
-  }
-
-  p {
-    margin: 0;
-    font-size: var(--t-sm);
-    color: var(--panel-marca-texto-2);
-  }
+  font-size: clamp(1.7rem, 6vw, 2.3rem);
+  letter-spacing: 0.16em;
+  /* El nombre va sobre el escudo: sin un poco de peso extra, la silueta de
+     atrás le quita definición a las letras. */
+  font-weight: 700;
+  color: var(--panel-marca-texto);
 }
 
 .lado-forma {
