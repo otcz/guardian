@@ -244,7 +244,65 @@ class NotificacionServiceImplTest {
         assertThat(html).contains("&lt;script&gt;");
     }
 
+    @Test
+    @DisplayName("si quien pidió el vehículo ES el titular, no le llegan dos correos")
+    void elTitularNoRecibeDuplicado() {
+        // Recibir dos avisos del mismo hecho enseña a ignorarlos, y el día que
+        // llegue uno que importa ya nadie los abre.
+        servicio.solicitudVehiculoResuelta(solicitudVehiculo("ABC123", null), true);
+
+        verify(correoService, times(1)).enviar(anyString(), any());
+    }
+
+    @Test
+    @DisplayName("aprobar un ingreso al hogar le avisa al titular, SIN el PIN del otro")
+    void alTitularNoSeLeFiltraElPinAjeno() {
+        // Dos correos distintos y no el mismo a dos destinos: el de la persona
+        // nueva lleva su PIN inicial, y mandárselo al titular sería entregarle
+        // una credencial que no es suya.
+        servicio.solicitudHogarResuelta(solicitudHogar("nueva@correo.com"), true);
+
+        ArgumentCaptor<String> destino = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<MensajeCorreo> mensaje = ArgumentCaptor.forClass(MensajeCorreo.class);
+        verify(correoService, times(2)).enviar(destino.capture(), mensaje.capture());
+
+        int alTitular = destino.getAllValues().indexOf("titular@correo.com");
+        assertThat(alTitular).isGreaterThanOrEqualTo(0);
+        assertThat(texto(mensaje.getAllValues().get(alTitular)))
+                .doesNotContain(Codigos.CLAVE_INICIAL)
+                .contains("PRUEBA NUEVA");
+
+        // Y a la persona nueva sí, que sin eso no puede entrar.
+        int aLaPersona = destino.getAllValues().indexOf("nueva@correo.com");
+        assertThat(texto(mensaje.getAllValues().get(aLaPersona)))
+                .contains(Codigos.CLAVE_INICIAL);
+    }
+
+    @Test
+    @DisplayName("si quien pide entrar al hogar usa el correo del titular, sale uno solo")
+    void hogarConElMismoCorreoNoSeDuplica() {
+        servicio.solicitudHogarResuelta(solicitudHogar("titular@correo.com"), true);
+
+        verify(correoService, times(1)).enviar(anyString(), any());
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
+
+    private guardian.entity.persona.GdSolicitudHogar solicitudHogar(String email) {
+        guardian.entity.persona.GdCodigoHogar codigo =
+                new guardian.entity.persona.GdCodigoHogar();
+        codigo.setCasa(casa);
+
+        guardian.entity.persona.GdSolicitudHogar s =
+                new guardian.entity.persona.GdSolicitudHogar();
+        s.setId(4L);
+        s.setCodigo(codigo);
+        s.setNombres("PRUEBA");
+        s.setApellidos("NUEVA");
+        s.setDocumento("111222333");
+        s.setEmail(email);
+        return s;
+    }
 
     /** Todo lo redactado del mensaje, para buscar una frase sin importar dónde cayó. */
     private String texto(MensajeCorreo mensaje) {

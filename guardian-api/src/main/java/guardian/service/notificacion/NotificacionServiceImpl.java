@@ -58,6 +58,18 @@ public class NotificacionServiceImpl implements NotificacionService {
                     .parrafo("La portería lo reconocerá desde ahora. No necesitas "
                             + "hacer nada más.")
                     .accion("Ver mis vehículos", urlApp));
+
+            // Al titular también, si por alguna razón no fue él quien lo pidió.
+            // Hoy la regla exige que lo sea, pero el aviso no puede depender de
+            // que esa regla no cambie nunca.
+            enviarAlTitularSiEsOtro(solicitud.getCasa(), quien.getEmail(), MensajeCorreo
+                    .de("Autorizaron el vehículo " + placa + " en tu casa",
+                            "Vehículo autorizado en tu casa",
+                            "Hola,")
+                    .parrafo("La administración autorizó un vehículo para la casa "
+                            + casa + ". Ya puede entrar y salir del conjunto.")
+                    .destacado("Placa", placa)
+                    .accion("Ver los vehículos de mi casa", urlApp));
             return;
         }
 
@@ -94,6 +106,24 @@ public class NotificacionServiceImpl implements NotificacionService {
                     .advertencia("Cámbialo apenas entres y no lo compartas: es lo "
                             + "que abre tu código de acceso en la portería.")
                     .accion("Entrar a GUARDIAN", urlApp));
+
+            // Al titular, OTRO correo y no una copia del anterior: el de arriba
+            // lleva el PIN inicial de la persona nueva, y mandárselo al titular
+            // sería entregarle una credencial que no es suya.
+            enviarAlTitularSiEsOtro(solicitud.getCodigo().getCasa(), solicitud.getEmail(),
+                    MensajeCorreo
+                            .de(nombreDe(solicitud) + " ya hace parte de tu hogar",
+                                    "Nuevo integrante en tu hogar",
+                                    "Hola,")
+                            .parrafo("La administración aprobó el ingreso de "
+                                    + nombreDe(solicitud) + " a la casa " + casa
+                                    + ", usando tu código de hogar.")
+                            .destacado("Documento", solicitud.getDocumento())
+                            .advertencia("Si no reconoces a esta persona, escribe "
+                                    + "de inmediato a la administración del "
+                                    + "conjunto: con este ingreso ya puede pasar "
+                                    + "por la portería.")
+                            .accion("Ver mi hogar", urlApp));
             return;
         }
 
@@ -124,6 +154,17 @@ public class NotificacionServiceImpl implements NotificacionService {
                     .parrafo("El código solo sirve dentro de las fechas que "
                             + "indicaste al invitarlo.")
                     .accion("Ver la invitación", urlApp));
+
+            // Al titular cuando el anfitrión es otro: cualquier residente
+            // invita, pero quien responde por lo que entra a esa casa es él.
+            enviarAlTitularSiEsOtro(invitacion.getCasa(), anfitrion.getEmail(), MensajeCorreo
+                    .de("Autorizaron una visita en tu casa",
+                            "Visita autorizada en tu casa",
+                            "Hola,")
+                    .parrafo("La administración autorizó una visita registrada por "
+                            + anfitrion.getNombreCompleto() + ".")
+                    .destacado("Invitado", invitado)
+                    .accion("Ver las invitaciones de mi casa", urlApp));
             return;
         }
 
@@ -263,6 +304,37 @@ public class NotificacionServiceImpl implements NotificacionService {
         if (correo != null && !correo.trim().isEmpty()) {
             destinos.add(correo.trim().toLowerCase());
         }
+    }
+
+    /**
+     * Avisa al titular de la casa, salvo que ya se le haya avisado como
+     * protagonista del hecho.
+     *
+     * <p>El titular responde por su hogar: quien entra a vivir, a quién se
+     * invita y qué carro queda autorizado. Pero muchas veces ÉL es quien lo
+     * pidió, y recibir dos correos del mismo hecho enseña a ignorarlos.</p>
+     *
+     * <p>La comparación es sobre el correo y no sobre la persona a propósito:
+     * lo que no queremos es que a una misma bandeja lleguen dos avisos, y dos
+     * personas distintas pueden compartir correo — un matrimonio, por ejemplo,
+     * que es exactamente el caso de este conjunto.</p>
+     */
+    private void enviarAlTitularSiEsOtro(GdCasa casa, String correoYaAvisado,
+                                         MensajeCorreo mensaje) {
+        String titular = correoDelTitular(casa);
+        if (titular == null || titular.trim().isEmpty()) {
+            return;
+        }
+        if (correoYaAvisado != null
+                && titular.trim().equalsIgnoreCase(correoYaAvisado.trim())) {
+            return;
+        }
+        enviar(titular, mensaje);
+    }
+
+    /** Nombre de quien pidió entrar al hogar, para el aviso al titular. */
+    private String nombreDe(GdSolicitudHogar solicitud) {
+        return solicitud.getNombres() + " " + solicitud.getApellidos();
     }
 
     /** Un rechazo sin motivo deja a la persona sin nada que corregir. */
