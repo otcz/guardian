@@ -22,17 +22,28 @@
          cae en el mismo sitio, y el prefijo distingue un código de GUARDIAN de
          un número de documento. Preguntarle al guardia qué acaba de pasar por
          el lector es hacerle perder el único toque que tiene. -->
-    <div class="manual">
+    <!-- El campo NO muestra lo que lee el lector: un código de credencial es
+         una cadena larga y sin sentido que no le dice nada al guardia y le tapa
+         el campo justo cuando tiene a alguien enfrente. Mientras dura la
+         lectura el campo se pone en "Leyendo…", que sí es información. -->
+    <div class="manual" [class.leyendo]="leyendo">
       <input #codigo
              id="codigo"
              type="text"
              [(ngModel)]="entradaManual"
              (ngModelChange)="alEscribir()"
+             (keydown)="alTeclear($event)"
              (keyup.enter)="verificarEntradaManual()"
-             placeholder="Escanea el código, la cédula o escribe un nombre"
+             [placeholder]="leyendo
+               ? 'Leyendo…'
+               : 'Escanea el código, la cédula o escribe un nombre'"
+             [readonly]="leyendo"
              autocomplete="off">
-      <button type="button" class="principal" (click)="verificarEntradaManual()">
-        <i class="ms">search</i> Buscar
+      <button type="button" class="principal"
+              [disabled]="leyendo"
+              (click)="verificarEntradaManual()">
+        <i class="ms" [class.gira]="leyendo">{{ leyendo ? 'progress_activity' : 'search' }}</i>
+        {{ leyendo ? 'Leyendo' : 'Buscar' }}
       </button>
     </div>
 

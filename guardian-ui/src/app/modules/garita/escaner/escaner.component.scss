@@ -99,6 +99,20 @@ section {
       box-shadow: 0 0 0 3px var(--accent-soft);
     }
   }
+
+  /* Mientras el lector lee. El campo se marca ENTERO y no con un texto
+     pequeño: el guardia está mirando a la persona, no a la tablet, y tiene que
+     poder confirmar por el rabillo del ojo que el disparo entró. */
+  &.leyendo input {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+
+    &::placeholder {
+      color: var(--accent);
+      font-weight: 600;
+      opacity: 1;
+    }
+  }
 }
 
 .pista {

@@ -254,6 +254,7 @@ export class EscanerComponent implements OnInit, AfterViewChecked, OnDestroy {
   ngOnDestroy(): void {
     this.detenerCuenta();
     this.suscripcionBusqueda?.unsubscribe();
+    clearTimeout(this.cierreLectura);
   }
 
   /**
@@ -362,6 +363,101 @@ export class EscanerComponent implements OnInit, AfterViewChecked, OnDestroy {
           this.buscandoCandidatos = false;
         }
       });
+  }
+
+  // ── El lector escribe a ciegas ───────────────────────────────────────────
+  //
+  // Lo que el lector lee NO se muestra. Un código de credencial es una cadena
+  // larga y sin sentido: verla aparecer de golpe no le dice nada al guardia y
+  // le tapa el campo con basura justo cuando tiene a alguien enfrente.
+  //
+  // Se distingue del tecleo por VELOCIDAD, que es lo único que de verdad los
+  // separa: un lector emite todos los caracteres a menos de 50 ms uno de otro;
+  // un dedo, ni de lejos. Nada que configurar y funciona con cualquier lector
+  // USB, que es como funcionan todos: como un teclado.
+
+  /** Se está leyendo un código: el campo se queda vacío y muestra "Leyendo…". */
+  leyendo = false;
+
+  private bufferLector = '';
+  private ultimaTecla = 0;
+  private cierreLectura?: ReturnType<typeof setTimeout>;
+
+  /**
+   * Milisegundos entre teclas por debajo de los cuales ya no es un dedo.
+   *
+   * <p>50 con holgura: un lector típico emite entre 5 y 20 ms, y el
+   * mecanógrafo más rápido del mundo no baja de 80.</p>
+   */
+  private static readonly UMBRAL_LECTOR_MS = 50;
+
+  /**
+   * Cuánto se espera sin teclas antes de dar por terminada una lectura.
+   *
+   * <p>Existe porque no todos los lectores vienen configurados para mandar
+   * Enter al final. Sin esto, con uno de esos el código quedaría atrapado en el
+   * buffer y la pantalla se quedaría en "Leyendo…" para siempre.</p>
+   */
+  private static readonly CIERRE_LECTURA_MS = 300;
+
+  alTeclear(evento: KeyboardEvent): void {
+    const ahora = Date.now();
+    const desdeLaAnterior = ahora - this.ultimaTecla;
+    this.ultimaTecla = ahora;
+
+    if (evento.key === 'Enter') {
+      if (this.leyendo) {
+        // El Enter es del lector, no del guardia: no debe llegar al formulario.
+        evento.preventDefault();
+        this.cerrarLectura();
+      }
+      return;
+    }
+
+    // Teclas de control (Shift, flechas, Tab): no son parte del código.
+    if (evento.key.length !== 1) {
+      return;
+    }
+
+    if (desdeLaAnterior < EscanerComponent.UMBRAL_LECTOR_MS) {
+      if (!this.leyendo) {
+        // El PRIMER carácter llegó con el campo vacío y sin referencia de
+        // tiempo, así que ya cayó a la vista. Se rescata de ahí y se borra:
+        // alcanza a verse un solo carácter durante unos milisegundos.
+        this.leyendo = true;
+        this.bufferLector = this.entradaManual;
+        this.entradaManual = '';
+        this.candidatos = [];
+        this.buscandoCandidatos = false;
+      }
+      evento.preventDefault();
+      this.bufferLector += evento.key;
+      this.programarCierre();
+    }
+  }
+
+  /** Cierra la lectura sola cuando el lector no manda Enter al final. */
+  private programarCierre(): void {
+    clearTimeout(this.cierreLectura);
+    this.cierreLectura = setTimeout(
+      () => this.cerrarLectura(), EscanerComponent.CIERRE_LECTURA_MS);
+  }
+
+  private cerrarLectura(): void {
+    clearTimeout(this.cierreLectura);
+    const leido = this.bufferLector.trim();
+    this.bufferLector = '';
+    this.leyendo = false;
+
+    if (!leido) {
+      return;
+    }
+    // Por el mismo camino que una lectura tecleada: el enfriamiento contra la
+    // relectura y el "alguien nuevo empuja al anterior" tienen que aplicar
+    // igual, y duplicarlos acá sería duplicar dos reglas delicadas.
+    this.entradaManual = leido;
+    this.verificarEntradaManual();
+    this.entradaManual = '';
   }
 
   /** Cada tecla del campo. El lector también pasa por aquí, y no dispara nada. */
