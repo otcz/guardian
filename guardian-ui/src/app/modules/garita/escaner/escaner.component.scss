@@ -207,6 +207,29 @@ section {
   min-width: 0;
 }
 
+/* ── El escudo de fondo ──────────────────────────────────────────────────────
+   Igual que en el login: ENTERO y centrado detrás del contenido, nunca
+   sangrando por un borde. La lección de las otras pantallas fue que una figura
+   cortada contra un canto no se lee como marca de agua sino como un dibujo mal
+   puesto.
+
+   Va dentro de la tarjeta de acción y no sobre la página: los paneles son
+   opacos, así que un escudo detrás de ellos quedaría partido por sus bordes.
+   Acá el campo y el botón se apoyan encima y la silueta sigue entera
+   alrededor, que es como se ve un papel con membrete.
+
+   Al 6%: por debajo de eso no se ve sobre este navy, y por encima le compite
+   al campo, que es lo único que el guardia mira en esta pantalla. */
+.col-principal.gd-watermark::after {
+  top: 50%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  height: min(78%, 340px);
+  transform: translate(-50%, -50%);
+  opacity: 0.06;
+}
+
 /* ── Los tres modos ──────────────────────────────────────────────────────────
    Icono grande y UNA palabra. En la portería el guardia no lee, reconoce: mira
    de reojo entre atender a una persona y la siguiente, y tiene que saber en
