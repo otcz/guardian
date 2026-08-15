@@ -17,32 +17,23 @@
   <!-- ESCANEO -->
   <section class="escaneo" *ngIf="etapa === 'escaneando' || etapa === 'verificando'">
 
-    <!-- UN solo campo y ningún modo que elegir. El lector de QR y el de código
-         de barras son teclados: escriben aquí lo que leen. La cédula tecleada
-         cae en el mismo sitio, y el prefijo distingue un código de GUARDIAN de
-         un número de documento. Preguntarle al guardia qué acaba de pasar por
-         el lector es hacerle perder el único toque que tiene. -->
-    <!-- LOS TRES MODOS. Iconos grandes y una palabra: el guardia tiene que
-         saber en cuál está de un vistazo, de noche y de pie. Cambiar de modo
-         cambia lo que la pantalla EXPLICA, no lo que el sistema acepta — un
-         código pasado por el lector en modo Documento se resuelve igual,
-         porque acá no se puede castigar a nadie por tocar el botón que no
-         era. -->
+    <!-- DOS MODOS, no tres.
+         Código y documento son el MISMO camino: un texto que el sistema
+         resuelve, venga del lector de QR, del de código de barras o del
+         teclado. El prefijo GRD distingue un código de una cédula sin
+         preguntarle nada al guardia, así que separarlos lo obligaba a decidir
+         algo que da igual — y en una portería no se puede castigar a nadie por
+         tocar el botón que no era.
+
+         La huella sí es otra cosa: otro aparato, otro gesto y sus propias dos
+         acciones. -->
     <div class="modos" role="tablist">
       <button type="button" role="tab" class="modo"
-              [class.activo]="modo === 'qr'"
-              [attr.aria-selected]="modo === 'qr'"
-              (click)="elegirModo('qr')">
+              [class.activo]="modo === 'identificar'"
+              [attr.aria-selected]="modo === 'identificar'"
+              (click)="elegirModo('identificar')">
         <i class="ms">qr_code_scanner</i>
-        <span>Código</span>
-      </button>
-
-      <button type="button" role="tab" class="modo"
-              [class.activo]="modo === 'documento'"
-              [attr.aria-selected]="modo === 'documento'"
-              (click)="elegirModo('documento')">
-        <i class="ms">badge</i>
-        <span>Documento</span>
+        <span>Código o documento</span>
       </button>
 
       <button type="button" role="tab" class="modo"
@@ -65,7 +56,7 @@
          una cadena larga y sin sentido que no le dice nada al guardia y le tapa
          el campo justo cuando tiene a alguien enfrente. Mientras dura la
          lectura el campo se pone en "Leyendo…", que sí es información. -->
-    <div class="manual" [class.leyendo]="leyendo" *ngIf="modo !== 'huella'">
+    <div class="manual" [class.leyendo]="leyendo" *ngIf="modo === 'identificar'">
       <input #codigo
              id="codigo"
              type="text"
@@ -73,11 +64,7 @@
              (ngModelChange)="alEscribir()"
              (keydown)="alTeclear($event)"
              (keyup.enter)="verificarEntradaManual()"
-             [placeholder]="leyendo
-               ? 'Leyendo…'
-               : (modo === 'qr'
-                   ? 'Pasa el código por el lector'
-                   : 'Número de documento o nombre')"
+             [placeholder]="leyendo ? 'Leyendo…' : 'Escanea el código, o escribe documento o nombre'"
              [readonly]="leyendo"
              autocomplete="off">
       <button type="button" class="principal"
@@ -116,11 +103,9 @@
 
     <!-- Una línea, no un párrafo: el guardia lee bajo presión. -->
     <p class="pista"
-       *ngIf="etapa === 'escaneando' && modo !== 'huella'
+       *ngIf="etapa === 'escaneando' && modo === 'identificar'
               && !candidatos.length && !buscandoCandidatos">
-      {{ modo === 'qr'
-          ? 'El código del residente o el de barras de la cédula'
-          : 'Escribe el documento, o el nombre si no lo tiene' }}
+      El lector, el número de documento o el nombre. Todo cae aquí.
     </p>
 
     <p class="pista" *ngIf="etapa === 'verificando'">

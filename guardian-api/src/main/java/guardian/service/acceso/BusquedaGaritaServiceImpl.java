@@ -48,11 +48,13 @@ public class BusquedaGaritaServiceImpl implements BusquedaGaritaService {
             return Collections.emptyList();
         }
 
-        List<GdPersona> encontradas = personaRepository.buscarPorNombre(
+        List<GdPersona> encontradas = personaRepository.buscarPorNombreODocumento(
                 guardia.getConjuntoId(), limpio, PageRequest.of(0, MAXIMO_RESULTADOS));
 
-        log.info("[garita] busqueda por nombre '{}' -> {} candidatos (por {})",
-                limpio, encontradas.size(), guardia.getDocumento());
+        // Cuantos, no quienes: un log de la porteria con nombres propios de
+        // quien pasa se vuelve un registro paralelo de movimientos.
+        log.info("[garita] busqueda -> {} candidatos (por {})",
+                encontradas.size(), guardia.getDocumento());
 
         return encontradas.stream().map(this::mapear).collect(Collectors.toList());
     }

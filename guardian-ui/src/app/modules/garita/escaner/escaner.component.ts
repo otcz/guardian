@@ -377,7 +377,13 @@ export class EscanerComponent implements OnInit, AfterViewChecked, OnDestroy {
   // pasado por el lector en modo documento se resuelve igual, porque en la
   // portería no se puede castigar a nadie por tocar el botón equivocado.
 
-  modo: 'qr' | 'documento' | 'huella' = 'qr';
+  /**
+   * DOS modos, no tres. Código y documento son el mismo camino —un texto que
+   * el sistema resuelve, venga del lector o del teclado— y separarlos obligaba
+   * al guardia a decidir algo que da igual. La huella sí es otra cosa: otro
+   * aparato, otro gesto y otras dos acciones.
+   */
+  modo: 'identificar' | 'huella' = 'identificar';
 
   /**
    * El lector de huella todavía no existe.
@@ -392,7 +398,7 @@ export class EscanerComponent implements OnInit, AfterViewChecked, OnDestroy {
     return false;
   }
 
-  elegirModo(modo: 'qr' | 'documento' | 'huella'): void {
+  elegirModo(modo: 'identificar' | 'huella'): void {
     this.modo = modo;
     this.candidatos = [];
     this.buscandoCandidatos = false;

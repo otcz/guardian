@@ -38,7 +38,13 @@ public interface GdPersonaRepository
     // guardian.repository.spec.PersonaSpecs — ver ahi por que no es un @Query.
 
     /**
-     * Candidatos por nombre para la porteria, ordenados alfabeticamente.
+     * Candidatos para la porteria: por NOMBRE o por DOCUMENTO.
+     *
+     * <p>Los dos en la misma consulta y no en dos, porque el guardia escribe en
+     * un solo campo y no tiene por que decirle al sistema que esta escribiendo.
+     * Antes solo miraba el nombre, y teclear un numero de cedula respondia "no
+     * encontramos a nadie" sobre una persona que si existia — el peor tipo de
+     * error, porque el guardia le cree.</p>
      *
      * <p>Consulta propia y no la Specification del panel: aquella pagina,
      * filtra por estado y trae el objeto entero. Aca hace falta lo contrario
@@ -52,9 +58,11 @@ public interface GdPersonaRepository
     @Query("SELECT p FROM GdPersona p "
             + "WHERE p.conjunto.id = :conjuntoId "
             + "AND p.activo = 'S' AND p.bloqueado = 'N' "
-            + "AND LOWER(CONCAT(p.nombres, ' ', p.apellidos)) LIKE LOWER(CONCAT('%', :texto, '%')) "
+            + "AND (LOWER(CONCAT(p.nombres, ' ', p.apellidos)) "
+            + "         LIKE LOWER(CONCAT('%', :texto, '%')) "
+            + "  OR p.documento LIKE CONCAT(:texto, '%')) "
             + "ORDER BY p.nombres ASC, p.apellidos ASC")
-    List<GdPersona> buscarPorNombre(@Param("conjuntoId") Long conjuntoId,
-                                    @Param("texto") String texto,
-                                    Pageable limite);
+    List<GdPersona> buscarPorNombreODocumento(@Param("conjuntoId") Long conjuntoId,
+                                              @Param("texto") String texto,
+                                              Pageable limite);
 }
