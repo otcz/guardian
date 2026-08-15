@@ -2,7 +2,6 @@ package guardian.service.huella;
 
 import guardian.entity.persona.GdHuella;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,14 +15,18 @@ import java.util.Optional;
  * modulo de huella este vacio, y una excepcion aca tumbaria la pantalla
  * completa por una funcion que todavia no existe.</p>
  *
- * <p>{@code @ConditionalOnMissingBean}: el dia que se agregue el cotejador de
- * verdad, este desaparece solo. No hay que acordarse de borrarlo ni de cambiar
- * una bandera — que es justo el tipo de detalle que se olvida y deja el sistema
- * diciendo "sensor no conectado" con el sensor conectado.</p>
+ * <p><b>Al agregar el cotejador de verdad, marcarlo {@code @Primary}.</b> Sin
+ * eso Spring encuentra dos implementaciones de la misma interfaz y no arranca.
+ *
+ * <p>Aca hubo un {@code @ConditionalOnMissingBean} para que este se retirara
+ * solo, y TUMBO LA PRODUCCION: esa anotacion solo funciona dentro de una
+ * autoconfiguracion, no sobre una clase que encuentra el escaneo de
+ * componentes. Ahi se evalua fuera de orden, esta clase se excluyo a si misma
+ * y la aplicacion quedo sin ningun cotejador, en bucle de reinicio. Un
+ * {@code @Primary} explicito es feo pero no miente.</p>
  */
 @Slf4j
 @Service
-@ConditionalOnMissingBean(CotejadorHuellas.class)
 public class CotejadorNoConfigurado implements CotejadorHuellas {
 
     @Override
