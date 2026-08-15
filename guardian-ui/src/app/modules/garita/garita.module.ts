@@ -6,11 +6,12 @@ import { TooltipModule } from 'primeng/tooltip';
 
 import { SharedModule } from '../../shared/shared.module';
 import { EscanerComponent } from './escaner/escaner.component';
+import { HuellaComponent } from './huella/huella.component';
 
 const routes: Routes = [{ path: '', component: EscanerComponent }];
 
 @NgModule({
-  declarations: [EscanerComponent],
+  declarations: [EscanerComponent, HuellaComponent],
   imports: [CommonModule, FormsModule, TooltipModule, SharedModule,
     RouterModule.forChild(routes)]
 })

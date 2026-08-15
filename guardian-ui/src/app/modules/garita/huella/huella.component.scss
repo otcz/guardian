@@ -1,0 +1,291 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* ── Las dos acciones ────────────────────────────────────────────────────────
+   Íconos grandes y una línea de explicación. Son dos cosas distintas —
+   identificar es el día a día, registrar se hace una vez por persona— y por eso
+   no comparten pantalla. */
+.acciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+
+.accion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-1);
+  padding: var(--e-5) var(--e-4);
+  color: var(--text-strong);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: border-color var(--transicion), background var(--transicion);
+
+  i {
+    /* 3rem: es lo que se reconoce de reojo, que es como se mira una portería. */
+    font-size: 3rem;
+    color: var(--accent);
+  }
+
+  strong {
+    font-size: var(--t-md);
+  }
+
+  small {
+    font-size: var(--t-xs);
+    color: var(--text-muted);
+  }
+
+  &:not(:disabled):active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+
+  &:disabled {
+    opacity: var(--opacidad-deshabilitado);
+    cursor: not-allowed;
+  }
+}
+
+.sin-sensor {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e-2);
+  margin: 0;
+  padding: var(--e-3);
+  font-size: var(--t-sm);
+  line-height: 1.5;
+  color: var(--text-muted);
+  background: var(--bg-soft);
+  border-radius: var(--r-sm);
+
+  i {
+    flex: 0 0 auto;
+    font-size: var(--t-lg);
+  }
+}
+
+/* ── El recorrido de tres pasos ──────────────────────────────────────────── */
+.registro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  width: 100%;
+}
+
+/* Dónde está el guardia. Sin esto, un formulario de tres pantallas se siente
+   como caer en un pozo: no se sabe cuánto falta ni cómo se llegó. */
+.pasos {
+  display: flex;
+  gap: var(--e-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: var(--e-1);
+    flex: 1 1 0;
+    font-size: var(--t-xs);
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .numero {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    font-size: var(--t-xs);
+    background: var(--bg-soft);
+    border-radius: var(--r-full);
+  }
+
+  li.activo {
+    color: var(--accent);
+
+    .numero {
+      color: var(--text-inverse);
+      background: var(--accent);
+    }
+  }
+
+  li.hecho:not(.activo) .numero {
+    color: var(--ok);
+    background: var(--ok-soft);
+  }
+}
+
+.cuerpo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-3);
+  padding: var(--e-5) var(--e-3);
+  text-align: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-md);
+
+  .grande {
+    font-size: 3.4rem;
+    color: var(--accent);
+
+    &.apagado {
+      color: var(--text-muted);
+    }
+  }
+}
+
+.instruccion {
+  margin: 0;
+  font-size: var(--t-md);
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.nota {
+  margin: 0;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+
+.campo-doc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  width: 100%;
+
+  input {
+    padding: var(--e-3);
+    /* Grande y centrado: se digita de pie, mirando a la persona. */
+    font-size: 1.15rem;
+    text-align: center;
+    letter-spacing: 0.05em;
+    color: var(--text-strong);
+    background: var(--bg-base);
+    border: 1px solid var(--border-default);
+    border-radius: var(--r-sm);
+
+    &:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+  }
+}
+
+/* Quién es, con foto. Enrolar a la persona equivocada deja una huella que abre
+   la puerta a nombre de otro, y eso no se descubre hasta que pasa algo. */
+.quien {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  width: 100%;
+  padding: var(--e-2) var(--e-3);
+  text-align: left;
+  background: var(--bg-soft);
+  border-radius: var(--r-sm);
+
+  .retrato {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    overflow: hidden;
+    background: var(--bg-base);
+    border-radius: var(--r-full);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  strong {
+    display: block;
+    font-size: var(--t-sm);
+    color: var(--text-strong);
+  }
+
+  small {
+    font-size: var(--t-xs);
+    color: var(--text-muted);
+  }
+}
+
+.dedos {
+  display: flex;
+  gap: var(--e-3);
+  width: 100%;
+}
+
+.dedo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-1);
+  flex: 1 1 0;
+  padding: var(--e-4) var(--e-2);
+  color: var(--text-strong);
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-md);
+  cursor: pointer;
+
+  i {
+    font-size: 2.2rem;
+    color: var(--accent);
+  }
+
+  strong {
+    font-size: var(--t-sm);
+  }
+
+  &:active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+}
+
+/* Las tres lecturas del mismo dedo. Se ven como tres puntos que se van
+   llenando: el guardia sabe cuántas van sin contar. */
+.capturas {
+  display: flex;
+  gap: var(--e-2);
+
+  .punto {
+    width: 14px;
+    height: 14px;
+    background: var(--bg-soft);
+    border: 2px solid var(--border-strong);
+    border-radius: var(--r-full);
+
+    &.hecho {
+      background: var(--ok);
+      border-color: var(--ok);
+    }
+  }
+}
+
+.pie {
+  display: flex;
+  gap: var(--e-2);
+
+  button {
+    flex: 1 1 0;
+  }
+}
+
+.aviso-error {
+  margin: 0;
+  font-size: var(--t-sm);
+  color: var(--deny);
+}

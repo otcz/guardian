@@ -55,14 +55,11 @@
       </button>
     </div>
 
-    <!-- HUELLA: se muestra pero no se finge. Un navegador no puede leer un
-         sensor biométrico; hace falta un puente en el equipo o un terminal de
-         red. Decirlo es más útil que un botón que no hace nada. -->
-    <div class="sin-sensor" *ngIf="modo === 'huella'">
-      <i class="ms">sensors_off</i>
-      <strong>Sensor no conectado</strong>
-      <p>Identifica por código o por documento mientras tanto.</p>
-    </div>
+    <!-- HUELLA: componente propio. Código y documento son el mismo camino —un
+         texto que el sistema resuelve— y comparten campo; la huella tiene dos
+         acciones distintas, su propio recorrido y un aparato que puede no
+         estar. -->
+    <gd-huella *ngIf="modo === 'huella'"></gd-huella>
 
     <!-- El campo NO muestra lo que lee el lector: un código de credencial es
          una cadena larga y sin sentido que no le dice nada al guardia y le tapa

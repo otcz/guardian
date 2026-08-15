@@ -1,0 +1,129 @@
+<!-- INICIO: las dos acciones del módulo, cada una con su ícono grande. Son dos
+     cosas distintas y por eso no comparten pantalla: identificar es el día a
+     día, registrar se hace una vez por persona. -->
+<div class="acciones" *ngIf="paso === 'inicio'">
+
+  <button type="button" class="accion identificar"
+          [disabled]="!sensorConectado"
+          (click)="identificar.emit()">
+    <i class="ms">fingerprint</i>
+    <strong>Identificar</strong>
+    <small>La persona pone el dedo</small>
+  </button>
+
+  <button type="button" class="accion registrar" (click)="empezarRegistro()">
+    <i class="ms">person_add</i>
+    <strong>Registrar huella</strong>
+    <small>Primera vez de una persona</small>
+  </button>
+
+  <!-- Se dice, no se finge. Un botón que no hace nada le quema al guardia el
+       único toque que tiene. -->
+  <p class="sin-sensor" *ngIf="!sensorConectado">
+    <i class="ms">sensors_off</i>
+    Sensor no conectado. Puedes preparar el registro, pero la captura del dedo
+    necesita el lector.
+  </p>
+</div>
+
+<!-- REGISTRO: tres pasos, y el guardia siempre ve en cuál está. -->
+<div class="registro" *ngIf="paso !== 'inicio'">
+
+  <ol class="pasos" aria-label="Pasos del registro">
+    <li [class.activo]="paso === 'buscando-persona'"
+        [class.hecho]="!!persona">
+      <span class="numero">1</span> Quién
+    </li>
+    <li [class.activo]="paso === 'eligiendo-dedo'"
+        [class.hecho]="!!dedoElegido">
+      <span class="numero">2</span> Dedo
+    </li>
+    <li [class.activo]="paso === 'capturando'">
+      <span class="numero">3</span> Captura
+    </li>
+  </ol>
+
+  <!-- Paso 1: por DOCUMENTO y no por nombre. Enrolar a la persona equivocada
+       deja una huella que abre la puerta a nombre de otro. -->
+  <div class="cuerpo" *ngIf="paso === 'buscando-persona'">
+    <i class="ms grande">badge</i>
+    <p class="instruccion">¿De quién es la huella?</p>
+
+    <div class="campo-doc">
+      <input type="text"
+             inputmode="numeric"
+             [(ngModel)]="documento"
+             (keyup.enter)="buscarPersona()"
+             placeholder="Número de documento"
+             autocomplete="off">
+      <button type="button" class="principal"
+              [disabled]="buscando || !documento.trim()"
+              (click)="buscarPersona()">
+        <i class="ms" [class.gira]="buscando">
+          {{ buscando ? 'progress_activity' : 'search' }}
+        </i>
+        Buscar
+      </button>
+    </div>
+
+    <p class="aviso-error" *ngIf="error">{{ error }}</p>
+  </div>
+
+  <!-- Paso 2: cuál dedo. Dos, uno de cada mano: el día que llegue con una
+       curita todavía puede entrar. -->
+  <div class="cuerpo" *ngIf="paso === 'eligiendo-dedo' && persona">
+    <div class="quien">
+      <span class="retrato">
+        <img *ngIf="persona.fotoUrl" [src]="persona.fotoUrl | foto"
+             [alt]="persona.nombreCompleto">
+        <i class="ms" *ngIf="!persona.fotoUrl">person</i>
+      </span>
+      <span>
+        <strong>{{ persona.nombreCompleto }}</strong>
+        <small>{{ persona.documento }}</small>
+      </span>
+    </div>
+
+    <p class="instruccion">¿Cuál dedo?</p>
+
+    <div class="dedos">
+      <button type="button" class="dedo" (click)="elegirDedo('DERECHO')">
+        <i class="ms">fingerprint</i>
+        <strong>Derecho</strong>
+      </button>
+      <button type="button" class="dedo" (click)="elegirDedo('IZQUIERDO')">
+        <i class="ms">fingerprint</i>
+        <strong>Izquierdo</strong>
+      </button>
+    </div>
+
+    <p class="nota">Máximo {{ maximoDedos }} dedos por persona.</p>
+  </div>
+
+  <!-- Paso 3: la captura. Es lo único que necesita el sensor. -->
+  <div class="cuerpo" *ngIf="paso === 'capturando'">
+    <i class="ms grande" [class.apagado]="!sensorConectado">fingerprint</i>
+
+    <p class="instruccion" *ngIf="sensorConectado">
+      Pon el dedo {{ dedoElegido === 'DERECHO' ? 'derecho' : 'izquierdo' }}
+      en el lector
+    </p>
+
+    <div class="capturas" *ngIf="sensorConectado">
+      <span class="punto" *ngFor="let i of [].constructor(capturasPorDedo); let n = index"
+            [class.hecho]="n < capturaActual"></span>
+    </div>
+
+    <p class="instruccion" *ngIf="!sensorConectado">Sensor no conectado</p>
+    <p class="nota" *ngIf="!sensorConectado">
+      Conecta el lector para tomar las {{ capturasPorDedo }} lecturas.
+    </p>
+  </div>
+
+  <div class="pie">
+    <button type="button" class="alterno" (click)="volver()">
+      <i class="ms">arrow_back</i> Atrás
+    </button>
+    <button type="button" class="alterno" (click)="cancelar()">Cancelar</button>
+  </div>
+</div>
