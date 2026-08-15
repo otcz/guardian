@@ -1,5 +1,6 @@
 package guardian.service.admin;
 
+import guardian.constant.ApiEndpoint;
 import guardian.constant.Codigos;
 import guardian.constant.MensajesGlobales;
 import guardian.dto.admin.VehiculoRequest;
@@ -13,6 +14,7 @@ import guardian.repository.GdVehiculoRepository;
 import guardian.security.Autoridad;
 import guardian.security.UsuarioAutenticado;
 import guardian.util.CatalogoVehiculo;
+import guardian.util.FotoUrlUtil;
 import guardian.util.PlacaUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +35,7 @@ public class VehiculoServiceImpl implements VehiculoService {
     private final ParametroService parametroService;
     private final EtiquetaCatalogoService etiquetaCatalogoService;
     private final guardian.service.acceso.PresenciaService presenciaService;
+    private final guardian.service.foto.FotoStorageService fotoStorageService;
 
     @Override
     @Transactional(readOnly = true)
@@ -133,6 +136,25 @@ public class VehiculoServiceImpl implements VehiculoService {
 
     @Override
     @Transactional
+    public VehiculoResponse fijarFoto(Long id, String fotoUrl, UsuarioAutenticado ejecutor) {
+        GdVehiculo vehiculo = obtener(id, ejecutor.getConjuntoId());
+
+        if (!FotoUrlUtil.esValida(fotoUrl)) {
+            throw GuardianException.solicitudInvalida(MensajesGlobales.FOTO_URL_INVALIDA);
+        }
+
+        // Vacio se normaliza a null: "" y null significan lo mismo —sin foto—
+        // y guardar los dos obligaria a preguntar por ambos en cada lectura.
+        vehiculo.setFotoUrl(FotoUrlUtil.tieneFoto(fotoUrl) ? fotoUrl.trim() : null);
+        vehiculo.setUsuarioModificador(ejecutor.getDocumento());
+
+        log.info("[vehiculo] foto actualizada id={} placa={} conFoto={}",
+                id, vehiculo.getPlaca(), vehiculo.getFotoUrl() != null);
+        return mapear(vehiculoRepository.save(vehiculo));
+    }
+
+    @Override
+    @Transactional
     public void eliminar(Long id, UsuarioAutenticado ejecutor) {
         Autoridad.exigirSuperAdmin(ejecutor);
 
@@ -141,8 +163,21 @@ public class VehiculoServiceImpl implements VehiculoService {
         eventoRepository.desvincularVehiculo(id);
         vehiculoRepository.delete(vehiculo);
 
+        // La foto tambien se va. El archivo se sirve publicamente por su nombre
+        // UUID, asi que dejarlo huerfano mantendria accesible la imagen de un
+        // vehiculo que ya no existe para el sistema.
+        borrarFotoDe(vehiculo);
+
         log.warn("[admin] vehiculo ELIMINADO id={} placa={} por={}",
                 id, vehiculo.getPlaca(), ejecutor.getDocumento());
+    }
+
+    private void borrarFotoDe(GdVehiculo vehiculo) {
+        String url = vehiculo.getFotoUrl();
+        if (url == null || !url.startsWith(ApiEndpoint.PUBLICO_FOTOS + "/")) {
+            return;
+        }
+        fotoStorageService.eliminar(url.substring((ApiEndpoint.PUBLICO_FOTOS + "/").length()));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -168,9 +203,16 @@ public class VehiculoServiceImpl implements VehiculoService {
     }
 
     private void aplicar(GdVehiculo vehiculo, VehiculoRequest request) {
+        // La misma regla que la foto de la persona: solo se acepta una ruta de
+        // subida propia. Una URL externa dejaria colar una imagen ajena —o un
+        // enlace roto— en lo que el guardia mira para decidir.
+        if (!FotoUrlUtil.esValida(request.getFotoUrl())) {
+            throw GuardianException.solicitudInvalida(MensajesGlobales.FOTO_URL_INVALIDA);
+        }
         vehiculo.setTipo(request.getTipo());
         vehiculo.setMarca(CatalogoVehiculo.limpiar(request.getMarca()));
         vehiculo.setColor(CatalogoVehiculo.limpiar(request.getColor()));
+        vehiculo.setFotoUrl(request.getFotoUrl());
     }
 
     private void validarCatalogo(String tipo, String marca, String color) {
@@ -194,6 +236,7 @@ public class VehiculoServiceImpl implements VehiculoService {
                         .etiqueta(Codigos.GRUPO_MARCA_VEHICULO, vehiculo.getMarca()))
                 .colorNombre(etiquetaCatalogoService
                         .etiqueta(Codigos.GRUPO_COLOR_VEHICULO, vehiculo.getColor()))
+                .fotoUrl(vehiculo.getFotoUrl())
                 .activo(vehiculo.getActivo())
                 .bloqueado(vehiculo.getBloqueado())
                 .motivoBloqueo(vehiculo.getMotivoBloqueo())

@@ -57,7 +57,10 @@ export class VehiculosComponent implements OnInit {
     placa: ['', [Validators.required]],
     tipo: ['', [Validators.required]],
     marca: [''],
-    color: ['']
+    color: [''],
+    // Sin Validators: un vehículo sin foto es un estado legítimo. Lo identifica
+    // la placa, que es única en todo el sistema.
+    fotoUrl: [null as string | null]
   });
 
   /**
@@ -133,7 +136,8 @@ export class VehiculosComponent implements OnInit {
       placa: vehiculo.placa,
       tipo: vehiculo.tipo,
       marca: vehiculo.marca ?? '',
-      color: vehiculo.color ?? ''
+      color: vehiculo.color ?? '',
+      fotoUrl: vehiculo.fotoUrl
     });
   }
 

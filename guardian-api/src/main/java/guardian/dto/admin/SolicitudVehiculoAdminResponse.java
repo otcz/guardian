@@ -18,6 +18,9 @@ public class SolicitudVehiculoAdminResponse {
     private String marcaNombre;
     private String colorNombre;
 
+    /** El carro que se esta autorizando. Es lo que sostiene la decision. */
+    private String fotoUrl;
+
     private Long casaId;
     private String casaIdentificador;
 

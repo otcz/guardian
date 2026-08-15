@@ -1,1 +1,47 @@
 @use '../../../styles/paneles';
+
+/* La foto arriba del formulario y en su propia fila: el resto de los campos
+   son selectores angostos, y meterla en la retícula con ellos la dejaba del
+   tamaño de un icono al lado de "Casa". */
+.foto-vehiculo {
+  display: block;
+  margin-bottom: var(--e-2);
+}
+
+/* ── Miniatura de la lista ────────────────────────────────────────────────
+   Apaisada y no cuadrada como el avatar de Personas: un carro fotografiado
+   de frente o de lado no cabe en un cuadrado sin recortarle los extremos,
+   que es justo por donde se reconoce. */
+.celda-foto {
+  width: 64px;
+}
+
+.miniatura {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 36px;
+  overflow: hidden;
+  border-radius: var(--r-sm);
+  background: var(--bg-soft);
+  border: 1px solid var(--border-default);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  i {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+}
+
+/* En tarjetas la celda deja de ser una columna angosta: el ancho fijo la
+   aplastaría contra la etiqueta. */
+@media (max-width: 820px) {
+  .tabla--tarjetas .celda-foto {
+    width: auto;
+  }
+}

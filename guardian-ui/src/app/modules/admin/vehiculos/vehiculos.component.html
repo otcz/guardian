@@ -9,6 +9,14 @@
   </div>
 
   <form class="alta gd-card" *ngIf="mostrarAlta" [formGroup]="formulario" (ngSubmit)="guardar()">
+    <!-- La foto primero, como en Personas: es lo que el guardia va a comparar
+         contra el carro que tiene enfrente. Marca y color describen, pero no
+         identifican — en un conjunto hay varios "Mazda gris". -->
+    <gd-foto-upload class="foto-vehiculo"
+        [fotoUrl]="formulario.controls.fotoUrl.value"
+        (fotoUrlChange)="formulario.controls.fotoUrl.setValue($event)">
+    </gd-foto-upload>
+
     <div class="campo">
       <label for="casa">Casa</label>
       <select id="casa" formControlName="casaId">
@@ -72,6 +80,7 @@
   <table class="tabla tabla--tarjetas gd-card" *ngIf="!cargando">
     <thead>
       <tr>
+        <th></th>
         <th>Placa</th>
         <th>Casa
           <gd-filtro-columna campo="casa" [filtro]="filtro" [filas]="vehiculos"
@@ -98,6 +107,15 @@
     </thead>
     <tbody>
       <tr *ngFor="let vehiculo of visibles" [class.inactiva]="!activo(vehiculo)">
+        <!-- CON data-etiqueta, a diferencia del avatar de Personas: en la
+             vista de tarjetas del teléfono las celdas sin etiqueta se ocultan,
+             y acá la foto es justamente el dato que se vino a ver. -->
+        <td data-etiqueta="Foto" class="celda-foto">
+          <span class="miniatura">
+            <img *ngIf="vehiculo.fotoUrl" [src]="vehiculo.fotoUrl | foto" [alt]="vehiculo.placa">
+            <i class="pi pi-car" *ngIf="!vehiculo.fotoUrl"></i>
+          </span>
+        </td>
         <td data-etiqueta="Placa" class="fuerte">{{ vehiculo.placa }}</td>
         <td data-etiqueta="Casa">{{ vehiculo.casaIdentificador }}</td>
         <td data-etiqueta="Tipo">{{ vehiculo.tipoNombre ?? vehiculo.tipo }}</td>
@@ -158,7 +176,7 @@
            registrando, y "no hay ninguno QUE COINCIDA" quitando el filtro.
            Con un solo mensaje, el segundo se lee como el primero. -->
       <tr *ngIf="visibles.length === 0">
-        <td colspan="7" class="vacio">
+        <td colspan="8" class="vacio">
           <ng-container *ngIf="vehiculos.length === 0">
             Todavía no hay vehículos registrados.
           </ng-container>

@@ -24,4 +24,8 @@ public class VehiculoResidenteRequest {
 
     @Size(max = 30)
     private String color;
+
+    /** Ruta de la foto ya subida por /api/fotos. Opcional. */
+    @Size(max = 500)
+    private String fotoUrl;
 }

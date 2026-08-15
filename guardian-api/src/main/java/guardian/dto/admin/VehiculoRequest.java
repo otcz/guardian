@@ -25,4 +25,11 @@ public class VehiculoRequest {
 
     @Size(max = 30)
     private String color;
+
+    /**
+     * Ruta de la foto ya subida por /api/fotos. Opcional: un vehiculo sin foto
+     * es un estado legitimo — lo identifica la placa.
+     */
+    @Size(max = 500)
+    private String fotoUrl;
 }

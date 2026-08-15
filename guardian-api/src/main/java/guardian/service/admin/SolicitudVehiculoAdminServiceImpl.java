@@ -55,6 +55,10 @@ public class SolicitudVehiculoAdminServiceImpl implements SolicitudVehiculoAdmin
         alta.setTipo(solicitud.getTipo());
         alta.setMarca(solicitud.getMarca());
         alta.setColor(solicitud.getColor());
+        // La foto pasa tal cual: es la misma que el administrador acaba de mirar
+        // para decidir, y volver a pedirla despues dejaria al vehiculo recien
+        // autorizado sin la imagen que la porteria va a comparar.
+        alta.setFotoUrl(solicitud.getFotoUrl());
 
         // Por el service de vehiculos y no con un save directo: es el que sabe
         // que la placa es unica en todo el sistema y que la casa tiene que ser
@@ -124,6 +128,7 @@ public class SolicitudVehiculoAdminServiceImpl implements SolicitudVehiculoAdmin
                         .etiqueta(Codigos.GRUPO_MARCA_VEHICULO, solicitud.getMarca()))
                 .colorNombre(etiquetaCatalogoService
                         .etiqueta(Codigos.GRUPO_COLOR_VEHICULO, solicitud.getColor()))
+                .fotoUrl(solicitud.getFotoUrl())
                 .casaId(solicitud.getCasa().getId())
                 .casaIdentificador(solicitud.getCasa().getIdentificador())
                 .solicitante(quien.getNombres() + " " + quien.getApellidos())

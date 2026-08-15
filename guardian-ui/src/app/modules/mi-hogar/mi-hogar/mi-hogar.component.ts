@@ -184,7 +184,11 @@ export class MiHogarComponent implements OnInit {
     placa: ['', [Validators.required]],
     tipo: ['', [Validators.required]],
     marca: [''],
-    color: ['']
+    color: [''],
+    // Sin Validators: al carro lo identifica su placa, no su foto. Exigirla
+    // dejaría al titular sin poder pedir el vehículo porque el celular no
+    // tiene batería para tomar la foto ahora.
+    fotoUrl: [null as string | null]
   });
 
   constructor(
@@ -351,12 +355,50 @@ export class MiHogarComponent implements OnInit {
       next: () => {
         this.guardando = false;
         this.mostrarAltaVehiculo = false;
-        this.formularioVehiculo.reset();
+        this.formularioVehiculo.reset({ fotoUrl: null });
         this.cargar();
       },
       error: (fallo: HttpErrorResponse) => {
         this.guardando = false;
         this.error = fallo.error?.mensaje ?? 'No pudimos enviar la solicitud.';
+      }
+    });
+  }
+
+  // ── Foto de un vehículo ya autorizado ────────────────────────────────────
+  //
+  // Aparte de la solicitud: el vehículo nace cuando la administración aprueba,
+  // así que los carros autorizados antes de que existiera este campo se
+  // quedarían sin foto para siempre si solo se pudiera mandar al pedirlo.
+
+  /** Vehículo al que se le está cambiando la foto. Null = hoja cerrada. */
+  vehiculoEnFoto: Vehiculo | null = null;
+  guardandoFotoVehiculo = false;
+
+  abrirFotoVehiculo(vehiculo: Vehiculo): void {
+    this.vehiculoEnFoto = vehiculo;
+  }
+
+  guardarFotoVehiculo(fotoUrl: string | null): void {
+    const vehiculo = this.vehiculoEnFoto;
+    if (!vehiculo || this.guardandoFotoVehiculo) {
+      return;
+    }
+
+    this.guardandoFotoVehiculo = true;
+    this.error = null;
+
+    this.residente.fijarFotoVehiculo(vehiculo.id, fotoUrl).subscribe({
+      next: actualizado => {
+        this.guardandoFotoVehiculo = false;
+        this.vehiculoEnFoto = null;
+        // Se reemplaza la fila y no se recarga todo: la lista de vehículos ya
+        // viene completa en la respuesta y una recarga entera parpadea.
+        this.vehiculos = this.vehiculos.map(v => (v.id === actualizado.id ? actualizado : v));
+      },
+      error: (fallo: HttpErrorResponse) => {
+        this.guardandoFotoVehiculo = false;
+        this.error = fallo.error?.mensaje ?? 'No pudimos guardar la foto del vehículo.';
       }
     });
   }

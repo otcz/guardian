@@ -22,6 +22,8 @@ public class SolicitudVehiculoResponse {
     private String marcaNombre;
     private String colorNombre;
 
+    private String fotoUrl;
+
     /** PENDIENTE, APROBADA o RECHAZADA. */
     private String estado;
 

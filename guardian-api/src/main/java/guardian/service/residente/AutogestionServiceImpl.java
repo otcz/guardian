@@ -144,13 +144,7 @@ public class AutogestionServiceImpl implements AutogestionService {
     @Transactional
     public VehiculoResponse cambiarEstadoVehiculo(Long vehiculoId, boolean activo,
                                                   UsuarioAutenticado usuario) {
-        GdCasa casa = miCasa(usuario);
-
-        // Solo vehiculos de MI casa: sin esto, cualquier residente podria
-        // inhabilitar el carro del vecino adivinando el id.
-        GdVehiculo vehiculo = vehiculoRepository.findById(vehiculoId)
-                .filter(v -> v.getCasa().getId().equals(casa.getId()))
-                .orElseThrow(() -> GuardianException.sinPermiso(MensajesGlobales.FAMILIAR_AJENO));
+        GdVehiculo vehiculo = exigirVehiculoDeMiCasa(vehiculoId, usuario);
 
         if (vehiculo.estaBloqueado()) {
             throw GuardianException.sinPermiso(MensajesGlobales.DESBLOQUEO_SOLO_ADMIN);
@@ -159,7 +153,33 @@ public class AutogestionServiceImpl implements AutogestionService {
         return vehiculoService.cambiarEstado(vehiculoId, activo, usuario);
     }
 
+    @Override
+    @Transactional
+    public VehiculoResponse fijarFotoVehiculo(Long vehiculoId, String fotoUrl,
+                                              UsuarioAutenticado usuario) {
+        // El mismo cerco que cambiar el estado: solo carros de MI casa, o
+        // cualquiera le cambiaria la foto al del vecino adivinando el id.
+        exigirVehiculoDeMiCasa(vehiculoId, usuario);
+
+        // El bloqueo administrativo NO se comprueba aca, a diferencia del
+        // estado: cambiar la foto no le devuelve el paso a un carro bloqueado,
+        // y si la administracion lo bloqueo justamente porque la foto no
+        // correspondia, poder corregirla es lo que destraba el caso.
+        return vehiculoService.fijarFoto(vehiculoId, fotoUrl, usuario);
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * El vehiculo, solo si es de MI casa. Sin este cerco, cualquier residente
+     * podria tocar el carro del vecino adivinando el id.
+     */
+    private GdVehiculo exigirVehiculoDeMiCasa(Long vehiculoId, UsuarioAutenticado usuario) {
+        GdCasa casa = miCasa(usuario);
+        return vehiculoRepository.findById(vehiculoId)
+                .filter(v -> v.getCasa().getId().equals(casa.getId()))
+                .orElseThrow(() -> GuardianException.sinPermiso(MensajesGlobales.FAMILIAR_AJENO));
+    }
 
     private GdCasa miCasa(UsuarioAutenticado usuario) {
         return hogar.casa(usuario);

@@ -67,4 +67,19 @@ public class GdVehiculo extends BaseEntity {
 
     @Column(name = "COLOR", length = 30)
     private String color;
+
+    /**
+     * Ruta relativa de la foto del vehiculo, subida por /api/fotos.
+     *
+     * <p>Cumple para el carro el mismo papel que la foto de la persona: el
+     * guardia compara lo que tiene enfrente contra la pantalla. Marca y color
+     * describen, pero no identifican — en un conjunto hay varios "Mazda gris",
+     * y la placa se lee mal de noche o viene tapada por el barro.</p>
+     *
+     * <p>A diferencia de la persona, la falta de foto NO bloquea nada: el
+     * vehiculo lo identifica su placa, que es unica en todo el sistema. La foto
+     * es evidencia de apoyo, no la llave.</p>
+     */
+    @Column(name = "FOTO_URL", length = 500)
+    private String fotoUrl;
 }

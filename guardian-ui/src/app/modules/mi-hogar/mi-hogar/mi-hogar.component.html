@@ -303,6 +303,13 @@
                (cerrar)="mostrarAltaVehiculo = false">
       <form id="alta-vehiculo" class="alta"
             [formGroup]="formularioVehiculo" (ngSubmit)="agregarVehiculo()">
+        <!-- Viaja con la solicitud: la administración autoriza que un carro
+             entre al conjunto, y "Mazda gris" no alcanza para decidir eso. -->
+        <gd-foto-upload
+            [fotoUrl]="formularioVehiculo.controls.fotoUrl.value"
+            (fotoUrlChange)="formularioVehiculo.controls.fotoUrl.setValue($event)">
+        </gd-foto-upload>
+
         <div class="campos">
           <div class="campo">
             <label for="v-placa">Placa</label>
@@ -349,7 +356,8 @@
         <article class="gd-fila miembro en-revision"
                  *ngFor="let solicitud of solicitudesVehiculo">
           <div class="avatar vehiculo">
-            <i class="pi pi-car"></i>
+            <img *ngIf="solicitud.fotoUrl" [src]="solicitud.fotoUrl | foto" [alt]="solicitud.placa">
+            <i class="pi pi-car" *ngIf="!solicitud.fotoUrl"></i>
           </div>
 
           <div class="datos">
@@ -386,9 +394,17 @@
         <article class="gd-fila miembro"
                  *ngFor="let vehiculo of vehiculos"
                  [class.inactivo]="!activo(vehiculo.activo)">
-          <div class="avatar vehiculo">
-            <i class="pi pi-car"></i>
-          </div>
+          <!-- La foto ES el botón para cambiarla, como el avatar propio de
+               arriba: un botón aparte en un renglón que ya tiene tres
+               acciones no cabe en un teléfono. -->
+          <button type="button" class="avatar vehiculo con-foto"
+                  (click)="abrirFotoVehiculo(vehiculo)"
+                  [attr.aria-label]="'Cambiar la foto de ' + vehiculo.placa"
+                  pTooltip="Cambiar foto" tooltipPosition="right">
+            <img *ngIf="vehiculo.fotoUrl" [src]="vehiculo.fotoUrl | foto" [alt]="vehiculo.placa">
+            <i class="pi pi-car" *ngIf="!vehiculo.fotoUrl"></i>
+            <span class="cambiar-foto" aria-hidden="true"><i class="pi pi-camera"></i></span>
+          </button>
 
           <div class="datos">
             <strong class="placa">{{ vehiculo.placa }}</strong>
@@ -439,6 +455,21 @@
           Registrar vehículo
         </button>
       </div>
+
+      <gd-hoja [abierta]="!!vehiculoEnFoto"
+               [titulo]="'Foto de ' + (vehiculoEnFoto?.placa || '')"
+               (cerrar)="vehiculoEnFoto = null">
+        <p class="instruccion">
+          El guardia compara el carro con esta foto. Tómala de frente, con la
+          placa visible.
+        </p>
+        <gd-foto-upload [fotoUrl]="vehiculoEnFoto?.fotoUrl || null"
+                        (fotoUrlChange)="guardarFotoVehiculo($event)">
+        </gd-foto-upload>
+        <p class="estado" role="status" *ngIf="guardandoFotoVehiculo">
+          <i class="pi pi-spinner pi-spin" aria-hidden="true"></i> Guardando…
+        </p>
+      </gd-hoja>
     </section>
 
     <!-- Confirmación de lo destructivo. Desactivar a alguien le quita el

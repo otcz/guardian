@@ -645,6 +645,7 @@ public class AccesoServiceImpl implements AccesoService {
                                 .etiqueta(Codigos.GRUPO_MARCA_VEHICULO, v.getMarca()))
                         .color(etiquetaCatalogoService
                                 .etiqueta(Codigos.GRUPO_COLOR_VEHICULO, v.getColor()))
+                        .fotoUrl(v.getFotoUrl())
                         .build())
                 .collect(Collectors.toList());
     }

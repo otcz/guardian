@@ -15,6 +15,12 @@ export interface VehiculoResumen {
   tipo: string;
   marca: string | null;
   color: string | null;
+  /**
+   * El carro, para que el guardia elija mirando y no leyendo. Null es
+   * legítimo: al vehículo lo identifica su placa, y sin foto el botón cae al
+   * icono genérico.
+   */
+  fotoUrl: string | null;
 }
 
 /** Lo que el guardia ve tras escanear. Refleja FichaVerificacionResponse del API. */

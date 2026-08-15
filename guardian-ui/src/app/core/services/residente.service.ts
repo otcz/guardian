@@ -92,6 +92,17 @@ export class ResidenteService {
     return this.http.patch<Vehiculo>(`${this.base}/vehiculos/${id}/${accion}`, {});
   }
 
+  /**
+   * La foto de un carro YA autorizado. `null` la quita.
+   *
+   * <p>Existe aparte de la solicitud porque el vehículo nace por aprobación:
+   * si la foto solo se pudiera mandar al pedirlo, los carros autorizados antes
+   * de que existiera este campo se quedarían sin foto para siempre.</p>
+   */
+  fijarFotoVehiculo(id: number, fotoUrl: string | null): Observable<Vehiculo> {
+    return this.http.put<Vehiculo>(`${this.base}/vehiculos/${id}/foto`, { fotoUrl });
+  }
+
   // ── Vehículos por autorizar ──────────────────────────────────────────────
   //
   // El titular no registra el vehículo: lo PIDE. Registrar una placa es darle

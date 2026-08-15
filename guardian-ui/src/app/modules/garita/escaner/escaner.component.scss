@@ -447,6 +447,24 @@ h1 {
     i {
       font-size: 1.05rem;
     }
+
+    /* Apaisado y más grande cuando lleva foto: un carro no cabe en 34px
+       cuadrados sin volverse una mancha. No crece más que esto a propósito
+       —la lista de opciones tiene que caber sin scroll, que es la regla de
+       esta pantalla— y a 62px ya se distingue de otro carro de la misma casa
+       a un metro de distancia. */
+    &.con-foto {
+      width: 62px;
+      height: 42px;
+      background: rgb(0 0 0 / 25%);
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: inherit;
+      }
+    }
   }
 
   .etiqueta {

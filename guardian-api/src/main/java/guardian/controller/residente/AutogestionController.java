@@ -4,6 +4,7 @@ import guardian.constant.ApiEndpoint;
 import guardian.dto.admin.VehiculoResponse;
 import guardian.dto.residente.FamiliarRequest;
 import guardian.dto.residente.FamiliarResponse;
+import guardian.dto.residente.MiFotoRequest;
 import guardian.security.UsuarioActual;
 import guardian.service.admin.PersonaRegistrada;
 import guardian.service.residente.AutogestionService;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -80,5 +82,20 @@ public class AutogestionController {
     public ResponseEntity<VehiculoResponse> desactivarVehiculo(@PathVariable Long id) {
         return ResponseEntity.ok(
                 autogestionService.cambiarEstadoVehiculo(id, false, usuarioActual.obtener()));
+    }
+
+    /**
+     * La foto del carro de mi casa. Sin fotoUrl en el cuerpo, la quita.
+     *
+     * <p>El DTO es {@link MiFotoRequest} sin {@code @Valid} a proposito: alli
+     * fotoUrl es {@code @NotBlank} porque una persona no puede quedarse sin
+     * cara —de eso depende su credencial—, pero un vehiculo si puede quedarse
+     * sin foto: lo identifica la placa.</p>
+     */
+    @PutMapping(ApiEndpoint.RESIDENTE_VEHICULOS + "/{id}/foto")
+    public ResponseEntity<VehiculoResponse> fijarFotoVehiculo(@PathVariable Long id,
+                                                              @RequestBody MiFotoRequest request) {
+        return ResponseEntity.ok(autogestionService.fijarFotoVehiculo(
+                id, request.getFotoUrl(), usuarioActual.obtener()));
     }
 }

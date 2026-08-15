@@ -23,6 +23,16 @@ public interface VehiculoService {
     VehiculoResponse cambiarEstado(Long id, boolean activo, UsuarioAutenticado ejecutor);
 
     /**
+     * Solo la foto, sin tocar placa ni catalogo. Null o vacio la quita.
+     *
+     * <p>Separado de {@link #actualizar} porque el residente puede cambiar la
+     * foto del carro de su casa pero no su placa: pasar por actualizar()
+     * obligaria a mandarle el request completo y le abriria la puerta a
+     * reescribir el resto.</p>
+     */
+    VehiculoResponse fijarFoto(Long id, String fotoUrl, UsuarioAutenticado ejecutor);
+
+    /**
      * Eliminacion FISICA — exclusiva del super administrador. El residente y
      * el administrador de la sede solo inactivan, que deja rastro.
      *

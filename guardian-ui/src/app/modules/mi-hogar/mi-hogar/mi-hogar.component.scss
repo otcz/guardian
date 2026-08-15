@@ -293,6 +293,17 @@ section {
       color: var(--accent);
     }
   }
+
+  /* Cuando el avatar ES el botón de cambiar la foto —el caso del vehículo—
+     hay que apagarle lo que el navegador le pone a un <button>. El área
+     táctil la da el propio avatar: 44px, justo el mínimo. */
+  &.con-foto {
+    padding: 0;
+    border: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+  }
 }
 
 /* Insignia y no un botón aparte: se ve pegada a LA foto que cambia, no como

@@ -161,7 +161,14 @@
                   class="opcion"
                   *ngFor="let vehiculo of ficha.vehiculos"
                   (click)="registrar('VEHICULO', vehiculo)">
-            <span class="simbolo"><i class="pi pi-car"></i></span>
+            <!-- La foto reemplaza al icono cuando existe: el guardia elige el
+                 botón mirando el carro que tiene enfrente, no leyendo tres
+                 placas parecidas. Con el icono genérico, dos carros de la
+                 misma casa son dos botones idénticos. -->
+            <span class="simbolo" [class.con-foto]="vehiculo.fotoUrl">
+              <img *ngIf="vehiculo.fotoUrl" [src]="vehiculo.fotoUrl | foto" [alt]="vehiculo.placa">
+              <i class="pi pi-car" *ngIf="!vehiculo.fotoUrl"></i>
+            </span>
             <span class="etiqueta">
               {{ vehiculo.placa }}
               <small *ngIf="vehiculo.marca || vehiculo.color">

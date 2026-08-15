@@ -116,6 +116,7 @@ export interface SolicitudVehiculo {
   tipoNombre: string | null;
   marcaNombre: string | null;
   colorNombre: string | null;
+  fotoUrl: string | null;
   estado: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
   motivoRechazo: string | null;
   fechaSolicitud: string;
@@ -128,6 +129,8 @@ export interface SolicitudVehiculoAdmin {
   tipoNombre: string | null;
   marcaNombre: string | null;
   colorNombre: string | null;
+  /** El carro que se está autorizando. Es lo que sostiene la decisión. */
+  fotoUrl: string | null;
   casaId: number;
   casaIdentificador: string;
   solicitante: string;
@@ -329,6 +332,8 @@ export interface VehiculoResidenteRequest {
   tipo: string;
   marca?: string | null;
   color?: string | null;
+  /** Viaja con la solicitud: el administrador decide viendo el carro. */
+  fotoUrl?: string | null;
 }
 
 /** Respuesta del alta: incluye el QR para poder imprimir el carnet en el momento. */
@@ -348,6 +353,11 @@ export interface Vehiculo {
   tipoNombre: string | null;
   marcaNombre: string | null;
   colorNombre: string | null;
+  /**
+   * Foto del carro. Null es legítimo: al vehículo lo identifica su placa, no
+   * su foto — a diferencia de la persona, que sin foto no recibe credencial.
+   */
+  fotoUrl: string | null;
   activo: string;
   bloqueado: string;
   motivoBloqueo: string | null;
@@ -363,6 +373,7 @@ export interface VehiculoRequest {
   tipo: string;
   marca?: string | null;
   color?: string | null;
+  fotoUrl?: string | null;
 }
 
 export interface Parametro {

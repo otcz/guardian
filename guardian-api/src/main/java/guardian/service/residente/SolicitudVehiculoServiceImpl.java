@@ -15,6 +15,7 @@ import guardian.security.UsuarioAutenticado;
 import guardian.service.admin.EtiquetaCatalogoService;
 import guardian.service.admin.ParametroService;
 import guardian.util.CatalogoVehiculo;
+import guardian.util.FotoUrlUtil;
 import guardian.util.PlacaUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,6 +66,12 @@ public class SolicitudVehiculoServiceImpl implements SolicitudVehiculoService {
         CatalogoVehiculo.exigir(parametroService, request.getTipo(),
                 request.getMarca(), request.getColor());
 
+        // Se valida ACA y no solo al aprobar: una URL externa guardada en la
+        // solicitud le quedaria delante al administrador como si fuera el carro.
+        if (!FotoUrlUtil.esValida(request.getFotoUrl())) {
+            throw GuardianException.solicitudInvalida(MensajesGlobales.FOTO_URL_INVALIDA);
+        }
+
         String placa = PlacaUtil.normalizar(request.getPlaca());
 
         // Las dos colisiones posibles, cortadas antes de llenar la bandeja: la
@@ -89,6 +96,7 @@ public class SolicitudVehiculoServiceImpl implements SolicitudVehiculoService {
         solicitud.setTipo(request.getTipo());
         solicitud.setMarca(CatalogoVehiculo.limpiar(request.getMarca()));
         solicitud.setColor(CatalogoVehiculo.limpiar(request.getColor()));
+        solicitud.setFotoUrl(request.getFotoUrl());
         solicitud.setEstado(Codigos.SOLICITUD_PENDIENTE);
         solicitud.setActivo(Codigos.SI);
         solicitud.setBloqueado(Codigos.NO);
@@ -139,6 +147,7 @@ public class SolicitudVehiculoServiceImpl implements SolicitudVehiculoService {
                         .etiqueta(Codigos.GRUPO_MARCA_VEHICULO, solicitud.getMarca()))
                 .colorNombre(etiquetaCatalogoService
                         .etiqueta(Codigos.GRUPO_COLOR_VEHICULO, solicitud.getColor()))
+                .fotoUrl(solicitud.getFotoUrl())
                 .estado(solicitud.getEstado())
                 .motivoRechazo(solicitud.getMotivoRechazo())
                 .fechaSolicitud(solicitud.getFechaCreacion())

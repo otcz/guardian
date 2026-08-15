@@ -36,4 +36,14 @@ public interface AutogestionService {
 
     VehiculoResponse cambiarEstadoVehiculo(Long vehiculoId, boolean activo,
                                            UsuarioAutenticado usuario);
+
+    /**
+     * Cambia la foto de un vehiculo de MI casa. Null la quita.
+     *
+     * <p>Existe aparte del alta porque el vehiculo nace por aprobacion: si la
+     * foto solo se pudiera fijar al pedirlo, un carro autorizado antes de que
+     * existiera este campo se quedaria sin foto para siempre.</p>
+     */
+    VehiculoResponse fijarFotoVehiculo(Long vehiculoId, String fotoUrl,
+                                       UsuarioAutenticado usuario);
 }

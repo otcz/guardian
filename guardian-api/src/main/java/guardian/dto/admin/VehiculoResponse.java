@@ -19,6 +19,9 @@ public class VehiculoResponse {
     private String marcaNombre;
     private String colorNombre;
 
+    /** Ruta relativa; el cliente la resuelve contra el host del API. */
+    private String fotoUrl;
+
     private String activo;
 
     /** Llave del administrador: gana sobre "activo". */

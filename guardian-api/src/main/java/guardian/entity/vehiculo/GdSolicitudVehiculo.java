@@ -71,6 +71,17 @@ public class GdSolicitudVehiculo extends BaseEntity {
     @Column(name = "COLOR", length = 30)
     private String color;
 
+    /**
+     * Foto del vehiculo, ya subida por /api/fotos.
+     *
+     * <p>Viaja con la solicitud y no se pide despues de aprobar: el
+     * administrador esta autorizando que un carro entre al conjunto, y "Mazda
+     * gris" no es identificacion suficiente para eso. Al aprobar pasa tal cual
+     * al vehiculo que nace.</p>
+     */
+    @Column(name = "FOTO_URL", length = 500)
+    private String fotoUrl;
+
     /** PENDIENTE, APROBADA o RECHAZADA. */
     @Column(name = "ESTADO", nullable = false, length = 20)
     private String estado;

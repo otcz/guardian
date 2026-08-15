@@ -112,6 +112,7 @@
     <table class="tabla tabla--tarjetas gd-card">
       <thead>
         <tr>
+          <th></th>
           <th>Placa</th>
           <th>Vehículo</th>
           <th>Casa</th>
@@ -122,6 +123,16 @@
       </thead>
       <tbody>
         <tr *ngFor="let v of vehiculos">
+          <!-- Lo que sostiene la decisión: acá se está autorizando que un
+               carro entre al conjunto, y "Camioneta · Mazda · Gris" describe
+               pero no identifica. Con data-etiqueta para que tampoco se
+               pierda en la vista de tarjetas del teléfono. -->
+          <td data-etiqueta="Foto" class="celda-foto">
+            <span class="miniatura">
+              <img *ngIf="v.fotoUrl" [src]="v.fotoUrl | foto" [alt]="v.placa">
+              <i class="pi pi-car" *ngIf="!v.fotoUrl"></i>
+            </span>
+          </td>
           <td data-etiqueta="Placa" class="fuerte placa">{{ v.placa }}</td>
           <td data-etiqueta="Vehículo">
             {{ v.tipoNombre }}
