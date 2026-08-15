@@ -19,7 +19,7 @@
 
     <div class="utilidades">
       <span class="casa" *ngIf="sesion?.casaIdentificador">
-        <i class="pi pi-home" aria-hidden="true"></i> {{ sesion?.casaIdentificador }}
+        <i class="ms" aria-hidden="true">home</i> {{ sesion?.casaIdentificador }}
       </span>
 
       <button type="button" class="avatar" (click)="mostrarCuenta = true"
@@ -41,15 +41,15 @@
        página desorienta. El estado real lo dice ariaCurrentWhenActive. -->
   <nav class="tabbar" aria-label="Secciones">
     <a routerLink="mi-qr" routerLinkActive="activa" ariaCurrentWhenActive="page" class="tab">
-      <i class="pi pi-qrcode" aria-hidden="true"></i>
+      <i class="ms" aria-hidden="true">qr_code_2</i>
       <span>Mi QR</span>
     </a>
     <a routerLink="mi-hogar" routerLinkActive="activa" ariaCurrentWhenActive="page" class="tab">
-      <i class="pi pi-home" aria-hidden="true"></i>
+      <i class="ms" aria-hidden="true">home</i>
       <span>Mi hogar</span>
     </a>
     <a routerLink="invitados" routerLinkActive="activa" ariaCurrentWhenActive="page" class="tab">
-      <i class="pi pi-ticket" aria-hidden="true"></i>
+      <i class="ms" aria-hidden="true">confirmation_number</i>
       <span>Invitados</span>
     </a>
   </nav>
@@ -74,9 +74,9 @@
       <button type="button" class="gd-fila gd-presionable"
               *ngFor="let opcion of opcionesTema"
               (click)="tema.fijar(opcion.valor)">
-        <i class="pi" [ngClass]="opcion.icono"></i>
+        <i class="ms">{{ opcion.icono }}</i>
         <span class="etiqueta">{{ opcion.nombre }}</span>
-        <i class="pi pi-check marca" *ngIf="tema.preferencia === opcion.valor"></i>
+        <i class="ms marca" *ngIf="tema.preferencia === opcion.valor">check</i>
       </button>
     </div>
 
@@ -84,9 +84,9 @@
     <div class="gd-lista">
       <a class="gd-fila gd-presionable" routerLink="/cambiar-clave"
          (click)="mostrarCuenta = false">
-        <i class="pi pi-key"></i>
+        <i class="ms">key</i>
         <span class="etiqueta">Cambiar mi PIN</span>
-        <i class="pi pi-chevron-right marca"></i>
+        <i class="ms marca">chevron_right</i>
       </a>
     </div>
 
@@ -95,15 +95,15 @@
       <div class="gd-lista">
         <a class="gd-fila gd-presionable" routerLink="/porteria"
            *ngIf="puedeIrAPorteria" (click)="mostrarCuenta = false">
-          <i class="pi pi-shield"></i>
+          <i class="ms">shield</i>
           <span class="etiqueta">Portería</span>
-          <i class="pi pi-chevron-right marca"></i>
+          <i class="ms marca">chevron_right</i>
         </a>
         <a class="gd-fila gd-presionable" routerLink="/admin"
            *ngIf="puedeIrAAdmin" (click)="mostrarCuenta = false">
-          <i class="pi pi-cog"></i>
+          <i class="ms">settings</i>
           <span class="etiqueta">Administración</span>
-          <i class="pi pi-chevron-right marca"></i>
+          <i class="ms marca">chevron_right</i>
         </a>
       </div>
     </ng-container>

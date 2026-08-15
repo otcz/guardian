@@ -36,12 +36,11 @@
             <button type="button" class="ver-clave"
                     (click)="verActual = !verActual"
                     [attr.aria-label]="verActual ? 'Ocultar el PIN' : 'Ver el PIN'">
-              <i class="pi" [ngClass]="verActual ? 'pi-eye-slash' : 'pi-eye'"
-                 aria-hidden="true"></i>
+              <i class="ms" aria-hidden="true">{{ verActual ? 'visibility_off' : 'visibility' }}</i>
             </button>
           </div>
           <p class="error" id="error-actual" role="alert" *ngIf="errorClaveActual">
-            <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+            <i class="ms" aria-hidden="true">error</i>
             {{ errorClaveActual }}
           </p>
         </div>
@@ -57,7 +56,7 @@
                     aria-label="4 números. Evita 1234 y repetidos"
                     pTooltip="4 números. Evita 1234 y repetidos"
                     tooltipPosition="top" tooltipEvent="both">
-              <i class="pi pi-info-circle" aria-hidden="true"></i>
+              <i class="ms" aria-hidden="true">info</i>
             </button>
           </div>
           <div class="control">
@@ -71,12 +70,11 @@
             <button type="button" class="ver-clave"
                     (click)="verNueva = !verNueva"
                     [attr.aria-label]="verNueva ? 'Ocultar el PIN' : 'Ver el PIN'">
-              <i class="pi" [ngClass]="verNueva ? 'pi-eye-slash' : 'pi-eye'"
-                 aria-hidden="true"></i>
+              <i class="ms" aria-hidden="true">{{ verNueva ? 'visibility_off' : 'visibility' }}</i>
             </button>
           </div>
           <p class="error" id="error-nueva" role="alert" *ngIf="errorClaveNueva">
-            <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+            <i class="ms" aria-hidden="true">error</i>
             {{ errorClaveNueva }}
           </p>
         </div>
@@ -96,19 +94,18 @@
             <button type="button" class="ver-clave"
                     (click)="verConfirmacion = !verConfirmacion"
                     [attr.aria-label]="verConfirmacion ? 'Ocultar el PIN' : 'Ver el PIN'">
-              <i class="pi" [ngClass]="verConfirmacion ? 'pi-eye-slash' : 'pi-eye'"
-                 aria-hidden="true"></i>
+              <i class="ms" aria-hidden="true">{{ verConfirmacion ? 'visibility_off' : 'visibility' }}</i>
             </button>
           </div>
           <p class="error" id="error-confirmacion" role="alert" *ngIf="errorConfirmacion">
-            <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+            <i class="ms" aria-hidden="true">error</i>
             {{ errorConfirmacion }}
           </p>
         </div>
       </div>
 
       <p class="aviso" role="alert" *ngIf="error">
-        <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+        <i class="ms" aria-hidden="true">warning</i>
         <span>{{ error }}</span>
       </p>
 
@@ -116,7 +113,7 @@
            acción va sola al final y no se confunde con un campo más. -->
       <div class="acciones">
         <button type="submit" class="principal" [disabled]="cargando">
-          <i class="pi pi-spinner pi-spin" *ngIf="cargando" aria-hidden="true"></i>
+          <i class="ms gira" *ngIf="cargando" aria-hidden="true">progress_activity</i>
           {{ cargando ? 'Guardando…' : 'Guardar' }}
         </button>
 

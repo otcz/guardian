@@ -7,14 +7,14 @@
          mandar a fallar. -->
     <div class="masiva">
       <button type="button" class="alterno" (click)="descargarPlantilla()">
-        <i class="pi pi-download"></i>
+        <i class="ms">download</i>
         Ver el formato
       </button>
 
       <!-- El input va oculto pero enfocable, dentro del label: así el botón se
            ve como los demás y el teclado sigue llegando. -->
       <label class="alterno cargar" [class.ocupado]="importando">
-        <i class="pi" [ngClass]="importando ? 'pi-spinner pi-spin' : 'pi-upload'"></i>
+        <i class="ms" [class.gira]="importando">{{ importando ? 'progress_activity' : 'upload' }}</i>
         {{ importando ? 'Cargando…' : 'Cargar Excel' }}
         <input type="file" accept=".xlsx" (change)="archivoElegido($event)"
                [disabled]="importando">
@@ -27,9 +27,9 @@
     <div class="campo">
       <label for="torre">
         Tipo
-        <i class="pi pi-info-circle ayuda"
+        <i class="ms ayuda"
            pTooltip="¿Falta alguno? Agrégalo en Configuración"
-           tooltipPosition="top"></i>
+           tooltipPosition="top">info</i>
       </label>
       <select id="torre" formControlName="torre">
         <option value="">Selecciona…</option>
@@ -44,7 +44,7 @@
 
 
     <button type="submit" class="principal" [disabled]="guardando">
-      <i class="pi" [ngClass]="editando ? 'pi-check' : 'pi-plus'"></i>
+      <i class="ms">{{ editando ? 'check' : 'add' }}</i>
       {{ editando ? 'Guardar cambios' : 'Agregar' }}
     </button>
 
@@ -69,7 +69,7 @@
       </span>
       <button type="button" class="cerrar" (click)="resultado = null"
               aria-label="Cerrar el resumen">
-        <i class="pi pi-times"></i>
+        <i class="ms">close</i>
       </button>
     </div>
 
@@ -96,7 +96,7 @@
   <!-- El buscador mira todas las columnas a la vez; los embudos de la
        cabecera acotan una por una. Se usan juntos.  -->
   <div class="busqueda">
-    <i class="pi pi-search"></i>
+    <i class="ms">search</i>
     <input type="search" [(ngModel)]="filtro.busqueda" (ngModelChange)="filtrar()"
            placeholder="Buscar por casa o torre">
   </div>
@@ -132,7 +132,7 @@
                 [class.candado]="bloqueada(casa)"
                 [attr.tabindex]="bloqueada(casa) ? 0 : null"
                 [pTooltip]="casa.motivoBloqueo || ''" tooltipPosition="top">
-            <i class="pi pi-lock" *ngIf="bloqueada(casa)"></i>
+            <i class="ms" *ngIf="bloqueada(casa)">lock</i>
             {{ estado(casa) }}
           </span>
         </td>
@@ -141,7 +141,7 @@
                   (click)="editar(casa)"
                   [attr.aria-label]="'Editar ' + casa.identificador"
                   pTooltip="Editar" tooltipPosition="left">
-            <i class="pi pi-pencil"></i>
+            <i class="ms">edit</i>
           </button>
           <button type="button"
                   class="accion"
@@ -149,7 +149,7 @@
                   [attr.aria-label]="(activa(casa) ? 'Desactivar ' : 'Activar ') + casa.identificador"
                   [pTooltip]="activa(casa) ? 'Desactivar la casa completa' : 'Activar'"
                   tooltipPosition="left">
-            <i class="pi" [ngClass]="activa(casa) ? 'pi-ban' : 'pi-check'"></i>
+            <i class="ms">{{ activa(casa) ? 'block' : 'check' }}</i>
           </button>
 
           <span class="separador" aria-hidden="true"></span>
@@ -161,7 +161,7 @@
                     + casa.identificador"
                   [pTooltip]="bloqueada(casa) ? 'Habilitar' : 'Deshabilitar'"
                   tooltipPosition="left">
-            <i class="pi" [ngClass]="bloqueada(casa) ? 'pi-lock-open' : 'pi-lock'"></i>
+            <i class="ms">{{ bloqueada(casa) ? 'lock_open' : 'lock' }}</i>
           </button>
         </td>
       </tr>

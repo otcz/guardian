@@ -3,7 +3,7 @@
     <h1>Invitaciones</h1>
     <button type="button" class="accion" (click)="cargar()"
             pTooltip="Actualizar" tooltipPosition="left">
-      <i class="pi pi-refresh"></i>
+      <i class="ms">refresh</i>
     </button>
   </div>
 
@@ -12,7 +12,7 @@
   <!-- El buscador mira todas las columnas a la vez; los embudos de la
        cabecera acotan una por una. Se usan juntos.  -->
   <div class="busqueda">
-    <i class="pi pi-search"></i>
+    <i class="ms">search</i>
     <input type="search" [(ngModel)]="filtro.busqueda" (ngModelChange)="filtrar()"
            placeholder="Buscar por invitado, documento, placa o anfitrión">
   </div>
@@ -65,13 +65,13 @@
                   (click)="compartir(invitacion)"
                   [attr.aria-label]="'Copiar el link de ' + invitacion.nombreInvitado"
                   pTooltip="Copiar link" tooltipPosition="left">
-            <i class="pi pi-share-alt"></i>
+            <i class="ms">share</i>
           </button>
           <button type="button" class="accion peligro" *ngIf="revocable(invitacion)"
                   (click)="revocar(invitacion)"
                   [attr.aria-label]="'Revocar la invitación de ' + invitacion.nombreInvitado"
                   pTooltip="Revocar" tooltipPosition="left">
-            <i class="pi pi-ban"></i>
+            <i class="ms">block</i>
           </button>
           <!-- Solo el super administrador. Una invitación borrada es un hueco
                en la auditoría: alguien pudo entrar por ese código y no quedaría
@@ -80,7 +80,7 @@
                   (click)="eliminar(invitacion)"
                   [attr.aria-label]="'Eliminar la invitación de ' + invitacion.nombreInvitado"
                   pTooltip="Eliminar" tooltipPosition="left">
-            <i class="pi pi-trash"></i>
+            <i class="ms">delete</i>
           </button>
         </td>
       </tr>

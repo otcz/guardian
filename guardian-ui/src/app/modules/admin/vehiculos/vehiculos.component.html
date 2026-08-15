@@ -3,7 +3,7 @@
     <h1>Vehículos</h1>
     <button type="button" class="principal"
             (click)="mostrarAlta ? cancelarEdicion() : (mostrarAlta = true)">
-      <i class="pi" [ngClass]="mostrarAlta ? 'pi-times' : 'pi-plus'"></i>
+      <i class="ms">{{ mostrarAlta ? 'close' : 'add' }}</i>
       {{ mostrarAlta ? 'Cancelar' : 'Registrar' }}
     </button>
   </div>
@@ -41,9 +41,9 @@
     <div class="campo">
       <label for="marca">
         Marca
-        <i class="pi pi-info-circle ayuda"
+        <i class="ms ayuda"
            pTooltip="¿Falta alguna? Agrégala en Configuración"
-           tooltipPosition="top"></i>
+           tooltipPosition="top">info</i>
       </label>
       <select id="marca" formControlName="marca">
         <option value="">Sin marca</option>
@@ -60,7 +60,7 @@
     </div>
 
     <button type="submit" class="principal" [disabled]="guardando">
-      <i class="pi pi-check"></i>
+      <i class="ms">check</i>
       {{ editando ? 'Guardar cambios' : 'Guardar' }}
     </button>
   </form>
@@ -70,7 +70,7 @@
   <!-- El buscador mira todas las columnas a la vez; los embudos de la
        cabecera acotan una por una. Se usan juntos.  -->
   <div class="busqueda">
-    <i class="pi pi-search"></i>
+    <i class="ms">search</i>
     <input type="search" [(ngModel)]="filtro.busqueda" (ngModelChange)="filtrar()"
            placeholder="Buscar por placa, casa, marca o color">
   </div>
@@ -113,7 +113,7 @@
         <td data-etiqueta="Foto" class="celda-foto">
           <span class="miniatura">
             <img *ngIf="vehiculo.fotoUrl" [src]="vehiculo.fotoUrl | foto" [alt]="vehiculo.placa">
-            <i class="pi pi-car" *ngIf="!vehiculo.fotoUrl"></i>
+            <i class="ms" *ngIf="!vehiculo.fotoUrl">directions_car</i>
           </span>
         </td>
         <td data-etiqueta="Placa" class="fuerte">{{ vehiculo.placa }}</td>
@@ -126,7 +126,7 @@
                 [class.candado]="bloqueado(vehiculo)"
                 [attr.tabindex]="bloqueado(vehiculo) ? 0 : null"
                 [pTooltip]="vehiculo.motivoBloqueo || ''" tooltipPosition="top">
-            <i class="pi pi-lock" *ngIf="bloqueado(vehiculo)"></i>
+            <i class="ms" *ngIf="bloqueado(vehiculo)">lock</i>
             {{ estado(vehiculo) }}
           </span>
         </td>
@@ -135,14 +135,14 @@
                   (click)="editar(vehiculo)"
                   [attr.aria-label]="'Editar ' + vehiculo.placa"
                   pTooltip="Editar" tooltipPosition="left">
-            <i class="pi pi-pencil"></i>
+            <i class="ms">edit</i>
           </button>
           <button type="button" class="accion"
                   (click)="alternarEstado(vehiculo)"
                   [attr.aria-label]="(activo(vehiculo) ? 'Desactivar ' : 'Activar ') + vehiculo.placa"
                   [pTooltip]="activo(vehiculo) ? 'Desactivar' : 'Activar'"
                   tooltipPosition="left">
-            <i class="pi" [ngClass]="activo(vehiculo) ? 'pi-ban' : 'pi-check'"></i>
+            <i class="ms">{{ activo(vehiculo) ? 'block' : 'check' }}</i>
           </button>
 
           <!-- Dos llaves y hacen falta las dos. El hogar activa y desactiva su
@@ -157,7 +157,7 @@
                     + vehiculo.placa"
                   [pTooltip]="bloqueado(vehiculo) ? 'Habilitar' : 'Deshabilitar'"
                   tooltipPosition="left">
-            <i class="pi" [ngClass]="bloqueado(vehiculo) ? 'pi-lock-open' : 'pi-lock'"></i>
+            <i class="ms">{{ bloqueado(vehiculo) ? 'lock_open' : 'lock' }}</i>
           </button>
 
           <!-- Solo el super administrador. Borrar deja un hueco en la
@@ -167,7 +167,7 @@
                   (click)="eliminar(vehiculo)"
                   [attr.aria-label]="'Eliminar ' + vehiculo.placa"
                   pTooltip="Eliminar" tooltipPosition="left">
-            <i class="pi pi-trash"></i>
+            <i class="ms">delete</i>
           </button>
         </td>
       </tr>

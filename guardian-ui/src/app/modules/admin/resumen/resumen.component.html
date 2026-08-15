@@ -3,7 +3,7 @@
     <h1>Resumen</h1>
     <button type="button" class="accion" (click)="cargar()"
             pTooltip="Actualizar" tooltipPosition="left">
-      <i class="pi pi-refresh"></i>
+      <i class="ms">refresh</i>
     </button>
   </div>
 
@@ -37,25 +37,25 @@
     <!-- Inventario -->
     <section class="fila">
       <a class="kpi enlace" routerLink="../casas">
-        <i class="pi pi-building"></i>
+        <i class="ms">apartment</i>
         <span class="valor">{{ resumen.casasActivas }}</span>
         <span class="titulo">Casas activas</span>
         <span class="detalle">de {{ resumen.casasTotal }}</span>
       </a>
       <a class="kpi enlace" routerLink="../personas">
-        <i class="pi pi-users"></i>
+        <i class="ms">group</i>
         <span class="valor">{{ resumen.personasActivas }}</span>
         <span class="titulo">Personas activas</span>
         <span class="detalle">de {{ resumen.personasTotal }}</span>
       </a>
       <a class="kpi enlace" routerLink="../vehiculos">
-        <i class="pi pi-car"></i>
+        <i class="ms">directions_car</i>
         <span class="valor">{{ resumen.vehiculosActivos }}</span>
         <span class="titulo">Vehículos habilitados</span>
         <span class="detalle">de {{ resumen.vehiculosTotal }}</span>
       </a>
       <a class="kpi enlace" routerLink="../usuarios">
-        <i class="pi pi-key"></i>
+        <i class="ms">key</i>
         <span class="valor">{{ resumen.usuariosActivos }}</span>
         <span class="titulo">Cuentas habilitadas</span>
         <span class="detalle">de {{ resumen.usuariosTotal }}</span>
@@ -67,7 +67,7 @@
       <div class="encabezado seccion">
         <h2>Últimos movimientos</h2>
         <a routerLink="../bitacora" class="ver-todo">
-          Ver bitácora <i class="pi pi-arrow-right"></i>
+          Ver bitácora <i class="ms">arrow_forward</i>
         </a>
       </div>
 
@@ -79,7 +79,7 @@
             <td data-etiqueta="Casa">{{ evento.casaIdentificador ?? '—' }}</td>
             <td data-etiqueta="Movimiento">
               <span class="movimiento">
-                <i class="pi" [ngClass]="evento.sentido === 'E' ? 'pi-sign-in ok' : 'pi-sign-out warn'"></i>
+                <i class="ms" [ngClass]="evento.sentido === 'E' ? 'ok' : 'warn'">{{ evento.sentido === 'E' ? 'login' : 'logout' }}</i>
                 {{ evento.sentido === 'E' ? 'Entrada' : 'Salida' }}
                 <ng-container *ngIf="evento.vehiculoPlaca"> · {{ evento.vehiculoPlaca }}</ng-container>
               </span>

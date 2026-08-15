@@ -30,7 +30,7 @@
         <button type="button" class="principal"
                 *ngIf="seleccionado.ampliable"
                 (click)="abrirAlta()">
-          <i class="pi pi-plus"></i>
+          <i class="ms">add</i>
           Agregar
         </button>
       </header>
@@ -45,7 +45,7 @@
           <span class="pastilla candado" *ngIf="opcion.protegido"
                 tabindex="0"
                 pTooltip="La usa el sistema" tooltipPosition="top">
-            <i class="pi pi-lock"></i>
+            <i class="ms">lock</i>
           </span>
 
           <span class="acciones">
@@ -53,7 +53,7 @@
                     (click)="abrirEdicion(opcion)"
                     [attr.aria-label]="'Cambiar el nombre de ' + opcion.valor"
                     pTooltip="Cambiar el nombre" tooltipPosition="left">
-              <i class="pi pi-pencil"></i>
+              <i class="ms">edit</i>
             </button>
             <button type="button" class="accion"
                     [disabled]="!opcion.activo ? false : !puedeDesactivar(opcion)"
@@ -63,7 +63,7 @@
                       ? (puedeDesactivar(opcion) ? 'Ocultar' : motivoNoDesactivable(opcion))
                       : 'Mostrar'"
                     tooltipPosition="left">
-              <i class="pi" [ngClass]="opcion.activo ? 'pi-eye-slash' : 'pi-eye'"></i>
+              <i class="ms">{{ opcion.activo ? 'visibility_off' : 'visibility' }}</i>
             </button>
           </span>
         </li>
@@ -88,9 +88,9 @@
       <div class="campo">
         <label for="c-valor">
           Nombre
-          <i class="pi pi-info-circle field-help"
+          <i class="ms field-help"
              pTooltip="Así lo verá quien llene el formulario"
-             tooltipPosition="top"></i>
+             tooltipPosition="top">info</i>
         </label>
         <input id="c-valor" type="text" formControlName="valor"
                gdMayusculas placeholder="Ej: Camioneta" autocomplete="off">
@@ -101,7 +101,7 @@
       </div>
 
       <button type="submit" class="principal" [disabled]="guardando">
-        <i class="pi" [ngClass]="guardando ? 'pi-spinner pi-spin' : 'pi-check'"></i>
+        <i class="ms" [class.gira]="guardando">{{ guardando ? 'progress_activity' : 'check' }}</i>
         {{ guardando ? 'Guardando…' : 'Guardar' }}
       </button>
     </form>

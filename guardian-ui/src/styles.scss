@@ -1,5 +1,73 @@
-@use 'primeicons/primeicons.css';
 @use './app/styles/tokens';
+
+/* ---------------------------------------------------------------------------
+   ICONOS — Material Symbols Rounded, autoalojados.
+
+   AUTOALOJADOS y no desde fonts.googleapis.com, aunque las tipografias de
+   marca si vengan de alli. La diferencia es que un icono que no carga no es
+   un icono feo: Material Symbols funciona por LIGADURAS, asi que el navegador
+   dibuja la palabra literal —"photo_camera", "directions_car"— en mitad de la
+   pantalla. En la garita, de noche y con gente esperando, eso es inaceptable.
+   Del mismo origen, el service worker lo precachea y la tablet sigue
+   dibujando iconos sin internet.
+
+   Son 11 KB: el archivo es un SUBCONJUNTO con los 69 iconos que usa GUARDIAN,
+   pedido a Google con `icon_names` y descargado una vez. La fuente completa
+   pasa de 3 MB.
+
+   Reemplaza a PrimeIcons. PrimeNG se queda —solo tooltip y config—, que no
+   dibuja iconos propios.
+   --------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'Material Symbols Rounded';
+  font-style: normal;
+  font-weight: 500;
+  /* block y no swap: el respaldo de una ligadura es la palabra en texto. Mas
+     vale un hueco de 100ms que "directions_car" escrito en la pantalla. */
+  font-display: block;
+  src: url('/fonts/material-symbols-rounded.woff2') format('woff2');
+}
+
+.ms {
+  font-family: 'Material Symbols Rounded';
+  font-weight: 500;
+  font-style: normal;
+  /* Hereda el tamano: todo el sistema ya dimensiona sus iconos con font-size
+     sobre el <i>, y asi ese trabajo se conserva tal cual. */
+  font-size: inherit;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+  /* Sin esto el icono se lleva el subrayado y el cursor de texto del contexto
+     donde caiga. */
+  user-select: none;
+}
+
+/* Relleno solido. Es un eje de la fuente variable, no otro archivo: por eso
+   circle, star y filter_alt pueden estar huecos o llenos sin costo. */
+.ms.lleno {
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+
+/* El spinner. `progress_activity` es el glifo que Material usa para esperar;
+   la vuelta la pone el sistema, igual que hacia pi-spin. */
+.ms.gira {
+  animation: gd-gira 1s linear infinite;
+}
+
+@keyframes gd-gira {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 /* ---------------------------------------------------------------------------
    Estilos globales de GUARDIAN.

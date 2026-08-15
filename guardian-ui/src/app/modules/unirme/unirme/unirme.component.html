@@ -10,14 +10,14 @@
 
     <!-- Código malo, vencido o ya usado: un solo mensaje, sin distinguir. -->
     <div class="fallo" *ngIf="!cargando && (error && !hogar)">
-      <i class="pi pi-times-circle"></i>
+      <i class="ms">cancel</i>
       <h1>Este enlace no sirve</h1>
       <p>{{ error }}</p>
     </div>
 
     <ng-container *ngIf="hogar && !listo">
       <div class="fallo" *ngIf="!hogar.vigente">
-        <i class="pi pi-clock"></i>
+        <i class="ms">schedule</i>
         <h1>El código ya venció</h1>
         <p>Pídele uno nuevo a {{ hogar.titularNombre }}.</p>
       </div>
@@ -61,9 +61,9 @@
           <div class="campo">
             <label for="u-correo">
               Correo
-              <i class="pi pi-info-circle field-help"
+              <i class="ms field-help"
                  pTooltip="Por aquí recuperas tu PIN"
-                 tooltipPosition="top"></i>
+                 tooltipPosition="top">info</i>
             </label>
             <input id="u-correo" type="email" formControlName="email"
                    placeholder="Ej: nombre@correo.com" autocomplete="email">
@@ -91,7 +91,7 @@
           <div class="aviso-error" *ngIf="error">{{ error }}</div>
 
           <button type="submit" class="principal" [disabled]="guardando">
-            <i class="pi" [ngClass]="guardando ? 'pi-spinner pi-spin' : 'pi-check'"></i>
+            <i class="ms" [class.gira]="guardando">{{ guardando ? 'progress_activity' : 'check' }}</i>
             {{ guardando ? 'Registrando…' : 'Crear mi cuenta' }}
           </button>
         </form>
@@ -101,7 +101,7 @@
     <!-- Pendiente: todavía no hay cuenta, solo una solicitud esperando al
          administrador — igual que "pedir casa sin código". -->
     <div class="exito" *ngIf="listo">
-      <i class="pi pi-clock"></i>
+      <i class="ms">schedule</i>
       <h1>Quedaste en espera</h1>
       <p>
         El administrador del conjunto tiene que aprobar tu ingreso a la casa
@@ -114,7 +114,7 @@
       </p>
 
       <button type="button" class="principal" (click)="irAlLogin()">
-        <i class="pi pi-sign-in"></i>
+        <i class="ms">login</i>
         Ir al inicio
       </button>
     </div>

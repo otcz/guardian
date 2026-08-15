@@ -27,7 +27,7 @@
         <div class="aviso-error" *ngIf="error">{{ error }}</div>
 
         <button type="submit" class="principal" [disabled]="cargando">
-          <i class="pi" [ngClass]="cargando ? 'pi-spinner pi-spin' : 'pi-envelope'"></i>
+          <i class="ms" [class.gira]="cargando">{{ cargando ? 'progress_activity' : 'mail' }}</i>
           {{ cargando ? 'Enviando…' : 'Enviarme el código' }}
         </button>
       </form>
@@ -47,9 +47,9 @@
         <div class="campo">
           <label for="r-codigo">
             Código
-            <i class="pi pi-info-circle ayuda"
+            <i class="ms ayuda"
                [pTooltip]="'Vence en ' + minutosVigencia + ' minutos'"
-               tooltipPosition="top"></i>
+               tooltipPosition="top">info</i>
           </label>
           <input id="r-codigo" type="text" inputmode="numeric" maxlength="6"
                  formControlName="codigo" placeholder="000000"
@@ -62,9 +62,9 @@
         <div class="campo">
           <label for="r-clave">
             PIN nuevo
-            <i class="pi pi-info-circle ayuda"
+            <i class="ms ayuda"
                pTooltip="4 números. Evita 1234 y repetidos"
-               tooltipPosition="top"></i>
+               tooltipPosition="top">info</i>
           </label>
           <input id="r-clave" type="password" inputmode="numeric" maxlength="4"
                  class="pin" formControlName="claveNueva" autocomplete="new-password">
@@ -78,7 +78,7 @@
         <div class="aviso-error" *ngIf="error">{{ error }}</div>
 
         <button type="submit" class="principal" [disabled]="cargando">
-          <i class="pi" [ngClass]="cargando ? 'pi-spinner pi-spin' : 'pi-check'"></i>
+          <i class="ms" [class.gira]="cargando">{{ cargando ? 'progress_activity' : 'check' }}</i>
           {{ cargando ? 'Cambiando…' : 'Cambiar mi PIN' }}
         </button>
       </form>
@@ -90,12 +90,12 @@
 
     <!-- LISTO -->
     <div class="exito" *ngIf="paso === 'listo'">
-      <i class="pi pi-check-circle"></i>
+      <i class="ms">check_circle</i>
       <h1>Listo</h1>
       <p>Tu PIN quedó cambiado. Ya puedes entrar con él.</p>
 
       <button type="button" class="principal" (click)="irAlLogin()">
-        <i class="pi pi-sign-in"></i>
+        <i class="ms">login</i>
         Entrar
       </button>
     </div>

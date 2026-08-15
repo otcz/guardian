@@ -37,26 +37,26 @@ export class AdminLayoutComponent implements OnInit {
   solicitudesPendientes = 0;
 
   readonly secciones = [
-    { ruta: 'resumen', etiqueta: 'Resumen', icono: 'pi-chart-bar' },
-    { ruta: 'casas', etiqueta: 'Casas', icono: 'pi-building' },
-    { ruta: 'personas', etiqueta: 'Personas', icono: 'pi-users' },
-    { ruta: 'vehiculos', etiqueta: 'Vehículos', icono: 'pi-car' },
+    { ruta: 'resumen', etiqueta: 'Resumen', icono: 'bar_chart' },
+    { ruta: 'casas', etiqueta: 'Casas', icono: 'apartment' },
+    { ruta: 'personas', etiqueta: 'Personas', icono: 'group' },
+    { ruta: 'vehiculos', etiqueta: 'Vehículos', icono: 'directions_car' },
     // "Usuarios" ya no está: la cuenta de alguien se administra sobre la
     // persona, en Personas. Dos pantallas para el mismo ser humano eran la
     // causa de que una dijera "Activa" y la otra le negara la entrada.
-    { ruta: 'invitaciones', etiqueta: 'Invitaciones', icono: 'pi-ticket' },
+    { ruta: 'invitaciones', etiqueta: 'Invitaciones', icono: 'confirmation_number' },
     // Con las pantallas del día a día y no abajo con la configuración: es una
     // bandeja, y una solicitud sin responder deja a alguien sin poder usar la
     // aplicación.
-    { ruta: 'solicitudes', etiqueta: 'Solicitudes', icono: 'pi-inbox' },
-    { ruta: 'bitacora', etiqueta: 'Bitácora', icono: 'pi-history' },
+    { ruta: 'solicitudes', etiqueta: 'Solicitudes', icono: 'inbox' },
+    { ruta: 'bitacora', etiqueta: 'Bitácora', icono: 'history' },
     // Con Configuración y no con Casas: las porterías se definen una vez, al
     // montar el conjunto, y después no se vuelven a tocar. Arriba le quitarían
     // sitio a las pantallas del día a día.
-    { ruta: 'porterias', etiqueta: 'Porterías', icono: 'pi-shield' },
+    { ruta: 'porterias', etiqueta: 'Porterías', icono: 'shield' },
     // De último: es lo que menos se toca, y va después de las pantallas de
     // trabajo diario porque configura lo que aparece en ellas.
-    { ruta: 'configuracion', etiqueta: 'Configuración', icono: 'pi-sliders-h' }
+    { ruta: 'configuracion', etiqueta: 'Configuración', icono: 'tune' }
   ];
 
   constructor(

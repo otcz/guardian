@@ -6,7 +6,7 @@
   <header class="barra">
     <div class="barra-contenido">
       <div class="marca">
-        <i class="pi pi-sitemap"></i>
+        <i class="ms">account_tree</i>
         <div class="textos">
           <strong>GUARDIAN</strong>
           <small>Plataforma</small>
@@ -21,15 +21,15 @@
         <a routerLink="/cambiar-clave" class="accion"
            aria-label="Cambiar mi PIN"
            pTooltip="Mi PIN" tooltipPosition="bottom">
-          <i class="pi pi-key"></i>
+          <i class="ms">key</i>
         </a>
         <button type="button" class="accion" (click)="tema.alternar()"
                 [attr.aria-label]="tema.oscuro ? 'Modo claro' : 'Modo oscuro'">
-          <i class="pi" [ngClass]="tema.oscuro ? 'pi-sun' : 'pi-moon'"></i>
+          <i class="ms">{{ tema.oscuro ? 'light_mode' : 'dark_mode' }}</i>
         </button>
         <button type="button" class="accion" (click)="salir()" aria-label="Salir"
                 pTooltip="Salir" tooltipPosition="bottom">
-          <i class="pi pi-sign-out"></i>
+          <i class="ms">logout</i>
         </button>
       </div>
     </div>
@@ -39,7 +39,7 @@
     <div class="encabezado">
       <h1>Sedes</h1>
       <button type="button" class="principal" (click)="mostrarAlta ? cancelar() : abrirAlta()">
-        <i class="pi" [ngClass]="mostrarAlta ? 'pi-times' : 'pi-plus'"></i>
+        <i class="ms">{{ mostrarAlta ? 'close' : 'add' }}</i>
         {{ mostrarAlta ? 'Cancelar' : 'Nueva sede' }}
       </button>
     </div>
@@ -63,7 +63,7 @@
       </div>
 
       <button type="submit" class="principal" [disabled]="guardando">
-        <i class="pi pi-check"></i>
+        <i class="ms">check</i>
         {{ editando ? 'Guardar cambios' : 'Crear sede' }}
       </button>
     </form>
@@ -129,7 +129,7 @@
                 {{ activa(sede) ? 'Activa' : 'Inactiva' }}
               </span>
               <span class="pastilla aviso" *ngIf="!sede.tieneAdministrador">
-                <i class="pi pi-exclamation-triangle"></i>
+                <i class="ms">warning</i>
                 Sin administrador
               </span>
             </td>
@@ -137,7 +137,7 @@
               <button type="button" class="principal compacto" (click)="entrar(sede)"
                       [disabled]="!activa(sede)"
                       [attr.aria-label]="'Entrar a ' + sede.nombre">
-                <i class="pi pi-sign-in"></i>
+                <i class="ms">login</i>
                 Entrar
               </button>
 
@@ -147,13 +147,13 @@
                       (click)="abrirAdministrador(sede)"
                       [attr.aria-label]="'Nombrar administrador de ' + sede.nombre"
                       pTooltip="Nombrar administrador" tooltipPosition="left">
-                <i class="pi pi-user-plus"></i>
+                <i class="ms">person_add</i>
               </button>
 
               <button type="button" class="accion" (click)="editar(sede)"
                       [attr.aria-label]="'Editar ' + sede.nombre"
                       pTooltip="Editar" tooltipPosition="left">
-                <i class="pi pi-pencil"></i>
+                <i class="ms">edit</i>
               </button>
 
               <button type="button" class="accion" [class.peligro]="activa(sede)"
@@ -161,7 +161,7 @@
                       [attr.aria-label]="(activa(sede) ? 'Desactivar ' : 'Activar ') + sede.nombre"
                       [pTooltip]="activa(sede) ? 'Desactivar' : 'Activar'"
                       tooltipPosition="left">
-                <i class="pi" [ngClass]="activa(sede) ? 'pi-ban' : 'pi-check'"></i>
+                <i class="ms">{{ activa(sede) ? 'block' : 'check' }}</i>
               </button>
             </td>
           </tr>
@@ -170,7 +170,7 @@
     </ng-container>
 
     <div class="gd-vacio" *ngIf="!cargando && sedes.length === 0">
-      <i class="pi pi-sitemap"></i>
+      <i class="ms">account_tree</i>
       <p>Todavía no hay sedes</p>
       <button type="button" class="principal" (click)="abrirAlta()">
         Crear la primera
@@ -230,7 +230,7 @@
            real que se está escribiendo. Quien nombra al administrador tiene
            que poder dictarle sus credenciales por teléfono sin adivinarlas. -->
       <div class="credencial">
-        <i class="pi pi-key"></i>
+        <i class="ms">key</i>
         <div class="detalle">
           <span class="linea">
             Usuario <code>{{ documentoAdmin || '—' }}</code>
@@ -244,7 +244,7 @@
     <div pie>
       <button type="button" class="alterno" (click)="nombrandoAdmin = null">Cancelar</button>
       <button type="submit" form="forma-admin" class="principal" [disabled]="guardando">
-        <i class="pi pi-check"></i>
+        <i class="ms">check</i>
         Crear administrador
       </button>
     </div>

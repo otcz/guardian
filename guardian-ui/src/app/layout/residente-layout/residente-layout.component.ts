@@ -23,9 +23,9 @@ export class ResidenteLayoutComponent {
   mostrarCuenta = false;
 
   readonly opcionesTema: { valor: PreferenciaTema; nombre: string; icono: string }[] = [
-    { valor: 'sistema', nombre: 'Como el sistema', icono: 'pi-mobile' },
-    { valor: 'claro', nombre: 'Claro', icono: 'pi-sun' },
-    { valor: 'oscuro', nombre: 'Oscuro', icono: 'pi-moon' }
+    { valor: 'sistema', nombre: 'Como el sistema', icono: 'smartphone' },
+    { valor: 'claro', nombre: 'Claro', icono: 'light_mode' },
+    { valor: 'oscuro', nombre: 'Oscuro', icono: 'dark_mode' }
   ];
 
   constructor(

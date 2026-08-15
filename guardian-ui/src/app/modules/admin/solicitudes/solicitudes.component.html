@@ -6,14 +6,14 @@
   <p class="gd-muted" *ngIf="cargando">Cargando…</p>
 
   <div class="gd-vacio" *ngIf="!cargando && vacia">
-    <i class="pi pi-inbox"></i>
+    <i class="ms">inbox</i>
     <p>No hay solicitudes esperando respuesta.</p>
   </div>
 
   <!-- Personas pidiendo casa ────────────────────────────────────────────── -->
   <section class="bandeja" *ngIf="!cargando && casas.length">
     <h2>
-      <i class="pi pi-home"></i>
+      <i class="ms">home</i>
       Personas pidiendo casa
       <span class="cuantas">{{ casas.length }}</span>
     </h2>
@@ -48,7 +48,7 @@
             </button>
             <button type="button" class="principal" [disabled]="resolviendo"
                     (click)="aprobarCasa(s)">
-              <i class="pi pi-check"></i>
+              <i class="ms">check</i>
               Aprobar
             </button>
           </td>
@@ -60,7 +60,7 @@
   <!-- Personas por unirse al hogar con el código del titular ───────────── -->
   <section class="bandeja" *ngIf="!cargando && hogar.length">
     <h2>
-      <i class="pi pi-users"></i>
+      <i class="ms">group</i>
       Personas por unirse al hogar
       <span class="cuantas">{{ hogar.length }}</span>
     </h2>
@@ -92,7 +92,7 @@
             </button>
             <button type="button" class="principal" [disabled]="resolviendo"
                     (click)="aprobarHogar(h)">
-              <i class="pi pi-check"></i>
+              <i class="ms">check</i>
               Aprobar
             </button>
           </td>
@@ -104,7 +104,7 @@
   <!-- Vehículos por autorizar ───────────────────────────────────────────── -->
   <section class="bandeja" *ngIf="!cargando && vehiculos.length">
     <h2>
-      <i class="pi pi-car"></i>
+      <i class="ms">directions_car</i>
       Vehículos por autorizar
       <span class="cuantas">{{ vehiculos.length }}</span>
     </h2>
@@ -130,7 +130,7 @@
           <td data-etiqueta="Foto" class="celda-foto">
             <span class="miniatura">
               <img *ngIf="v.fotoUrl" [src]="v.fotoUrl | foto" [alt]="v.placa">
-              <i class="pi pi-car" *ngIf="!v.fotoUrl"></i>
+              <i class="ms" *ngIf="!v.fotoUrl">directions_car</i>
             </span>
           </td>
           <td data-etiqueta="Placa" class="fuerte placa">{{ v.placa }}</td>
@@ -152,7 +152,7 @@
             </button>
             <button type="button" class="principal" [disabled]="resolviendo"
                     (click)="aprobarVehiculo(v)">
-              <i class="pi pi-check"></i>
+              <i class="ms">check</i>
               Autorizar
             </button>
           </td>
@@ -164,7 +164,7 @@
   <!-- Invitaciones por aprobar ──────────────────────────────────────────── -->
   <section class="bandeja" *ngIf="!cargando && invitaciones.length">
     <h2>
-      <i class="pi pi-ticket"></i>
+      <i class="ms">confirmation_number</i>
       Invitaciones por aprobar
       <span class="cuantas">{{ invitaciones.length }}</span>
     </h2>
@@ -198,7 +198,7 @@
             </button>
             <button type="button" class="principal" [disabled]="resolviendo"
                     (click)="aprobarInvitacion(i)">
-              <i class="pi pi-check"></i>
+              <i class="ms">check</i>
               Aprobar
             </button>
           </td>
@@ -224,7 +224,7 @@
       <button type="button" class="alterno" (click)="rechazando = null">Cancelar</button>
       <button type="button" class="principal" [disabled]="resolviendo"
               (click)="confirmarRechazo()">
-        <i class="pi pi-times"></i>
+        <i class="ms">close</i>
         Rechazar
       </button>
     </div>

@@ -1,7 +1,7 @@
 <div class="pantalla" [class.sol]="sol">
 
   <div class="cargando" role="status" *ngIf="cargando && !credencial">
-    <i class="pi pi-spinner pi-spin" aria-hidden="true"></i>
+    <i class="ms gira" aria-hidden="true">progress_activity</i>
     <span>Cargando tu código…</span>
   </div>
 
@@ -20,7 +20,7 @@
     </gd-foto-upload>
 
     <p class="estado" role="status" *ngIf="subiendoFoto">
-      <i class="pi pi-spinner pi-spin" aria-hidden="true"></i> Guardando…
+      <i class="ms gira" aria-hidden="true">progress_activity</i> Guardando…
     </p>
   </div>
 
@@ -32,7 +32,7 @@
         <button type="button" class="cambiar-foto" (click)="cambiandoFoto = true"
                 aria-label="Cambiar tu foto"
                 pTooltip="Cambiar tu foto" tooltipPosition="right">
-          <i class="pi pi-camera"></i>
+          <i class="ms">photo_camera</i>
         </button>
       </div>
 
@@ -40,7 +40,7 @@
         <h1>{{ credencial.nombreCompleto }}</h1>
         <div class="datos">
           <span class="casa" *ngIf="credencial.casaIdentificador">
-            <i class="pi pi-home" aria-hidden="true"></i> {{ credencial.casaIdentificador }}
+            <i class="ms" aria-hidden="true">home</i> {{ credencial.casaIdentificador }}
           </span>
           <span class="doc gd-seleccionable">
             {{ credencial.tipoDocumento }} {{ credencial.documento | documento }}
@@ -60,12 +60,12 @@
     </button>
 
     <p class="instruccion">
-      <i class="pi pi-arrow-up" aria-hidden="true"></i>
+      <i class="ms" aria-hidden="true">arrow_upward</i>
       Muestra este código en la portería
     </p>
 
     <div class="sin-conexion" *ngIf="desdeCache">
-      <i class="pi pi-wifi" aria-hidden="true"></i>
+      <i class="ms" aria-hidden="true">wifi</i>
       Sin conexión. Tu código sigue siendo válido.
     </div>
   </div>
@@ -80,7 +80,7 @@
                     (fotoUrlChange)="guardarMiFoto($event)">
     </gd-foto-upload>
     <p class="estado" role="status" *ngIf="subiendoFoto">
-      <i class="pi pi-spinner pi-spin" aria-hidden="true"></i> Guardando…
+      <i class="ms gira" aria-hidden="true">progress_activity</i> Guardando…
     </p>
   </gd-hoja>
 </div>

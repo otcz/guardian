@@ -1,12 +1,12 @@
 <div class="pantalla">
 
   <div class="tarjeta" *ngIf="cargando">
-    <i class="pi pi-spinner pi-spin"></i>
+    <i class="ms gira">progress_activity</i>
     <p>Cargando tu invitación…</p>
   </div>
 
   <div class="tarjeta" *ngIf="error">
-    <i class="pi pi-exclamation-circle rojo"></i>
+    <i class="ms rojo">error</i>
     <p>No encontramos esta invitación.</p>
     <small>Pide a quien te invitó que la genere de nuevo.</small>
   </div>
@@ -38,7 +38,7 @@
         <!-- La ventana completa y no solo el último día: el invitado necesita
              saber desde cuándo puede llegar, no solo hasta cuándo. -->
         <span>
-          <i class="pi pi-calendar"></i>
+          <i class="ms">calendar_month</i>
           Válida {{ invitacion.vigenciaDesde | rangoFechas:invitacion.vigenciaHasta }}
         </span>
       </div>
@@ -49,7 +49,7 @@
     </ng-container>
 
     <div class="agotada" *ngIf="!utilizable">
-      <i class="pi pi-ban"></i>
+      <i class="ms">block</i>
       <p>{{ textoEstado }}</p>
       <small>Si necesitas entrar, pide una invitación nueva.</small>
     </div>

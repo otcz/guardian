@@ -304,6 +304,30 @@ section {
     -webkit-appearance: none;
     appearance: none;
   }
+
+  /* Sin foto todavía. Se dibuja como un hueco por llenar —borde punteado, sin
+     relleno— y no como una tarjeta con contenido: así el renglón dice de un
+     vistazo cuáles carros les falta la foto, que es lo que el residente tiene
+     que resolver. */
+  &.vacia {
+    background: none;
+    border: 1px dashed var(--border-strong);
+
+    i {
+      font-size: var(--t-md);
+      color: var(--text-muted);
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        border-color: var(--accent);
+
+        i {
+          color: var(--accent);
+        }
+      }
+    }
+  }
 }
 
 /* Insignia y no un botón aparte: se ve pegada a LA foto que cambia, no como
@@ -315,8 +339,8 @@ section {
   bottom: -3px;
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   padding: 0;
   color: var(--text-inverse);
   background: var(--accent);

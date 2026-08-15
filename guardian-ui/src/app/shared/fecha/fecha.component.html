@@ -1,7 +1,7 @@
 <button #campo type="button" class="campo" [class.abierto]="abierto"
         [attr.aria-label]="etiquetaAccesible" [attr.aria-expanded]="abierto"
         (click)="alternar()">
-  <i class="pi pi-calendar" aria-hidden="true"></i>
+  <i class="ms" aria-hidden="true">calendar_month</i>
   <span class="texto">{{ texto }}</span>
 </button>
 
@@ -10,11 +10,11 @@
 
   <div class="mes">
     <button type="button" class="mover" (click)="correrMes(-1)" aria-label="Mes anterior">
-      <i class="pi pi-chevron-left"></i>
+      <i class="ms">chevron_left</i>
     </button>
     <span class="nombre">{{ tituloMes }}</span>
     <button type="button" class="mover" (click)="correrMes(1)" aria-label="Mes siguiente">
-      <i class="pi pi-chevron-right"></i>
+      <i class="ms">chevron_right</i>
     </button>
   </div>
 

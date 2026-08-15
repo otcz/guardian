@@ -3,7 +3,10 @@
         [attr.aria-expanded]="abierto"
         [attr.aria-label]="'Filtrar por ' + campo"
         (click)="alternarMenu()">
-  <i class="pi" [ngClass]="activo ? 'pi-filter-fill' : 'pi-filter'"></i>
+  <!-- El mismo glifo, hueco o relleno. En Material el relleno es un EJE de la
+       fuente y no otro icono, asi que "hay filtro puesto" se dice sin que la
+       forma cambie: el ojo lo lee como el mismo embudo, mas marcado. -->
+  <i class="ms" [class.lleno]="activo">filter_alt</i>
   <span class="cuantos" *ngIf="cuantos">{{ cuantos }}</span>
 </button>
 
@@ -11,7 +14,7 @@
   <!-- Buscador dentro del menú: una columna "Casa" de un conjunto real trae
        cientos de valores, y sin él hay que rodarlos todos. -->
   <div class="buscar">
-    <i class="pi pi-search"></i>
+    <i class="ms">search</i>
     <input type="search" [(ngModel)]="busqueda" placeholder="Buscar" aria-label="Buscar valor">
   </div>
 
@@ -20,7 +23,7 @@
             *ngFor="let v of valores"
             [class.marcado]="marcado(v)"
             (click)="alternar(v)">
-      <i class="pi" [ngClass]="marcado(v) ? 'pi-check-square' : 'pi-stop'"></i>
+      <i class="ms">{{ marcado(v) ? 'check_box' : 'check_box_outline_blank' }}</i>
       <span>{{ v }}</span>
     </button>
 

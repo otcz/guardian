@@ -5,7 +5,7 @@
   <header class="barra-movil">
     <button type="button" class="hamburguesa" (click)="menuAbierto = true"
             aria-label="Abrir menú">
-      <i class="pi pi-bars"></i>
+      <i class="ms">menu</i>
     </button>
     <i class="gd-emblema" aria-hidden="true"></i>
     <strong>GUARDIAN</strong>
@@ -35,14 +35,14 @@
     <button type="button" class="plegar" (click)="alternarPlegado()"
             [attr.aria-label]="plegada ? 'Expandir el menú' : 'Plegar el menú'"
             [pTooltip]="plegada ? 'Expandir' : 'Plegar'" tooltipPosition="right">
-      <i class="pi" [ngClass]="plegada ? 'pi-angle-double-right' : 'pi-angle-double-left'"></i>
+      <i class="ms">{{ plegada ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left' }}</i>
     </button>
 
     <nav class="secciones">
       <a *ngFor="let seccion of secciones"
          [routerLink]="seccion.ruta"
          routerLinkActive="activa">
-        <i class="pi" [ngClass]="seccion.icono"></i>
+        <i class="ms">{{ seccion.icono }}</i>
         <span>{{ seccion.etiqueta }}</span>
         <!-- El número, no un punto: "3 esperando" y "1 esperando" no piden la
              misma urgencia, y el punto obliga a entrar para saber cuántas. -->
@@ -55,11 +55,11 @@
 
     <div class="atajos">
       <a routerLink="/porteria" *ngIf="!suplantando">
-        <i class="pi pi-shield"></i>
+        <i class="ms">shield</i>
         <span>Portería</span>
       </a>
       <a routerLink="/app" *ngIf="!suplantando">
-        <i class="pi pi-user"></i>
+        <i class="ms">person</i>
         <span>Mi cuenta</span>
       </a>
       <!-- Botón y no routerLink: irse a /sedes con un enlace dejaría la
@@ -67,14 +67,14 @@
            seguiría operando sobre esta sede sin decirlo. -->
       <button type="button" *ngIf="suplantando"
               (click)="salirDeSede()" [disabled]="saliendo">
-        <i class="pi pi-sitemap"></i>
+        <i class="ms">account_tree</i>
         <span>Todas las sedes</span>
       </button>
 
       <!-- La clave propia no se cambia desde el panel de Usuarios: ahí el
            administrador no se ve a sí mismo. Este es su único camino. -->
       <a routerLink="/cambiar-clave">
-        <i class="pi pi-key"></i>
+        <i class="ms">key</i>
         <span>Mi PIN</span>
       </a>
     </div>
@@ -87,11 +87,11 @@
       <div class="botones">
         <button type="button" (click)="tema.alternar()"
                 [attr.aria-label]="tema.oscuro ? 'Modo claro' : 'Modo oscuro'">
-          <i class="pi" [ngClass]="tema.oscuro ? 'pi-sun' : 'pi-moon'"></i>
+          <i class="ms">{{ tema.oscuro ? 'light_mode' : 'dark_mode' }}</i>
         </button>
         <button type="button" (click)="salir()" aria-label="Salir"
                 pTooltip="Salir" tooltipPosition="top">
-          <i class="pi pi-sign-out"></i>
+          <i class="ms">logout</i>
         </button>
       </div>
     </div>
@@ -102,12 +102,12 @@
          la plataforma está editando datos de OTRO conjunto. Si olvida en cuál
          está, borra la casa equivocada de la sede equivocada. -->
     <div class="banda-sede" *ngIf="suplantando" role="status">
-      <i class="pi pi-eye"></i>
+      <i class="ms">visibility</i>
       <span class="texto">
         Estás dentro de <strong>{{ sesion?.sedeNombre }}</strong>
       </span>
       <button type="button" (click)="salirDeSede()" [disabled]="saliendo">
-        <i class="pi pi-sign-out"></i>
+        <i class="ms">logout</i>
         Salir de la sede
       </button>
     </div>

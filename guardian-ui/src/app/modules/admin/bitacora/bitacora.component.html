@@ -9,7 +9,7 @@
        bitácora pagina, y buscar solo en la página abierta escondería justo el
        movimiento que se está buscando. -->
   <div class="busqueda">
-    <i class="pi pi-search"></i>
+    <i class="ms">search</i>
     <input type="search" [(ngModel)]="filtro.busqueda" (keyup.enter)="filtrar()"
            placeholder="Buscar por persona, documento, casa o placa">
     <button type="button" class="ir" (click)="filtrar()">Buscar</button>
@@ -60,7 +60,7 @@
         <td data-etiqueta="Movimiento">
           <span class="movimiento" [class.entrada]="evento.sentido === 'E'"
                 [class.salida]="evento.sentido === 'S'">
-            <i class="pi" [ngClass]="evento.sentido === 'E' ? 'pi-sign-in' : 'pi-sign-out'"></i>
+            <i class="ms">{{ evento.sentido === 'E' ? 'login' : 'logout' }}</i>
             {{ evento.sentido === 'E' ? 'Entrada' : 'Salida' }}
             · {{ evento.modo === 'VEHICULO' ? 'Vehículo' : 'A pie' }}
           </span>
@@ -92,11 +92,11 @@
 
   <div class="paginacion" *ngIf="totalPaginas > 1">
     <button type="button" [disabled]="pagina === 0" (click)="irA(pagina - 1)">
-      <i class="pi pi-chevron-left"></i>
+      <i class="ms">chevron_left</i>
     </button>
     <span>Página {{ pagina + 1 }} de {{ totalPaginas }}</span>
     <button type="button" [disabled]="pagina >= totalPaginas - 1" (click)="irA(pagina + 1)">
-      <i class="pi pi-chevron-right"></i>
+      <i class="ms">chevron_right</i>
     </button>
   </div>
 </div>

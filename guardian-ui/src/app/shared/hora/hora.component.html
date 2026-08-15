@@ -1,7 +1,7 @@
 <button #campo type="button" class="campo" [class.abierto]="abierto"
         [attr.aria-label]="etiquetaAccesible" [attr.aria-expanded]="abierto"
         (click)="alternar()">
-  <i class="pi pi-clock" aria-hidden="true"></i>
+  <i class="ms" aria-hidden="true">schedule</i>
   <span class="texto">{{ texto }}</span>
 </button>
 
@@ -15,11 +15,11 @@
 
     <div class="rueda">
       <button type="button" (click)="correrHora(1)" aria-label="Una hora más">
-        <i class="pi pi-chevron-up"></i>
+        <i class="ms">expand_less</i>
       </button>
       <span class="valor">{{ horaTexto }}</span>
       <button type="button" (click)="correrHora(-1)" aria-label="Una hora menos">
-        <i class="pi pi-chevron-down"></i>
+        <i class="ms">expand_more</i>
       </button>
     </div>
 
@@ -27,11 +27,11 @@
 
     <div class="rueda">
       <button type="button" (click)="correrMinutos(1)" aria-label="Un cuarto de hora más">
-        <i class="pi pi-chevron-up"></i>
+        <i class="ms">expand_less</i>
       </button>
       <span class="valor">{{ minutoTexto }}</span>
       <button type="button" (click)="correrMinutos(-1)" aria-label="Un cuarto de hora menos">
-        <i class="pi pi-chevron-down"></i>
+        <i class="ms">expand_more</i>
       </button>
     </div>
 
@@ -39,11 +39,11 @@
          dos para que la columna se vea y se opere igual que las otras. -->
     <div class="rueda">
       <button type="button" (click)="alternarMitad()" aria-label="Cambiar entre mañana y tarde">
-        <i class="pi pi-chevron-up"></i>
+        <i class="ms">expand_less</i>
       </button>
       <span class="valor mitad">{{ mitad }}</span>
       <button type="button" (click)="alternarMitad()" aria-label="Cambiar entre mañana y tarde">
-        <i class="pi pi-chevron-down"></i>
+        <i class="ms">expand_more</i>
       </button>
     </div>
   </div>

@@ -15,9 +15,9 @@
     <div class="campo ancho">
       <label for="direccion">
         Dirección
-        <i class="pi pi-info-circle ayuda"
+        <i class="ms ayuda"
            pTooltip="Dónde queda el puesto"
-           tooltipPosition="top"></i>
+           tooltipPosition="top">info</i>
       </label>
       <input id="direccion" type="text" formControlName="direccion"
              gdMayusculas placeholder="Ej: Carrera 15 # 23-40, costado norte">
@@ -32,7 +32,7 @@
     </label>
 
     <button type="submit" class="principal" [disabled]="guardando">
-      <i class="pi" [ngClass]="editando ? 'pi-check' : 'pi-plus'"></i>
+      <i class="ms">{{ editando ? 'check' : 'add' }}</i>
       {{ editando ? 'Guardar cambios' : 'Agregar' }}
     </button>
 
@@ -62,10 +62,8 @@
         <td data-etiqueta="Portería" class="fuerte">{{ porteria.nombre }}</td>
         <td data-etiqueta="Dirección">{{ porteria.direccion || '—' }}</td>
         <td data-etiqueta="Vehículos">
-          <i class="pi marca-vehiculo"
-             [ngClass]="permiteVehiculos(porteria) ? 'pi-car' : 'pi-user'"
-             [pTooltip]="permiteVehiculos(porteria) ? 'Entran vehículos' : 'Solo a pie'"
-             tooltipPosition="top"></i>
+          <i class="ms marca-vehiculo" [pTooltip]="permiteVehiculos(porteria) ? 'Entran vehículos' : 'Solo a pie'"
+             tooltipPosition="top">{{ permiteVehiculos(porteria) ? 'directions_car' : 'person' }}</i>
         </td>
         <!-- La celda ES el botón: el número y la acción de cambiarlo son la
              misma cosa, y un icono aparte en la columna de acciones obligaría
@@ -74,7 +72,7 @@
           <button type="button" class="guardias" (click)="abrirGuardias(porteria)"
                   [attr.aria-label]="'Guardias de ' + porteria.nombre"
                   pTooltip="Asignar guardias" tooltipPosition="top">
-            <i class="pi pi-users" aria-hidden="true"></i>
+            <i class="ms" aria-hidden="true">group</i>
             <span *ngIf="porteria.guardias">{{ porteria.guardias }}</span>
             <span class="ninguno" *ngIf="!porteria.guardias">Sin asignar</span>
           </button>
@@ -90,7 +88,7 @@
                   (click)="editar(porteria)"
                   [attr.aria-label]="'Editar ' + porteria.nombre"
                   pTooltip="Editar" tooltipPosition="left">
-            <i class="pi pi-pencil"></i>
+            <i class="ms">edit</i>
           </button>
           <button type="button" class="accion"
                   (click)="alternarEstado(porteria)"
@@ -98,7 +96,7 @@
                     + porteria.nombre"
                   [pTooltip]="activa(porteria) ? 'Deshabilitar' : 'Habilitar'"
                   tooltipPosition="left">
-            <i class="pi" [ngClass]="activa(porteria) ? 'pi-ban' : 'pi-check'"></i>
+            <i class="ms">{{ activa(porteria) ? 'block' : 'check' }}</i>
           </button>
         </td>
       </tr>
@@ -119,7 +117,7 @@
     <p class="gd-muted" *ngIf="cargandoGuardias">Cargando…</p>
 
     <div class="gd-vacio" *ngIf="!cargandoGuardias && guardias.length === 0">
-      <i class="pi pi-users"></i>
+      <i class="ms">group</i>
       <p>Este conjunto todavía no tiene guardias. Créalos en Personas, con cuenta de rol Guardia.</p>
     </div>
 
@@ -127,7 +125,7 @@
       <!-- El buscador solo cuando hay suficientes para perderse: con cuatro
            nombres a la vista es un campo que estorba. -->
       <div class="buscador" *ngIf="guardias.length > UMBRAL_BUSCADOR">
-        <i class="pi pi-search" aria-hidden="true"></i>
+        <i class="ms" aria-hidden="true">search</i>
         <input type="search" [(ngModel)]="busquedaGuardia" (input)="filtrarGuardias()"
                placeholder="Buscar por nombre o documento"
                aria-label="Buscar guardia">
@@ -141,7 +139,7 @@
       </p>
 
       <div class="gd-vacio" *ngIf="guardiasVisibles.length === 0">
-        <i class="pi pi-search"></i>
+        <i class="ms">search</i>
         <p>Nadie coincide con «{{ busquedaGuardia }}»</p>
       </div>
 
@@ -150,8 +148,7 @@
                 *ngFor="let g of guardiasVisibles"
                 (click)="alternarMarcado(g)"
                 [attr.aria-pressed]="marcado(g)">
-          <i class="pi" [ngClass]="marcado(g) ? 'pi-check-square' : 'pi-stop'"
-             [class.marca]="marcado(g)" aria-hidden="true"></i>
+          <i class="ms" [class.marca]="marcado(g)" aria-hidden="true">{{ marcado(g) ? 'check_box' : 'check_box_outline_blank' }}</i>
           <span class="etiqueta">
             {{ g.nombreCompleto }}
             <!-- Asignado pero ya sin cuenta de guardia: se ve para poder
@@ -168,7 +165,7 @@
       <button type="button" class="alterno" (click)="asignando = null">Cancelar</button>
       <button type="button" class="principal" (click)="guardarGuardias()"
               [disabled]="guardando || cargandoGuardias">
-        <i class="pi pi-check"></i>
+        <i class="ms">check</i>
         Guardar<span *ngIf="cuantosMarcados"> ({{ cuantosMarcados }})</span>
       </button>
     </div>

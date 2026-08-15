@@ -44,7 +44,7 @@
                   class="ver-clave"
                   (click)="verClave = !verClave"
                   [attr.aria-label]="verClave ? 'Ocultar PIN' : 'Ver PIN'">
-            <i class="pi" [ngClass]="verClave ? 'pi-eye-slash' : 'pi-eye'"></i>
+            <i class="ms">{{ verClave ? 'visibility_off' : 'visibility' }}</i>
           </button>
         </div>
         <small class="error" *ngIf="campoInvalido('clave')">
@@ -60,7 +60,7 @@
       <div class="aviso" *ngIf="error">{{ error }}</div>
 
       <button type="submit" class="principal" [disabled]="cargando">
-        <i class="pi" [ngClass]="cargando ? 'pi-spinner pi-spin' : 'pi-sign-in'"></i>
+        <i class="ms" [class.gira]="cargando">{{ cargando ? 'progress_activity' : 'login' }}</i>
         {{ cargando ? 'Entrando…' : 'Entrar' }}
       </button>
 

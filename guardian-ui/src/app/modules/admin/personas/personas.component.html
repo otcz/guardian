@@ -7,21 +7,21 @@
            escribe el archivo de memoria, y ofrecer "cargar" sin decir con qué
            formato es mandar a fallar. -->
       <button type="button" class="alterno" (click)="descargarPlantilla()">
-        <i class="pi pi-download"></i>
+        <i class="ms">download</i>
         Ver el formato
       </button>
 
       <!-- El input va oculto pero enfocable, dentro del label: así el botón se
            ve como los demás y el teclado sigue llegando. -->
       <label class="alterno cargar" [class.ocupado]="importando">
-        <i class="pi" [ngClass]="importando ? 'pi-spinner pi-spin' : 'pi-upload'"></i>
+        <i class="ms" [class.gira]="importando">{{ importando ? 'progress_activity' : 'upload' }}</i>
         {{ importando ? 'Cargando…' : 'Cargar Excel' }}
         <input type="file" accept=".xlsx" (change)="archivoElegido($event)"
                [disabled]="importando">
       </label>
 
       <button type="button" class="principal" (click)="mostrarAlta = true">
-        <i class="pi pi-user-plus"></i>
+        <i class="ms">person_add</i>
         Registrar
       </button>
     </div>
@@ -41,7 +41,7 @@
       </span>
       <button type="button" class="cerrar" (click)="resultado = null"
               aria-label="Cerrar el resumen">
-        <i class="pi pi-times"></i>
+        <i class="ms">close</i>
       </button>
     </div>
 
@@ -136,9 +136,9 @@
           <label for="email">
             Correo
             <span class="req" *ngIf="exigeCorreo" aria-hidden="true">*</span>
-            <i class="pi pi-info-circle ayuda" *ngIf="exigeCorreo"
+            <i class="ms ayuda" *ngIf="exigeCorreo"
                pTooltip="Por aquí recupera su PIN"
-               tooltipPosition="top"></i>
+               tooltipPosition="top">info</i>
           </label>
           <input id="email" type="email" formControlName="email"
                  placeholder="Ej: nombre@correo.com">
@@ -162,9 +162,9 @@
         <div class="campo" *ngIf="!editando">
           <label for="rolUsuario">
             Cuenta
-            <i class="pi pi-info-circle ayuda"
+            <i class="ms ayuda"
                pTooltip="Entra con el PIN 0000"
-               tooltipPosition="top"></i>
+               tooltipPosition="top">info</i>
           </label>
           <select id="rolUsuario" formControlName="rolUsuario">
             <option *ngFor="let rol of roles" [value]="rol.codigo">{{ rol.valor }}</option>
@@ -182,9 +182,9 @@
         <div class="campo" *ngIf="pideCasa && pideParentesco">
           <label for="parentesco">
             Parentesco
-            <i class="pi pi-info-circle ayuda" *ngIf="casaVacia"
+            <i class="ms ayuda" *ngIf="casaVacia"
                pTooltip="El primero de una casa es su titular"
-               tooltipPosition="top"></i>
+               tooltipPosition="top">info</i>
           </label>
           <!-- En una casa vacía queda fijo en TITULAR: el primero tiene que
                serlo, o esa familia nace sin quien la administre. -->
@@ -197,7 +197,7 @@
         <!-- No es ayuda de un campo: es la explicación de por qué desapareció
              uno que estaba ahí hace un segundo. -->
         <p class="nota-guardia" *ngIf="!pideCasa">
-          <i class="pi pi-info-circle" aria-hidden="true"></i>
+          <i class="ms" aria-hidden="true">info</i>
           El guardia trabaja en el conjunto, no vive en él.
         </p>
       </div>
@@ -206,7 +206,7 @@
     <div class="pie-formulario">
       <button type="button" class="alterno" (click)="cancelarEdicion()">Cancelar</button>
       <button type="submit" class="principal" [disabled]="guardando">
-        <i class="pi pi-check"></i>
+        <i class="ms">check</i>
         {{ editando ? 'Guardar cambios' : 'Guardar' }}
       </button>
     </div>
@@ -215,7 +215,7 @@
   <div class="aviso-error" *ngIf="error">{{ error }}</div>
 
   <div class="busqueda">
-    <i class="pi pi-search"></i>
+    <i class="ms">search</i>
     <input type="text"
            [ngModel]="texto"
            (ngModelChange)="buscar($event)"
@@ -258,7 +258,7 @@
         <td class="celda-avatar">
           <span class="avatar">
             <img *ngIf="persona.fotoUrl" [src]="persona.fotoUrl | foto" [alt]="persona.nombreCompleto">
-            <i class="pi pi-user" *ngIf="!persona.fotoUrl"></i>
+            <i class="ms" *ngIf="!persona.fotoUrl">person</i>
           </span>
         </td>
         <td data-etiqueta="Persona" class="fuerte">
@@ -272,15 +272,14 @@
         <td data-etiqueta="Casa">{{ persona.casaIdentificador ?? '—' }}</td>
         <td data-etiqueta="Edad">{{ persona.edad ?? '—' }}</td>
         <td data-etiqueta="QR">
-          <i class="pi"
-             [ngClass]="persona.tieneCredencial ? 'pi-qrcode ok' : 'pi-minus sin'"></i>
+          <i class="ms" [ngClass]="persona.tieneCredencial ? 'ok' : 'sin'">{{ persona.tieneCredencial ? 'qr_code_2' : 'remove' }}</i>
         </td>
         <td data-etiqueta="Registro">
           <span class="pastilla" [class.si]="operativa(persona)" [class.no]="!operativa(persona)"
                 [class.candado]="bloqueada(persona)"
                 [attr.tabindex]="bloqueada(persona) ? 0 : null"
                 [pTooltip]="persona.motivoBloqueo || ''" tooltipPosition="top">
-            <i class="pi pi-lock" *ngIf="bloqueada(persona)"></i>
+            <i class="ms" *ngIf="bloqueada(persona)">lock</i>
             {{ estado(persona) }}
           </span>
         </td>
@@ -299,9 +298,9 @@
                   [pTooltip]="tieneCuenta(persona) ? 'Rol, PIN y estado de la cuenta' : 'Darle acceso'"
                   tooltipPosition="top"
                   [attr.aria-label]="'Administrar el acceso de ' + persona.nombreCompleto">
-            <i class="pi" [ngClass]="tieneCuenta(persona) ? 'pi-key' : 'pi-plus-circle'"></i>
+            <i class="ms">{{ tieneCuenta(persona) ? 'key' : 'add_circle' }}</i>
             {{ estadoAcceso(persona) }}
-            <i class="pi pi-chevron-right marca"></i>
+            <i class="ms marca">chevron_right</i>
           </button>
         </td>
 
@@ -313,12 +312,12 @@
                   (click)="abrirCambioDePin(persona)"
                   [attr.aria-label]="'Cambiar el PIN de ' + persona.nombreCompleto"
                   pTooltip="Cambiar el PIN" tooltipPosition="left">
-            <i class="pi pi-key"></i>
+            <i class="ms">key</i>
           </button>
           <button type="button" class="accion"
                   (click)="editar(persona)"
                   pTooltip="Editar" tooltipPosition="left">
-            <i class="pi pi-pencil"></i>
+            <i class="ms">edit</i>
           </button>
           <!-- Sin "emitir QR": el código se emite solo en cuanto la persona
                tiene foto, y ella lo ve en su propia pantalla "Mi QR". Un botón
@@ -330,7 +329,7 @@
                   *ngIf="persona.tieneCredencial"
                   (click)="revocarCredencial(persona)"
                   pTooltip="Revocar el QR (si se filtró)" tooltipPosition="left">
-            <i class="pi pi-shield"></i>
+            <i class="ms">shield</i>
           </button>
           <button type="button" class="accion"
                   (click)="alternarEstado(persona)"
@@ -338,7 +337,7 @@
                     + persona.nombreCompleto"
                   [pTooltip]="activa(persona) ? 'Desactivar' : 'Activar'"
                   tooltipPosition="left">
-            <i class="pi" [ngClass]="activa(persona) ? 'pi-ban' : 'pi-check'"></i>
+            <i class="ms">{{ activa(persona) ? 'block' : 'check' }}</i>
           </button>
 
           <!-- Separado a propósito: activar y desactivar es la llave del
@@ -353,7 +352,7 @@
                     + persona.nombreCompleto"
                   [pTooltip]="bloqueada(persona) ? 'Habilitar' : 'Deshabilitar'"
                   tooltipPosition="left">
-            <i class="pi" [ngClass]="bloqueada(persona) ? 'pi-lock-open' : 'pi-lock'"></i>
+            <i class="ms">{{ bloqueada(persona) ? 'lock_open' : 'lock' }}</i>
           </button>
 
           <!-- Solo el super administrador. Borrar deja un hueco en la
@@ -363,7 +362,7 @@
                   (click)="eliminar(persona)"
                   [attr.aria-label]="'Eliminar a ' + persona.nombreCompleto"
                   pTooltip="Eliminar" tooltipPosition="left">
-            <i class="pi pi-trash"></i>
+            <i class="ms">delete</i>
           </button>
         </td>
       </tr>
@@ -412,7 +411,7 @@
     <ng-container *ngIf="gestionandoAcceso as p">
 
       <div class="aviso-acceso" *ngIf="avisoAcceso">
-        <i class="pi pi-check-circle"></i>
+        <i class="ms">check_circle</i>
         <span>{{ avisoAcceso }}</span>
       </div>
 
@@ -434,7 +433,7 @@
         </form>
 
         <div class="credencial">
-          <i class="pi pi-key"></i>
+          <i class="ms">key</i>
           <div class="detalle">
             <span class="linea">
               Entrará con usuario <code>{{ p.documento }}</code>
@@ -457,9 +456,9 @@
             <div class="campo">
               <label for="c-nueva">
                 Nuevo
-                <i class="pi pi-info-circle ayuda"
+                <i class="ms ayuda"
                    pTooltip="4 números. Evita 1234 y repetidos"
-                   tooltipPosition="top"></i>
+                   tooltipPosition="top">info</i>
               </label>
               <input id="c-nueva" type="text" inputmode="numeric" maxlength="4" class="pin"
                      formControlName="claveNueva" autocomplete="off">
@@ -473,18 +472,18 @@
 
             <button type="submit" class="principal"
                     [disabled]="guardando || formularioClave.invalid || claveNoCoincide">
-              <i class="pi pi-check"></i>
+              <i class="ms">check</i>
               Asignar
             </button>
           </div>
 
           <p class="error" role="alert" *ngIf="errorPinAsignado || claveNoCoincide">
-            <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+            <i class="ms" aria-hidden="true">error</i>
             {{ claveNoCoincide ? 'Los dos no coinciden' : errorPinAsignado }}
           </p>
 
           <p class="dictado">
-            <i class="pi pi-info-circle" aria-hidden="true"></i>
+            <i class="ms" aria-hidden="true">info</i>
             Dile este PIN a la persona. Se lo pedirá al entrar y podrá cambiarlo.
           </p>
         </form>
@@ -498,7 +497,7 @@
       <button type="submit" form="forma-acceso" class="principal"
               *ngIf="gestionandoAcceso && !tieneCuenta(gestionandoAcceso)"
               [disabled]="guardando">
-        <i class="pi pi-check"></i>
+        <i class="ms">check</i>
         Dar acceso
       </button>
     </div>

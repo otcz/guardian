@@ -1,7 +1,7 @@
 <div class="gd-page">
 
   <div class="sin-casa gd-card" *ngIf="sinCasa">
-    <i class="pi pi-home"></i>
+    <i class="ms">home</i>
     <p>Tu usuario no tiene una casa asignada.</p>
     <small>Comunícate con la administración del conjunto.</small>
   </div>
@@ -12,7 +12,7 @@
       <h2 class="gd-titulo-seccion">Mis invitaciones</h2>
       <button type="button" class="agregar" (click)="mostrarAlta = true"
               aria-label="Nueva invitación">
-        <i class="pi pi-plus"></i>
+        <i class="ms">add</i>
       </button>
     </div>
 
@@ -30,9 +30,9 @@
           <div class="campo">
             <label for="i-documento">
               Documento
-              <i class="pi pi-info-circle ayuda"
+              <i class="ms ayuda"
                  pTooltip="La portería lo compara con la cédula"
-                 tooltipPosition="top"></i>
+                 tooltipPosition="top">info</i>
             </label>
             <input id="i-documento" type="text" inputmode="numeric"
                    formControlName="documentoInvitado" gdMayusculas placeholder="Ej: 1020304050">
@@ -83,9 +83,9 @@
             <div class="linea">
               <span class="rotulo">
                 Hasta
-                <i class="pi pi-info-circle ayuda"
+                <i class="ms ayuda"
                    pTooltip="Puede entrar y salir hasta esa hora"
-                   tooltipPosition="top"></i>
+                   tooltipPosition="top">info</i>
               </span>
               <div class="par">
                 <gd-fecha [valor]="formulario.controls.finFecha.value"
@@ -149,11 +149,11 @@
                existe. Copiar está siempre y no depende de nada. -->
           <button type="button" class="principal" *ngIf="puedeCompartir"
                   (click)="compartir(qrAbierto)">
-            <i class="pi pi-share-alt"></i> Compartir link
+            <i class="ms">share</i> Compartir link
           </button>
           <button type="button" [class]="puedeCompartir ? 'alterno' : 'principal'"
                   (click)="copiar(qrAbierto)">
-            <i class="pi pi-copy"></i> Copiar link
+            <i class="ms">content_copy</i> Copiar link
           </button>
           <button type="button" class="peligro-texto" (click)="revocar(qrAbierto)">
             Revocar invitación
@@ -191,7 +191,7 @@
                *ngFor="let invitacion of invitaciones"
                [class.apagada]="!esVigente(invitacion)">
         <div class="icono-tipo">
-          <i class="pi pi-ticket"></i>
+          <i class="ms">confirmation_number</i>
         </div>
 
         <div class="datos">
@@ -215,7 +215,7 @@
              marcarlo llenaría la lista de ruido. -->
         <span class="presencia" *ngIf="invitacion.adentro"
               pTooltip="Su último registro fue una entrada" tooltipPosition="left">
-          <i class="pi pi-circle-fill"></i> Adentro
+          <i class="ms lleno">circle</i> Adentro
         </span>
 
         <span class="pastilla"
@@ -232,13 +232,13 @@
         <button type="button" class="accion" *ngIf="esVigente(invitacion)"
                 (click)="qrAbierto = invitacion"
                 pTooltip="Ver código" tooltipPosition="left" aria-label="Ver código">
-          <i class="pi pi-chevron-right"></i>
+          <i class="ms">chevron_right</i>
         </button>
       </article>
     </div>
 
     <div class="gd-vacio" *ngIf="!cargando && invitaciones.length === 0">
-      <i class="pi pi-ticket"></i>
+      <i class="ms">confirmation_number</i>
       <p>Aún no has invitado a nadie</p>
       <button type="button" class="principal" (click)="mostrarAlta = true">
         Crear una invitación

@@ -535,9 +535,9 @@ export class EscanerComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   get iconoVeredicto(): string {
     if (!this.ficha?.permitido) {
-      return 'pi-times-circle';
+      return 'cancel';
     }
-    return this.soloSalida ? 'pi-exclamation-triangle' : 'pi-check-circle';
+    return this.soloSalida ? 'warning' : 'check_circle';
   }
 
   get textoSentido(): string {
@@ -548,7 +548,7 @@ export class EscanerComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   /** La flecha del sentido: entra hacia adentro, sale hacia afuera. */
   get iconoSentido(): string {
-    return this.textoSentido === 'SALIDA' ? 'pi-sign-out' : 'pi-sign-in';
+    return this.textoSentido === 'SALIDA' ? 'logout' : 'login';
   }
 
   get textoSentidoOpuesto(): string {

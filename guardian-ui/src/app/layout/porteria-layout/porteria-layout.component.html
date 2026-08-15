@@ -23,21 +23,21 @@
               (click)="abrirEleccion()"
               pTooltip="Cambiar de portería" tooltipPosition="bottom"
               aria-label="Cambiar de portería">
-        <i class="pi pi-sync"></i>
+        <i class="ms">sync</i>
       </button>
     </div>
 
     <div class="acciones">
       <a routerLink="/app" class="icono" pTooltip="Mi cuenta" tooltipPosition="bottom">
-        <i class="pi pi-user"></i>
+        <i class="ms">person</i>
       </a>
       <button type="button" class="icono" (click)="tema.alternar()"
               [attr.aria-label]="tema.oscuro ? 'Modo claro' : 'Modo oscuro'">
-        <i class="pi" [ngClass]="tema.oscuro ? 'pi-sun' : 'pi-moon'"></i>
+        <i class="ms">{{ tema.oscuro ? 'light_mode' : 'dark_mode' }}</i>
       </button>
       <button type="button" class="icono" (click)="salir()" aria-label="Salir"
               pTooltip="Salir" tooltipPosition="bottom">
-        <i class="pi pi-sign-out"></i>
+        <i class="ms">logout</i>
       </button>
     </div>
   </header>
@@ -57,14 +57,14 @@
       <button type="button" class="gd-fila gd-presionable"
               *ngFor="let p of opciones"
               (click)="elegir(p)">
-        <i class="pi pi-shield" aria-hidden="true"></i>
+        <i class="ms" aria-hidden="true">shield</i>
         <span class="etiqueta">
           {{ p.nombre }}
           <small *ngIf="p.direccion">{{ p.direccion }}</small>
         </span>
         <!-- La suya va marcada: es la que le asignó la administración. -->
-        <i class="pi pi-star-fill marca" *ngIf="p.asignada"
-           pTooltip="Es la tuya" tooltipPosition="left" aria-hidden="true"></i>
+        <i class="ms lleno marca" *ngIf="p.asignada"
+           pTooltip="Es la tuya" tooltipPosition="left" aria-hidden="true">star</i>
       </button>
     </div>
   </gd-hoja>

@@ -7,26 +7,26 @@
   <div class="sin-casa gd-card" *ngIf="sinCasa">
 
     <ng-container *ngIf="solicitudPendiente">
-      <i class="pi pi-clock"></i>
+      <i class="ms">schedule</i>
       <h2>Pediste entrar a {{ solicitud?.casaIdentificador }}</h2>
       <p>La administración tiene que aprobarlo. Te avisamos apenas responda.</p>
     </ng-container>
 
     <ng-container *ngIf="solicitudRechazada">
-      <i class="pi pi-times-circle rechazo"></i>
+      <i class="ms rechazo">cancel</i>
       <h2>No aprobaron tu solicitud</h2>
       <p *ngIf="solicitud?.motivoRechazo">{{ solicitud?.motivoRechazo }}</p>
       <p *ngIf="!solicitud?.motivoRechazo">
         No dejaron un motivo. Escribe a la administración del conjunto.
       </p>
       <button type="button" class="principal" (click)="elegirDeNuevo()">
-        <i class="pi pi-refresh"></i>
+        <i class="ms">refresh</i>
         Elegir otra casa
       </button>
     </ng-container>
 
     <ng-container *ngIf="!solicitudPendiente && !solicitudRechazada">
-      <i class="pi pi-home"></i>
+      <i class="ms">home</i>
       <h2>¿En qué casa vives?</h2>
       <p>Elígela y la administración lo confirma. Después podrás registrar a tu
         familia y tus vehículos.</p>
@@ -57,7 +57,7 @@
         </div>
 
         <p class="nota" *ngIf="casaElegida && soloPuedeSerTitular">
-          <i class="pi pi-info-circle" aria-hidden="true"></i>
+          <i class="ms" aria-hidden="true">info</i>
           Esa casa todavía no tiene titular, así que entrarías como titular:
           quien administra la familia y los vehículos.
         </p>
@@ -65,7 +65,7 @@
         <button type="button" class="principal"
                 [disabled]="!casaElegida || !parentescoElegido || enviandoSolicitud"
                 (click)="solicitarCasa()">
-          <i class="pi" [ngClass]="enviandoSolicitud ? 'pi-spinner pi-spin' : 'pi-send'"></i>
+          <i class="ms" [class.gira]="enviandoSolicitud">{{ enviandoSolicitud ? 'progress_activity' : 'send' }}</i>
           {{ enviandoSolicitud ? 'Enviando…' : 'Enviar solicitud' }}
         </button>
       </div>
@@ -90,12 +90,12 @@
         <ng-container *ngIf="esTitular">
           <button type="button" class="agregar" (click)="abrirInvitacion()"
                   aria-label="Invitar a alguien a mi hogar">
-            <i class="pi pi-share-alt"></i>
+            <i class="ms">share</i>
           </button>
           <button type="button" class="agregar"
                   (click)="mostrarAltaFamiliar = true"
                   aria-label="Agregar persona">
-            <i class="pi pi-plus"></i>
+            <i class="ms">add</i>
           </button>
         </ng-container>
       </div>
@@ -104,7 +104,7 @@
            de quién sí puede: un "no tienes permiso" sin decir a quién pedírselo
            deja a la persona sin ningún paso siguiente. -->
       <p class="solo-titular" *ngIf="!esTitular && familia.length">
-        <i class="pi pi-info-circle" aria-hidden="true"></i>
+        <i class="ms" aria-hidden="true">info</i>
         <span *ngIf="nombreDelTitular">
           Quien agrega personas a esta casa es <strong>{{ nombreDelTitular }}</strong>,
           el titular. Pídeselo y aparecerán acá.
@@ -165,9 +165,9 @@
           <div class="campo">
             <label for="f-email">
               Correo
-              <i class="pi pi-info-circle ayuda"
+              <i class="ms ayuda"
                  pTooltip="Con correo puede entrar a la aplicación"
-                 tooltipPosition="top"></i>
+                 tooltipPosition="top">info</i>
             </label>
             <input id="f-email" type="email" formControlName="email"
                    placeholder="Vacío si no usará la aplicación">
@@ -194,7 +194,7 @@
                  [class.inactivo]="!activo(familiar.activo)">
           <div class="avatar">
             <img *ngIf="familiar.fotoUrl" [src]="familiar.fotoUrl | foto" [alt]="familiar.nombreCompleto">
-            <i class="pi pi-user" *ngIf="!familiar.fotoUrl"></i>
+            <i class="ms" *ngIf="!familiar.fotoUrl">person</i>
 
             <!-- Solo en la propia fila: nadie puede ponerle la cara a otro,
                  ni siquiera el titular. -->
@@ -204,15 +204,15 @@
                     (click)="abrirCambioFoto()"
                     aria-label="Cambiar tu foto"
                     pTooltip="Cambiar tu foto" tooltipPosition="right">
-              <i class="pi pi-camera"></i>
+              <i class="ms">photo_camera</i>
             </button>
           </div>
 
           <div class="datos">
             <strong>
               {{ familiar.nombreCompleto }}
-              <i class="pi pi-qrcode marca-qr" *ngIf="familiar.tieneCredencial"
-                 pTooltip="Tiene credencial QR" tooltipPosition="top"></i>
+              <i class="ms marca-qr" *ngIf="familiar.tieneCredencial"
+                 pTooltip="Tiene credencial QR" tooltipPosition="top">qr_code_2</i>
             </strong>
             <span class="detalle">
               {{ etiquetaParentesco(familiar.parentesco) }}
@@ -224,7 +224,7 @@
                  renglón el titular la da de alta, el familiar intenta entrar
                  con el PIN inicial y nadie entiende por qué lo rechazan. -->
             <span class="sin-cuenta" *ngIf="!familiar.tieneCuenta">
-              <i class="pi pi-mobile"></i> No entra a la aplicación
+              <i class="ms">smartphone</i> No entra a la aplicación
             </span>
           </div>
 
@@ -233,7 +233,7 @@
                a casi toda hora, y marcarlo llenaría la lista de ruido. -->
           <span class="presencia" *ngIf="familiar.adentro"
                 pTooltip="Su último registro fue una entrada" tooltipPosition="left">
-            <i class="pi pi-circle-fill"></i> Adentro
+            <i class="ms lleno">circle</i> Adentro
           </span>
 
           <span class="pastilla no" *ngIf="bloqueado(familiar)">Deshabilitado</span>
@@ -247,7 +247,7 @@
                   *ngIf="bloqueado(familiar)"
                   (click)="explicarBloqueo(familiar.nombreCompleto, familiar.motivoBloqueo)"
                   [attr.aria-label]="'Por qué está deshabilitado ' + familiar.nombreCompleto">
-            <i class="pi pi-lock"></i>
+            <i class="ms">lock</i>
           </button>
 
           <!-- aria-label y no solo pTooltip: en un celular no hay "por
@@ -260,13 +260,13 @@
                     + familiar.nombreCompleto"
                   [pTooltip]="activo(familiar.activo) ? 'Desactivar' : 'Activar'"
                   tooltipPosition="left">
-            <i class="pi" [ngClass]="activo(familiar.activo) ? 'pi-ban' : 'pi-check'"></i>
+            <i class="ms">{{ activo(familiar.activo) ? 'block' : 'check' }}</i>
           </button>
         </article>
       </div>
 
       <div class="gd-vacio" *ngIf="!cargando && familia.length === 0">
-        <i class="pi pi-users"></i>
+        <i class="ms">group</i>
         <p>Aún no hay nadie más en tu casa</p>
         <button type="button" class="principal" (click)="mostrarAltaFamiliar = true">
           Agregar a alguien
@@ -282,7 +282,7 @@
         <gd-foto-upload [fotoUrl]="miFotoActual" (fotoUrlChange)="guardarFotoPropia($event)">
         </gd-foto-upload>
         <p class="estado" role="status" *ngIf="guardandoFoto">
-          <i class="pi pi-spinner pi-spin" aria-hidden="true"></i> Guardando…
+          <i class="ms gira" aria-hidden="true">progress_activity</i> Guardando…
         </p>
       </gd-hoja>
     </section>
@@ -294,7 +294,7 @@
         <button type="button" class="agregar"
                 (click)="mostrarAltaVehiculo = true"
                 aria-label="Registrar vehículo">
-          <i class="pi pi-plus"></i>
+          <i class="ms">add</i>
         </button>
       </div>
 
@@ -357,7 +357,7 @@
                  *ngFor="let solicitud of solicitudesVehiculo">
           <div class="avatar vehiculo">
             <img *ngIf="solicitud.fotoUrl" [src]="solicitud.fotoUrl | foto" [alt]="solicitud.placa">
-            <i class="pi pi-car" *ngIf="!solicitud.fotoUrl"></i>
+            <i class="ms" *ngIf="!solicitud.fotoUrl">directions_car</i>
           </div>
 
           <div class="datos">
@@ -385,7 +385,7 @@
                   (click)="descartarSolicitudVehiculo(solicitud)"
                   [attr.aria-label]="'Quitar la solicitud de ' + solicitud.placa"
                   pTooltip="Quitar" tooltipPosition="left">
-            <i class="pi pi-times"></i>
+            <i class="ms">close</i>
           </button>
         </article>
       </div>
@@ -394,16 +394,27 @@
         <article class="gd-fila miembro"
                  *ngFor="let vehiculo of vehiculos"
                  [class.inactivo]="!activo(vehiculo.activo)">
-          <!-- La foto ES el botón para cambiarla, como el avatar propio de
-               arriba: un botón aparte en un renglón que ya tiene tres
-               acciones no cabe en un teléfono. -->
+          <!-- La foto ES el botón para cambiarla: un botón aparte, en un
+               renglón que ya tiene tres acciones, no cabe en un teléfono.
+
+               UN SOLO ÍCONO CUANDO NO HAY FOTO. Antes había dos —el carro y
+               encima la insignia de la cámara— peleando dentro de 44px, y eso
+               no se lee como un botón sino como un dibujo mal montado.
+               `add_a_photo` dice por sí solo lo que pasa al tocarlo. La
+               insignia vuelve cuando SÍ hay foto: ahí el carro ya ocupa el
+               cuadro y la cámara solo tiene que avisar que se puede cambiar. -->
           <button type="button" class="avatar vehiculo con-foto"
+                  [class.vacia]="!vehiculo.fotoUrl"
                   (click)="abrirFotoVehiculo(vehiculo)"
-                  [attr.aria-label]="'Cambiar la foto de ' + vehiculo.placa"
-                  pTooltip="Cambiar foto" tooltipPosition="right">
-            <img *ngIf="vehiculo.fotoUrl" [src]="vehiculo.fotoUrl | foto" [alt]="vehiculo.placa">
-            <i class="pi pi-car" *ngIf="!vehiculo.fotoUrl"></i>
-            <span class="cambiar-foto" aria-hidden="true"><i class="pi pi-camera"></i></span>
+                  [attr.aria-label]="(vehiculo.fotoUrl ? 'Cambiar la foto de ' : 'Agregar una foto a ')
+                    + vehiculo.placa"
+                  [pTooltip]="vehiculo.fotoUrl ? 'Cambiar foto' : 'Agregar foto'"
+                  tooltipPosition="right">
+            <ng-container *ngIf="vehiculo.fotoUrl">
+              <img [src]="vehiculo.fotoUrl | foto" [alt]="vehiculo.placa">
+              <span class="cambiar-foto" aria-hidden="true"><i class="ms">photo_camera</i></span>
+            </ng-container>
+            <i class="ms" *ngIf="!vehiculo.fotoUrl">add_a_photo</i>
           </button>
 
           <div class="datos">
@@ -425,14 +436,14 @@
                puede pasar y después dónde quedó. -->
           <span class="presencia" *ngIf="vehiculo.adentro"
                 pTooltip="Su último registro fue una entrada" tooltipPosition="left">
-            <i class="pi pi-circle-fill"></i> Adentro
+            <i class="ms lleno">circle</i> Adentro
           </span>
 
           <button type="button" class="accion candado"
                   *ngIf="bloqueado(vehiculo)"
                   (click)="explicarBloqueo(vehiculo.placa, vehiculo.motivoBloqueo)"
                   [attr.aria-label]="'Por qué está deshabilitado ' + vehiculo.placa">
-            <i class="pi pi-lock"></i>
+            <i class="ms">lock</i>
           </button>
 
           <button type="button" class="accion"
@@ -442,14 +453,14 @@
                     + vehiculo.placa"
                   [pTooltip]="activo(vehiculo.activo) ? 'Desactivar' : 'Activar'"
                   tooltipPosition="left">
-            <i class="pi" [ngClass]="activo(vehiculo.activo) ? 'pi-ban' : 'pi-check'"></i>
+            <i class="ms">{{ activo(vehiculo.activo) ? 'block' : 'check' }}</i>
           </button>
         </article>
       </div>
 
       <div class="gd-vacio"
            *ngIf="vehiculos.length === 0 && solicitudesVehiculo.length === 0 && !cargando">
-        <i class="pi pi-car"></i>
+        <i class="ms">directions_car</i>
         <p>No hay vehículos en tu casa</p>
         <button type="button" class="principal" (click)="mostrarAltaVehiculo = true">
           Registrar vehículo
@@ -467,7 +478,7 @@
                         (fotoUrlChange)="guardarFotoVehiculo($event)">
         </gd-foto-upload>
         <p class="estado" role="status" *ngIf="guardandoFotoVehiculo">
-          <i class="pi pi-spinner pi-spin" aria-hidden="true"></i> Guardando…
+          <i class="ms gira" aria-hidden="true">progress_activity</i> Guardando…
         </p>
       </gd-hoja>
     </section>
@@ -503,7 +514,7 @@
 
       <!-- Ya se usó: el enlace no sirve más y hay que decir quién lo usó. -->
       <div class="codigo-usado" *ngIf="codigoHogar?.usadoPor as quien">
-        <i class="pi pi-check-circle"></i>
+        <i class="ms">check_circle</i>
         <span><strong>{{ quien }}</strong> ya usó el enlace anterior.</span>
       </div>
 
@@ -519,12 +530,12 @@
 
         <div class="gd-lista">
           <button type="button" class="gd-fila gd-presionable" (click)="copiarEnlace()">
-            <i class="pi" [ngClass]="copiado ? 'pi-check' : 'pi-copy'"></i>
+            <i class="ms">{{ copiado ? 'check' : 'content_copy' }}</i>
             <span class="etiqueta">{{ copiado ? 'Copiado' : 'Copiar el enlace' }}</span>
           </button>
           <button type="button" class="gd-fila gd-presionable gd-fila--destructiva"
                   (click)="revocarCodigo()">
-            <i class="pi pi-ban"></i>
+            <i class="ms">block</i>
             <span class="etiqueta">Anular el enlace</span>
           </button>
         </div>
@@ -533,7 +544,7 @@
       <div class="gd-lista" *ngIf="!codigoHogar?.vigente">
         <button type="button" class="gd-fila gd-presionable centrada"
                 (click)="generarCodigo()" [disabled]="guardando">
-          <i class="pi pi-link"></i>
+          <i class="ms">link</i>
           <span class="etiqueta">
             {{ codigoHogar ? 'Generar un enlace nuevo' : 'Generar el enlace' }}
           </span>
