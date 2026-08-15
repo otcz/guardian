@@ -50,10 +50,44 @@ export class HuellaComponent implements OnInit {
   maximoDedos = 2;
   capturasPorDedo = 3;
 
+  /**
+   * Las dos manos, cada una con sus cinco dedos.
+   *
+   * <p>Se nombra el dedo EXACTO y no solo la mano: si alguien registró el
+   * índice y el día de la curita pone el pulgar, hay que poder decirle "pon el
+   * índice derecho" en vez de "pon el de la derecha". Sin el nombre, ese
+   * momento se resuelve a ensayo y error con la fila esperando.</p>
+   *
+   * <p>El orden es el de la mano vista de frente, del pulgar al meñique, para
+   * que la pantalla se lea como se mira una mano.</p>
+   */
+  readonly manos = [
+    {
+      mano: 'Izquierda',
+      dedos: [
+        { codigo: 'IZQ_PULGAR', nombre: 'Pulgar' },
+        { codigo: 'IZQ_INDICE', nombre: 'Índice' },
+        { codigo: 'IZQ_MEDIO', nombre: 'Medio' },
+        { codigo: 'IZQ_ANULAR', nombre: 'Anular' },
+        { codigo: 'IZQ_MENIQUE', nombre: 'Meñique' }
+      ]
+    },
+    {
+      mano: 'Derecha',
+      dedos: [
+        { codigo: 'DER_PULGAR', nombre: 'Pulgar' },
+        { codigo: 'DER_INDICE', nombre: 'Índice' },
+        { codigo: 'DER_MEDIO', nombre: 'Medio' },
+        { codigo: 'DER_ANULAR', nombre: 'Anular' },
+        { codigo: 'DER_MENIQUE', nombre: 'Meñique' }
+      ]
+    }
+  ];
+
   paso: Paso = 'inicio';
   documento = '';
   persona: CandidatoGarita | null = null;
-  dedoElegido: 'DERECHO' | 'IZQUIERDO' | null = null;
+  dedoElegido: string | null = null;
   capturaActual = 0;
   error: string | null = null;
   buscando = false;
@@ -140,8 +174,22 @@ export class HuellaComponent implements OnInit {
     return this.yaRegistrados.includes(dedo);
   }
 
+  /** "IZQ_INDICE" -> "índice izquierdo", para poder pedírselo a la persona. */
+  nombreDe(codigo: string | null): string {
+    if (!codigo) {
+      return '';
+    }
+    for (const mano of this.manos) {
+      const dedo = mano.dedos.find(d => d.codigo === codigo);
+      if (dedo) {
+        return `${dedo.nombre.toLowerCase()} ${mano.mano.toLowerCase()}`;
+      }
+    }
+    return codigo;
+  }
+
   /** Paso 2: cuál dedo. */
-  elegirDedo(dedo: 'DERECHO' | 'IZQUIERDO'): void {
+  elegirDedo(dedo: string): void {
     this.dedoElegido = dedo;
     this.capturaActual = 0;
     this.error = null;

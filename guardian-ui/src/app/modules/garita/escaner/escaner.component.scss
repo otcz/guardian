@@ -72,6 +72,26 @@ section {
   max-width: 420px;
 }
 
+/* ── Ancho de tablet ─────────────────────────────────────────────────────────
+   420px es medida de teléfono, y la portería se opera en una tablet o en un
+   monitor: dejaba una columna angosta en el medio con todo vacío a los lados.
+
+   Se ensancha SOLO el escaneo y solo desde 700px. La ficha se queda angosta a
+   propósito: ahí manda la foto, y estirarla a lo ancho de un monitor separaría
+   la cara del veredicto —las dos cosas que el guardia tiene que ver juntas— y
+   lo obligaría a mover la mirada de un extremo al otro. */
+@media (min-width: 700px) {
+  .escaneo {
+    max-width: 720px;
+  }
+
+  /* Los contadores acompañan el ancho nuevo: dos cajas de 420 centradas bajo
+     un panel de 720 se ven descolgadas. */
+  .presencia {
+    max-width: 720px;
+  }
+}
+
 /* ── Los tres modos ──────────────────────────────────────────────────────────
    Icono grande y UNA palabra. En la portería el guardia no lee, reconoce: mira
    de reojo entre atender a una persona y la siguiente, y tiene que saber en

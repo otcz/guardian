@@ -225,37 +225,64 @@
   }
 }
 
-.dedos {
+/* ── Las dos manos ───────────────────────────────────────────────────────────
+   Lado a lado: en una tablet caben enteras y así el guardia ve las diez
+   opciones de un vistazo, sin desplegar nada. En un teléfono se apilan. */
+.manos {
   display: flex;
-  gap: var(--e-3);
+  flex-wrap: wrap;
+  gap: var(--e-4);
   width: 100%;
 }
 
-.dedo {
+.mano {
+  flex: 1 1 260px;
+  min-width: 0;
+
+  h3 {
+    margin: 0 0 var(--e-2);
+    font-size: var(--t-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--text-muted);
+  }
+}
+
+.lista-dedos {
   display: flex;
   flex-direction: column;
+  gap: var(--e-2);
+}
+
+/* Fila y no tarjeta: cinco dedos en columna se leen como una mano, y cada uno
+   queda con área táctil de sobra sin comerse la pantalla. */
+.dedo {
+  display: flex;
   align-items: center;
-  gap: var(--e-1);
-  flex: 1 1 0;
-  padding: var(--e-4) var(--e-2);
+  gap: var(--e-3);
+  width: 100%;
+  min-height: 52px;
+  padding: var(--e-2) var(--e-3);
+  text-align: left;
   color: var(--text-strong);
   background: var(--bg-base);
   border: 1px solid var(--border-default);
   border-radius: var(--r-md);
   cursor: pointer;
+  transition: border-color var(--transicion), background var(--transicion);
 
-  i {
-    font-size: 2.2rem;
-    color: var(--accent);
-  }
-
-  strong {
-    font-size: var(--t-sm);
-  }
-
-  small {
-    font-size: var(--t-xs);
+  > i {
+    flex: 0 0 auto;
+    font-size: 1.5rem;
     color: var(--text-muted);
+  }
+
+  .nombre {
+    flex: 1 1 auto;
+    font-size: var(--t-sm);
+    font-weight: 600;
   }
 
   /* El que ya tiene huella se marca en vez de deshabilitarse: quien vuelve a
@@ -263,15 +290,26 @@
      reemplazarlo, no impedírsela. */
   &.registrado {
     border-color: var(--ok);
+    background: var(--ok-soft);
 
-    i {
+    > i,
+    .marca {
       color: var(--ok);
     }
+  }
+
+  .marca {
+    flex: 0 0 auto;
+    font-size: 1.1rem;
   }
 
   &:active {
     background: var(--accent-soft);
     border-color: var(--accent);
+
+    > i {
+      color: var(--accent);
+    }
   }
 }
 

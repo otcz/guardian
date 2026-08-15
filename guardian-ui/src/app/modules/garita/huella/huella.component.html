@@ -86,24 +86,32 @@
 
     <p class="instruccion">¿Cuál dedo?</p>
 
-    <div class="dedos">
-      <button type="button" class="dedo"
-              [class.registrado]="yaTiene('DERECHO')"
-              (click)="elegirDedo('DERECHO')">
-        <i class="ms" [class.lleno]="yaTiene('DERECHO')">fingerprint</i>
-        <strong>Derecho</strong>
-        <small *ngIf="yaTiene('DERECHO')">Ya registrado · reemplazar</small>
-      </button>
-      <button type="button" class="dedo"
-              [class.registrado]="yaTiene('IZQUIERDO')"
-              (click)="elegirDedo('IZQUIERDO')">
-        <i class="ms" [class.lleno]="yaTiene('IZQUIERDO')">fingerprint</i>
-        <strong>Izquierdo</strong>
-        <small *ngIf="yaTiene('IZQUIERDO')">Ya registrado · reemplazar</small>
-      </button>
+    <!-- Las dos manos, lado a lado. En una tablet cabe entero y se lee como se
+         mira una mano: del pulgar al meñique. El dedo con huella se marca en
+         verde para que el guardia sepa cuáles ya están sin tener que leer una
+         lista aparte. -->
+    <div class="manos">
+      <div class="mano" *ngFor="let m of manos">
+        <h3>Mano {{ m.mano }}</h3>
+        <div class="lista-dedos">
+          <button type="button" class="dedo"
+                  *ngFor="let d of m.dedos"
+                  [class.registrado]="yaTiene(d.codigo)"
+                  (click)="elegirDedo(d.codigo)">
+            <i class="ms" [class.lleno]="yaTiene(d.codigo)">fingerprint</i>
+            <span class="nombre">{{ d.nombre }}</span>
+            <i class="ms marca" *ngIf="yaTiene(d.codigo)">check_circle</i>
+          </button>
+        </div>
+      </div>
     </div>
 
-    <p class="nota">Máximo {{ maximoDedos }} dedos por persona.</p>
+    <p class="nota">
+      {{ yaRegistrados.length }} de {{ maximoDedos }} registrados.
+      <ng-container *ngIf="yaRegistrados.length">
+        Tocar uno marcado lo reemplaza.
+      </ng-container>
+    </p>
   </div>
 
   <!-- Paso 3: la captura. Es lo único que necesita el sensor. -->
@@ -111,8 +119,7 @@
     <i class="ms grande" [class.apagado]="!sensorConectado">fingerprint</i>
 
     <p class="instruccion" *ngIf="sensorConectado">
-      Pon el dedo {{ dedoElegido === 'DERECHO' ? 'derecho' : 'izquierdo' }}
-      en el lector
+      Pon el {{ nombreDe(dedoElegido) }} en el lector
     </p>
 
     <div class="capturas" *ngIf="sensorConectado">
@@ -145,8 +152,7 @@
     <i class="ms grande hecho">check_circle</i>
     <p class="instruccion">Huella registrada</p>
     <p class="nota" *ngIf="persona">
-      {{ persona.nombreCompleto }} — dedo
-      {{ dedoElegido === 'DERECHO' ? 'derecho' : 'izquierdo' }}
+      {{ persona.nombreCompleto }} — {{ nombreDe(dedoElegido) }}
     </p>
     <button type="button" class="principal" (click)="empezarRegistro()">
       <i class="ms">person_add</i> Registrar otra

@@ -28,14 +28,14 @@ import java.util.stream.Collectors;
 public class HuellaServiceImpl implements HuellaService {
 
     /**
-     * Dos dedos por persona.
+     * Tres dedos por persona.
      *
-     * <p>No es un limite tecnico. Quien registra cuatro dedos nunca se acuerda
-     * de cual puso, y con dos —uno de cada mano— queda cubierto el dia que
-     * llegue con una curita, que es el caso real por el que se registra un
-     * segundo.</p>
+     * <p>No es un limite tecnico sino operativo: cada dedo mas es una
+     * comparacion mas por cada persona que llega, y a partir de cierto punto
+     * deja de mejorar el acierto. Tres cubre el caso real —una curita, un dedo
+     * lastimado, uno que ese dia no lee— sin volver lento el cotejo.</p>
      */
-    private static final int MAXIMO_DEDOS = 2;
+    private static final int MAXIMO_DEDOS = 3;
 
     /**
      * Tres capturas del MISMO dedo, que el algoritmo funde en UNA plantilla.
@@ -46,8 +46,18 @@ public class HuellaServiceImpl implements HuellaService {
      */
     private static final int CAPTURAS_POR_DEDO = 3;
 
-    private static final List<String> DEDOS_VALIDOS =
-            Arrays.asList("DERECHO", "IZQUIERDO");
+    /**
+     * Los diez dedos, cada uno identificado por mano y nombre.
+     *
+     * <p>Antes eran solo DERECHO e IZQUIERDO, y eso no alcanza: si alguien
+     * registro el indice y el dia de la curita pone el pulgar, el sistema no
+     * tiene forma de decirle cual habia guardado. Nombrar el dedo exacto es lo
+     * que permite pedirle "pon el indice derecho" en vez de "pon el de la
+     * derecha".</p>
+     */
+    private static final List<String> DEDOS_VALIDOS = Arrays.asList(
+            "IZQ_PULGAR", "IZQ_INDICE", "IZQ_MEDIO", "IZQ_ANULAR", "IZQ_MENIQUE",
+            "DER_PULGAR", "DER_INDICE", "DER_MEDIO", "DER_ANULAR", "DER_MENIQUE");
 
     private final GdHuellaRepository huellaRepository;
     private final GdPersonaRepository personaRepository;
@@ -159,8 +169,7 @@ public class HuellaServiceImpl implements HuellaService {
     private String normalizarDedo(String dedo) {
         String limpio = dedo == null ? "" : dedo.trim().toUpperCase();
         if (!DEDOS_VALIDOS.contains(limpio)) {
-            throw GuardianException.solicitudInvalida(
-                    "El dedo debe ser DERECHO o IZQUIERDO.");
+            throw GuardianException.solicitudInvalida("Ese dedo no existe.");
         }
         return limpio;
     }
