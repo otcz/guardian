@@ -8,6 +8,7 @@ import guardian.entity.persona.GdPersona;
 import guardian.exception.GuardianException;
 import guardian.repository.GdInvitacionRepository;
 import guardian.security.UsuarioAutenticado;
+import guardian.service.notificacion.NotificacionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.when;
 class InvitacionAprobacionServiceImplTest {
 
     @Mock private GdInvitacionRepository invitacionRepository;
+    @Mock private NotificacionService notificacionService;
 
     @InjectMocks
     private InvitacionAprobacionServiceImpl servicio;

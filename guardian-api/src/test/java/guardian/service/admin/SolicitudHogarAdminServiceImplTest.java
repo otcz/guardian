@@ -16,6 +16,7 @@ import guardian.repository.GdResidenteCasaRepository;
 import guardian.repository.GdSolicitudHogarRepository;
 import guardian.repository.GdUsuarioRepository;
 import guardian.security.UsuarioAutenticado;
+import guardian.service.notificacion.NotificacionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,6 +54,7 @@ class SolicitudHogarAdminServiceImplTest {
     @Mock private GdResidenteCasaRepository residenteCasaRepository;
     @Mock private GdUsuarioRepository usuarioRepository;
     @Mock private PasswordEncoder passwordEncoder;
+    @Mock private NotificacionService notificacionService;
 
     @InjectMocks
     private SolicitudHogarAdminServiceImpl servicio;

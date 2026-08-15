@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 public class InvitacionAprobacionServiceImpl implements InvitacionAprobacionService {
 
     private final GdInvitacionRepository invitacionRepository;
+    private final guardian.service.notificacion.NotificacionService notificacionService;
 
     @Override
     @Transactional(readOnly = true)
@@ -48,6 +49,8 @@ public class InvitacionAprobacionServiceImpl implements InvitacionAprobacionServ
         invitacion.setUsuarioModificador(ejecutor.getDocumento());
 
         log.info("[admin] invitacion {} aprobada por {}", id, ejecutor.getDocumento());
+
+        notificacionService.invitacionResuelta(invitacion, true);
         return mapear(invitacionRepository.save(invitacion));
     }
 
@@ -63,6 +66,8 @@ public class InvitacionAprobacionServiceImpl implements InvitacionAprobacionServ
         invitacion.setUsuarioModificador(ejecutor.getDocumento());
 
         log.info("[admin] invitacion {} rechazada por {}", id, ejecutor.getDocumento());
+
+        notificacionService.invitacionResuelta(invitacion, false);
         return mapear(invitacionRepository.save(invitacion));
     }
 

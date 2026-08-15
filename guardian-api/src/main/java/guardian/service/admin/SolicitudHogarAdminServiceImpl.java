@@ -36,6 +36,7 @@ public class SolicitudHogarAdminServiceImpl implements SolicitudHogarAdminServic
     private final GdResidenteCasaRepository residenteCasaRepository;
     private final GdUsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final guardian.service.notificacion.NotificacionService notificacionService;
 
     @Override
     @Transactional(readOnly = true)
@@ -117,6 +118,8 @@ public class SolicitudHogarAdminServiceImpl implements SolicitudHogarAdminServic
         log.info("[admin] solicitud de hogar {} aprobada: {} entra a {} como {} (por {})",
                 id, documento, casa.getIdentificador(), solicitud.getParentesco(),
                 ejecutor.getDocumento());
+
+        notificacionService.solicitudHogarResuelta(solicitud, true);
         return mapear(solicitudRepository.save(solicitud));
     }
 
@@ -132,6 +135,8 @@ public class SolicitudHogarAdminServiceImpl implements SolicitudHogarAdminServic
         solicitud.setUsuarioModificador(ejecutor.getDocumento());
 
         log.info("[admin] solicitud de hogar {} rechazada por {}", id, ejecutor.getDocumento());
+
+        notificacionService.solicitudHogarResuelta(solicitud, false);
         return mapear(solicitudRepository.save(solicitud));
     }
 

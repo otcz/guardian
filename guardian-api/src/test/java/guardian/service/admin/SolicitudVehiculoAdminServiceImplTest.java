@@ -11,6 +11,7 @@ import guardian.entity.vehiculo.GdSolicitudVehiculo;
 import guardian.exception.GuardianException;
 import guardian.repository.GdSolicitudVehiculoRepository;
 import guardian.security.UsuarioAutenticado;
+import guardian.service.notificacion.NotificacionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,7 @@ class SolicitudVehiculoAdminServiceImplTest {
     @Mock private GdSolicitudVehiculoRepository solicitudRepository;
     @Mock private VehiculoService vehiculoService;
     @Mock private EtiquetaCatalogoService etiquetaCatalogoService;
+    @Mock private NotificacionService notificacionService;
 
     @InjectMocks private SolicitudVehiculoAdminServiceImpl servicio;
 

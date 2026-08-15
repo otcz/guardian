@@ -62,15 +62,43 @@ public class CorreoServiceImpl implements CorreoService {
             return;
         }
 
+        despachar(destinatario, "Tu codigo para recuperar la contrasena",
+                cuerpo(nombre, codigo, minutosVigencia), "codigo de recuperacion");
+    }
+
+    @Override
+    public void enviar(String destinatario, String asunto, String cuerpo) {
+        // Sin destinatario no hay nada que hacer, y no es un error: la mitad de
+        // las personas de un conjunto —los ninos, los que solo pasan por la
+        // porteria— no tienen correo, y eso es legitimo.
+        if (!tiene(destinatario)) {
+            return;
+        }
+        if (!estaConfigurado()) {
+            log.warn("[correo] SIN SMTP configurado ({}). No se envio a {}: {}",
+                    queFalta(), destinatario, asunto);
+            return;
+        }
+        despachar(destinatario, asunto, cuerpo, asunto);
+    }
+
+    /**
+     * El envio de verdad. La firma y el pie los pone aca y no cada plantilla,
+     * para que todo lo que sale del sistema se vea igual.
+     */
+    private void despachar(String destinatario, String asunto, String cuerpo,
+                           String queEs) {
         try {
             SimpleMailMessage mensaje = new SimpleMailMessage();
             mensaje.setFrom(String.format("%s <%s>", nombreRemitente, remitente));
             mensaje.setTo(destinatario);
-            mensaje.setSubject("Tu codigo para recuperar la contrasena");
-            mensaje.setText(cuerpo(nombre, codigo, minutosVigencia));
+            mensaje.setSubject(asunto);
+            // La firma la pone el despacho y no cada plantilla: asi todo lo
+            // que sale del sistema termina igual, y nadie puede olvidarla.
+            mensaje.setText(cuerpo + firma());
 
             mailSender.send(mensaje);
-            log.info("[correo] codigo de recuperacion enviado");
+            log.info("[correo] enviado: {}", queEs);
         } catch (RuntimeException fallo) {
             // Se traga a proposito: ver el contrato en CorreoService. El log
             // queda para que el administrador pueda diagnosticar un SMTP mal
@@ -79,9 +107,15 @@ public class CorreoServiceImpl implements CorreoService {
             // El MENSAJE en la linea y la traza solo en debug: lo que resuelve
             // el problema es leer "535 Username and Password not accepted", no
             // ciento veinte lineas de pila que lo entierran.
-            log.error("[correo] fallo el envio: {}", causaRaiz(fallo));
+            log.error("[correo] fallo el envio de '{}': {}", queEs, causaRaiz(fallo));
             log.debug("[correo] detalle del fallo", fallo);
         }
+    }
+
+    /** El pie comun de todo lo que manda el sistema. */
+    private String firma() {
+        return "\n\n-- \n" + nombreRemitente + "\n"
+                + "Este es un mensaje automatico. No respondas a este correo.";
     }
 
     /** Para que el log diga QUE falta, y no solo que falta algo. */
@@ -124,8 +158,6 @@ public class CorreoServiceImpl implements CorreoService {
                 + "    " + codigo + "\n\n"
                 + "Vence en " + minutos + " minutos y sirve una sola vez.\n\n"
                 + "Si no pediste este codigo, ignora este mensaje: tu contrasena\n"
-                + "sigue siendo la misma.\n\n"
-                + "-- \n" + nombreRemitente + "\n"
-                + "Este es un mensaje automatico. No respondas a este correo.";
+                + "sigue siendo la misma.";
     }
 }

@@ -26,6 +26,7 @@ public class SolicitudVehiculoAdminServiceImpl implements SolicitudVehiculoAdmin
     private final GdSolicitudVehiculoRepository solicitudRepository;
     private final VehiculoService vehiculoService;
     private final EtiquetaCatalogoService etiquetaCatalogoService;
+    private final guardian.service.notificacion.NotificacionService notificacionService;
 
     @Override
     @Transactional(readOnly = true)
@@ -74,6 +75,8 @@ public class SolicitudVehiculoAdminServiceImpl implements SolicitudVehiculoAdmin
                         + "(vehiculoId={}, por {})",
                 id, solicitud.getPlaca(), solicitud.getCasa().getIdentificador(),
                 vehiculo.getId(), ejecutor.getDocumento());
+
+        notificacionService.solicitudVehiculoResuelta(solicitud, true);
         return mapear(solicitudRepository.save(solicitud));
     }
 
@@ -92,6 +95,8 @@ public class SolicitudVehiculoAdminServiceImpl implements SolicitudVehiculoAdmin
 
         log.info("[admin] solicitud de vehiculo {} (placa {}) rechazada por {}",
                 id, solicitud.getPlaca(), ejecutor.getDocumento());
+
+        notificacionService.solicitudVehiculoResuelta(solicitud, false);
         return mapear(solicitudRepository.save(solicitud));
     }
 

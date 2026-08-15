@@ -29,6 +29,7 @@ public class BloqueoServiceImpl implements BloqueoService {
     private final GdCasaRepository casaRepository;
     private final GdUsuarioRepository usuarioRepository;
     private final EstadoUsuarioService estadoUsuarioService;
+    private final guardian.service.notificacion.NotificacionService notificacionService;
 
     // ── Personas ─────────────────────────────────────────────────────────────
 
@@ -43,6 +44,10 @@ public class BloqueoServiceImpl implements BloqueoService {
         aplicarBloqueo(persona, motivo, admin, "persona", id);
         personaRepository.save(persona);
         invalidarSesionDe(id);
+
+        // El aviso mas importante de los cuatro: a esta persona la porteria le
+        // va a negar el paso y, sin correo, se entera parada frente al guardia.
+        notificacionService.bloqueoPersonaCambiado(persona, true, motivo);
     }
 
     @Override
@@ -52,6 +57,8 @@ public class BloqueoServiceImpl implements BloqueoService {
         quitarBloqueo(persona, admin, "persona", id);
         personaRepository.save(persona);
         invalidarSesionDe(id);
+
+        notificacionService.bloqueoPersonaCambiado(persona, false, null);
     }
 
     // ── Vehiculos ────────────────────────────────────────────────────────────
@@ -62,6 +69,8 @@ public class BloqueoServiceImpl implements BloqueoService {
         GdVehiculo vehiculo = vehiculoDe(id, admin);
         aplicarBloqueo(vehiculo, motivo, admin, "vehiculo", id);
         vehiculoRepository.save(vehiculo);
+
+        notificacionService.bloqueoVehiculoCambiado(vehiculo, true, motivo);
     }
 
     @Override
@@ -70,6 +79,8 @@ public class BloqueoServiceImpl implements BloqueoService {
         GdVehiculo vehiculo = vehiculoDe(id, admin);
         quitarBloqueo(vehiculo, admin, "vehiculo", id);
         vehiculoRepository.save(vehiculo);
+
+        notificacionService.bloqueoVehiculoCambiado(vehiculo, false, null);
     }
 
     // ── Casas ────────────────────────────────────────────────────────────────
