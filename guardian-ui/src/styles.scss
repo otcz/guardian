@@ -11,7 +11,7 @@
    Del mismo origen, el service worker lo precachea y la tablet sigue
    dibujando iconos sin internet.
 
-   Son 11 KB: el archivo es un SUBCONJUNTO con los 70 iconos que usa GUARDIAN,
+   Son 12 KB: el archivo es un SUBCONJUNTO con los 73 iconos que usa GUARDIAN,
    pedido a Google con `icon_names` y descargado una vez. La fuente completa
    pasa de 3 MB.
 
@@ -44,7 +44,7 @@
      un icono al subconjunto, sin subir esta version se seguiria sirviendo la
      fuente vieja — y un glifo que no esta en la fuente se dibuja como la
      PALABRA. Al cambiar el subconjunto, subir el numero. */
-  src: url('/fonts/material-symbols-rounded.woff2?v=1') format('woff2');
+  src: url('/fonts/material-symbols-rounded.woff2?v=2') format('woff2');
 }
 
 .ms {

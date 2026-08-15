@@ -72,6 +72,90 @@ section {
   max-width: 420px;
 }
 
+/* ── Los tres modos ──────────────────────────────────────────────────────────
+   Icono grande y UNA palabra. En la portería el guardia no lee, reconoce: mira
+   de reojo entre atender a una persona y la siguiente, y tiene que saber en
+   qué modo está sin detenerse a leer. */
+.modos {
+  display: flex;
+  gap: var(--e-2);
+  width: 100%;
+}
+
+.modo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-1);
+  flex: 1 1 0;
+  /* 76px: se toca de pie y a veces con guantes. */
+  min-height: 76px;
+  padding: var(--e-2);
+  color: var(--text-muted);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: color var(--transicion), border-color var(--transicion),
+              background var(--transicion);
+
+  i {
+    /* 1.9rem: el icono manda sobre la palabra, no al revés. */
+    font-size: 1.9rem;
+  }
+
+  span {
+    font-size: var(--t-xs);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  &.activo {
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+
+  /* El modo que existe pero todavía no opera. Se muestra apagado y no
+     escondido: que el guardia sepa que viene es mejor que la sorpresa. */
+  &.sin-servicio:not(.activo) {
+    opacity: var(--opacidad-deshabilitado);
+  }
+}
+
+/* Sin sensor. Se dice, no se finge: un botón de huella que no hace nada le
+   quema al guardia el único toque que tiene. */
+.sin-sensor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--e-2);
+  width: 100%;
+  padding: var(--e-5) var(--e-4);
+  text-align: center;
+  background: var(--bg-surface);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--r-md);
+
+  i {
+    font-size: 2.6rem;
+    color: var(--text-muted);
+  }
+
+  strong {
+    font-size: var(--t-md);
+    color: var(--text-strong);
+  }
+
+  p {
+    margin: 0;
+    font-size: var(--t-sm);
+    color: var(--text-muted);
+  }
+}
+
 /* ── Escaneo ─────────────────────────────────────────────────────────────── */
 
 .manual {

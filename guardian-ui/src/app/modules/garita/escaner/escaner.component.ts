@@ -365,6 +365,43 @@ export class EscanerComponent implements OnInit, AfterViewChecked, OnDestroy {
       });
   }
 
+  // ── Los tres modos de identificar ────────────────────────────────────────
+  //
+  // Se hacen explícitos porque son tres gestos distintos con tres aparatos
+  // distintos, y el guardia tiene que saber en cuál está de un vistazo, de
+  // noche y de pie. Antes había un solo campo que servía para todo: elegante
+  // para quien conoce el sistema, opaco para quien lo usa doce horas seguidas.
+  //
+  // El campo sigue atendiendo QR y documento indistintamente: cambiar de modo
+  // cambia lo que la pantalla EXPLICA, no lo que el sistema acepta. Un código
+  // pasado por el lector en modo documento se resuelve igual, porque en la
+  // portería no se puede castigar a nadie por tocar el botón equivocado.
+
+  modo: 'qr' | 'documento' | 'huella' = 'qr';
+
+  /**
+   * El lector de huella todavía no existe.
+   *
+   * <p>Un navegador NO puede leer un sensor biométrico USB: hace falta un
+   * programa puente en el equipo de la portería, o un terminal de red que
+   * coteje por su cuenta. Hasta que se decida el hardware, el modo se muestra
+   * —para que el guardia sepa que viene— pero dice que no hay sensor en vez de
+   * fingir que lo hay.</p>
+   */
+  get huellaDisponible(): boolean {
+    return false;
+  }
+
+  elegirModo(modo: 'qr' | 'documento' | 'huella'): void {
+    this.modo = modo;
+    this.candidatos = [];
+    this.buscandoCandidatos = false;
+    this.error = null;
+    if (modo !== 'huella') {
+      this.entradaManual = '';
+    }
+  }
+
   // ── El lector escribe a ciegas ───────────────────────────────────────────
   //
   // Lo que el lector lee NO se muestra. Un código de credencial es una cadena

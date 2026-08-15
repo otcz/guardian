@@ -22,11 +22,53 @@
          cae en el mismo sitio, y el prefijo distingue un código de GUARDIAN de
          un número de documento. Preguntarle al guardia qué acaba de pasar por
          el lector es hacerle perder el único toque que tiene. -->
+    <!-- LOS TRES MODOS. Iconos grandes y una palabra: el guardia tiene que
+         saber en cuál está de un vistazo, de noche y de pie. Cambiar de modo
+         cambia lo que la pantalla EXPLICA, no lo que el sistema acepta — un
+         código pasado por el lector en modo Documento se resuelve igual,
+         porque acá no se puede castigar a nadie por tocar el botón que no
+         era. -->
+    <div class="modos" role="tablist">
+      <button type="button" role="tab" class="modo"
+              [class.activo]="modo === 'qr'"
+              [attr.aria-selected]="modo === 'qr'"
+              (click)="elegirModo('qr')">
+        <i class="ms">qr_code_scanner</i>
+        <span>Código</span>
+      </button>
+
+      <button type="button" role="tab" class="modo"
+              [class.activo]="modo === 'documento'"
+              [attr.aria-selected]="modo === 'documento'"
+              (click)="elegirModo('documento')">
+        <i class="ms">badge</i>
+        <span>Documento</span>
+      </button>
+
+      <button type="button" role="tab" class="modo"
+              [class.activo]="modo === 'huella'"
+              [class.sin-servicio]="!huellaDisponible"
+              [attr.aria-selected]="modo === 'huella'"
+              (click)="elegirModo('huella')">
+        <i class="ms">fingerprint</i>
+        <span>Huella</span>
+      </button>
+    </div>
+
+    <!-- HUELLA: se muestra pero no se finge. Un navegador no puede leer un
+         sensor biométrico; hace falta un puente en el equipo o un terminal de
+         red. Decirlo es más útil que un botón que no hace nada. -->
+    <div class="sin-sensor" *ngIf="modo === 'huella'">
+      <i class="ms">sensors_off</i>
+      <strong>Sensor no conectado</strong>
+      <p>Identifica por código o por documento mientras tanto.</p>
+    </div>
+
     <!-- El campo NO muestra lo que lee el lector: un código de credencial es
          una cadena larga y sin sentido que no le dice nada al guardia y le tapa
          el campo justo cuando tiene a alguien enfrente. Mientras dura la
          lectura el campo se pone en "Leyendo…", que sí es información. -->
-    <div class="manual" [class.leyendo]="leyendo">
+    <div class="manual" [class.leyendo]="leyendo" *ngIf="modo !== 'huella'">
       <input #codigo
              id="codigo"
              type="text"
@@ -36,7 +78,9 @@
              (keyup.enter)="verificarEntradaManual()"
              [placeholder]="leyendo
                ? 'Leyendo…'
-               : 'Escanea el código, la cédula o escribe un nombre'"
+               : (modo === 'qr'
+                   ? 'Pasa el código por el lector'
+                   : 'Número de documento o nombre')"
              [readonly]="leyendo"
              autocomplete="off">
       <button type="button" class="principal"
@@ -73,8 +117,13 @@
       </button>
     </div>
 
-    <p class="pista" *ngIf="etapa === 'escaneando' && !candidatos.length && !buscandoCandidatos">
-      Pasa el código o la cédula por el lector. Si no lo tienes, escribe el nombre.
+    <!-- Una línea, no un párrafo: el guardia lee bajo presión. -->
+    <p class="pista"
+       *ngIf="etapa === 'escaneando' && modo !== 'huella'
+              && !candidatos.length && !buscandoCandidatos">
+      {{ modo === 'qr'
+          ? 'El código del residente o el de barras de la cédula'
+          : 'Escribe el documento, o el nombre si no lo tiene' }}
     </p>
 
     <p class="pista" *ngIf="etapa === 'verificando'">
