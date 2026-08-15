@@ -1,8 +1,11 @@
 package guardian.service.foto;
 
+import guardian.util.FotoUrlUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -64,6 +67,49 @@ public class LocalFotoStorageServiceImpl implements FotoStorageService {
             log.warn("[foto] fallo la lectura nombre={}", nombreArchivo, ex);
             return null;
         }
+    }
+
+    @Override
+    public void eliminarPorUrl(String fotoUrl) {
+        String nombre = FotoUrlUtil.nombreArchivoDe(fotoUrl);
+        if (nombre != null) {
+            alConfirmar(nombre);
+        }
+    }
+
+    @Override
+    public void eliminarReemplazada(String urlAnterior, String urlNueva) {
+        String anterior = FotoUrlUtil.nombreArchivoDe(urlAnterior);
+        if (anterior == null || anterior.equals(FotoUrlUtil.nombreArchivoDe(urlNueva))) {
+            return;
+        }
+        alConfirmar(anterior);
+    }
+
+    /**
+     * Borra el archivo DESPUES de que la transaccion confirme.
+     *
+     * <p>Borrar en el momento es una perdida de datos esperando a ocurrir: si
+     * lo que sigue en el metodo revienta —vincular la casa, la unicidad de la
+     * placa— la transaccion revierte, la entidad se queda con su foto
+     * ANTERIOR, y el archivo de esa foto ya no existe. La fila queda apuntando
+     * a una imagen rota y no hay forma de recuperarla.</p>
+     *
+     * <p>Sin transaccion activa borra directo: asi el metodo sirve igual desde
+     * un contexto que no sea transaccional.</p>
+     */
+    private void alConfirmar(String nombreArchivo) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            eliminar(nombreArchivo);
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        eliminar(nombreArchivo);
+                    }
+                });
     }
 
     @Override

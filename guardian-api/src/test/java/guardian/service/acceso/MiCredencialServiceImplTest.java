@@ -11,6 +11,7 @@ import guardian.repository.GdCredencialQrRepository;
 import guardian.repository.GdPersonaRepository;
 import guardian.repository.GdResidenteCasaRepository;
 import guardian.security.UsuarioAutenticado;
+import guardian.service.foto.FotoStorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,10 +47,14 @@ class MiCredencialServiceImplTest {
     private static final String FOTO_PROPIA =
             ApiEndpoint.PUBLICO_FOTOS + "/3f2504e0-4f89-11d3-9a0c-0305e82c3301.jpg";
 
+    private static final String FOTO_ANTERIOR =
+            ApiEndpoint.PUBLICO_FOTOS + "/9c858901-8a57-4791-81fe-4c455b099bc9.jpg";
+
     @Mock private GdPersonaRepository personaRepository;
     @Mock private GdCredencialQrRepository credencialRepository;
     @Mock private GdResidenteCasaRepository residenteCasaRepository;
     @Mock private CredencialQrService credencialQrService;
+    @Mock private FotoStorageService fotoStorageService;
 
     @InjectMocks
     private MiCredencialServiceImpl servicio;
@@ -106,6 +111,31 @@ class MiCredencialServiceImplTest {
         assertThat(ficha.isNecesitaFoto()).isFalse();
         assertThat(ficha.getPayload()).isEqualTo("GRD1.uuid.firma");
         verify(credencialQrService).emitirPermanente(any(), anyString());
+    }
+
+    @Test
+    @DisplayName("al reemplazar la foto se borra el archivo de la anterior")
+    void reemplazarLaFotoBorraLaAnterior() {
+        persona.setFotoUrl(FOTO_ANTERIOR);
+
+        servicio.fijarMiFoto(residente, FOTO_PROPIA);
+
+        verify(fotoStorageService).eliminarReemplazada(FOTO_ANTERIOR, FOTO_PROPIA);
+    }
+
+    @Test
+    @DisplayName("volver a mandar LA MISMA foto no borra nada")
+    void reenviarLaMismaFotoNoBorraNada() {
+        // El caso peligroso, y no es raro: la pantalla reenvia la foto actual
+        // cada vez que se guarda. Si el borrado no distinguiera "cambio" de
+        // "es la misma", la persona se quedaria apuntando a un archivo que
+        // acaba de desaparecer — y su credencial la muestra al guardia.
+        persona.setFotoUrl(FOTO_PROPIA);
+
+        servicio.fijarMiFoto(residente, FOTO_PROPIA);
+
+        verify(fotoStorageService).eliminarReemplazada(FOTO_PROPIA, FOTO_PROPIA);
+        assertThat(persona.getFotoUrl()).isEqualTo(FOTO_PROPIA);
     }
 
     @Test

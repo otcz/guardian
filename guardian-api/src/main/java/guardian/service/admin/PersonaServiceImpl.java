@@ -187,12 +187,20 @@ public class PersonaServiceImpl implements PersonaService {
                     throw GuardianException.conflicto(MensajesGlobales.DOCUMENTO_YA_REGISTRADO);
                 });
 
+        // La foto de antes, ANTES de pisarla: si cambio, su archivo queda
+        // huerfano en disco y se sirve publicamente por su nombre.
+        String fotoAnterior = persona.getFotoUrl();
+
         persona.setDocumento(documento);
         aplicar(persona, request);
         persona.setUsuarioModificador(ejecutor.getDocumento());
 
         GdPersona guardada = personaRepository.save(persona);
         vincularCasa(guardada, request, ejecutor);
+
+        // El borrado real ocurre al confirmar la transaccion — ver
+        // LocalFotoStorageServiceImpl.alConfirmar().
+        fotoStorageService.eliminarReemplazada(fotoAnterior, guardada.getFotoUrl());
 
         return mapear(guardada);
     }
@@ -280,18 +288,10 @@ public class PersonaServiceImpl implements PersonaService {
         // La foto tambien se va: el archivo es publico por nombre UUID y
         // dejarlo huerfano en disco mantendria accesible el dato mas sensible
         // de una persona que pidio ser eliminada.
-        borrarFotoDe(persona);
+        fotoStorageService.eliminarPorUrl(persona.getFotoUrl());
 
         log.warn("[admin] persona ELIMINADA id={} documento={} por={}",
                 id, persona.getDocumento(), ejecutor.getDocumento());
-    }
-
-    private void borrarFotoDe(GdPersona persona) {
-        String url = persona.getFotoUrl();
-        if (url == null || !url.startsWith(ApiEndpoint.PUBLICO_FOTOS + "/")) {
-            return;
-        }
-        fotoStorageService.eliminar(url.substring((ApiEndpoint.PUBLICO_FOTOS + "/").length()));
     }
 
     // ─────────────────────────────────────────────────────────────────────────

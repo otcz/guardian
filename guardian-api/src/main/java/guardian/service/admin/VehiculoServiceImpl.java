@@ -114,12 +114,19 @@ public class VehiculoServiceImpl implements VehiculoService {
                     throw GuardianException.conflicto(MensajesGlobales.PLACA_YA_REGISTRADA);
                 });
 
+        // La foto de antes, ANTES de pisarla: si cambio, su archivo queda
+        // huerfano en disco y se sigue sirviendo por su nombre.
+        String fotoAnterior = vehiculo.getFotoUrl();
+
         vehiculo.setCasa(obtenerCasa(request.getCasaId(), ejecutor.getConjuntoId()));
         vehiculo.setPlaca(placa);
         aplicar(vehiculo, request);
         vehiculo.setUsuarioModificador(ejecutor.getDocumento());
 
-        return mapear(vehiculoRepository.save(vehiculo));
+        GdVehiculo guardado = vehiculoRepository.save(vehiculo);
+        fotoStorageService.eliminarReemplazada(fotoAnterior, guardado.getFotoUrl());
+
+        return mapear(guardado);
     }
 
     @Override
@@ -143,14 +150,19 @@ public class VehiculoServiceImpl implements VehiculoService {
             throw GuardianException.solicitudInvalida(MensajesGlobales.FOTO_URL_INVALIDA);
         }
 
+        String fotoAnterior = vehiculo.getFotoUrl();
+
         // Vacio se normaliza a null: "" y null significan lo mismo —sin foto—
         // y guardar los dos obligaria a preguntar por ambos en cada lectura.
         vehiculo.setFotoUrl(FotoUrlUtil.tieneFoto(fotoUrl) ? fotoUrl.trim() : null);
         vehiculo.setUsuarioModificador(ejecutor.getDocumento());
 
+        GdVehiculo guardado = vehiculoRepository.save(vehiculo);
+        fotoStorageService.eliminarReemplazada(fotoAnterior, guardado.getFotoUrl());
+
         log.info("[vehiculo] foto actualizada id={} placa={} conFoto={}",
-                id, vehiculo.getPlaca(), vehiculo.getFotoUrl() != null);
-        return mapear(vehiculoRepository.save(vehiculo));
+                id, guardado.getPlaca(), guardado.getFotoUrl() != null);
+        return mapear(guardado);
     }
 
     @Override
@@ -166,18 +178,10 @@ public class VehiculoServiceImpl implements VehiculoService {
         // La foto tambien se va. El archivo se sirve publicamente por su nombre
         // UUID, asi que dejarlo huerfano mantendria accesible la imagen de un
         // vehiculo que ya no existe para el sistema.
-        borrarFotoDe(vehiculo);
+        fotoStorageService.eliminarPorUrl(vehiculo.getFotoUrl());
 
         log.warn("[admin] vehiculo ELIMINADO id={} placa={} por={}",
                 id, vehiculo.getPlaca(), ejecutor.getDocumento());
-    }
-
-    private void borrarFotoDe(GdVehiculo vehiculo) {
-        String url = vehiculo.getFotoUrl();
-        if (url == null || !url.startsWith(ApiEndpoint.PUBLICO_FOTOS + "/")) {
-            return;
-        }
-        fotoStorageService.eliminar(url.substring((ApiEndpoint.PUBLICO_FOTOS + "/").length()));
     }
 
     // ─────────────────────────────────────────────────────────────────────────

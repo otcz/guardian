@@ -37,4 +37,19 @@ public final class FotoUrlUtil {
     public static boolean tieneFoto(String fotoUrl) {
         return fotoUrl != null && !fotoUrl.trim().isEmpty();
     }
+
+    /**
+     * El nombre del archivo dentro de una ruta de foto propia, o null.
+     *
+     * <p>Devuelve null —y no la cadena cruda— para todo lo que no sea una
+     * subida de esta aplicacion. Es deliberado: quien llama a esto lo usa para
+     * BORRAR del disco, y una ruta ajena no puede llegar nunca a resolverse
+     * contra el sistema de archivos.</p>
+     */
+    public static String nombreArchivoDe(String fotoUrl) {
+        if (!tieneFoto(fotoUrl) || !esValida(fotoUrl)) {
+            return null;
+        }
+        return fotoUrl.trim().substring((ApiEndpoint.PUBLICO_FOTOS + "/").length());
+    }
 }

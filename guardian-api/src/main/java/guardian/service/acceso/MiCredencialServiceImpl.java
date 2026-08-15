@@ -26,6 +26,7 @@ public class MiCredencialServiceImpl implements MiCredencialService {
     private final GdCredencialQrRepository credencialRepository;
     private final GdResidenteCasaRepository residenteCasaRepository;
     private final CredencialQrService credencialQrService;
+    private final guardian.service.foto.FotoStorageService fotoStorageService;
 
     @Override
     @Transactional
@@ -45,9 +46,17 @@ public class MiCredencialServiceImpl implements MiCredencialService {
         // Su PROPIA persona, del token: sin id en la URL no hay forma de
         // ponerle la cara a otro.
         GdPersona persona = miPersona(usuario);
+
+        // La foto de antes, ANTES de pisarla: quien se cambia la cara varias
+        // veces iba dejando un archivo suelto en disco por cada intento, y
+        // esos archivos se sirven publicamente por su nombre.
+        String fotoAnterior = persona.getFotoUrl();
+
         persona.setFotoUrl(fotoUrl.trim());
         persona.setUsuarioModificador(usuario.getDocumento());
         personaRepository.save(persona);
+
+        fotoStorageService.eliminarReemplazada(fotoAnterior, persona.getFotoUrl());
 
         log.info("[residente] foto propia actualizada personaId={}", persona.getId());
 
