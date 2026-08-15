@@ -13,23 +13,42 @@
 
          La huella sí es otra cosa: otro aparato, otro gesto y sus propias dos
          acciones. -->
-    <div class="modos" role="tablist">
-      <button type="button" role="tab" class="modo"
-              [class.activo]="modo === 'identificar'"
-              [attr.aria-selected]="modo === 'identificar'"
-              (click)="elegirModo('identificar')">
-        <i class="ms">qr_code_scanner</i>
-        <span>Código o documento</span>
-      </button>
+    <!-- BARRA DE ESTADO. Los modos a la izquierda, la presencia a la derecha:
+         las dos son informacion de encabezado, no contenido. Antes eran cuatro
+         cajas gigantes que se disputaban la pantalla con lo unico que importa,
+         que es el campo donde se identifica a alguien. -->
+    <div class="barra">
+      <div class="modos" role="tablist">
+        <button type="button" role="tab" class="modo"
+                [class.activo]="modo === 'identificar'"
+                [attr.aria-selected]="modo === 'identificar'"
+                (click)="elegirModo('identificar')">
+          <i class="ms">qr_code_scanner</i>
+          <span>Código o documento</span>
+        </button>
 
-      <button type="button" role="tab" class="modo"
-              [class.activo]="modo === 'huella'"
-              [class.sin-servicio]="!huellaDisponible"
-              [attr.aria-selected]="modo === 'huella'"
-              (click)="elegirModo('huella')">
-        <i class="ms">fingerprint</i>
-        <span>Huella</span>
-      </button>
+        <button type="button" role="tab" class="modo"
+                [class.activo]="modo === 'huella'"
+                [class.sin-servicio]="!huellaDisponible"
+                [attr.aria-selected]="modo === 'huella'"
+                (click)="elegirModo('huella')">
+          <i class="ms">fingerprint</i>
+          <span>Huella</span>
+        </button>
+      </div>
+
+      <!-- Cifras de contexto, en chips y no en cajas: se miran de reojo una vez
+           cada tanto, no son la accion de nadie. -->
+      <div class="presencia" *ngIf="presencia">
+        <span class="kpi adentro">
+          <span class="valor">{{ presencia.adentro }}</span>
+          <span class="titulo">Adentro</span>
+        </span>
+        <span class="kpi afuera">
+          <span class="valor">{{ presencia.afuera }}</span>
+          <span class="titulo">Afuera</span>
+        </span>
+      </div>
     </div>
 
     <!-- COLUMNA PRINCIPAL: lo que el guardia toca.
@@ -48,6 +67,11 @@
          una cadena larga y sin sentido que no le dice nada al guardia y le tapa
          el campo justo cuando tiene a alguien enfrente. Mientras dura la
          lectura el campo se pone en "Leyendo…", que sí es información. -->
+    <!-- El icono le da centro de gravedad a la zona de accion. Sin el, el campo
+         flotaba solo en media pantalla y la columna se veia a medio llenar. -->
+    <i class="ms emblema-escaneo" *ngIf="modo === 'identificar' && !candidatos.length"
+       aria-hidden="true">qr_code_scanner</i>
+
     <div class="manual" [class.leyendo]="leyendo" *ngIf="modo === 'identificar'">
       <input #codigo
              id="codigo"

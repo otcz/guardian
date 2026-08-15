@@ -15,14 +15,60 @@
 
 /* ── Contadores de presencia ─────────────────────────────────────────────── */
 
+/* ── Barra de estado ─────────────────────────────────────────────────────────
+   Modos y presencia son ENCABEZADO, no contenido. Antes eran cuatro cajas
+   grandes disputandole la pantalla al campo de identificacion, que es lo unico
+   que el guardia usa de verdad. */
+.barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-3);
+  width: 100%;
+  padding-bottom: var(--e-3);
+  border-bottom: 1px solid var(--border-hairline);
+}
+
 .presencia {
   display: flex;
-  gap: 0.75rem;
-  width: 100%;
-  max-width: 420px;
+  gap: var(--e-2);
 }
 
 .kpi {
+  display: flex;
+  align-items: baseline;
+  gap: var(--e-2);
+  padding: var(--e-2) var(--e-3);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-full);
+  white-space: nowrap;
+
+  .valor {
+    font-size: var(--t-lg);
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .titulo {
+    font-size: var(--t-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+  }
+
+  &.adentro .valor {
+    color: var(--ok);
+  }
+
+  &.afuera .valor {
+    color: var(--text-default);
+  }
+}
+
+/* Lo viejo, que quedaba de cuando eran cajas grandes. */
+.kpi-antiguo {
   flex: 1 1 0;
   min-width: 0;
   display: flex;
@@ -89,37 +135,63 @@ section {
 @media (min-width: 900px) {
   .escaneo {
     display: grid;
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
     grid-template-areas:
-      'modos    modos'
+      'barra     barra'
       'principal contexto';
-    align-items: start;
+    align-items: stretch;
     gap: var(--e-4) var(--e-5);
-    max-width: 1000px;
+    max-width: 1080px;
   }
 
-  .modos {
-    grid-area: modos;
+  .barra {
+    grid-area: barra;
   }
 
   .col-principal {
     grid-area: principal;
+    /* La zona de accion es una TARJETA con su contenido centrado, no una pila
+       pegada arriba. Antes el campo quedaba en el borde superior y debajo se
+       abria un hueco muerto de media pantalla. */
+    justify-content: center;
+    align-items: center;
+    gap: var(--e-4);
+    min-height: 420px;
+    padding: var(--e-5);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--r-md);
   }
 
   .contexto {
     grid-area: contexto;
   }
 
-  /* Los contadores dejan de ser dos cajas sueltas y encabezan su columna. */
-  .presencia {
-    max-width: none;
+  /* Todo lo de la zona de accion comparte ancho: alineado, no cada cosa con su
+     medida. Es lo que separa una composicion de unas cajas sueltas. */
+  .manual,
+  .pista,
+  .auto-check,
+  .candidatos {
+    max-width: 420px;
   }
 
-  /* El campo crece con la columna: es la acción principal de la pantalla y
-     tiene que verse como tal desde un metro de distancia. */
+  /* El campo es la accion principal de la pantalla y tiene que verse como tal
+     desde un metro de distancia. */
   .manual input {
-    padding: 0.95rem 1rem;
-    font-size: 1.2rem;
+    padding: 1rem;
+    font-size: 1.25rem;
+    text-align: center;
+  }
+
+  .pista {
+    text-align: center;
+  }
+
+  /* La lista llena su columna en vez de quedar corta al lado de una tarjeta
+     alta. */
+  .movimientos {
+    height: 100%;
   }
 }
 
@@ -139,46 +211,41 @@ section {
    Icono grande y UNA palabra. En la portería el guardia no lee, reconoce: mira
    de reojo entre atender a una persona y la siguiente, y tiene que saber en
    qué modo está sin detenerse a leer. */
+/* Control segmentado, no dos paneles. Elegir el modo es un ajuste, no la tarea:
+   dos cajas de cien pixeles de alto le decian al guardia que eso era lo
+   importante de la pantalla, y lo importante es el campo de abajo. */
 .modos {
-  display: flex;
-  gap: var(--e-2);
-  width: 100%;
+  display: inline-flex;
+  padding: 3px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-full);
 }
 
 .modo {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: var(--e-1);
-  flex: 1 1 0;
-  /* 76px: se toca de pie y a veces con guantes. */
-  min-height: 76px;
-  padding: var(--e-2);
+  gap: var(--e-2);
+  /* Sigue siendo tactil de sobra: 44px es el minimo y aca hay 46. */
+  min-height: 46px;
+  padding: 0 var(--e-4);
+  font-size: var(--t-sm);
+  font-weight: 600;
   color: var(--text-muted);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: var(--r-md);
+  background: none;
+  border: none;
+  border-radius: var(--r-full);
   cursor: pointer;
-  transition: color var(--transicion), border-color var(--transicion),
-              background var(--transicion);
+  white-space: nowrap;
+  transition: color var(--transicion), background var(--transicion);
 
   i {
-    /* 1.9rem: el icono manda sobre la palabra, no al revés. */
-    font-size: 1.9rem;
-  }
-
-  span {
-    font-size: var(--t-xs);
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font-size: 1.25rem;
   }
 
   &.activo {
-    color: var(--accent);
-    background: var(--accent-soft);
-    border-color: var(--accent);
+    color: var(--text-inverse);
+    background: var(--accent);
   }
 
   /* El modo que existe pero todavía no opera. Se muestra apagado y no
@@ -186,6 +253,13 @@ section {
   &.sin-servicio:not(.activo) {
     opacity: var(--opacidad-deshabilitado);
   }
+}
+
+/* El centro de gravedad de la zona de accion. Sin el, el campo flotaba solo en
+   media pantalla y la columna se veia a medio llenar. */
+.emblema-escaneo {
+  font-size: 4rem;
+  color: var(--border-strong);
 }
 
 /* Sin sensor. Se dice, no se finge: un botón de huella que no hace nada le
