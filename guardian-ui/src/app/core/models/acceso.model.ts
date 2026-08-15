@@ -89,6 +89,35 @@ export interface CandidatoGarita {
   fotoUrl: string | null;
 }
 
+/** Si el módulo de huella opera del lado del servidor. */
+export interface EstadoHuella {
+  disponible: boolean;
+  algoritmo: string;
+  maximoDedos: number;
+  capturasPorDedo: number;
+}
+
+/**
+ * Los dedos registrados de una persona.
+ *
+ * <p>NO viaja la plantilla, y es deliberado: es un dato biométrico y no tiene
+ * por qué salir del servidor. La pantalla solo necesita saber cuáles hay para
+ * no ofrecer el mismo dedo dos veces.</p>
+ */
+export interface HuellasDeUnaPersona {
+  personaId: number;
+  nombreCompleto: string;
+  dedos: DedoRegistrado[];
+  puedeAgregar: boolean;
+}
+
+export interface DedoRegistrado {
+  dedo: string;
+  calidad: number | null;
+  fechaRegistro: string;
+  algoritmo: string;
+}
+
 export type EstadoInvitacion =
   'PENDIENTE' | 'RECHAZADA'
   | 'VIGENTE' | 'NO_VIGENTE' | 'AGOTADA' | 'VENCIDA' | 'REVOCADA';

@@ -87,13 +87,19 @@
     <p class="instruccion">¿Cuál dedo?</p>
 
     <div class="dedos">
-      <button type="button" class="dedo" (click)="elegirDedo('DERECHO')">
-        <i class="ms">fingerprint</i>
+      <button type="button" class="dedo"
+              [class.registrado]="yaTiene('DERECHO')"
+              (click)="elegirDedo('DERECHO')">
+        <i class="ms" [class.lleno]="yaTiene('DERECHO')">fingerprint</i>
         <strong>Derecho</strong>
+        <small *ngIf="yaTiene('DERECHO')">Ya registrado · reemplazar</small>
       </button>
-      <button type="button" class="dedo" (click)="elegirDedo('IZQUIERDO')">
-        <i class="ms">fingerprint</i>
+      <button type="button" class="dedo"
+              [class.registrado]="yaTiene('IZQUIERDO')"
+              (click)="elegirDedo('IZQUIERDO')">
+        <i class="ms" [class.lleno]="yaTiene('IZQUIERDO')">fingerprint</i>
         <strong>Izquierdo</strong>
+        <small *ngIf="yaTiene('IZQUIERDO')">Ya registrado · reemplazar</small>
       </button>
     </div>
 
@@ -114,16 +120,49 @@
             [class.hecho]="n < capturaActual"></span>
     </div>
 
+    <button type="button" class="principal"
+            *ngIf="sensorConectado"
+            [disabled]="guardando"
+            (click)="capturar()">
+      <i class="ms" [class.gira]="guardando">
+        {{ guardando ? 'progress_activity' : 'fingerprint' }}
+      </i>
+      {{ guardando ? 'Leyendo…' : 'Empezar' }}
+    </button>
+
     <p class="instruccion" *ngIf="!sensorConectado">Sensor no conectado</p>
     <p class="nota" *ngIf="!sensorConectado">
       Conecta el lector para tomar las {{ capturasPorDedo }} lecturas.
     </p>
+
+    <p class="aviso-error" *ngIf="error">{{ error }}</p>
   </div>
 
-  <div class="pie">
-    <button type="button" class="alterno" (click)="volver()">
+  <!-- Listo. Se confirma y no se vuelve solo al inicio: el guardia tiene que
+       VER que quedó, sobre todo cuando acaba de pedirle el dedo tres veces a
+       alguien que está esperando. -->
+  <div class="cuerpo" *ngIf="paso === 'listo'">
+    <i class="ms grande hecho">check_circle</i>
+    <p class="instruccion">Huella registrada</p>
+    <p class="nota" *ngIf="persona">
+      {{ persona.nombreCompleto }} — dedo
+      {{ dedoElegido === 'DERECHO' ? 'derecho' : 'izquierdo' }}
+    </p>
+    <button type="button" class="principal" (click)="empezarRegistro()">
+      <i class="ms">person_add</i> Registrar otra
+    </button>
+  </div>
+
+  <div class="pie" *ngIf="paso !== 'listo'">
+    <button type="button" class="alterno" [disabled]="guardando" (click)="volver()">
       <i class="ms">arrow_back</i> Atrás
     </button>
-    <button type="button" class="alterno" (click)="cancelar()">Cancelar</button>
+    <button type="button" class="alterno" [disabled]="guardando" (click)="cancelar()">
+      Cancelar
+    </button>
+  </div>
+
+  <div class="pie" *ngIf="paso === 'listo'">
+    <button type="button" class="alterno" (click)="cancelar()">Terminar</button>
   </div>
 </div>

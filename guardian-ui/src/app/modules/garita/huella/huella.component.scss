@@ -140,6 +140,10 @@
     &.apagado {
       color: var(--text-muted);
     }
+
+    &.hecho {
+      color: var(--ok);
+    }
   }
 }
 
@@ -247,6 +251,22 @@
 
   strong {
     font-size: var(--t-sm);
+  }
+
+  small {
+    font-size: var(--t-xs);
+    color: var(--text-muted);
+  }
+
+  /* El que ya tiene huella se marca en vez de deshabilitarse: quien vuelve a
+     tocarlo es porque el anterior no le funciona, y la acción correcta es
+     reemplazarlo, no impedírsela. */
+  &.registrado {
+    border-color: var(--ok);
+
+    i {
+      color: var(--ok);
+    }
   }
 
   &:active {

@@ -1,10 +1,11 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 
 import { AccesoService } from '../../../core/services/acceso.service';
+import { LectorHuellaService } from '../../../core/services/lector-huella.service';
 import { CandidatoGarita } from '../../../core/models/acceso.model';
 
 /** En qué punto del módulo está el guardia. */
-type Paso = 'inicio' | 'buscando-persona' | 'eligiendo-dedo' | 'capturando';
+type Paso = 'inicio' | 'buscando-persona' | 'eligiendo-dedo' | 'capturando' | 'listo';
 
 /**
  * El módulo de huella de la portería.
@@ -26,30 +27,28 @@ type Paso = 'inicio' | 'buscando-persona' | 'eligiendo-dedo' | 'capturando';
   styleUrl: './huella.component.scss',
   standalone: false
 })
-export class HuellaComponent {
+export class HuellaComponent implements OnInit {
 
   /**
-   * El lector todavía no existe.
+   * Hay lector y su servicio local responde.
    *
-   * <p>Un navegador NO puede leer un sensor biométrico USB por su cuenta: hace
-   * falta el servicio local del fabricante escuchando en localhost. Mientras
-   * no esté, esto es false y la pantalla lo dice.</p>
+   * <p>Se resuelve preguntando a DOS partes, y las dos tienen que decir que
+   * sí: el navegador —que necesita el servicio local del fabricante escuchando
+   * en localhost— y el servidor, que necesita el algoritmo de cotejo. Con una
+   * sola de las dos, enrolar produce plantillas que nadie va a poder
+   * comparar.</p>
    */
-  readonly sensorConectado = false;
+  sensorConectado = false;
 
   /**
-   * Dos dedos por persona. No es un límite técnico: es que quien registra
-   * cuatro dedos nunca se acuerda de cuál puso, y con dos —uno de cada mano—
-   * queda cubierto el día que llegue con una curita.
+   * Los límites los manda el SERVIDOR, no esta pantalla.
+   *
+   * <p>Son reglas de negocio —cuántos dedos, cuántas capturas— y si viven en
+   * dos sitios el día que cambien van a quedar en desacuerdo. Estos valores
+   * son solo el respaldo mientras llega la respuesta.</p>
    */
-  readonly maximoDedos = 2;
-
-  /**
-   * Tres capturas del MISMO dedo. El SDK las fusiona en una sola plantilla:
-   * no son tres huellas, son tres lecturas para que la plantilla resultante
-   * aguante que el dedo venga torcido, seco o sucio.
-   */
-  readonly capturasPorDedo = 3;
+  maximoDedos = 2;
+  capturasPorDedo = 3;
 
   paso: Paso = 'inicio';
   documento = '';
@@ -58,11 +57,32 @@ export class HuellaComponent {
   capturaActual = 0;
   error: string | null = null;
   buscando = false;
+  guardando = false;
+
+  /** Los dedos que la persona ya tiene, para no ofrecer el mismo dos veces. */
+  yaRegistrados: string[] = [];
 
   /** El guardia quiere identificar a quien está enfrente. */
   @Output() identificar = new EventEmitter<void>();
 
-  constructor(private readonly acceso: AccesoService) {}
+  constructor(
+    private readonly acceso: AccesoService,
+    private readonly lector: LectorHuellaService
+  ) {}
+
+  ngOnInit(): void {
+    // Las dos mitades: el lector del lado del navegador y el cotejo del lado
+    // del servidor. Sin ambas, enrolar no sirve de nada.
+    this.acceso.estadoHuella().subscribe({
+      next: estado => {
+        this.maximoDedos = estado.maximoDedos;
+        this.capturasPorDedo = estado.capturasPorDedo;
+        this.lector.disponible().subscribe(
+          hayLector => (this.sensorConectado = hayLector && estado.disponible));
+      },
+      error: () => (this.sensorConectado = false)
+    });
+  }
 
   // ── Registrar ────────────────────────────────────────────────────────────
 
@@ -98,6 +118,7 @@ export class HuellaComponent {
         }
         this.persona = exacta;
         this.paso = 'eligiendo-dedo';
+        this.cargarDedos(exacta.personaId);
       },
       error: () => {
         this.buscando = false;
@@ -106,11 +127,87 @@ export class HuellaComponent {
     });
   }
 
+  private cargarDedos(personaId: number): void {
+    this.acceso.huellasDe(personaId).subscribe({
+      next: huellas => (this.yaRegistrados = huellas.dedos.map(d => d.dedo)),
+      // Que no se sepa qué dedos tiene no impide registrar: en el peor caso el
+      // servidor reemplaza el que ya estaba, que es lo correcto igual.
+      error: () => (this.yaRegistrados = [])
+    });
+  }
+
+  yaTiene(dedo: string): boolean {
+    return this.yaRegistrados.includes(dedo);
+  }
+
   /** Paso 2: cuál dedo. */
   elegirDedo(dedo: 'DERECHO' | 'IZQUIERDO'): void {
     this.dedoElegido = dedo;
     this.capturaActual = 0;
+    this.error = null;
     this.paso = 'capturando';
+  }
+
+  /**
+   * Paso 3: las tres lecturas del mismo dedo.
+   *
+   * <p>Se piden UNA a una y en secuencia, no en paralelo: el sensor tiene un
+   * solo dedo encima y entre lectura y lectura la persona tiene que levantarlo
+   * y volverlo a poner — de eso salen las tres vistas distintas que hacen buena
+   * a la plantilla.</p>
+   */
+  capturar(): void {
+    if (!this.persona || !this.dedoElegido || this.guardando) {
+      return;
+    }
+    this.error = null;
+    this.guardando = true;
+    this.lecturas = [];
+    this.siguienteLectura();
+  }
+
+  private lecturas: string[] = [];
+  private ultimaCalidad?: number;
+
+  private siguienteLectura(): void {
+    this.lector.capturar().subscribe({
+      next: lectura => {
+        this.lecturas.push(lectura.plantilla);
+        this.ultimaCalidad = lectura.calidad;
+        this.capturaActual = this.lecturas.length;
+
+        if (this.lecturas.length < this.capturasPorDedo) {
+          this.siguienteLectura();
+          return;
+        }
+        this.guardar();
+      },
+      error: fallo => {
+        this.guardando = false;
+        this.capturaActual = 0;
+        this.error = fallo?.message ?? 'No pudimos leer la huella.';
+      }
+    });
+  }
+
+  private guardar(): void {
+    this.acceso.registrarHuella({
+      personaId: this.persona!.personaId,
+      dedo: this.dedoElegido!,
+      lecturas: this.lecturas,
+      calidad: this.ultimaCalidad
+    }).subscribe({
+      next: huellas => {
+        this.guardando = false;
+        this.yaRegistrados = huellas.dedos.map(d => d.dedo);
+        this.paso = 'listo';
+      },
+      error: fallo => {
+        this.guardando = false;
+        this.capturaActual = 0;
+        this.error = fallo?.error?.mensaje ?? 'No pudimos guardar la huella.';
+      }
+    });
   }
 
   volver(): void {

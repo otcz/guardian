@@ -28,6 +28,8 @@ public final class ApiEndpoint {
     public static final String ACCESO_PORTERIAS = "/porterias";
     /** Respaldo del escaneo: encontrar a alguien por su nombre. */
     public static final String ACCESO_BUSCAR = "/buscar";
+    /** Enrolamiento de huellas. El cotejo entra por ACCESO_VERIFICAR. */
+    public static final String ACCESO_HUELLAS = "/huellas";
 
     /** Autogestion del residente — cualquier usuario autenticado sobre SU casa. */
     public static final String RESIDENTE = API + "/residente";

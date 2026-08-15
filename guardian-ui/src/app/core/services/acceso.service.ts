@@ -6,6 +6,8 @@ import { environment } from '../../../environments/environment';
 import {
   AccesoEvento,
   CandidatoGarita,
+  EstadoHuella,
+  HuellasDeUnaPersona,
   FichaVerificacion,
   MiQr,
   Pagina,
@@ -124,5 +126,34 @@ export class AccesoService {
 
   miQr(): Observable<MiQr> {
     return this.http.get<MiQr>(`${environment.apiUrl}/residente/mi-qr`);
+  }
+
+  // ── Huellas ──────────────────────────────────────────────────────────────
+  //
+  // El enrolamiento. El cotejo, cuando exista, entra por verificar(): la
+  // decisión de dejar pasar tiene que salir de un solo sitio.
+
+  /** Si hay lector configurado del lado del servidor, y con qué algoritmo. */
+  estadoHuella(): Observable<EstadoHuella> {
+    return this.http.get<EstadoHuella>(`${this.base}/huellas/estado`);
+  }
+
+  huellasDe(personaId: number): Observable<HuellasDeUnaPersona> {
+    return this.http.get<HuellasDeUnaPersona>(`${this.base}/huellas/${personaId}`);
+  }
+
+  /** Las tres lecturas de UN dedo. El servidor las funde en una plantilla. */
+  registrarHuella(peticion: {
+    personaId: number;
+    dedo: string;
+    lecturas: string[];
+    calidad?: number;
+  }): Observable<HuellasDeUnaPersona> {
+    return this.http.post<HuellasDeUnaPersona>(`${this.base}/huellas`, peticion);
+  }
+
+  eliminarHuella(personaId: number, dedo: string): Observable<HuellasDeUnaPersona> {
+    return this.http.delete<HuellasDeUnaPersona>(
+      `${this.base}/huellas/${personaId}/${dedo}`);
   }
 }
