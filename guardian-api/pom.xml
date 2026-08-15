@@ -23,6 +23,14 @@
 
     <properties>
         <java.version>1.8</java.version>
+        <!-- Sin esto Maven compila con el encoding de CADA maquina: el Windows
+             del desarrollo y el contenedor de produccion no coinciden, asi que
+             una tilde escrita en un texto se veia bien en un lado y rota en el
+             otro. Por eso todo el codigo estaba en ASCII, evitando el problema
+             en vez de resolverlo — y los correos le llegaban al residente
+             diciendo "contrasena". -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- Overrides de CVE. Mantener sincronizado con el pom raiz. -->
         <!-- Tomcat: CVE-2025-24813 CRITICAL (RCE), CVE-2024-34750 HIGH -->
         <tomcat.version>9.0.106</tomcat.version>

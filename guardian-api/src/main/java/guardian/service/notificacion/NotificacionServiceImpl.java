@@ -45,26 +45,34 @@ public class NotificacionServiceImpl implements NotificacionService {
     public void solicitudVehiculoResuelta(GdSolicitudVehiculo solicitud, boolean aprobada) {
         GdPersona quien = solicitud.getSolicitante();
         String casa = solicitud.getCasa().getIdentificador();
+        String placa = solicitud.getPlaca();
 
         if (aprobada) {
-            enviar(quien.getEmail(),
-                    "Tu vehiculo " + solicitud.getPlaca() + " quedo autorizado",
-                    saludo(quien.getNombres())
-                            + "La administracion autorizo el vehiculo "
-                            + solicitud.getPlaca() + " para la casa " + casa + ".\n\n"
-                            + "Ya puede entrar y salir del conjunto."
-                            + enlace());
+            enviar(quien.getEmail(), MensajeCorreo
+                    .de("Tu vehículo " + placa + " quedó autorizado",
+                            "Vehículo autorizado",
+                            "Hola " + quien.getNombres() + ",")
+                    .parrafo("La administración autorizó tu vehículo para la casa "
+                            + casa + ". Ya puede entrar y salir del conjunto.")
+                    .destacado("Placa autorizada", placa)
+                    .parrafo("La portería lo reconocerá desde ahora. No necesitas "
+                            + "hacer nada más.")
+                    .accion("Ver mis vehículos", urlApp));
             return;
         }
 
-        enviar(quien.getEmail(),
-                "No autorizaron el vehiculo " + solicitud.getPlaca(),
-                saludo(quien.getNombres())
-                        + "La administracion no autorizo el vehiculo "
-                        + solicitud.getPlaca() + " para la casa " + casa + ".\n\n"
-                        + motivo(solicitud.getMotivoRechazo())
-                        + "Puedes corregir los datos y volver a pedirlo."
-                        + enlace());
+        enviar(quien.getEmail(), MensajeCorreo
+                .de("No autorizaron el vehículo " + placa,
+                        "Vehículo no autorizado",
+                        "Hola " + quien.getNombres() + ",")
+                .parrafo("La administración revisó tu solicitud para la casa "
+                        + casa + " y no la autorizó.")
+                .destacado("Placa", placa)
+                .parrafo(motivo(solicitud.getMotivoRechazo()))
+                .advertencia("Puedes corregir los datos y volver a pedirlo desde "
+                        + "la aplicación. Este vehículo no entra al conjunto "
+                        + "mientras tanto.")
+                .accion("Volver a pedirlo", urlApp));
     }
 
     @Override
@@ -72,50 +80,63 @@ public class NotificacionServiceImpl implements NotificacionService {
         String casa = solicitud.getCodigo().getCasa().getIdentificador();
 
         if (aprobada) {
-            enviar(solicitud.getEmail(),
-                    "Ya haces parte de la casa " + casa,
-                    saludo(solicitud.getNombres())
-                            + "La administracion aprobo tu solicitud para entrar a la casa "
-                            + casa + ".\n\n"
-                            + "Entra con tu numero de documento. Tu PIN es "
-                            + Codigos.CLAVE_INICIAL
-                            + " y tendras que cambiarlo la primera vez."
-                            + enlace());
+            enviar(solicitud.getEmail(), MensajeCorreo
+                    .de("Ya haces parte de la casa " + casa,
+                            "Bienvenido a " + casa,
+                            "Hola " + solicitud.getNombres() + ",")
+                    .parrafo("La administración aprobó tu solicitud. Ya estás "
+                            + "registrado en la casa " + casa + " y puedes entrar "
+                            + "a la aplicación.")
+                    .destacado("Tu usuario", solicitud.getDocumento())
+                    .parrafo("Tu PIN de entrada es " + Codigos.CLAVE_INICIAL
+                            + ". La aplicación te va a pedir que lo cambies la "
+                            + "primera vez.")
+                    .advertencia("Cámbialo apenas entres y no lo compartas: es lo "
+                            + "que abre tu código de acceso en la portería.")
+                    .accion("Entrar a GUARDIAN", urlApp));
             return;
         }
 
-        enviar(solicitud.getEmail(),
-                "No aprobaron tu solicitud para la casa " + casa,
-                saludo(solicitud.getNombres())
-                        + "La administracion no aprobo tu solicitud para entrar a la casa "
-                        + casa + ".\n\n"
-                        + motivo(solicitud.getMotivoRechazo())
-                        + "Escribe a la administracion del conjunto si crees que hay un error.");
+        enviar(solicitud.getEmail(), MensajeCorreo
+                .de("No aprobaron tu solicitud para la casa " + casa,
+                        "Solicitud no aprobada",
+                        "Hola " + solicitud.getNombres() + ",")
+                .parrafo("La administración revisó tu solicitud para entrar a la "
+                        + "casa " + casa + " y no la aprobó.")
+                .parrafo(motivo(solicitud.getMotivoRechazo()))
+                .advertencia("Si crees que hay un error, escribe a la administración "
+                        + "del conjunto."));
     }
 
     @Override
     public void invitacionResuelta(GdInvitacion invitacion, boolean aprobada) {
         GdPersona anfitrion = invitacion.getAnfitrion();
+        String invitado = invitacion.getNombreInvitado();
 
         if (aprobada) {
-            enviar(anfitrion.getEmail(),
-                    "Tu invitado " + invitacion.getNombreInvitado() + " quedo autorizado",
-                    saludo(anfitrion.getNombres())
-                            + "La administracion autorizo la visita de "
-                            + invitacion.getNombreInvitado() + ".\n\n"
-                            + "Ya puedes compartirle su codigo de entrada."
-                            + enlace());
+            enviar(anfitrion.getEmail(), MensajeCorreo
+                    .de("Tu invitado " + invitado + " quedó autorizado",
+                            "Visita autorizada",
+                            "Hola " + anfitrion.getNombres() + ",")
+                    .parrafo("La administración autorizó la visita que registraste. "
+                            + "Ya puedes compartirle su código de entrada.")
+                    .destacado("Invitado", invitado)
+                    .parrafo("El código solo sirve dentro de las fechas que "
+                            + "indicaste al invitarlo.")
+                    .accion("Ver la invitación", urlApp));
             return;
         }
 
-        enviar(anfitrion.getEmail(),
-                "No autorizaron la visita de " + invitacion.getNombreInvitado(),
-                saludo(anfitrion.getNombres())
-                        + "La administracion no autorizo la visita de "
-                        + invitacion.getNombreInvitado() + ".\n\n"
-                        + motivo(invitacion.getMotivoRechazo())
-                        + "Tu invitado no podra entrar con ese codigo."
-                        + enlace());
+        enviar(anfitrion.getEmail(), MensajeCorreo
+                .de("No autorizaron la visita de " + invitado,
+                        "Visita no autorizada",
+                        "Hola " + anfitrion.getNombres() + ",")
+                .parrafo("La administración revisó la visita que registraste y no "
+                        + "la autorizó.")
+                .destacado("Invitado", invitado)
+                .parrafo(motivo(invitacion.getMotivoRechazo()))
+                .advertencia("Tu invitado no podrá entrar con ese código. "
+                        + "Avísale antes de que venga."));
     }
 
     // ── Bloqueos ─────────────────────────────────────────────────────────────
@@ -133,21 +154,26 @@ public class NotificacionServiceImpl implements NotificacionService {
 
         for (String destino : destinos) {
             if (bloqueada) {
-                enviar(destino,
-                        nombre + " quedo deshabilitado en el conjunto",
-                        "Hola,\n\n"
-                                + nombre + " no puede entrar ni salir del conjunto hasta que "
-                                + "la administracion vuelva a habilitarlo.\n\n"
-                                + motivo(motivo)
-                                + "Esto no se puede levantar desde la aplicacion. "
-                                + "Escribe a la administracion del conjunto.");
+                enviar(destino, MensajeCorreo
+                        .de(nombre + " quedó deshabilitado en el conjunto",
+                                "Acceso deshabilitado",
+                                "Hola,")
+                        .parrafo("La administración deshabilitó el acceso de "
+                                + nombre + ". La portería no le va a permitir "
+                                + "entrar ni salir.")
+                        .parrafo(motivo(motivo))
+                        .advertencia("Esto no se puede levantar desde la aplicación. "
+                                + "Para resolverlo, escribe a la administración del "
+                                + "conjunto."));
             } else {
-                enviar(destino,
-                        nombre + " vuelve a tener acceso",
-                        "Hola,\n\n"
-                                + "La administracion habilito de nuevo a " + nombre + ".\n\n"
-                                + "Ya puede entrar y salir del conjunto."
-                                + enlace());
+                enviar(destino, MensajeCorreo
+                        .de(nombre + " vuelve a tener acceso",
+                                "Acceso restablecido",
+                                "Hola,")
+                        .parrafo("La administración habilitó de nuevo a " + nombre
+                                + ". Ya puede entrar y salir del conjunto con "
+                                + "normalidad.")
+                        .accion("Abrir GUARDIAN", urlApp));
             }
         }
     }
@@ -156,27 +182,33 @@ public class NotificacionServiceImpl implements NotificacionService {
     public void bloqueoVehiculoCambiado(GdVehiculo vehiculo, boolean bloqueado, String motivo) {
         String destino = correoDelTitular(vehiculo.getCasa());
         String casa = vehiculo.getCasa().getIdentificador();
+        String placa = vehiculo.getPlaca();
 
         if (bloqueado) {
-            enviar(destino,
-                    "El vehiculo " + vehiculo.getPlaca() + " quedo deshabilitado",
-                    "Hola,\n\n"
-                            + "El vehiculo " + vehiculo.getPlaca() + " de la casa " + casa
-                            + " no puede entrar ni salir del conjunto hasta que la "
-                            + "administracion vuelva a habilitarlo.\n\n"
-                            + motivo(motivo)
-                            + "Esto no se puede levantar desde la aplicacion. "
-                            + "Escribe a la administracion del conjunto.");
+            enviar(destino, MensajeCorreo
+                    .de("El vehículo " + placa + " quedó deshabilitado",
+                            "Vehículo deshabilitado",
+                            "Hola,")
+                    .parrafo("La administración deshabilitó un vehículo de la casa "
+                            + casa + ". La portería no le va a permitir entrar ni "
+                            + "salir.")
+                    .destacado("Placa", placa)
+                    .parrafo(motivo(motivo))
+                    .advertencia("Esto no se puede levantar desde la aplicación. "
+                            + "Para resolverlo, escribe a la administración del "
+                            + "conjunto."));
             return;
         }
 
-        enviar(destino,
-                "El vehiculo " + vehiculo.getPlaca() + " vuelve a entrar",
-                "Hola,\n\n"
-                        + "La administracion habilito de nuevo el vehiculo "
-                        + vehiculo.getPlaca() + " de la casa " + casa + ".\n\n"
-                        + "Ya puede entrar y salir del conjunto."
-                        + enlace());
+        enviar(destino, MensajeCorreo
+                .de("El vehículo " + placa + " vuelve a entrar",
+                        "Vehículo habilitado",
+                        "Hola,")
+                .parrafo("La administración habilitó de nuevo un vehículo de la "
+                        + "casa " + casa + ". Ya puede entrar y salir con "
+                        + "normalidad.")
+                .destacado("Placa", placa)
+                .accion("Ver mis vehículos", urlApp));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -207,22 +239,22 @@ public class NotificacionServiceImpl implements NotificacionService {
      * suba. La aprobacion ya ocurrio; el aviso es un extra que no puede
      * tumbarla.
      */
-    private void enviar(String destinatario, String asunto, String cuerpo) {
+    private void enviar(String destinatario, MensajeCorreo mensaje) {
         if (destinatario == null || destinatario.trim().isEmpty()) {
             // No es un error: mucha gente del conjunto no tiene correo, y esa
-            // persona simplemente se entera al abrir la aplicacion.
+            // persona simplemente se entera al abrir la aplicación.
             return;
         }
         TrasConfirmar.ejecutar(() -> {
             try {
-                correoService.enviar(destinatario, asunto, cuerpo);
+                correoService.enviar(destinatario, mensaje);
             } catch (RuntimeException fallo) {
-                // Cinturon y tirantes: CorreoService ya se compromete a no
-                // lanzar, pero esto corre DESPUES del commit, donde una
-                // excepcion no revierte nada y solo ensucia el log del
-                // servidor con una traza sin dueno.
-                log.error("[notificacion] no se pudo avisar '{}': {}",
-                        asunto, fallo.getMessage());
+                // Cinturón y tirantes: CorreoService ya se compromete a no
+                // lanzar, pero esto corre DESPUÉS del commit, donde una
+                // excepción no revierte nada y solo ensucia el log del
+                // servidor con una traza sin dueño.
+                log.error("[notificación] no se pudo avisar '{}': {}",
+                        mensaje.getAsunto(), fallo.getMessage());
             }
         });
     }
@@ -233,22 +265,11 @@ public class NotificacionServiceImpl implements NotificacionService {
         }
     }
 
-    private String saludo(String nombres) {
-        return "Hola " + nombres + ",\n\n";
-    }
-
     /** Un rechazo sin motivo deja a la persona sin nada que corregir. */
     private String motivo(String texto) {
         if (texto == null || texto.trim().isEmpty()) {
-            return "No dejaron un motivo registrado.\n\n";
+            return "La administración no dejó un motivo registrado.";
         }
-        return "Motivo: " + texto.trim() + "\n\n";
-    }
-
-    private String enlace() {
-        if (urlApp == null || urlApp.trim().isEmpty()) {
-            return "";
-        }
-        return "\n\nMiralo en " + urlApp.trim();
+        return "Motivo: " + texto.trim();
     }
 }

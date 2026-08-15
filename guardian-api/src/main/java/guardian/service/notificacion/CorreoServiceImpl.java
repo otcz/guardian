@@ -2,9 +2,14 @@ package guardian.service.notificacion;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
 
 @Slf4j
 @Service
@@ -62,44 +67,59 @@ public class CorreoServiceImpl implements CorreoService {
             return;
         }
 
-        despachar(destinatario, "Tu codigo para recuperar la contrasena",
-                cuerpo(nombre, codigo, minutosVigencia), "codigo de recuperacion");
+        enviar(destinatario, MensajeCorreo
+                .de("Tu código para entrar a GUARDIAN",
+                        "Recupera el acceso a tu cuenta",
+                        "Hola " + nombre + ",")
+                .parrafo("Alguien pidió recuperar el PIN de tu cuenta. "
+                        + "Usa este código para elegir uno nuevo.")
+                .destacado("Tu código", codigo)
+                .parrafo("Vence en " + minutosVigencia
+                        + " minutos y sirve una sola vez.")
+                .advertencia("¿No lo pediste? Ignora este mensaje: tu PIN sigue "
+                        + "siendo el mismo y nadie más puede usar este código."));
     }
 
     @Override
-    public void enviar(String destinatario, String asunto, String cuerpo) {
+    public void enviar(String destinatario, MensajeCorreo mensaje) {
         // Sin destinatario no hay nada que hacer, y no es un error: la mitad de
-        // las personas de un conjunto —los ninos, los que solo pasan por la
-        // porteria— no tienen correo, y eso es legitimo.
+        // las personas de un conjunto —los niños, los que solo pasan por la
+        // portería— no tienen correo, y eso es legítimo.
         if (!tiene(destinatario)) {
             return;
         }
         if (!estaConfigurado()) {
-            log.warn("[correo] SIN SMTP configurado ({}). No se envio a {}: {}",
-                    queFalta(), destinatario, asunto);
+            log.warn("[correo] SIN SMTP configurado ({}). No se envió a {}: {}",
+                    queFalta(), destinatario, mensaje.getAsunto());
             return;
         }
-        despachar(destinatario, asunto, cuerpo, asunto);
+        despachar(destinatario, mensaje);
     }
 
     /**
-     * El envio de verdad. La firma y el pie los pone aca y no cada plantilla,
-     * para que todo lo que sale del sistema se vea igual.
+     * El envío de verdad, en multiparte.
+     *
+     * <p>MimeMessage y no SimpleMailMessage: el segundo solo sabe de texto
+     * plano. El "true" del helper abre la multiparte y el UTF-8 explícito es lo
+     * que hace que una eñe llegue como eñe.</p>
      */
-    private void despachar(String destinatario, String asunto, String cuerpo,
-                           String queEs) {
+    private void despachar(String destinatario, MensajeCorreo mensaje) {
         try {
-            SimpleMailMessage mensaje = new SimpleMailMessage();
-            mensaje.setFrom(String.format("%s <%s>", nombreRemitente, remitente));
-            mensaje.setTo(destinatario);
-            mensaje.setSubject(asunto);
-            // La firma la pone el despacho y no cada plantilla: asi todo lo
-            // que sale del sistema termina igual, y nadie puede olvidarla.
-            mensaje.setText(cuerpo + firma());
+            MimeMessage correo = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(correo, true, "UTF-8");
 
-            mailSender.send(mensaje);
-            log.info("[correo] enviado: {}", queEs);
-        } catch (RuntimeException fallo) {
+            helper.setFrom(new InternetAddress(remitente, nombreRemitente, "UTF-8"));
+            helper.setTo(destinatario);
+            helper.setSubject(mensaje.getAsunto());
+            // El orden importa: primero el texto plano, después el HTML. Así lo
+            // espera el estándar de multipart/alternative — el cliente muestra
+            // la ÚLTIMA rama que entienda.
+            helper.setText(PlantillaCorreo.texto(mensaje, nombreRemitente),
+                    PlantillaCorreo.html(mensaje, nombreRemitente));
+
+            mailSender.send(correo);
+            log.info("[correo] enviado: {}", mensaje.getAsunto());
+        } catch (MessagingException | UnsupportedEncodingException | RuntimeException fallo) {
             // Se traga a proposito: ver el contrato en CorreoService. El log
             // queda para que el administrador pueda diagnosticar un SMTP mal
             // configurado, que si no seria invisible.
@@ -107,15 +127,10 @@ public class CorreoServiceImpl implements CorreoService {
             // El MENSAJE en la linea y la traza solo en debug: lo que resuelve
             // el problema es leer "535 Username and Password not accepted", no
             // ciento veinte lineas de pila que lo entierran.
-            log.error("[correo] fallo el envio de '{}': {}", queEs, causaRaiz(fallo));
+            log.error("[correo] falló el envío de '{}': {}",
+                    mensaje.getAsunto(), causaRaiz(fallo));
             log.debug("[correo] detalle del fallo", fallo);
         }
-    }
-
-    /** El pie comun de todo lo que manda el sistema. */
-    private String firma() {
-        return "\n\n-- \n" + nombreRemitente + "\n"
-                + "Este es un mensaje automatico. No respondas a este correo.";
     }
 
     /** Para que el log diga QUE falta, y no solo que falta algo. */
@@ -147,17 +162,4 @@ public class CorreoServiceImpl implements CorreoService {
                 : actual.getClass().getSimpleName();
     }
 
-    /**
-     * Texto plano y no HTML. Un correo corto de seis digitos no gana nada con
-     * maquetacion, y el texto plano llega igual a todos los clientes y cae
-     * menos en spam que un HTML con imagenes.
-     */
-    private String cuerpo(String nombre, String codigo, int minutos) {
-        return "Hola " + nombre + ",\n\n"
-                + "Tu codigo para recuperar la contrasena es:\n\n"
-                + "    " + codigo + "\n\n"
-                + "Vence en " + minutos + " minutos y sirve una sola vez.\n\n"
-                + "Si no pediste este codigo, ignora este mensaje: tu contrasena\n"
-                + "sigue siendo la misma.";
-    }
 }

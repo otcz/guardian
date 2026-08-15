@@ -30,10 +30,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * Los avisos de lo que decide la administracion.
+ * Los avisos de lo que decide la administración.
  *
- * <p>Lo que se cubre es lo que puede hacer dano: que el aviso NO tumbe la
- * operacion que lo disparo, que no se mande a quien no tiene correo, y que el
+ * <p>Lo que se cubre es lo que puede hacer daño: que el aviso NO tumbe la
+ * operación que lo disparó, que no se mande a quien no tiene correo, y que el
  * bloqueo llegue a las dos personas que tienen que enterarse sin duplicarse
  * cuando son la misma.</p>
  */
@@ -51,8 +51,8 @@ class NotificacionServiceImplTest {
 
     @BeforeEach
     void preparar() {
-        // Sin URL de aplicacion: es el estado por defecto y el que no debe
-        // escribir la linea "Miralo en ...".
+        // Sin URL de aplicación: es el estado por defecto, y el que NO debe
+        // dibujar el botón de acción.
         servicio = new NotificacionServiceImpl(correoService, residenteCasaRepository, "");
 
         casa = new GdCasa();
@@ -73,20 +73,21 @@ class NotificacionServiceImplTest {
     }
 
     @Test
-    @DisplayName("un vehiculo aprobado le avisa a quien lo pidio")
+    @DisplayName("un vehículo aprobado le avisa a quien lo pidió")
     void vehiculoAprobadoAvisaAlSolicitante() {
         servicio.solicitudVehiculoResuelta(solicitudVehiculo("ABC123", null), true);
 
         ArgumentCaptor<String> destino = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<String> asunto = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<String> cuerpo = ArgumentCaptor.forClass(String.class);
-        verify(correoService).enviar(destino.capture(), asunto.capture(), cuerpo.capture());
+        ArgumentCaptor<MensajeCorreo> mensaje = ArgumentCaptor.forClass(MensajeCorreo.class);
+        verify(correoService).enviar(destino.capture(), mensaje.capture());
 
         assertThat(destino.getValue()).isEqualTo("titular@correo.com");
-        assertThat(asunto.getValue()).contains("ABC123").contains("autorizado");
-        assertThat(cuerpo.getValue()).contains("CASA-B-52");
-        // Sin URL configurada, la invitacion a "mirarlo" no aparece.
-        assertThat(cuerpo.getValue()).doesNotContain("Miralo en");
+        assertThat(mensaje.getValue().getAsunto()).contains("ABC123").contains("autorizado");
+        // La placa va en el bloque destacado: es lo que se lee de un vistazo.
+        assertThat(mensaje.getValue().getDestacado()).isEqualTo("ABC123");
+        assertThat(texto(mensaje.getValue())).contains("CASA-B-52");
+        // Sin URL configurada no se dibuja el botón, que si no llevaría a nada.
+        assertThat(mensaje.getValue().tieneAccion()).isFalse();
     }
 
     @Test
@@ -94,38 +95,38 @@ class NotificacionServiceImplTest {
     void rechazoSinMotivoLoDice() {
         servicio.solicitudVehiculoResuelta(solicitudVehiculo("ABC123", null), false);
 
-        ArgumentCaptor<String> cuerpo = ArgumentCaptor.forClass(String.class);
-        verify(correoService).enviar(anyString(), anyString(), cuerpo.capture());
+        ArgumentCaptor<MensajeCorreo> mensaje = ArgumentCaptor.forClass(MensajeCorreo.class);
+        verify(correoService).enviar(anyString(), mensaje.capture());
 
         // Un rechazo mudo deja a la persona sin nada que corregir, y la manda a
         // volver a pedir exactamente lo mismo.
-        assertThat(cuerpo.getValue()).contains("No dejaron un motivo registrado");
+        assertThat(texto(mensaje.getValue())).contains("no dejó un motivo registrado");
     }
 
     @Test
-    @DisplayName("el motivo del rechazo viaja tal cual lo escribio la administracion")
+    @DisplayName("el motivo del rechazo viaja tal cual lo escribió la administración")
     void rechazoConMotivoLoIncluye() {
         servicio.solicitudVehiculoResuelta(
                 solicitudVehiculo("ABC123", "La placa no coincide con la foto"), false);
 
-        ArgumentCaptor<String> cuerpo = ArgumentCaptor.forClass(String.class);
-        verify(correoService).enviar(anyString(), anyString(), cuerpo.capture());
+        ArgumentCaptor<MensajeCorreo> mensaje = ArgumentCaptor.forClass(MensajeCorreo.class);
+        verify(correoService).enviar(anyString(), mensaje.capture());
 
-        assertThat(cuerpo.getValue()).contains("La placa no coincide con la foto");
+        assertThat(texto(mensaje.getValue())).contains("La placa no coincide con la foto");
     }
 
     @Test
     @DisplayName("sin correo no se intenta enviar nada")
     void sinCorreoNoEnvia() {
-        // No es un error: mucha gente del conjunto —los ninos, los que solo
-        // pasan por la porteria— no tiene correo, y se entera al abrir la
-        // aplicacion.
+        // No es un error: mucha gente del conjunto —los niños, los que solo
+        // pasan por la portería— no tiene correo, y se entera al abrir la
+        // aplicación.
         GdSolicitudVehiculo solicitud = solicitudVehiculo("ABC123", null);
         solicitud.getSolicitante().setEmail(null);
 
         servicio.solicitudVehiculoResuelta(solicitud, true);
 
-        verify(correoService, never()).enviar(anyString(), anyString(), anyString());
+        verify(correoService, never()).enviar(anyString(), any());
     }
 
     @Test
@@ -133,11 +134,11 @@ class NotificacionServiceImplTest {
     void bloqueoAvisaALosDos() {
         GdPersona hijo = persona(2L, "JUAN", "CARRILLO", "hijo@correo.com");
 
-        servicio.bloqueoPersonaCambiado(hijo, true, "Perdio la credencial");
+        servicio.bloqueoPersonaCambiado(hijo, true, "Perdió la credencial");
 
         // Dos avisos: quien se va a encontrar la talanquera abajo, y quien
         // responde por el hogar y a quien le van a reclamar.
-        verify(correoService, times(2)).enviar(anyString(), anyString(), anyString());
+        verify(correoService, times(2)).enviar(anyString(), any());
     }
 
     @Test
@@ -145,18 +146,18 @@ class NotificacionServiceImplTest {
     void bloqueoDelTitularNoSeDuplica() {
         servicio.bloqueoPersonaCambiado(titular, true, "Motivo cualquiera");
 
-        verify(correoService, times(1)).enviar(anyString(), anyString(), anyString());
+        verify(correoService, times(1)).enviar(anyString(), any());
     }
 
     @Test
-    @DisplayName("un SMTP caido NO tumba la operacion que disparo el aviso")
+    @DisplayName("un SMTP caído NO tumba la operación que disparó el aviso")
     void unFalloDeCorreoNoRompeNada() {
-        // Es la garantia que sostiene todo lo demas: cuando esto se llama, la
-        // aprobacion o el bloqueo YA ocurrieron. Si un correo pudiera propagar
-        // su excepcion, el conjunto se quedaria sin poder administrarse cada
-        // vez que Google tenga un mal dia.
+        // Es la garantía que sostiene todo lo demás: cuando esto se llama, la
+        // aprobación o el bloqueo YA ocurrieron. Si un correo pudiera propagar
+        // su excepción, el conjunto se quedaría sin poder administrarse cada
+        // vez que Google tenga un mal día.
         doThrow(new RuntimeException("535 Username and Password not accepted"))
-                .when(correoService).enviar(anyString(), anyString(), anyString());
+                .when(correoService).enviar(anyString(), any());
 
         assertThatCode(() ->
                 servicio.solicitudVehiculoResuelta(solicitudVehiculo("ABC123", null), true))
@@ -164,42 +165,91 @@ class NotificacionServiceImplTest {
     }
 
     @Test
-    @DisplayName("con URL configurada, el aviso dice a donde ir")
-    void conUrlIncluyeElEnlace() {
+    @DisplayName("con URL configurada, el aviso lleva botón a la aplicación")
+    void conUrlIncluyeElBoton() {
         servicio = new NotificacionServiceImpl(
                 correoService, residenteCasaRepository, "https://guardiaco.com");
 
         servicio.solicitudVehiculoResuelta(solicitudVehiculo("ABC123", null), true);
 
-        ArgumentCaptor<String> cuerpo = ArgumentCaptor.forClass(String.class);
-        verify(correoService).enviar(anyString(), anyString(), cuerpo.capture());
-        assertThat(cuerpo.getValue()).contains("https://guardiaco.com");
+        ArgumentCaptor<MensajeCorreo> mensaje = ArgumentCaptor.forClass(MensajeCorreo.class);
+        verify(correoService).enviar(anyString(), mensaje.capture());
+
+        assertThat(mensaje.getValue().tieneAccion()).isTrue();
+        assertThat(mensaje.getValue().getUrlAccion()).isEqualTo("https://guardiaco.com");
     }
 
     @Test
-    @DisplayName("un vehiculo deshabilitado le avisa al titular de su casa")
+    @DisplayName("un vehículo deshabilitado le avisa al titular de su casa")
     void vehiculoBloqueadoAvisaAlTitular() {
         GdVehiculo vehiculo = new GdVehiculo();
         vehiculo.setId(5L);
         vehiculo.setPlaca("XYZ789");
         vehiculo.setCasa(casa);
 
-        servicio.bloqueoVehiculoCambiado(vehiculo, true, "Entro por la porteria equivocada");
+        servicio.bloqueoVehiculoCambiado(vehiculo, true, "Entró por la portería equivocada");
 
         ArgumentCaptor<String> destino = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<String> cuerpo = ArgumentCaptor.forClass(String.class);
-        verify(correoService).enviar(destino.capture(), anyString(), cuerpo.capture());
+        ArgumentCaptor<MensajeCorreo> mensaje = ArgumentCaptor.forClass(MensajeCorreo.class);
+        verify(correoService).enviar(destino.capture(), mensaje.capture());
 
         assertThat(destino.getValue()).isEqualTo("titular@correo.com");
-        assertThat(cuerpo.getValue())
-                .contains("XYZ789")
-                .contains("Entro por la porteria equivocada")
-                // Lo que el titular necesita saber: que no lo puede resolver el
+        assertThat(mensaje.getValue().getDestacado()).isEqualTo("XYZ789");
+        assertThat(texto(mensaje.getValue()))
+                .contains("Entró por la portería equivocada")
+                // Lo que el titular necesita saber: que no lo puede resolver él
                 // solo desde el celular.
-                .contains("Escribe a la administracion");
+                .contains("escribe a la administración");
+    }
+
+    @Test
+    @DisplayName("las tildes y las eñes sobreviven a la plantilla")
+    void elTextoConservaLosAcentos() {
+        // El motivo por el que existe este test: todo el backend estaba en
+        // ASCII porque el pom no declaraba el encoding de las fuentes, y a los
+        // residentes les llegaba "contrasena". Si alguien vuelve a romper esa
+        // configuración, esto lo caza antes de que salga un correo.
+        GdVehiculo vehiculo = new GdVehiculo();
+        vehiculo.setId(5L);
+        vehiculo.setPlaca("XYZ789");
+        vehiculo.setCasa(casa);
+
+        servicio.bloqueoVehiculoCambiado(vehiculo, true, "Sin razón");
+
+        ArgumentCaptor<MensajeCorreo> mensaje = ArgumentCaptor.forClass(MensajeCorreo.class);
+        verify(correoService).enviar(anyString(), mensaje.capture());
+
+        assertThat(mensaje.getValue().getAsunto()).contains("vehículo");
+        assertThat(texto(mensaje.getValue())).contains("administración");
+
+        // Y que la plantilla no los rompa al maquetar.
+        String html = PlantillaCorreo.html(mensaje.getValue(), "GUARDIAN");
+        assertThat(html).contains("vehículo").contains("charset=\"utf-8\"");
+    }
+
+    @Test
+    @DisplayName("lo que escribe la administración no puede inyectar HTML")
+    void elMotivoSeEscapa() {
+        // El motivo lo teclea una persona en un formulario. Sin escapar, un
+        // fragmento de HTML pegado ahí se ejecutaría en el cliente de correo
+        // de quien lo recibe.
+        servicio.solicitudVehiculoResuelta(
+                solicitudVehiculo("ABC123", "<script>alert(1)</script>"), false);
+
+        ArgumentCaptor<MensajeCorreo> mensaje = ArgumentCaptor.forClass(MensajeCorreo.class);
+        verify(correoService).enviar(anyString(), mensaje.capture());
+
+        String html = PlantillaCorreo.html(mensaje.getValue(), "GUARDIAN");
+        assertThat(html).doesNotContain("<script>");
+        assertThat(html).contains("&lt;script&gt;");
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+
+    /** Todo lo redactado del mensaje, para buscar una frase sin importar dónde cayó. */
+    private String texto(MensajeCorreo mensaje) {
+        return PlantillaCorreo.texto(mensaje, "GUARDIAN");
+    }
 
     private GdPersona persona(Long id, String nombres, String apellidos, String email) {
         GdPersona p = new GdPersona();
