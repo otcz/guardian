@@ -107,6 +107,200 @@ section {
   color: var(--text-muted);
 }
 
+/* ── Candidatos por nombre ───────────────────────────────────────────────────
+   El respaldo del lector. Cada fila es un objetivo táctil grande y con foto:
+   quien busca por nombre lo hace porque no tiene el código, y entonces la cara
+   es lo único que le queda al guardia para no equivocarse de persona. */
+.candidatos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  width: 100%;
+}
+
+.buscando {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.candidato {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  width: 100%;
+  /* 64px: se toca de pie, con una tablet en la otra mano y a veces con
+     guantes. El mínimo táctil de 44 se queda corto para eso. */
+  min-height: 64px;
+  padding: var(--e-2) var(--e-3);
+  text-align: left;
+  color: var(--text-strong);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: border-color var(--transicion), background var(--transicion);
+
+  .retrato {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 46px;
+    height: 46px;
+    overflow: hidden;
+    background: var(--bg-soft);
+    border-radius: var(--r-full);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    i {
+      color: var(--text-muted);
+    }
+  }
+
+  .quien {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+
+    strong {
+      font-size: 1rem;
+      line-height: 1.25;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    small {
+      font-size: var(--t-xs);
+      color: var(--text-muted);
+    }
+  }
+
+  .flecha {
+    flex: 0 0 auto;
+    color: var(--text-muted);
+  }
+
+  &:active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+}
+
+/* ── Últimos movimientos ─────────────────────────────────────────────────────
+   Contexto, no decisión: tipografía menor, sin color de veredicto salvo en lo
+   denegado. Si compitiera con la ficha, la portería miraría el sitio
+   equivocado. */
+.movimientos {
+  width: 100%;
+  align-items: stretch;
+  margin-top: var(--e-3);
+  padding-top: var(--e-3);
+  border-top: 1px solid var(--border-hairline);
+
+  h2 {
+    margin: 0 0 var(--e-2);
+    font-size: var(--t-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: var(--e-3);
+    padding: var(--e-2) 0;
+    border-bottom: 1px solid var(--border-hairline);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  /* Salida por defecto y entrada marcada: en un conjunto residencial se
+     registra más salida que entrada, y pintar las dos de color deja la lista
+     como un semáforo sin jerarquía. */
+  .sentido {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--r-full);
+    background: var(--bg-soft);
+    color: var(--text-muted);
+
+    i {
+      font-size: 1rem;
+    }
+
+    &.entrada {
+      background: var(--ok-soft);
+      color: var(--ok);
+    }
+  }
+
+  .datos {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+    line-height: 1.25;
+
+    strong {
+      font-size: 0.9rem;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    small {
+      font-size: var(--t-xs);
+      color: var(--text-muted);
+    }
+  }
+
+  .hora {
+    flex: 0 0 auto;
+    font-family: var(--fuente-mono);
+    font-size: var(--t-xs);
+    color: var(--text-muted);
+  }
+
+  /* Lo negado se marca: es lo que el guardia puede necesitar explicar. */
+  li.denegado {
+    .sentido {
+      background: var(--deny-soft);
+      color: var(--deny);
+    }
+
+    .datos strong {
+      color: var(--deny);
+    }
+  }
+}
+
 /* ── Ficha ───────────────────────────────────────────────────────────────── */
 
 .ficha {

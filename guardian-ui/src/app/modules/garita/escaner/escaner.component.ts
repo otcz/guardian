@@ -7,6 +7,8 @@ import {
   ViewChild
 } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 import { AccesoService } from '../../../core/services/acceso.service';
 import { AdminService } from '../../../core/services/admin.service';
@@ -14,6 +16,7 @@ import { FotoService } from '../../../core/services/foto.service';
 import { Parametro } from '../../../core/models/admin.model';
 import {
   AccesoEvento,
+  CandidatoGarita,
   FichaVerificacion,
   Modo,
   Presencia,
@@ -167,6 +170,8 @@ export class EscanerComponent implements OnInit, AfterViewChecked, OnDestroy {
   ngOnInit(): void {
     this.autoRegistro = localStorage.getItem(CLAVE_AUTO) === 'S';
     this.cargarPresencia();
+    this.cargarMovimientos();
+    this.escucharBusquedaPorNombre();
     // El motivo se muestra con el texto del catálogo, no con el código:
     // "VEHICULO_INACTIVO" no es algo que se le pueda leer a nadie de noche.
     this.admin.parametros('MOTIVO_DENEGACION').subscribe(m => (this.motivos = m));
@@ -218,8 +223,37 @@ export class EscanerComponent implements OnInit, AfterViewChecked, OnDestroy {
     });
   }
 
+  // ── Últimos movimientos ──────────────────────────────────────────────────
+  //
+  // Llenan el vacío que dejaba la pantalla y, sobre todo, le dejan al guardia
+  // ver lo que acaba de pasar: si registró a alguien en el sentido equivocado
+  // o le abrió a quien no era, lo ve en el renglón de arriba y no dos días
+  // después en la bitácora.
+  //
+  // Solo se pintan mientras NO hay ficha: la decisión no compite con nada.
+
+  ultimosMovimientos: AccesoEvento[] = [];
+
+  /**
+   * Seis. No es un número técnico: es lo que cabe sin empujar el campo de
+   * escaneo fuera de la pantalla de una tablet, que es la regla de esta
+   * pantalla. Para más está la bitácora, que pagina y filtra.
+   */
+  private static readonly CUANTOS_MOVIMIENTOS = 6;
+
+  private cargarMovimientos(): void {
+    this.acceso.eventos({ tamano: EscanerComponent.CUANTOS_MOVIMIENTOS })
+      .subscribe({
+        next: pagina => (this.ultimosMovimientos = pagina.content ?? []),
+        // Un panel de contexto que no carga no puede romper la portería: se
+        // queda vacío y el guardia sigue escaneando.
+        error: () => undefined
+      });
+  }
+
   ngOnDestroy(): void {
     this.detenerCuenta();
+    this.suscripcionBusqueda?.unsubscribe();
   }
 
   /**
@@ -291,6 +325,73 @@ export class EscanerComponent implements OnInit, AfterViewChecked, OnDestroy {
     } else {
       this.verificarDocumento(texto);
     }
+  }
+
+  // ── Respaldo: buscar por nombre ──────────────────────────────────────────
+  //
+  // Para cuando el lector no resuelve: el QR no carga, el teléfono se quedó sin
+  // batería, la persona llegó sin cédula.
+  //
+  // SIN un modo que el guardia tenga que elegir, igual que el resto de esta
+  // pantalla. Lo que sale del lector es numérico (una cédula) o empieza por
+  // GRD (un código), así que en cuanto aparecen letras es que alguien está
+  // tecleando un nombre — y solo entonces se busca.
+
+  candidatos: CandidatoGarita[] = [];
+  buscandoCandidatos = false;
+
+  private readonly nombreTecleado = new Subject<string>();
+  private suscripcionBusqueda?: Subscription;
+
+  private escucharBusquedaPorNombre(): void {
+    this.suscripcionBusqueda = this.nombreTecleado
+      .pipe(
+        // 250ms: por debajo se dispara una consulta por letra; por encima, el
+        // guardia ya levantó la vista esperando la lista.
+        debounceTime(250),
+        distinctUntilChanged(),
+        switchMap(texto => this.acceso.buscarCandidatos(texto))
+      )
+      .subscribe({
+        next: encontrados => {
+          this.candidatos = encontrados;
+          this.buscandoCandidatos = false;
+        },
+        error: () => {
+          this.candidatos = [];
+          this.buscandoCandidatos = false;
+        }
+      });
+  }
+
+  /** Cada tecla del campo. El lector también pasa por aquí, y no dispara nada. */
+  alEscribir(): void {
+    const texto = this.entradaManual.trim();
+    const esNombre = texto.length >= 3
+      && !/^\d+$/.test(texto)
+      && !texto.toUpperCase().startsWith(PREFIJO_CODIGO);
+
+    if (!esNombre) {
+      this.candidatos = [];
+      this.buscandoCandidatos = false;
+      return;
+    }
+    this.buscandoCandidatos = true;
+    this.nombreTecleado.next(texto);
+  }
+
+  /**
+   * El guardia eligió a alguien de la lista.
+   *
+   * <p>Se verifica por su DOCUMENTO y no por su id: es el mismo camino que
+   * sigue una cédula tecleada, así que la decisión la toma exactamente la
+   * misma lógica. Encontrar a alguien en esta lista no lo autoriza.</p>
+   */
+  elegirCandidato(candidato: CandidatoGarita): void {
+    this.candidatos = [];
+    this.entradaManual = '';
+    this.procesando = true;
+    this.verificarDocumento(candidato.documento);
   }
 
   private verificarDocumento(documento: string): void {
@@ -375,6 +476,7 @@ export class EscanerComponent implements OnInit, AfterViewChecked, OnDestroy {
           // bloqueo. Ahora el veredicto sale del evento, no del código HTTP.
           this.eventoRegistrado = evento;
           this.cargarPresencia();
+          this.cargarMovimientos();
 
           // Ya había alguien esperando: se salta la confirmación y se le
           // atiende de una vez. La fila no espera dos segundos por cortesía.

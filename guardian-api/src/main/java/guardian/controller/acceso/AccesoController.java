@@ -3,6 +3,7 @@ package guardian.controller.acceso;
 import guardian.constant.ApiEndpoint;
 import guardian.dto.acceso.FiltroEventos;
 import guardian.dto.acceso.AccesoEventoResponse;
+import guardian.dto.acceso.CandidatoGaritaResponse;
 import guardian.dto.acceso.FichaVerificacionResponse;
 import guardian.dto.acceso.PorteriasGaritaResponse;
 import guardian.dto.acceso.PresenciaResponse;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Operacion de la porteria. Restringido a los roles GUARDIA y ADMIN en
@@ -41,6 +43,7 @@ public class AccesoController {
     private final AccesoService accesoService;
     private final PresenciaService presenciaService;
     private final PorteriaGaritaService porteriaGaritaService;
+    private final guardian.service.acceso.BusquedaGaritaService busquedaGaritaService;
     private final UsuarioActual usuarioActual;
 
     /**
@@ -52,6 +55,21 @@ public class AccesoController {
     @GetMapping(ApiEndpoint.ACCESO_PORTERIAS)
     public ResponseEntity<PorteriasGaritaResponse> porterias() {
         return ResponseEntity.ok(porteriaGaritaService.disponibles(usuarioActual.obtener()));
+    }
+
+    /**
+     * Respaldo del escaneo: buscar a alguien por su nombre.
+     *
+     * <p>GET y no POST porque no cambia nada, y sin el nombre en el path para
+     * que no quede escrito en los registros de acceso del proxy: un nombre
+     * propio en una URL viaja a los logs de Cloudflare y de Caddy.</p>
+     */
+    @GetMapping(ApiEndpoint.ACCESO_BUSCAR)
+    public ResponseEntity<List<CandidatoGaritaResponse>> buscar(
+            @RequestParam(name = "q", required = false) String texto) {
+
+        return ResponseEntity.ok(
+                busquedaGaritaService.buscar(texto, usuarioActual.obtener()));
     }
 
     /** Contadores ADENTRO / AFUERA que encabezan la pantalla de la porteria. */

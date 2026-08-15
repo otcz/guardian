@@ -1,9 +1,13 @@
 package guardian.repository;
 
 import guardian.entity.persona.GdPersona;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface GdPersonaRepository
@@ -32,4 +36,25 @@ public interface GdPersonaRepository
 
     // La busqueda por texto libre vive en
     // guardian.repository.spec.PersonaSpecs — ver ahi por que no es un @Query.
+
+    /**
+     * Candidatos por nombre para la porteria, ordenados alfabeticamente.
+     *
+     * <p>Consulta propia y no la Specification del panel: aquella pagina,
+     * filtra por estado y trae el objeto entero. Aca hace falta lo contrario
+     * —pocas columnas, tope duro, y SOLO quien puede pasar— porque quien la
+     * dispara es un guardia con gente esperando.</p>
+     *
+     * <p>Deja fuera a la persona bloqueada y a la inactiva a proposito:
+     * ofrecerle al guardia un nombre que el registro va a rechazar le hace
+     * perder el toque y la fila crece. Quien no aparece aca es que no pasa.</p>
+     */
+    @Query("SELECT p FROM GdPersona p "
+            + "WHERE p.conjunto.id = :conjuntoId "
+            + "AND p.activo = 'S' AND p.bloqueado = 'N' "
+            + "AND LOWER(CONCAT(p.nombres, ' ', p.apellidos)) LIKE LOWER(CONCAT('%', :texto, '%')) "
+            + "ORDER BY p.nombres ASC, p.apellidos ASC")
+    List<GdPersona> buscarPorNombre(@Param("conjuntoId") Long conjuntoId,
+                                    @Param("texto") String texto,
+                                    Pageable limite);
 }

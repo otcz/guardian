@@ -74,6 +74,21 @@ export interface AccesoEvento {
   invitado: boolean;
 }
 
+/**
+ * Alguien ofrecido al guardia cuando busca por nombre.
+ *
+ * <p>Es el respaldo del escaneo: el QR no carga, el teléfono se quedó sin
+ * batería, la persona llegó sin cédula. Elegirlo NO autoriza nada — dispara la
+ * verificación normal por documento, que es la que decide.</p>
+ */
+export interface CandidatoGarita {
+  personaId: number;
+  nombreCompleto: string;
+  documento: string;
+  casaIdentificador: string | null;
+  fotoUrl: string | null;
+}
+
 export type EstadoInvitacion =
   'PENDIENTE' | 'RECHAZADA'
   | 'VIGENTE' | 'NO_VIGENTE' | 'AGOTADA' | 'VENCIDA' | 'REVOCADA';

@@ -26,18 +26,44 @@
       <input #codigo
              id="codigo"
              type="text"
-             inputmode="numeric"
              [(ngModel)]="entradaManual"
+             (ngModelChange)="alEscribir()"
              (keyup.enter)="verificarEntradaManual()"
-             placeholder="Escanea el código o la cédula"
+             placeholder="Escanea el código, la cédula o escribe un nombre"
              autocomplete="off">
       <button type="button" class="principal" (click)="verificarEntradaManual()">
         <i class="ms">search</i> Buscar
       </button>
     </div>
 
-    <p class="pista" *ngIf="etapa === 'escaneando'">
-      Pasa el código del residente o la cédula por el lector
+    <!-- Candidatos por nombre. Solo aparecen cuando lo tecleado tiene letras:
+         lo que sale del lector es numérico o empieza por GRD, así que esto
+         nunca se interpone entre el escaneo y la ficha. -->
+    <div class="candidatos" *ngIf="candidatos.length || buscandoCandidatos">
+      <p class="buscando" *ngIf="buscandoCandidatos && !candidatos.length">
+        <i class="ms gira">progress_activity</i> Buscando…
+      </p>
+
+      <button type="button" class="candidato"
+              *ngFor="let c of candidatos"
+              (click)="elegirCandidato(c)">
+        <span class="retrato">
+          <img *ngIf="c.fotoUrl" [src]="c.fotoUrl | foto" [alt]="c.nombreCompleto">
+          <i class="ms" *ngIf="!c.fotoUrl">person</i>
+        </span>
+        <span class="quien">
+          <strong>{{ c.nombreCompleto }}</strong>
+          <small>
+            {{ c.documento }}
+            <ng-container *ngIf="c.casaIdentificador"> · {{ c.casaIdentificador }}</ng-container>
+          </small>
+        </span>
+        <i class="ms flecha">chevron_right</i>
+      </button>
+    </div>
+
+    <p class="pista" *ngIf="etapa === 'escaneando' && !candidatos.length && !buscandoCandidatos">
+      Pasa el código o la cédula por el lector. Si no lo tienes, escribe el nombre.
     </p>
 
     <p class="pista" *ngIf="etapa === 'verificando'">
@@ -58,6 +84,33 @@
         <small>Registra a pie a los {{ SEGUNDOS_AUTO }} s si no tocas nada</small>
       </span>
     </button>
+
+    <!-- ÚLTIMOS MOVIMIENTOS.
+         Van al final y solo mientras no hay ficha: son contexto, no decisión.
+         Su valor es que el guardia VEA lo que acaba de registrar — un sentido
+         equivocado o un paso que no era se cazan en el renglón de arriba, no
+         dos días después revisando la bitácora. -->
+    <section class="movimientos" *ngIf="ultimosMovimientos.length && !candidatos.length">
+      <h2>Últimos movimientos</h2>
+
+      <ul>
+        <li *ngFor="let m of ultimosMovimientos"
+            [class.denegado]="m.resultado === 'DENEGADO'">
+          <span class="sentido" [class.entrada]="m.sentido === 'E'">
+            <i class="ms">{{ m.sentido === 'E' ? 'login' : 'logout' }}</i>
+          </span>
+          <span class="datos">
+            <strong>{{ m.personaNombre || 'Sin identificar' }}</strong>
+            <small>
+              {{ m.casaIdentificador || '—' }}
+              <ng-container *ngIf="m.vehiculoPlaca"> · {{ m.vehiculoPlaca }}</ng-container>
+              <ng-container *ngIf="m.invitado"> · Invitado</ng-container>
+            </small>
+          </span>
+          <span class="hora">{{ m.fechaEvento | date:'HH:mm' }}</span>
+        </li>
+      </ul>
+    </section>
   </section>
 
   <!-- FICHA -->

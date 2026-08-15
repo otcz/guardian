@@ -26,6 +26,8 @@ public final class ApiEndpoint {
     public static final String ACCESO_EVENTOS = "/eventos";
     /** Las porterias que la tablet puede elegir, y cual le toca a quien entro. */
     public static final String ACCESO_PORTERIAS = "/porterias";
+    /** Respaldo del escaneo: encontrar a alguien por su nombre. */
+    public static final String ACCESO_BUSCAR = "/buscar";
 
     /** Autogestion del residente — cualquier usuario autenticado sobre SU casa. */
     public static final String RESIDENTE = API + "/residente";

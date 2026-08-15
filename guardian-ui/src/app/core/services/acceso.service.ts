@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AccesoEvento,
+  CandidatoGarita,
   FichaVerificacion,
   MiQr,
   Pagina,
@@ -26,6 +27,19 @@ export class AccesoService {
 
   presencia(): Observable<Presencia> {
     return this.http.get<Presencia>(`${this.base}/presencia`);
+  }
+
+  /**
+   * Candidatos por nombre, para cuando el lector no resuelve.
+   *
+   * <p>El texto va como parámetro y no en la ruta a propósito: un nombre propio
+   * dentro de una URL termina escrito en los registros de Cloudflare y de
+   * Caddy.</p>
+   */
+  buscarCandidatos(texto: string): Observable<CandidatoGarita[]> {
+    return this.http.get<CandidatoGarita[]>(`${this.base}/buscar`, {
+      params: new HttpParams().set('q', texto)
+    });
   }
 
   /**
