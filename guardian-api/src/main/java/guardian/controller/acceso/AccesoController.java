@@ -7,6 +7,7 @@ import guardian.dto.acceso.CandidatoGaritaResponse;
 import guardian.dto.acceso.FichaVerificacionResponse;
 import guardian.dto.acceso.PorteriasGaritaResponse;
 import guardian.dto.acceso.PresenciaResponse;
+import guardian.dto.acceso.QuienEstaResponse;
 import guardian.dto.acceso.RegistrarAccesoRequest;
 import guardian.dto.acceso.VerificarDocumentoRequest;
 import guardian.dto.acceso.VerificarQrRequest;
@@ -76,6 +77,20 @@ public class AccesoController {
     @GetMapping("/presencia")
     public ResponseEntity<PresenciaResponse> presencia() {
         return ResponseEntity.ok(presenciaService.conteo(usuarioActual.conjuntoId()));
+    }
+
+    /**
+     * QUIENES estan adentro o afuera, no cuantos.
+     *
+     * <p>El contador responde "cuantos"; esto responde "quien falta por salir",
+     * que es la pregunta de verdad a la hora de cerrar o de evacuar.</p>
+     */
+    @GetMapping("/presencia/personas")
+    public ResponseEntity<List<QuienEstaResponse>> quienesEstan(
+            @RequestParam(defaultValue = "E") String sentido) {
+
+        return ResponseEntity.ok(
+                presenciaService.quienesEstan(usuarioActual.conjuntoId(), sentido));
     }
 
     /** Paso 1: el guardia escanea y ve la ficha con la foto. */

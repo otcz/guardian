@@ -2,6 +2,7 @@ package guardian.service.acceso;
 
 import guardian.constant.Codigos;
 import guardian.dto.acceso.PresenciaResponse;
+import guardian.dto.acceso.QuienEstaResponse;
 import guardian.repository.GdAccesoEventoRepository;
 import guardian.repository.GdPersonaRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -90,5 +93,28 @@ public class PresenciaServiceImpl implements PresenciaService {
                 .afuera(Math.max(0, totalActivos - personasAdentro))
                 .totalActivos(totalActivos)
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<QuienEstaResponse> quienesEstan(Long conjuntoId, String sentido) {
+        String cual = Codigos.ENTRADA.equalsIgnoreCase(sentido)
+                ? Codigos.ENTRADA : Codigos.SALIDA;
+
+        return eventoRepository
+                .quienesEstan(conjuntoId, Codigos.RESULTADO_PERMITIDO, cual)
+                .stream()
+                .map(e -> QuienEstaResponse.builder()
+                        .personaId(e.getPersona() == null ? null : e.getPersona().getId())
+                        // Del EVENTO y no de la persona: es lo que de verdad
+                        // quedo registrado en la porteria ese dia, aunque
+                        // despues le hayan cambiado la casa o el nombre.
+                        .nombreCompleto(e.getPersonaNombre())
+                        .casaIdentificador(e.getCasaIdentificador())
+                        .desde(e.getFechaEvento())
+                        .vehiculoPlaca(e.getVehiculoPlaca())
+                        .invitado(e.getInvitacion() != null)
+                        .build())
+                .collect(Collectors.toList());
     }
 }

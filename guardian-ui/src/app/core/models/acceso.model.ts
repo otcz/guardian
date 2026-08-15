@@ -89,6 +89,22 @@ export interface CandidatoGarita {
   fotoUrl: string | null;
 }
 
+/**
+ * Alguien que está adentro o afuera ahora mismo.
+ *
+ * <p>Sale del último paso permitido de cada persona, con el nombre y la casa
+ * copiados en ese evento: responde por lo que quedó registrado, no por lo que
+ * dice el registro de la persona hoy.</p>
+ */
+export interface QuienEsta {
+  personaId: number | null;
+  nombreCompleto: string | null;
+  casaIdentificador: string | null;
+  desde: string;
+  vehiculoPlaca: string | null;
+  invitado: boolean;
+}
+
 /** Si el módulo de huella opera del lado del servidor. */
 export interface EstadoHuella {
   disponible: boolean;

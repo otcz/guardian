@@ -35,4 +35,17 @@ public interface PresenciaService {
      * quien evacuo?" y nadie sobra.</p>
      */
     PresenciaResponse conteo(Long conjuntoId, Long exceptoPersonaId);
+
+    /**
+     * QUIENES estan adentro o afuera, no cuantos.
+     *
+     * <p>El conteo responde "cuantos"; esto responde "quien falta por salir",
+     * que es la pregunta que de verdad se hace en una porteria a la hora de
+     * cerrar o cuando hay que evacuar.</p>
+     *
+     * @param sentido "E" para los que estan adentro, "S" para los que estan
+     *                afuera. Son la misma pregunta mirada al derecho y al reves.
+     */
+    java.util.List<guardian.dto.acceso.QuienEstaResponse> quienesEstan(
+            Long conjuntoId, String sentido);
 }

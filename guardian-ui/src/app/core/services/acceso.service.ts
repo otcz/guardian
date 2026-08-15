@@ -12,6 +12,7 @@ import {
   MiQr,
   Pagina,
   Presencia,
+  QuienEsta,
   RegistrarAccesoRequest,
   Resultado
 } from '../models/acceso.model';
@@ -29,6 +30,17 @@ export class AccesoService {
 
   presencia(): Observable<Presencia> {
     return this.http.get<Presencia>(`${this.base}/presencia`);
+  }
+
+  /**
+   * QUIÉNES están adentro o afuera. El contador dice cuántos; esto, quiénes.
+   *
+   * @param sentido 'E' los que están adentro, 'S' los que están afuera.
+   */
+  quienesEstan(sentido: 'E' | 'S'): Observable<QuienEsta[]> {
+    return this.http.get<QuienEsta[]>(`${this.base}/presencia/personas`, {
+      params: new HttpParams().set('sentido', sentido)
+    });
   }
 
   /**

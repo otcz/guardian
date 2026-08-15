@@ -447,13 +447,60 @@ section {
   border: 1px solid var(--border-default);
   border-radius: var(--r-md);
 
-  h2 {
-    margin: 0 0 var(--e-2);
+  /* Pestañas dentro del panel. Sin bordes ni cajas: una línea inferior basta
+     para decir cuál está activa y no le agrega otro marco a un panel que ya
+     tiene el suyo. */
+  .pestanas {
+    display: flex;
+    gap: var(--e-1);
+    margin-bottom: var(--e-2);
+    border-bottom: 1px solid var(--border-hairline);
+  }
+
+  .pestana {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--e-1);
+    padding: var(--e-2) var(--e-2) var(--e-3);
     font-size: var(--t-xs);
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--text-muted);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    cursor: pointer;
+    white-space: nowrap;
+
+    .cuantos {
+      padding: 0 var(--e-1);
+      font-size: var(--t-xs);
+      line-height: 1.5;
+      color: var(--text-default);
+      background: var(--bg-soft);
+      border-radius: var(--r-full);
+    }
+
+    &.activa {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+
+      .cuantos {
+        color: var(--text-inverse);
+        background: var(--accent);
+      }
+    }
+  }
+
+  .vacia {
+    justify-content: center;
+    gap: var(--e-2);
+    padding: var(--e-5) 0;
+    font-size: var(--t-sm);
+    color: var(--text-muted);
+    border-bottom: none;
   }
 
   ul {
@@ -761,26 +808,55 @@ h1 {
   color: var(--text-strong);
 }
 
+/* ── Los datos de la ficha ───────────────────────────────────────────────────
+   Rejilla con la etiqueta encima, no una fila corrida de textos.
+
+   El guardia no LEE esto: lo BUSCA. Quiere el documento para cotejarlo con la
+   cédula que tiene en la mano, o la casa para decirla en voz alta. En una línea
+   seguida hay que recorrerla entera cada vez; con la etiqueta arriba, el ojo va
+   directo al dato y vuelve a la cara. */
 .datos {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
   flex-wrap: wrap;
-  font-size: 0.9rem;
-  color: var(--text-muted);
+  gap: var(--e-2) var(--e-5);
+  padding: var(--e-3) 0;
+  border-top: 1px solid var(--border-hairline);
+  border-bottom: 1px solid var(--border-hairline);
+}
 
-  /* La casa es el unico dato que se pinta: es lo que el guardia dice en voz
-     alta ("va para la 101") y lo que confirma con quien llega. */
-  .casa {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.25rem 0.7rem;
-    font-size: 0.9rem;
+.dato {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+
+  .etiqueta {
+    font-size: var(--t-xs);
     font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .valor {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-strong);
+  }
+
+  /* La casa se pinta del color de acento: es lo que el guardia dice en voz
+     alta ("va para la B-52") y lo que confirma con quien llega. */
+  .valor.destacado {
     color: var(--accent);
-    background: var(--accent-soft);
-    border-radius: var(--r-full);
+    font-weight: 700;
+  }
+
+  /* Monoespaciada: un número de cédula se compara dígito a dígito contra el
+     documento físico, y en proporcional los dígitos bailan. */
+  .valor.numero {
+    font-family: var(--fuente-mono);
+    font-size: 1rem;
+    letter-spacing: 0.02em;
   }
 }
 

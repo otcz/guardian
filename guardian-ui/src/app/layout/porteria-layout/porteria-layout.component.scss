@@ -13,14 +13,22 @@
 
 /* Franja de identidad de la consola: se distingue de los otros paneles a
    primera vista, incluso de reojo desde un metro. */
+/* Navy de MARCA y no `--bg-inverse`: ese token significa "lo contrario del
+   fondo", así que en modo oscuro se vuelve claro — la cabecera salía blanca
+   sobre una aplicación negra, que es justo lo que no se quería.
+
+   El navy de marca es navy en los dos modos, igual que la banda del login y la
+   barra móvil del panel: la identidad no cambia porque el guardia prefiera el
+   tema oscuro. El filo dorado abajo es la misma firma del resto del sistema. */
 .cabecera {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.55rem 1rem;
-  background: var(--bg-inverse);
-  color: var(--text-inverse);
+  padding: 0.6rem 1.15rem;
+  background: var(--panel-marca-fondo);
+  color: var(--panel-marca-texto);
+  border-bottom: 2px solid var(--marca-oro-500);
 }
 
 /* Ranura de navegación: la salida y luego la identidad de la pantalla. Sin
@@ -41,9 +49,11 @@
   /* Dorado de marca y no el verde de "operativo": esto es el emblema, no un
      indicador de estado. El verde acá competía con el veredicto de la ficha,
      que es el único sitio de la garita donde el verde debe significar algo. */
+  /* El dorado FIJO de marca, no `--oro-inverso`: el fondo de esta barra ya no
+     depende del tema, así que el acento tampoco debe hacerlo. */
   > i {
-    font-size: 1.35rem;
-    color: var(--oro-inverso);
+    font-size: 1.45rem;
+    color: var(--marca-oro-500);
   }
 
   .textos {

@@ -84,6 +84,30 @@ public interface GdAccesoEventoRepository
                        @Param("permitido") String permitido,
                        @Param("entrada") String entrada);
 
+    /**
+     * QUIENES estan adentro o afuera, no cuantos.
+     *
+     * <p>Misma regla que el conteo —el ULTIMO evento permitido de cada
+     * persona— pero devolviendo el evento, que ya trae el nombre y la casa
+     * copiados. La porteria lo usa para responder "quien falta por salir" sin
+     * abrir la bitacora.</p>
+     *
+     * <p>Con {@code sentido = 'E'} son los que estan adentro; con {@code 'S'},
+     * los que estan afuera. Una sola consulta para los dos: son la misma
+     * pregunta mirada al derecho y al reves.</p>
+     */
+    @Query("SELECT e FROM GdAccesoEvento e "
+            + "WHERE e.conjuntoId = :conjuntoId "
+            + "AND e.resultado = :permitido "
+            + "AND e.sentido = :sentido "
+            + "AND e.persona IS NOT NULL "
+            + "AND e.fechaEvento = (SELECT MAX(e2.fechaEvento) FROM GdAccesoEvento e2 "
+            + "                     WHERE e2.persona = e.persona AND e2.resultado = :permitido) "
+            + "ORDER BY e.fechaEvento DESC")
+    List<GdAccesoEvento> quienesEstan(@Param("conjuntoId") Long conjuntoId,
+                                      @Param("permitido") String permitido,
+                                      @Param("sentido") String sentido);
+
     /** Cuanto se ha registrado por una porteria. El panel lo muestra antes de apagarla. */
     long countByPuntoAccesoId(Long puntoAccesoId);
 

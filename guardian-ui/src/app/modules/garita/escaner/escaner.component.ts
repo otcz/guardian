@@ -20,6 +20,7 @@ import {
   FichaVerificacion,
   Modo,
   Presencia,
+  QuienEsta,
   Sentido,
   VehiculoResumen
 } from '../../../core/models/acceso.model';
@@ -240,6 +241,36 @@ export class EscanerComponent implements OnInit, AfterViewChecked, OnDestroy {
    * pantalla. Para más está la bitácora, que pagina y filtra.
    */
   private static readonly CUANTOS_MOVIMIENTOS = 6;
+
+  // ── Pestañas del panel de contexto ───────────────────────────────────────
+  //
+  // "Últimos movimientos" responde qué pasó; "Adentro" y "Afuera" responden
+  // quién está. La segunda es la pregunta de la hora de cerrar y la de una
+  // evacuación, y hasta ahora solo existía como un número.
+
+  pestana: 'movimientos' | 'adentro' | 'afuera' = 'movimientos';
+  quienes: QuienEsta[] = [];
+  cargandoQuienes = false;
+
+  elegirPestana(cual: 'movimientos' | 'adentro' | 'afuera'): void {
+    this.pestana = cual;
+    if (cual === 'movimientos') {
+      this.cargarMovimientos();
+      return;
+    }
+    this.cargandoQuienes = true;
+    this.quienes = [];
+    this.acceso.quienesEstan(cual === 'adentro' ? 'E' : 'S').subscribe({
+      next: lista => {
+        this.quienes = lista;
+        this.cargandoQuienes = false;
+      },
+      error: () => {
+        this.quienes = [];
+        this.cargandoQuienes = false;
+      }
+    });
+  }
 
   private cargarMovimientos(): void {
     this.acceso.eventos({ tamano: EscanerComponent.CUANTOS_MOVIMIENTOS })

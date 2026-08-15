@@ -149,43 +149,77 @@
          sin bajar; apilado quedaba debajo del pliegue, que es como no
          existir. -->
     <aside class="contexto">
+      <section class="movimientos">
 
-      <div class="presencia" *ngIf="presencia">
-        <div class="kpi adentro">
-          <span class="valor">{{ presencia.adentro }}</span>
-          <span class="titulo">ADENTRO</span>
+        <!-- TRES PESTAÑAS. "Movimientos" responde qué pasó; "Adentro" y
+             "Afuera" responden QUIÉN está — que es la pregunta de la hora de
+             cerrar y la de una evacuación, y hasta ahora solo existía como un
+             número en la barra de arriba. -->
+        <div class="pestanas" role="tablist">
+          <button type="button" role="tab" class="pestana"
+                  [class.activa]="pestana === 'movimientos'"
+                  [attr.aria-selected]="pestana === 'movimientos'"
+                  (click)="elegirPestana('movimientos')">
+            Movimientos
+          </button>
+          <button type="button" role="tab" class="pestana"
+                  [class.activa]="pestana === 'adentro'"
+                  [attr.aria-selected]="pestana === 'adentro'"
+                  (click)="elegirPestana('adentro')">
+            Adentro <span class="cuantos" *ngIf="presencia">{{ presencia.adentro }}</span>
+          </button>
+          <button type="button" role="tab" class="pestana"
+                  [class.activa]="pestana === 'afuera'"
+                  [attr.aria-selected]="pestana === 'afuera'"
+                  (click)="elegirPestana('afuera')">
+            Afuera <span class="cuantos" *ngIf="presencia">{{ presencia.afuera }}</span>
+          </button>
         </div>
-        <div class="kpi afuera">
-          <span class="valor">{{ presencia.afuera }}</span>
-          <span class="titulo">AFUERA</span>
-        </div>
-      </div>
 
-    <!-- ÚLTIMOS MOVIMIENTOS.
-         Contexto, no decisión. Su valor es que el guardia VEA lo que acaba de
-         registrar — un sentido equivocado o un paso que no era se cazan en el
-         renglón de arriba, no dos días después revisando la bitácora. -->
-    <section class="movimientos" *ngIf="ultimosMovimientos.length">
-      <h2>Últimos movimientos</h2>
+        <!-- Movimientos -->
+        <ul *ngIf="pestana === 'movimientos'">
+          <li *ngFor="let m of ultimosMovimientos"
+              [class.denegado]="m.resultado === 'DENEGADO'">
+            <span class="sentido" [class.entrada]="m.sentido === 'E'">
+              <i class="ms">{{ m.sentido === 'E' ? 'login' : 'logout' }}</i>
+            </span>
+            <span class="datos">
+              <strong>{{ m.personaNombre || 'Sin identificar' }}</strong>
+              <small>
+                {{ m.casaIdentificador || '—' }}
+                <ng-container *ngIf="m.vehiculoPlaca"> · {{ m.vehiculoPlaca }}</ng-container>
+                <ng-container *ngIf="m.invitado"> · Invitado</ng-container>
+              </small>
+            </span>
+            <span class="hora">{{ m.fechaEvento | date:'HH:mm' }}</span>
+          </li>
+          <li class="vacia" *ngIf="!ultimosMovimientos.length">Todavía no hay pasos hoy.</li>
+        </ul>
 
-      <ul>
-        <li *ngFor="let m of ultimosMovimientos"
-            [class.denegado]="m.resultado === 'DENEGADO'">
-          <span class="sentido" [class.entrada]="m.sentido === 'E'">
-            <i class="ms">{{ m.sentido === 'E' ? 'login' : 'logout' }}</i>
-          </span>
-          <span class="datos">
-            <strong>{{ m.personaNombre || 'Sin identificar' }}</strong>
-            <small>
-              {{ m.casaIdentificador || '—' }}
-              <ng-container *ngIf="m.vehiculoPlaca"> · {{ m.vehiculoPlaca }}</ng-container>
-              <ng-container *ngIf="m.invitado"> · Invitado</ng-container>
-            </small>
-          </span>
-          <span class="hora">{{ m.fechaEvento | date:'HH:mm' }}</span>
-        </li>
-      </ul>
-    </section>
+        <!-- Quiénes están. La hora es "desde cuándo", no "a qué hora pasó". -->
+        <ul *ngIf="pestana !== 'movimientos'">
+          <li class="vacia" *ngIf="cargandoQuienes">
+            <i class="ms gira">progress_activity</i> Consultando…
+          </li>
+          <li *ngFor="let q of quienes">
+            <span class="sentido" [class.entrada]="pestana === 'adentro'">
+              <i class="ms">person</i>
+            </span>
+            <span class="datos">
+              <strong>{{ q.nombreCompleto || 'Sin identificar' }}</strong>
+              <small>
+                {{ q.casaIdentificador || '—' }}
+                <ng-container *ngIf="q.vehiculoPlaca"> · {{ q.vehiculoPlaca }}</ng-container>
+                <ng-container *ngIf="q.invitado"> · Invitado</ng-container>
+              </small>
+            </span>
+            <span class="hora">{{ q.desde | date:'HH:mm' }}</span>
+          </li>
+          <li class="vacia" *ngIf="!cargandoQuienes && !quienes.length">
+            No hay nadie {{ pestana }}.
+          </li>
+        </ul>
+      </section>
     </aside><!-- /contexto -->
   </section>
 
@@ -246,14 +280,24 @@
       <div class="identidad">
         <h1>{{ ficha.nombreCompleto || 'Desconocido' }}</h1>
 
+        <!-- Rejilla con etiqueta encima de cada dato, no una fila corrida.
+             El guardia no lee esto: lo BUSCA — quiere el documento para
+             cotejarlo con la cédula que tiene en la mano, y en una línea
+             seguida hay que recorrerla entera para encontrarlo. Con la
+             etiqueta arriba, el ojo va directo. -->
         <div class="datos">
-          <span class="casa" *ngIf="ficha.casaIdentificador">
-            <i class="ms">home</i> {{ ficha.casaIdentificador }}
-          </span>
-          <span *ngIf="ficha.edad !== null">{{ ficha.edad }} años</span>
-          <span *ngIf="ficha.documento">
-            {{ ficha.tipoDocumento ?? '' }} {{ ficha.documento | documento }}
-          </span>
+          <div class="dato" *ngIf="ficha.casaIdentificador">
+            <span class="etiqueta">Casa</span>
+            <span class="valor destacado">{{ ficha.casaIdentificador }}</span>
+          </div>
+          <div class="dato" *ngIf="ficha.documento">
+            <span class="etiqueta">{{ ficha.tipoDocumento || 'Documento' }}</span>
+            <span class="valor numero">{{ ficha.documento | documento }}</span>
+          </div>
+          <div class="dato" *ngIf="ficha.edad !== null">
+            <span class="etiqueta">Edad</span>
+            <span class="valor">{{ ficha.edad }} años</span>
+          </div>
         </div>
 
         <div class="verifica-documento" *ngIf="ficha.esInvitado && ficha.permitido">
