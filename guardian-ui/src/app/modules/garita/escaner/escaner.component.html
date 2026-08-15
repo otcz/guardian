@@ -1,19 +1,5 @@
 <div class="garita">
 
-  <!-- PRESENCIA. Fuera de la pantalla mientras hay una ficha: son datos de
-       contexto, y en una tablet lo que ocupan arriba obliga a bajar para ver
-       la decisión — justo lo que la portería no puede hacer. -->
-  <div class="presencia" *ngIf="presencia && etapa !== 'ficha'">
-    <div class="kpi adentro">
-      <span class="valor">{{ presencia.adentro }}</span>
-      <span class="titulo">ADENTRO</span>
-    </div>
-    <div class="kpi afuera">
-      <span class="valor">{{ presencia.afuera }}</span>
-      <span class="titulo">AFUERA</span>
-    </div>
-  </div>
-
   <!-- ESCANEO -->
   <section class="escaneo" *ngIf="etapa === 'escaneando' || etapa === 'verificando'">
 
@@ -45,6 +31,12 @@
         <span>Huella</span>
       </button>
     </div>
+
+    <!-- COLUMNA PRINCIPAL: lo que el guardia toca.
+         En pantalla ancha va a la izquierda, que es donde cae la mirada, y el
+         contexto se corre a la derecha. Apilado, todo esto quedaba en una
+         columna angosta en el medio con la pantalla vacía a los lados. -->
+    <div class="col-principal">
 
     <!-- HUELLA: componente propio. Código y documento son el mismo camino —un
          texto que el sistema resuelve— y comparten campo; la huella tiene dos
@@ -126,13 +118,30 @@
         <small>Registra a pie a los {{ SEGUNDOS_AUTO }} s si no tocas nada</small>
       </span>
     </button>
+    </div><!-- /col-principal -->
+
+    <!-- COLUMNA DE CONTEXTO: lo que el guardia MIRA, no lo que toca.
+         Presencia y últimos movimientos. En pantalla ancha va al lado y se ve
+         sin bajar; apilado quedaba debajo del pliegue, que es como no
+         existir. -->
+    <aside class="contexto">
+
+      <div class="presencia" *ngIf="presencia">
+        <div class="kpi adentro">
+          <span class="valor">{{ presencia.adentro }}</span>
+          <span class="titulo">ADENTRO</span>
+        </div>
+        <div class="kpi afuera">
+          <span class="valor">{{ presencia.afuera }}</span>
+          <span class="titulo">AFUERA</span>
+        </div>
+      </div>
 
     <!-- ÚLTIMOS MOVIMIENTOS.
-         Van al final y solo mientras no hay ficha: son contexto, no decisión.
-         Su valor es que el guardia VEA lo que acaba de registrar — un sentido
-         equivocado o un paso que no era se cazan en el renglón de arriba, no
-         dos días después revisando la bitácora. -->
-    <section class="movimientos" *ngIf="ultimosMovimientos.length && !candidatos.length">
+         Contexto, no decisión. Su valor es que el guardia VEA lo que acaba de
+         registrar — un sentido equivocado o un paso que no era se cazan en el
+         renglón de arriba, no dos días después revisando la bitácora. -->
+    <section class="movimientos" *ngIf="ultimosMovimientos.length">
       <h2>Últimos movimientos</h2>
 
       <ul>
@@ -153,6 +162,7 @@
         </li>
       </ul>
     </section>
+    </aside><!-- /contexto -->
   </section>
 
   <!-- FICHA -->

@@ -72,24 +72,67 @@ section {
   max-width: 420px;
 }
 
-/* ── Ancho de tablet ─────────────────────────────────────────────────────────
+/* ── Consola de dos columnas ─────────────────────────────────────────────────
    420px es medida de teléfono, y la portería se opera en una tablet o en un
-   monitor: dejaba una columna angosta en el medio con todo vacío a los lados.
+   monitor: todo quedaba en una tira angosta en el medio, con la pantalla vacía
+   a los lados y los últimos movimientos debajo del pliegue — que es como no
+   existir.
 
-   Se ensancha SOLO el escaneo y solo desde 700px. La ficha se queda angosta a
-   propósito: ahí manda la foto, y estirarla a lo ancho de un monitor separaría
-   la cara del veredicto —las dos cosas que el guardia tiene que ver juntas— y
-   lo obligaría a mover la mirada de un extremo al otro. */
-@media (min-width: 700px) {
+   Desde 900px se parte en dos: a la IZQUIERDA lo que el guardia toca, a la
+   DERECHA lo que mira. Es la division de una consola de operacion y no una
+   decoración: la mano va siempre al mismo sitio, y el contexto no se
+   interpone.
+
+   La FICHA no entra en esto y es deliberado: ahí manda la foto, y repartirla a
+   lo ancho de un monitor separaría la cara del veredicto —lo único que el
+   guardia tiene que ver junto— obligándolo a barrer la pantalla con la vista. */
+@media (min-width: 900px) {
   .escaneo {
-    max-width: 720px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    grid-template-areas:
+      'modos    modos'
+      'principal contexto';
+    align-items: start;
+    gap: var(--e-4) var(--e-5);
+    max-width: 1000px;
   }
 
-  /* Los contadores acompañan el ancho nuevo: dos cajas de 420 centradas bajo
-     un panel de 720 se ven descolgadas. */
-  .presencia {
-    max-width: 720px;
+  .modos {
+    grid-area: modos;
   }
+
+  .col-principal {
+    grid-area: principal;
+  }
+
+  .contexto {
+    grid-area: contexto;
+  }
+
+  /* Los contadores dejan de ser dos cajas sueltas y encabezan su columna. */
+  .presencia {
+    max-width: none;
+  }
+
+  /* El campo crece con la columna: es la acción principal de la pantalla y
+     tiene que verse como tal desde un metro de distancia. */
+  .manual input {
+    padding: 0.95rem 1rem;
+    font-size: 1.2rem;
+  }
+}
+
+/* Las dos columnas por dentro: cada una apila lo suyo. Fuera del @media esto
+   no estorba —son contenedores flex de una sola columna, que es justo el
+   comportamiento apilado del teléfono—. */
+.col-principal,
+.contexto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+  min-width: 0;
 }
 
 /* ── Los tres modos ──────────────────────────────────────────────────────────
@@ -320,10 +363,15 @@ section {
    equivocado. */
 .movimientos {
   width: 100%;
+  max-width: none;
   align-items: stretch;
-  margin-top: var(--e-3);
-  padding-top: var(--e-3);
-  border-top: 1px solid var(--border-hairline);
+  /* Panel propio y no una lista suelta bajo una línea: en la columna de
+     contexto tiene que leerse como un bloque con dueño, igual que los
+     contadores de arriba. */
+  padding: var(--e-3) var(--e-4);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-md);
 
   h2 {
     margin: 0 0 var(--e-2);
