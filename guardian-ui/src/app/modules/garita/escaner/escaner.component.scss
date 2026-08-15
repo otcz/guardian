@@ -225,9 +225,31 @@ section {
   left: 50%;
   right: auto;
   bottom: auto;
-  height: min(78%, 340px);
+  height: min(86%, 420px);
   transform: translate(-50%, -50%);
-  opacity: 0.06;
+  opacity: 0.07;
+}
+
+/* Los componentes de encima DEJAN PASAR el fondo.
+   Con relleno opaco, el escudo se partía en tiras entre el campo y el resto —
+   la misma corrección que hubo que hacer en el login—. Sin relleno, la silueta
+   pasa entera por detrás y a cada control lo sigue delimitando su borde, que
+   es lo que de verdad lo dibuja.
+
+   El botón Buscar se queda SÓLIDO a propósito: es la acción principal de la
+   pantalla y un botón traslúcido deja de leerse como botón. Un elemento
+   opaco encima de una marca de agua es normal; lo que no lo era, era tener
+   tres.
+
+   Y el paso automático ENCENDIDO también vuelve a ser sólido: su regla verde
+   vive más abajo con la misma especificidad, así que gana. No es un descuido
+   de cascada — está prendido es un estado que tiene que verse, y el fondo es
+   justamente lo que lo dice. */
+.col-principal {
+  .manual input,
+  .auto-check {
+    background: transparent;
+  }
 }
 
 /* ── Los tres modos ──────────────────────────────────────────────────────────
