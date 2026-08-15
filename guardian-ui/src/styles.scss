@@ -25,7 +25,12 @@
   /* block y no swap: el respaldo de una ligadura es la palabra en texto. Mas
      vale un hueco de 100ms que "directions_car" escrito en la pantalla. */
   font-display: block;
-  src: url('/fonts/material-symbols-rounded.woff2') format('woff2');
+  /* ?v= a mano y NO por casualidad: el archivo tiene nombre fijo, no lleva
+     hash de contenido, y Cloudflare lo cachea 4 horas. El dia que se agregue
+     un icono al subconjunto, sin subir esta version se seguiria sirviendo la
+     fuente vieja — y un glifo que no esta en la fuente se dibuja como la
+     PALABRA. Al cambiar el subconjunto, subir el numero. */
+  src: url('/fonts/material-symbols-rounded.woff2?v=1') format('woff2');
 }
 
 .ms {
