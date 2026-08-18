@@ -219,6 +219,9 @@ public final class MensajesGlobales {
     // ── Fotos ────────────────────────────────────────────────────────────────
     public static final String FOTO_INVALIDA =
             "La foto debe ser JPG, PNG o WEBP y pesar menos de 5 MB.";
+    /** El limite de multipart del servidor, que salta ANTES del controller. */
+    public static final String FOTO_DEMASIADO_PESADA =
+            "Esa foto es muy pesada. Toma una nueva desde la aplicacion.";
     public static final String FOTO_URL_INVALIDA =
             "La foto debe subirse desde la aplicacion.";
 

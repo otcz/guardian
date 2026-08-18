@@ -12,6 +12,8 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 
 import java.util.Date;
 import java.util.List;
@@ -85,6 +87,27 @@ public class GlobalExceptionHandler {
                 .badRequest()
                 .body(new ErrorResponse(new Date(), HttpStatus.BAD_REQUEST.value(),
                         MensajesGlobales.PETICION_ILEGIBLE, null));
+    }
+
+
+    /**
+     * La foto no cabe en el limite de multipart.
+     *
+     * <p>Sin este manejador el fallo caia en el generico y al residente le
+     * salia "error inesperado" — el peor mensaje posible, porque no le dice
+     * que hacer y parece que el sistema esta roto. Salta ANTES del controller,
+     * asi que la validacion de FotoController nunca alcanza a correr.</p>
+     *
+     * <p>413 y no 400: el problema es el tamano de la peticion, y ese es el
+     * codigo que le corresponde.</p>
+     */
+    @ExceptionHandler({ MaxUploadSizeExceededException.class, MultipartException.class })
+    public ResponseEntity<ErrorResponse> manejarSubidaGrande(Exception ex) {
+        log.warn("[error] subida rechazada por tamano: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(new ErrorResponse(new Date(), HttpStatus.PAYLOAD_TOO_LARGE.value(),
+                        MensajesGlobales.FOTO_DEMASIADO_PESADA, null));
     }
 
     /**

@@ -10,7 +10,7 @@
       <i class="ms">photo_camera</i>
       {{ vistaPrevia ? 'Cambiar' : 'Subir foto' }}
       <input type="file"
-             accept="image/jpeg,image/png,image/webp"
+             accept="image/*"
              (change)="alSeleccionar($event)">
     </label>
 
