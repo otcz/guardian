@@ -20,6 +20,11 @@
   /* Ancla del escudo del fondo: sin esto su `position: absolute` se cuelga
      del viewport y se va a la esquina de la pantalla, no a la del panel. */
   position: relative;
+  /* El UNICO contexto de apilamiento del panel, y a proposito: aca dentro
+     conviven la cabecera (20), la barra de abajo (30) y las hojas (40+), y esos
+     numeros por fin significan lo que dicen. Es tambien lo que deja al escudo
+     usar z-index negativo sin desaparecer detras de la pagina. */
+  isolation: isolate;
   max-width: var(--ancho-panel);
   margin: 0 auto;
   padding-top: var(--seguro-arriba);
@@ -154,9 +159,14 @@ main {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   padding-bottom: var(--e-4);
-  /* El contenido va por encima del escudo del fondo. */
+  /* Ancla para lo que se posicione adentro, y SIN z-index. Eso ultimo es lo
+     importante: un z-index aca creaba un CONTEXTO DE APILAMIENTO, y dentro de
+     el toda la pantalla —hojas incluidas— valia lo que valiera este bloque. La
+     hoja pedia 40 y la barra de abajo pedia 30, pero como la hoja estaba
+     encerrada aca dentro la comparacion real era 1 contra 30: la barra ganaba y
+     pintaba ENCIMA del pie de la hoja. Ese era el boton Guardar que no se veia,
+     en cualquier telefono y sin teclado de por medio. */
   position: relative;
-  z-index: 1;
 }
 
 /* ---------------------------------------------------------------------------
@@ -200,7 +210,10 @@ main {
   -webkit-mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
   mask: url('/brand/guardian-watermark.svg') no-repeat center / contain;
   pointer-events: none;
-  z-index: 0;
+  /* Negativo: queda detras de TODO el contenido sin obligar a nadie a subir su
+     z-index para taparlo. El isolation del panel lo mantiene por encima del
+     fondo del propio panel en vez de irse detras de la pagina. */
+  z-index: -1;
 }
 
 /* ── Barra de navegación inferior ──────────────────────────────────────── */

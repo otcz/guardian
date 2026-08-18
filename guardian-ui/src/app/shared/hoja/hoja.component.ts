@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   Component,
   ElementRef,
   EventEmitter,
@@ -38,6 +39,15 @@ export class HojaComponent implements OnChanges, OnDestroy {
 
   /** Contexto bajo el título: la sede, la casa, a quién pertenece lo que se edita. */
   @Input() subtitulo = '';
+
+  /**
+   * Deja la hoja a la altura de su contenido en vez de ocupar la pantalla
+   * entera. Es para preguntas de si-o-no, como {@code gd-confirmar}: abrir una
+   * pantalla completa para decir "Cancelar / Eliminar" desorienta mas que
+   * ayuda. Todo lo que sea un FORMULARIO va a pantalla completa, que es donde
+   * el pie tiene su sitio garantizado.
+   */
+  @Input({ transform: booleanAttribute }) compacta = false;
 
   @Output() cerrar = new EventEmitter<void>();
 

@@ -2,15 +2,12 @@
      [style.z-index]="'calc(var(--z-hoja) + ' + nivel + ')'"></div>
 
 <section class="hoja"
+         [class.compacta]="compacta"
          *ngIf="abierta"
          role="dialog"
          aria-modal="true"
          [attr.aria-label]="titulo"
          [style.z-index]="'calc(var(--z-hoja) + ' + (nivel + 1) + ')'">
-  <!-- El tirador dice "esto se cierra arrastrando" sin una sola palabra.
-       En escritorio no aplica: ahí no se arrastra, se hace clic fuera. -->
-  <div class="tirador"></div>
-
   <!-- La cabecera se dibuja SIEMPRE, tenga título o no: acá vive la X, y
        colgarla del título dejaba sin forma de cerrar a las hojas que no lo
        llevan —la del código del invitado, sin ir más lejos—. Sin título la
@@ -32,17 +29,18 @@
     </button>
   </header>
 
-  <!-- El pie vive DENTRO del cuerpo que se desplaza, no como hermano suyo.
-       Es la garantia de ultimo recurso: un pie anclado al fondo SIEMPRE puede
-       quedar detras del teclado de iOS, pero a un pie que va al final del
-       contenido se llega bajando, pase lo que pase con el teclado. En
-       escritorio vuelve a quedar pegado abajo, que ahi no hay teclado virtual
-       que lo tape. -->
   <div class="cuerpo">
     <ng-content></ng-content>
+  </div>
 
-    <div class="pie">
-      <ng-content select="[pie]"></ng-content>
-    </div>
+  <!-- El pie es HERMANO del cuerpo, no hijo suyo: asi ocupa su propio sitio y
+       esta SIEMPRE a la vista, sin que haya que desplazarse para encontrarlo.
+       Se probo meterlo dentro del cuerpo para blindarlo contra el teclado de
+       iOS y fue peor: el boton dejaba de verse en una pantalla normal, que es
+       el caso de siempre. Contra el teclado defienden las otras dos capas —el
+       meta interactive-widget y la medida de visualViewport— que suben la hoja
+       entera en vez de esconder su pie. -->
+  <div class="pie">
+    <ng-content select="[pie]"></ng-content>
   </div>
 </section>
