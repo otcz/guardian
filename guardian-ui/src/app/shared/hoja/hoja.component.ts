@@ -59,6 +59,39 @@ export class HojaComponent implements OnChanges, OnDestroy {
   /** A dónde devolver el foco al cerrar: al control que abrió la hoja. */
   private focoPrevio: HTMLElement | null = null;
 
+  // ── El teclado de iOS ────────────────────────────────────────────────────
+  //
+  // En Safari de iOS la ventana NO se encoge cuando sube el teclado: los
+  // elementos con position fixed siguen anclados al fondo de la pantalla
+  // completa, o sea DETRAS del teclado. Por eso el pie con Guardar quedaba
+  // tapado — y no habia forma de alcanzarlo, porque la hoja tampoco se
+  // desplaza: se desplaza su cuerpo.
+  //
+  // visualViewport es la unica API que sabe cuanto ocupa el teclado. Se mide y
+  // se publica en una variable CSS que la hoja usa para subirse y encogerse.
+  //
+  // No es exclusivo de iOS: Android tiene el mismo problema cuando el navegador
+  // no redimensiona. Medir sirve en los dos.
+
+  /** Cuanto del alto se lleva el teclado ahora mismo, en pixeles. */
+  private alturaTeclado = 0;
+
+  private readonly medirTeclado = (): void => {
+    const vv = window.visualViewport;
+    if (!vv) {
+      return;
+    }
+    // Lo que la ventana perdio por abajo. offsetTop entra en la cuenta porque
+    // iOS tambien desplaza la vista cuando el campo enfocado queda muy abajo.
+    const alto = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+
+    if (alto === this.alturaTeclado) {
+      return;
+    }
+    this.alturaTeclado = alto;
+    document.documentElement.style.setProperty('--teclado-alto', alto + 'px');
+  };
+
   constructor(private readonly host: ElementRef<HTMLElement>) {}
 
   ngOnChanges(): void {
@@ -121,6 +154,10 @@ export class HojaComponent implements OnChanges, OnDestroy {
     HojaComponent.abiertas++;
     this.contabilizada = true;
 
+    window.visualViewport?.addEventListener('resize', this.medirTeclado);
+    window.visualViewport?.addEventListener('scroll', this.medirTeclado);
+    this.medirTeclado();
+
     this.focoPrevio = document.activeElement as HTMLElement | null;
     // Tras el render: el contenido proyectado todavía no existe en ngOnChanges.
     // El primero SIN data-no-autofoco: la X del encabezado es focoable para el
@@ -139,8 +176,15 @@ export class HojaComponent implements OnChanges, OnDestroy {
     HojaComponent.abiertas--;
     this.contabilizada = false;
 
+    window.visualViewport?.removeEventListener('resize', this.medirTeclado);
+    window.visualViewport?.removeEventListener('scroll', this.medirTeclado);
+
     if (HojaComponent.abiertas === 0) {
       document.body.style.overflow = HojaComponent.overflowPrevio;
+      // Se limpia solo cuando NO queda ninguna hoja: con dos superpuestas, la
+      // que se cierra no puede borrarle la medida a la que sigue abierta.
+      document.documentElement.style.removeProperty('--teclado-alto');
+      this.alturaTeclado = 0;
     }
 
     this.focoPrevio?.focus();

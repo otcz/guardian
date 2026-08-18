@@ -32,8 +32,13 @@
      pie —donde vive Guardar— se sale por abajo. Es exactamente el sintoma que
      reporto OSCAR en produccion, y afectaba a TODOS los formularios de la
      aplicacion porque todos viven en esta hoja. */
-  max-height: 90vh;
-  max-height: 90dvh;
+  /* El teclado de iOS: la hoja se sube por encima de el y se encoge lo que el
+     teclado ocupa. Sin esto el pie —donde vive Guardar— queda DETRAS del
+     teclado, y ni siquiera se puede desplazar hasta el: la hoja no se
+     desplaza, se desplaza su cuerpo. Ver medirTeclado() en el componente. */
+  bottom: var(--teclado-alto, 0px);
+  max-height: calc(90vh - var(--teclado-alto, 0px));
+  max-height: calc(90dvh - var(--teclado-alto, 0px));
   /* La hoja NO se desplaza: lo hace su cuerpo. Cuando el scroll vivía aquí, el
      pie pegajoso quedaba ENCIMA del contenido y el último botón del formulario
      asomaba por debajo de "Cerrar". La anatomía correcta de un diálogo es
@@ -196,8 +201,9 @@
     margin: auto;
     height: fit-content;
     max-width: 560px;
+    bottom: auto;
     max-height: 85vh;
-    max-height: 85dvh;
+    max-height: calc(85dvh - var(--teclado-alto, 0px));
     --hoja-relleno: var(--e-5);
     padding: var(--e-5);
     border-radius: var(--r-lg);
