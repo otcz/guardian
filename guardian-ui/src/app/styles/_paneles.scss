@@ -534,6 +534,10 @@
 
 .acciones {
   display: flex;
+  /* Una fila de acciones con cinco botones no cabe en un telefono angosto: sin
+     envolver, los ultimos quedan fuera de la pantalla y no hay forma de
+     tocarlos. */
+  flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
   gap: 0.35rem;

@@ -119,3 +119,19 @@
   font-size: var(--t-xs);
   text-align: center;
 }
+
+/* El aviso de "preparando". En un teléfono lo que se demora no es la red sino
+   reducir la foto, y sin este texto la persona ve un spinner sin explicación y
+   vuelve a tocar el botón. */
+.estado {
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+
+/* El icono de ayuda vive en la fila de acciones y no rompe su alineación. */
+.ayuda {
+  flex: 0 0 auto;
+  font-size: var(--t-md);
+  color: var(--text-muted);
+  cursor: help;
+}

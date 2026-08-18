@@ -111,6 +111,33 @@ body {
   /* Sin rebote al final del scroll: ese "tirón" es la señal más clara de que
      lo que se está usando es una página web dentro de un navegador. */
   overscroll-behavior: none;
+  /* RED DE SEGURIDAD. Ningún elemento puede empujar la página a lo ancho: si
+     algo se pasa, se recorta ahí y no arrastra toda la pantalla hacia el lado
+     —el sintoma que hacía que la aplicación se viera "corrida" en el
+     teléfono—. No sustituye a arreglar el elemento que se desborda; evita que
+     uno solo arruine la pantalla entera mientras aparece. */
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Nada con contenido propio puede ser más ancho que su sitio. Una imagen o un
+   bloque de código sin esto empujan la página entera en un teléfono. */
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+/* Una palabra sin espacios —un correo largo, una URL— no rompe el ancho: se
+   parte. Es lo que más desborda en pantallas angostas. */
+p,
+h1, h2, h3, h4,
+td, th,
+label,
+strong,
+small {
+  overflow-wrap: anywhere;
 }
 
 /* Nada de destello gris al tocar, ni de selección accidental de texto al

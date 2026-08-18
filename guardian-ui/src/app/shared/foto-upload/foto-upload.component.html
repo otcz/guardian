@@ -5,6 +5,12 @@
     <i class="ms gira" *ngIf="cargando">progress_activity</i>
   </div>
 
+  <!-- "Preparando" y no "Subiendo": en un teléfono lo que se demora NO es la
+       red sino reducir la foto — decodificar 12 megapíxeles y volver a
+       comprimirlos toma un par de segundos en un equipo viejo. Decir "subiendo"
+       ahí sería mentir sobre qué está esperando la persona. -->
+  <small class="estado" *ngIf="cargando">Preparando la foto…</small>
+
   <div class="acciones">
     <label class="boton">
       <i class="ms">photo_camera</i>
@@ -13,6 +19,15 @@
              accept="image/*"
              (change)="alSeleccionar($event)">
     </label>
+
+    <!-- El tooltip dice lo ÚTIL —que no hay que preocuparse por el tamaño—
+         y no un límite en megas que la aplicación ya no deja alcanzar: reduce
+         cualquier foto antes de subirla. Un letrero de "máximo 5 MB" haría que
+         alguien descartara una foto buena por miedo a un tope que no existe. -->
+    <i class="ms ayuda"
+       pTooltip="Cualquier tamaño: se ajusta sola"
+       tooltipPosition="top"
+       aria-hidden="true">info</i>
 
     <button type="button"
             class="quitar"

@@ -26,6 +26,13 @@
   flex-direction: column;
   width: 100%;
   max-width: var(--ancho-panel);
+  /* 90vh PRIMERO como respaldo y 90dvh despues.
+     Sin el respaldo, un navegador que no conozca dvh descarta la declaracion
+     ENTERA: la hoja se queda sin tope de altura, crece mas que la pantalla y el
+     pie —donde vive Guardar— se sale por abajo. Es exactamente el sintoma que
+     reporto OSCAR en produccion, y afectaba a TODOS los formularios de la
+     aplicacion porque todos viven en esta hoja. */
+  max-height: 90vh;
   max-height: 90dvh;
   /* La hoja NO se desplaza: lo hace su cuerpo. Cuando el scroll vivía aquí, el
      pie pegajoso quedaba ENCIMA del contenido y el último botón del formulario
@@ -156,6 +163,11 @@
    fila del cuerpo. */
 .pie {
   display: flex;
+  /* Envuelve en vez de desbordarse. Dos botones como "Cancelar" y "Enviar
+     solicitud" no caben lado a lado en una pantalla de 320px, y sin esto el
+     segundo se sale por la derecha — invisible e intocable. Envolviendo pasa a
+     la linea de abajo y siempre se alcanza. */
+  flex-wrap: wrap;
   gap: var(--e-2);
   justify-content: flex-end;
   flex: 0 0 auto;
@@ -184,6 +196,7 @@
     margin: auto;
     height: fit-content;
     max-width: 560px;
+    max-height: 85vh;
     max-height: 85dvh;
     --hoja-relleno: var(--e-5);
     padding: var(--e-5);

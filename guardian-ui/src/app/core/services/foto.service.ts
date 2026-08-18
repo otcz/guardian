@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, from, map, switchMap } from 'rxjs';
+import { Observable, from, map, switchMap, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 
@@ -17,6 +17,15 @@ const LADO_MAXIMO = 1600;
 /** Calidad del JPEG resultante. 0.85 es el punto donde deja de notarse. */
 const CALIDAD = 0.85;
 
+/**
+ * Tope real del servidor. Se comprueba tambien ACA, despues de preparar la
+ * imagen, para no gastar los datos moviles del residente subiendo ocho megas
+ * que van a terminar en un rechazo. Solo se alcanza cuando la conversion fallo
+ * —un archivo que el navegador no supo decodificar— porque una foto normal
+ * sale de aqui pesando unos cientos de kilobytes.
+ */
+const TOPE_BYTES = 5 * 1024 * 1024;
+
 @Injectable({ providedIn: 'root' })
 export class FotoService {
 
@@ -26,6 +35,18 @@ export class FotoService {
   subir(archivo: File): Observable<string> {
     return from(this.prepararImagen(archivo)).pipe(
       switchMap(preparada => {
+        // Se corta ACA y no en el servidor: subir ocho megas por datos moviles
+        // para recibir un rechazo es tiempo y plata de quien esta parado
+        // llenando el formulario.
+        if (preparada.size > TOPE_BYTES) {
+          return throwError(() => ({
+            error: {
+              mensaje: 'No pudimos preparar esa imagen y pesa demasiado. '
+                + 'Toma una foto nueva con la cámara.'
+            }
+          }));
+        }
+
         const datos = new FormData();
         datos.append('archivo', preparada, 'foto.jpg');
 
