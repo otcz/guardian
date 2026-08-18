@@ -161,6 +161,9 @@
 
 .pie {
   display: flex;
+  /* Envuelve en vez de desbordarse: un boton que se sale por la derecha es
+     invisible e intocable, y no hay pantalla estrecha que lo justifique. */
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
@@ -191,6 +194,7 @@
 
   .botones {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.3rem;
 
     button {

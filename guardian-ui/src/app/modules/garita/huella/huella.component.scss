@@ -335,10 +335,16 @@
 
 .pie {
   display: flex;
+  /* Envuelve en vez de desbordarse: un boton que se sale por la derecha es
+     invisible e intocable, y no hay pantalla estrecha que lo justifique. */
+  flex-wrap: wrap;
   gap: var(--e-2);
 
   button {
-    flex: 1 1 0;
+    /* Base de 8rem en vez de 0: repartiendo desde cero los dos botones se
+       aplastan hasta partir su texto antes de decidirse a bajar de linea. */
+    flex: 1 1 8rem;
+    min-width: 0;
   }
 }
 

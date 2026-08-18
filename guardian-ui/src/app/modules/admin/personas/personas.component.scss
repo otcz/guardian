@@ -480,12 +480,16 @@ code {
   word-break: break-all;
 }
 
-/* El diálogo se ajusta a lo que pide: dos campos de cuatro dígitos y un botón.
+/* `estrecha` y no `compacta`: `compacta` es el atributo de gd-hoja que la deja
+   a la altura de su contenido, y dos cosas distintas no pueden llamarse igual.
+   Esto solo recorta el ANCHO en escritorio.
+
+   El diálogo se ajusta a lo que pide: dos campos de cuatro dígitos y un botón.
    Los 560px del resto de las hojas son para formularios con varios campos; acá
    solo dejaban aire a los lados. En móvil NO aplica — ahí la hoja sube desde
    abajo a todo el ancho, y estrecharla la volvería una tarjeta flotante. */
 @media (min-width: 821px) {
-  :host ::ng-deep gd-hoja.compacta .hoja {
+  :host ::ng-deep gd-hoja.estrecha .hoja {
     max-width: 440px;
   }
 }

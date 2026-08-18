@@ -128,7 +128,7 @@
     <div class="aviso-error" *ngIf="error">{{ error }}</div>
 
     <!-- Código del invitado -->
-    <gd-hoja [abierta]="!!qrAbierto" (cerrar)="qrAbierto = null">
+    <gd-hoja compacta [abierta]="!!qrAbierto" (cerrar)="qrAbierto = null">
       <div class="codigo" *ngIf="qrAbierto">
         <div class="qr-cuadro">
           <qrcode [qrdata]="qrAbierto.payload" [width]="200" [margin]="1"
@@ -164,7 +164,7 @@
 
     <!-- Confirmación de revocar. Antes era un window.confirm, que dibuja el
          dominio del sitio y los botones del navegador. -->
-    <gd-hoja [abierta]="!!invitacionARevocar"
+    <gd-hoja compacta [abierta]="!!invitacionARevocar"
              [titulo]="invitacionARevocar?.nombreInvitado || ''"
              (cerrar)="invitacionARevocar = null">
       <p class="instruccion">El código dejará de servir de inmediato.</p>

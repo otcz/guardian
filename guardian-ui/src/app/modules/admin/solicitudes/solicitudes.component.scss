@@ -87,6 +87,9 @@
    normal y la otra la excepción. */
 .acciones {
   display: flex;
+  /* Envuelve en vez de desbordarse: un boton que se sale por la derecha es
+     invisible e intocable, y no hay pantalla estrecha que lo justifique. */
+  flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
   gap: var(--e-2);

@@ -56,7 +56,7 @@
 
   <!-- Mi cuenta. Ninguna app nativa tiene "cerrar sesión" a un toque en la
        pantalla principal, ni cuatro iconos sin nombre en la esquina. -->
-  <gd-hoja [abierta]="mostrarCuenta" titulo="Mi cuenta"
+  <gd-hoja compacta [abierta]="mostrarCuenta" titulo="Mi cuenta"
            (cerrar)="mostrarCuenta = false">
 
     <div class="ficha-cuenta" *ngIf="sesion">

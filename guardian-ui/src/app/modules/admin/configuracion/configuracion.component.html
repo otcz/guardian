@@ -84,7 +84,7 @@
            [titulo]="tituloHoja"
            [subtitulo]="subtituloHoja"
            (cerrar)="cerrarHoja()">
-    <form [formGroup]="formulario" (ngSubmit)="guardar()">
+    <form id="forma-config" [formGroup]="formulario" (ngSubmit)="guardar()">
       <div class="campo">
         <label for="c-valor">
           Nombre
@@ -99,11 +99,14 @@
           Escribe un nombre de hasta 100 caracteres.
         </small>
       </div>
+    </form>
 
-      <button type="submit" class="principal" [disabled]="guardando">
+    <div pie>
+      <button type="button" class="alterno" (click)="cerrarHoja()">Cancelar</button>
+      <button type="submit" form="forma-config" class="principal" [disabled]="guardando">
         <i class="ms" [class.gira]="guardando">{{ guardando ? 'progress_activity' : 'check' }}</i>
         {{ guardando ? 'Guardando…' : 'Guardar' }}
       </button>
-    </form>
+    </div>
   </gd-hoja>
 </div>

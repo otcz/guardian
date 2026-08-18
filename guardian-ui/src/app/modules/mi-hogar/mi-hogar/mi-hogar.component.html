@@ -273,7 +273,7 @@
         </button>
       </div>
 
-      <gd-hoja [abierta]="cambiandoFoto" titulo="Cambiar tu foto"
+      <gd-hoja compacta [abierta]="cambiandoFoto" titulo="Cambiar tu foto"
                (cerrar)="cambiandoFoto = false">
         <p class="instruccion">
           El guardia compara tu cara con esta foto. Usa una donde se te vea de
@@ -467,7 +467,7 @@
         </button>
       </div>
 
-      <gd-hoja [abierta]="!!vehiculoEnFoto"
+      <gd-hoja compacta [abierta]="!!vehiculoEnFoto"
                [titulo]="'Foto de ' + (vehiculoEnFoto?.placa || '')"
                (cerrar)="vehiculoEnFoto = null">
         <p class="instruccion">
@@ -485,7 +485,7 @@
 
     <!-- Confirmación de lo destructivo. Desactivar a alguien le quita el
          ingreso al conjunto y hasta ahora no preguntaba nada. -->
-    <gd-hoja [abierta]="!!aConfirmar" [titulo]="aConfirmar?.titulo || ''"
+    <gd-hoja compacta [abierta]="!!aConfirmar" [titulo]="aConfirmar?.titulo || ''"
              (cerrar)="aConfirmar = null">
       <p class="detalle-confirmar">{{ aConfirmar?.detalle }}</p>
 
@@ -504,7 +504,7 @@
     </gd-hoja>
 
     <!-- Invitar a alguien a registrarse solo en este hogar. -->
-    <gd-hoja [abierta]="mostrarInvitacion" titulo="Invitar a mi hogar"
+    <gd-hoja compacta [abierta]="mostrarInvitacion" titulo="Invitar a mi hogar"
              (cerrar)="mostrarInvitacion = false">
 
       <p class="detalle-confirmar">
@@ -553,7 +553,7 @@
     </gd-hoja>
 
     <!-- El candado no se negocia desde acá: la hoja solo explica por qué. -->
-    <gd-hoja [abierta]="!!bloqueoInfo" [titulo]="bloqueoInfo?.titulo || ''"
+    <gd-hoja compacta [abierta]="!!bloqueoInfo" [titulo]="bloqueoInfo?.titulo || ''"
              (cerrar)="bloqueoInfo = null">
       <p class="detalle-confirmar">{{ bloqueoInfo?.detalle }}</p>
 
