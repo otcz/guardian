@@ -32,11 +32,17 @@
     </button>
   </header>
 
+  <!-- El pie vive DENTRO del cuerpo que se desplaza, no como hermano suyo.
+       Es la garantia de ultimo recurso: un pie anclado al fondo SIEMPRE puede
+       quedar detras del teclado de iOS, pero a un pie que va al final del
+       contenido se llega bajando, pase lo que pase con el teclado. En
+       escritorio vuelve a quedar pegado abajo, que ahi no hay teclado virtual
+       que lo tape. -->
   <div class="cuerpo">
     <ng-content></ng-content>
-  </div>
 
-  <div class="pie">
-    <ng-content select="[pie]"></ng-content>
+    <div class="pie">
+      <ng-content select="[pie]"></ng-content>
+    </div>
   </div>
 </section>

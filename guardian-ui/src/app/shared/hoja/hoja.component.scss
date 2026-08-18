@@ -137,6 +137,11 @@
    valores a 954 mientras el pie seguía en 968 — dos bordes derechos en un
    diálogo que tiene uno. */
 .cuerpo {
+  /* Cuando iOS desplaza solo hasta el campo enfocado, lo deja pegado al borde
+     de abajo. Con este relleno de desplazamiento queda holgura debajo, asi que
+     el campo se ve completo y el pie asoma justo detras — sin tener que
+     adivinar donde quedo. */
+  scroll-padding-bottom: 8rem;
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
@@ -166,7 +171,16 @@
 /* El pie ocupa su propio sitio al final de la columna. Con el teclado abierto
    el botón de guardar sigue a la vista, y ya no puede solaparse con la última
    fila del cuerpo. */
+/* En el TELEFONO el pie va al final del contenido y NO pegado al fondo.
+   Un pie pegado siempre puede quedar detras del teclado de iOS; a uno que va
+   al final del contenido se llega bajando, y eso no depende de que ninguna
+   API reporte bien. Es la garantia de ultimo recurso.
+
+   El margen de arriba lo separa del ultimo campo, y el de abajo deja aire para
+   que el pulgar lo alcance sin tocar el borde. */
 .pie {
+  margin-top: var(--e-4);
+  padding-bottom: var(--e-2);
   display: flex;
   /* Envuelve en vez de desbordarse. Dos botones como "Cancelar" y "Enviar
      solicitud" no caben lado a lado en una pantalla de 320px, y sin esto el
@@ -178,6 +192,7 @@
   flex: 0 0 auto;
   padding-top: var(--e-3);
   background: var(--bg-surface);
+  border-top: 1px solid var(--border-hairline);
 
   &:empty {
     display: none;
@@ -208,6 +223,16 @@
     padding: var(--e-5);
     border-radius: var(--r-lg);
     animation: gd-entrada-modal var(--dur-media) var(--curva-estandar);
+  }
+
+  /* En escritorio el pie vuelve a quedar pegado al fondo de la hoja: ahi no
+     hay teclado virtual que lo pueda tapar, y un dialogo con sus acciones
+     siempre a la vista es lo que se espera con raton. */
+  .pie {
+    position: sticky;
+    bottom: 0;
+    margin-top: var(--e-5);
+    padding-bottom: 0;
   }
 
   .tirador {
