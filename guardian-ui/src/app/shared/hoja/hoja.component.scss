@@ -22,11 +22,22 @@
    ───────────────────────────────────────────────────────────────────────── */
 .hoja {
   position: fixed;
-  inset: 0;
-  /* El teclado de iOS no encoge la ventana: se dibuja ENCIMA de ella. Sin esta
-     resta el pie queda detras del teclado y no hay forma de llegar a el, porque
-     la que se desplaza es el cuerpo, no la pantalla. Ver medirTeclado(). */
-  bottom: var(--teclado-alto, 0px);
+  top: 0;
+  left: 0;
+  right: 0;
+  /* El alto se pide por `dvh` y NO se deduce de `inset: 0`. En Safari de iOS el
+     bloque contenedor de un elemento fijo es el viewport GRANDE —el que habria
+     si las barras del navegador se escondieran—, asi que con `inset: 0` el
+     borde de abajo de la hoja cae DETRAS de la barra de Safari y se lleva el
+     pie con el. `100dvh` esta definido como el area visible de verdad.
+
+     100vh primero como respaldo: un navegador que no conozca `dvh` descarta la
+     declaracion entera y se quedaria sin alto.
+
+     La resta del teclado va aqui: iOS no encoge la ventana cuando lo abre, lo
+     dibuja ENCIMA. Ver medirTeclado(). */
+  height: 100vh;
+  height: calc(100dvh - var(--teclado-alto, 0px));
   margin-inline: auto;
   z-index: calc(var(--z-hoja) + 1);
   display: flex;
@@ -59,6 +70,7 @@
 @media (max-width: 820px) {
   .hoja.compacta {
     top: auto;
+    bottom: var(--teclado-alto, 0px);
     height: auto;
     max-height: calc(90vh - var(--teclado-alto, 0px));
     max-height: calc(90dvh - var(--teclado-alto, 0px));

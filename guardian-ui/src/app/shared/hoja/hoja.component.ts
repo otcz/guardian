@@ -86,14 +86,20 @@ export class HojaComponent implements OnChanges, OnDestroy {
   /** Cuanto del alto se lleva el teclado ahora mismo, en pixeles. */
   private alturaTeclado = 0;
 
+  /** Alto visible en el momento de abrir, con el teclado todavia cerrado. */
+  private alturaBase = 0;
+
   private readonly medirTeclado = (): void => {
     const vv = window.visualViewport;
     if (!vv) {
       return;
     }
-    // Lo que la ventana perdio por abajo. offsetTop entra en la cuenta porque
-    // iOS tambien desplaza la vista cuando el campo enfocado queda muy abajo.
-    const alto = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+    // Contra el alto que habia AL ABRIR, no contra window.innerHeight: en
+    // Safari de iOS innerHeight es el viewport grande —el que habria si las
+    // barras del navegador se escondieran—, asi que restarle vv.height daba
+    // ~90px de "teclado" con el teclado cerrado y la hoja vivia encogida por
+    // abajo. La diferencia contra la apertura si es el teclado.
+    const alto = Math.max(0, Math.round(this.alturaBase - vv.height));
 
     if (alto === this.alturaTeclado) {
       return;
@@ -164,6 +170,7 @@ export class HojaComponent implements OnChanges, OnDestroy {
     HojaComponent.abiertas++;
     this.contabilizada = true;
 
+    this.alturaBase = window.visualViewport?.height ?? 0;
     window.visualViewport?.addEventListener('resize', this.medirTeclado);
     window.visualViewport?.addEventListener('scroll', this.medirTeclado);
     this.medirTeclado();

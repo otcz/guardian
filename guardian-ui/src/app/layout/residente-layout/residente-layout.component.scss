@@ -156,7 +156,17 @@ main {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  /* SIN `-webkit-overflow-scrolling: touch`. En WebKit esa propiedad promueve
+     el elemento a su propia capa y lo convierte en BLOQUE CONTENEDOR de sus
+     descendientes `position: fixed`. Las hojas viven aca dentro, asi que en
+     iOS dejaban de anclarse a la pantalla y se anclaban a esta caja —la franja
+     entre la cabecera y la barra de abajo—, recortadas por ella y desplazandose
+     con la lista. Se veia el formulario por la mitad: sin su cabecera arriba y
+     sin su pie abajo. En Chrome no pasaba porque hace anos que ignora la
+     propiedad, y por eso el emulador del navegador daba el visto bueno.
+
+     No hace falta para nada: iOS trae desplazamiento con inercia por defecto
+     desde la version 13. */
   overscroll-behavior: contain;
   padding-bottom: var(--e-4);
   /* Ancla para lo que se posicione adentro, y SIN z-index. Eso ultimo es lo
