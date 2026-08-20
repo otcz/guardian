@@ -1,17 +1,25 @@
-<div class="velo" *ngIf="abierta" (click)="cerrar.emit()"
-     [style.z-index]="'calc(var(--z-hoja) + ' + nivel + ')'"></div>
+<!-- <dialog> abierto con showModal() y NO un <div> con z-index.
 
-<section class="hoja"
-         [class.compacta]="compacta"
-         *ngIf="abierta"
-         role="dialog"
-         aria-modal="true"
-         [attr.aria-label]="titulo"
-         [style.z-index]="'calc(var(--z-hoja) + ' + (nivel + 1) + ')'">
+     Un dialogo modal vive en la CAPA SUPERIOR del navegador: se dibuja encima
+     de toda la pagina y su marco de referencia es la pantalla, no su padre en
+     el arbol. Ningun ancestro puede posicionarlo, recortarlo ni taparlo — da
+     igual que tenga z-index, transform, overflow o -webkit-overflow-scrolling.
+
+     Se llego aca despues de arreglar tres causas distintas del mismo sintoma
+     —el boton Guardar fuera de la pantalla— y de que volviera una cuarta vez.
+     No es un ajuste mas: es quitar de raiz la familia entera de fallos. El
+     navegador tambien se encarga del foco y de Escape, que antes se sostenian
+     a mano. -->
+<dialog class="hoja"
+        [class.compacta]="compacta"
+        *ngIf="abierta"
+        [attr.aria-label]="titulo"
+        (close)="cerrar.emit()"
+        (click)="alClicFuera($event)">
+
   <!-- La cabecera se dibuja SIEMPRE, tenga título o no: acá vive la X, y
        colgarla del título dejaba sin forma de cerrar a las hojas que no lo
-       llevan —la del código del invitado, sin ir más lejos—. Sin título la
-       cabecera es solo la X y no separa nada. -->
+       llevan —la del código del invitado, sin ir más lejos—. -->
   <header class="encabezado" [class.sin-titulo]="!titulo">
     <div class="textos" *ngIf="titulo">
       <h2 class="titulo">{{ titulo }}</h2>
@@ -34,13 +42,8 @@
   </div>
 
   <!-- El pie es HERMANO del cuerpo, no hijo suyo: asi ocupa su propio sitio y
-       esta SIEMPRE a la vista, sin que haya que desplazarse para encontrarlo.
-       Se probo meterlo dentro del cuerpo para blindarlo contra el teclado de
-       iOS y fue peor: el boton dejaba de verse en una pantalla normal, que es
-       el caso de siempre. Contra el teclado defienden las otras dos capas —el
-       meta interactive-widget y la medida de visualViewport— que suben la hoja
-       entera en vez de esconder su pie. -->
+       esta SIEMPRE a la vista, sin que haya que desplazarse para encontrarlo. -->
   <div class="pie">
     <ng-content select="[pie]"></ng-content>
   </div>
-</section>
+</dialog>

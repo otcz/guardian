@@ -3,25 +3,22 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  HostListener,
   Input,
   OnChanges,
   OnDestroy,
   Output
 } from '@angular/core';
 
-/** Cada hoja sube dos niveles sobre la anterior: su velo y su superficie. */
-const SALTO_POR_HOJA = 2;
-
 /**
  * Hoja que sube desde abajo — el patrón nativo que en el móvil reemplaza al
  * diálogo centrado del escritorio.
  *
- * <p>Existe para sacar de la app las tres cosas que más delatan al navegador:
- * el <code>window.confirm</code> (que dibuja el dominio del sitio en su
- * encabezado, con la tipografía y los botones del navegador), los formularios
- * en acordeón que empujan el contenido, y los menús de utilidades apretados en
- * una esquina.</p>
+ * <p>Por dentro es un <code>&lt;dialog&gt;</code> abierto con
+ * <code>showModal()</code>, o sea que vive en la CAPA SUPERIOR del navegador:
+ * se dibuja encima de toda la página y su marco de referencia es la pantalla,
+ * no su padre en el árbol. Esa decisión no es un detalle de implementación —
+ * es la razón de que el botón de guardar no pueda volver a quedar tapado ni
+ * fuera de la vista, pase lo que pase con el CSS de quien la contenga.</p>
  *
  * <p>Uso: contenido por proyección normal y acciones en el slot
  * <code>[pie]</code>, que queda pegado abajo mientras el cuerpo se desplaza.</p>
@@ -42,17 +39,14 @@ export class HojaComponent implements OnChanges, OnDestroy {
 
   /**
    * Deja la hoja a la altura de su contenido en vez de ocupar la pantalla
-   * entera. Es para preguntas de si-o-no, como {@code gd-confirmar}: abrir una
-   * pantalla completa para decir "Cancelar / Eliminar" desorienta mas que
+   * entera. Es para preguntas de sí-o-no, como {@code gd-confirmar}: abrir una
+   * pantalla completa para decir "Cancelar / Eliminar" desorienta más que
    * ayuda. Todo lo que sea un FORMULARIO va a pantalla completa, que es donde
    * el pie tiene su sitio garantizado.
    */
   @Input({ transform: booleanAttribute }) compacta = false;
 
   @Output() cerrar = new EventEmitter<void>();
-
-  /** Nivel de apilamiento de ESTA hoja, para que dos superpuestas no empaten. */
-  nivel = 0;
 
   /**
    * Contador y NO un booleano: dos hojas pueden solaparse (ver el código de
@@ -71,22 +65,20 @@ export class HojaComponent implements OnChanges, OnDestroy {
 
   // ── El teclado de iOS ────────────────────────────────────────────────────
   //
-  // En Safari de iOS la ventana NO se encoge cuando sube el teclado: los
-  // elementos con position fixed siguen anclados al fondo de la pantalla
-  // completa, o sea DETRAS del teclado. Por eso el pie con Guardar quedaba
-  // tapado — y no habia forma de alcanzarlo, porque la hoja tampoco se
-  // desplaza: se desplaza su cuerpo.
+  // En Safari de iOS la ventana NO se encoge cuando sube el teclado: se dibuja
+  // ENCIMA. Sin medirlo, el pie con Guardar queda detrás — y no hay forma de
+  // alcanzarlo, porque la hoja tampoco se desplaza: se desplaza su cuerpo.
   //
-  // visualViewport es la unica API que sabe cuanto ocupa el teclado. Se mide y
-  // se publica en una variable CSS que la hoja usa para subirse y encogerse.
+  // visualViewport es la única API que sabe cuánto ocupa. Se mide y se publica
+  // en una variable CSS que la hoja usa para encogerse por abajo.
   //
   // No es exclusivo de iOS: Android tiene el mismo problema cuando el navegador
   // no redimensiona. Medir sirve en los dos.
 
-  /** Cuanto del alto se lleva el teclado ahora mismo, en pixeles. */
+  /** Cuánto del alto se lleva el teclado ahora mismo, en píxeles. */
   private alturaTeclado = 0;
 
-  /** Alto visible en el momento de abrir, con el teclado todavia cerrado. */
+  /** Alto visible en el momento de abrir, con el teclado todavía cerrado. */
   private alturaBase = 0;
 
   private readonly medirTeclado = (): void => {
@@ -94,11 +86,11 @@ export class HojaComponent implements OnChanges, OnDestroy {
     if (!vv) {
       return;
     }
-    // Contra el alto que habia AL ABRIR, no contra window.innerHeight: en
-    // Safari de iOS innerHeight es el viewport grande —el que habria si las
-    // barras del navegador se escondieran—, asi que restarle vv.height daba
-    // ~90px de "teclado" con el teclado cerrado y la hoja vivia encogida por
-    // abajo. La diferencia contra la apertura si es el teclado.
+    // Contra el alto que había AL ABRIR, no contra window.innerHeight: en
+    // Safari de iOS innerHeight es el viewport grande —el que habría si las
+    // barras del navegador se escondieran—, así que restarle vv.height daba
+    // ~90px de "teclado" con el teclado cerrado y la hoja vivía encogida por
+    // abajo. La diferencia contra la apertura sí es el teclado.
     const alto = Math.max(0, Math.round(this.alturaBase - vv.height));
 
     if (alto === this.alturaTeclado) {
@@ -122,40 +114,28 @@ export class HojaComponent implements OnChanges, OnDestroy {
     this.liberar();
   }
 
-  /** Escape cierra, como cualquier diálogo del sistema. */
-  @HostListener('document:keydown.escape')
-  alEscape(): void {
-    if (this.abierta) {
+  /**
+   * Cerrar tocando fuera, que en escritorio es lo que se espera de un diálogo.
+   * Se compara contra el RECTÁNGULO y no contra `event.target`: el relleno de
+   * la propia hoja también reporta al diálogo como destino, así que un clic en
+   * el margen de arriba la habría cerrado con el formulario a medio llenar.
+   *
+   * En el móvil no aplica: ahí la hoja ocupa la pantalla y no hay "fuera".
+   */
+  alClicFuera(evento: MouseEvent): void {
+    const caja = this.dialogo()?.getBoundingClientRect();
+    if (!caja) {
+      return;
+    }
+    const fuera = evento.clientX < caja.left || evento.clientX > caja.right
+               || evento.clientY < caja.top || evento.clientY > caja.bottom;
+    if (fuera) {
       this.cerrar.emit();
     }
   }
 
-  /**
-   * Se anuncia como aria-modal, así que el foco tiene que quedarse dentro:
-   * si no, el lector de pantalla y el tabulador se van al fondo que el
-   * usuario no puede ver.
-   */
-  @HostListener('document:keydown.tab', ['$event'])
-  alTabular(evento: KeyboardEvent): void {
-    if (!this.abierta) {
-      return;
-    }
-    const focoables = this.focoables();
-    if (focoables.length === 0) {
-      return;
-    }
-
-    const primero = focoables[0];
-    const ultimo = focoables[focoables.length - 1];
-    const activo = document.activeElement;
-
-    if (evento.shiftKey && (activo === primero || !this.host.nativeElement.contains(activo))) {
-      evento.preventDefault();
-      ultimo.focus();
-    } else if (!evento.shiftKey && activo === ultimo) {
-      evento.preventDefault();
-      primero.focus();
-    }
+  private dialogo(): HTMLDialogElement | null {
+    return this.host.nativeElement.querySelector('dialog');
   }
 
   private abrir(): void {
@@ -166,7 +146,6 @@ export class HojaComponent implements OnChanges, OnDestroy {
       HojaComponent.overflowPrevio = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
     }
-    this.nivel = HojaComponent.abiertas * SALTO_POR_HOJA;
     HojaComponent.abiertas++;
     this.contabilizada = true;
 
@@ -176,10 +155,34 @@ export class HojaComponent implements OnChanges, OnDestroy {
     this.medirTeclado();
 
     this.focoPrevio = document.activeElement as HTMLElement | null;
-    // Tras el render: el contenido proyectado todavía no existe en ngOnChanges.
-    // El primero SIN data-no-autofoco: la X del encabezado es focoable para el
-    // tabulador, pero abrir un formulario con el foco en "cerrar" no sirve.
+
+    // Tras el render: el *ngIf todavía no creó el <dialog> en ngOnChanges, y el
+    // contenido proyectado tampoco existe.
     setTimeout(() => {
+      const dlg = this.dialogo();
+      if (!dlg) {
+        return;
+      }
+      try {
+        if (typeof dlg.showModal !== 'function') {
+          throw new Error('sin dialogos nativos');
+        }
+        if (!dlg.open) {
+          // showModal y NO show: solo el modal entra en la capa superior, y solo
+          // el modal vuelve inerte al resto de la página. Es lo que hace que el
+          // foco y Escape funcionen sin código nuestro.
+          dlg.showModal();
+        }
+      } catch {
+        // Navegador sin diálogos nativos, o el elemento todavía no está en el
+        // documento. Queda visible por CSS, sin capa superior — el
+        // comportamiento que la aplicación tenía antes. Vale más una hoja sin
+        // capa superior que ninguna hoja.
+        dlg.setAttribute('open', '');
+      }
+
+      // El primero SIN data-no-autofoco: la X del encabezado es focoable para
+      // el tabulador, pero abrir un formulario con el foco en "cerrar" no sirve.
       const candidatos = this.focoables();
       const destino = candidatos.find(el => !el.hasAttribute('data-no-autofoco'));
       (destino ?? candidatos[0])?.focus();
@@ -192,6 +195,13 @@ export class HojaComponent implements OnChanges, OnDestroy {
     }
     HojaComponent.abiertas--;
     this.contabilizada = false;
+
+    // Antes de que el *ngIf lo saque del árbol: un diálogo que se elimina
+    // abierto deja el resto de la página inerte en algunos navegadores.
+    const dlg = this.dialogo();
+    if (dlg?.open) {
+      dlg.close();
+    }
 
     window.visualViewport?.removeEventListener('resize', this.medirTeclado);
     window.visualViewport?.removeEventListener('scroll', this.medirTeclado);

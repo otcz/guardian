@@ -1,82 +1,97 @@
-/* El z-index real lo pone el componente segun cuantas hojas haya encima:
-   con un valor fijo, el velo de la segunda quedaba DEBAJO de la primera. */
-.velo {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-hoja);
-  background: var(--overlay);
-  animation: gd-velo var(--dur-lenta) var(--curva-entrada);
-}
-
 /* ─────────────────────────────────────────────────────────────────────────
-   EN EL TELEFONO ESTO ES UNA PANTALLA COMPLETA, no un panel a media altura.
+   ESTO ES UN <dialog> MODAL, no un <div> flotante.
 
-   Registrar una persona o un vehiculo es trabajo de pantalla entera: hay foto,
-   ocho campos y dos botones. Mientras eso vivio en un panel que subia hasta la
-   mitad, el pie tenia que pelear su sitio con la barra de navegacion y con el
-   teclado, y el boton de guardar se perdia. Ocupando la pantalla completa el
-   problema deja de existir POR CONSTRUCCION: la caja mide exactamente lo que
-   mide la pantalla, la cabecera y el pie tienen su sitio reservado en la
-   columna y solo el cuerpo se desplaza. No queda forma de que un boton caiga
-   fuera de la vista.
+   Vive en la CAPA SUPERIOR del navegador: se dibuja encima de toda la página y
+   su marco de referencia es la pantalla, no su padre en el árbol. Por eso acá
+   ya no hay `z-index` que ajustar — no hay contra quién competir.
+
+   Lo que sí hay que hacer es DESARMAR el estilo que el navegador le pone por
+   defecto a un `dialog`: borde, relleno, colores del sistema, ancho y alto "a
+   la medida del contenido" y unos topes de tamaño que recortarían la hoja.
    ───────────────────────────────────────────────────────────────────────── */
+
+/* En el TELÉFONO la hoja ocupa la pantalla completa.
+
+   Registrar una persona o un vehículo es trabajo de pantalla entera: hay foto,
+   ocho campos y dos botones. Con la caja midiendo exactamente lo que mide la
+   pantalla, la cabecera y el pie tienen su sitio reservado en la columna y solo
+   el cuerpo se desplaza. Un botón no puede caer fuera de la vista. */
 .hoja {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  /* El alto se pide por `dvh` y NO se deduce de `inset: 0`. En Safari de iOS el
-     bloque contenedor de un elemento fijo es el viewport GRANDE —el que habria
-     si las barras del navegador se escondieran—, asi que con `inset: 0` el
-     borde de abajo de la hoja cae DETRAS de la barra de Safari y se lleva el
-     pie con el. `100dvh` esta definido como el area visible de verdad.
-
-     100vh primero como respaldo: un navegador que no conozca `dvh` descarta la
-     declaracion entera y se quedaria sin alto.
-
-     La resta del teclado va aqui: iOS no encoge la ventana cuando lo abre, lo
-     dibuja ENCIMA. Ver medirTeclado(). */
-  height: 100vh;
-  height: calc(100dvh - var(--teclado-alto, 0px));
-  margin-inline: auto;
-  z-index: calc(var(--z-hoja) + 1);
+  bottom: auto;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   width: 100%;
   /* Mismo ancho que el panel: en una tableta en vertical no se estira de borde
-     a borde, se queda en la columna de la aplicacion. */
+     a borde, se queda en la columna de la aplicación. */
   max-width: var(--ancho-panel);
-  /* La pantalla NO se desplaza: lo hace su cuerpo. Con el scroll aqui, el pie
-     quedaba ENCIMA del contenido y el ultimo campo asomaba por debajo de los
+  /* El alto se pide por `dvh` y NO se deduce de `inset: 0`. En Safari de iOS el
+     marco de un elemento fijo es el viewport GRANDE —el que habría si las
+     barras del navegador se escondieran—, así que con `inset: 0` el borde de
+     abajo caía detrás de la barra de Safari y se llevaba el pie con él.
+     `100dvh` está definido como el área visible de verdad.
+
+     100vh primero como respaldo: un navegador que no conozca `dvh` descarta la
+     declaración entera y la hoja se quedaría sin alto.
+
+     La resta del teclado va acá: iOS no encoge la ventana cuando lo abre, lo
+     dibuja ENCIMA. Ver medirTeclado() en el componente. */
+  height: 100vh;
+  height: calc(100dvh - var(--teclado-alto, 0px));
+  /* El navegador le pone un tope de alto a los diálogos. Sin anularlo, la hoja
+     no llegaría nunca al borde de la pantalla. */
+  max-height: none;
+  /* La hoja NO se desplaza: lo hace su cuerpo. Con el scroll acá, el pie
+     quedaba ENCIMA del contenido y el último campo asomaba por debajo de los
      botones. Cabecera fija, cuerpo que se desplaza y pie fijo. */
   overflow: hidden;
   /* El relleno lateral con nombre: el cuerpo lo necesita para meter la barra
-     de desplazamiento DENTRO de el y no a costa del contenido. */
+     de desplazamiento DENTRO de él y no a costa del contenido. */
   --hoja-relleno: var(--e-4);
   padding:
     calc(var(--seguro-arriba) + var(--e-3))
     var(--hoja-relleno)
     calc(var(--seguro-abajo) + var(--e-3));
+  color: inherit;
   background: var(--bg-surface);
+  border: none;
+  border-radius: 0;
   box-shadow: var(--shadow-flotante);
   animation: gd-entrada-abajo var(--dur-lenta) var(--curva-entrada);
 }
 
-/* La excepcion, y solo para preguntas de si-o-no: la hoja se queda a la
-   altura de su contenido. Abrir una pantalla completa para decir "Cancelar /
-   Eliminar" desorienta mas de lo que ayuda. Va dentro de un @media de maximo
-   ancho para que en escritorio no tenga nada que anular: alli el dialogo
-   centrado ya es lo mismo para las dos variantes. */
-@media (max-width: 820px) {
-  .hoja.compacta {
-    top: auto;
-    bottom: var(--teclado-alto, 0px);
-    height: auto;
-    max-height: calc(90vh - var(--teclado-alto, 0px));
-    max-height: calc(90dvh - var(--teclado-alto, 0px));
-    padding-top: var(--e-4);
-    border-radius: var(--r-xl) var(--r-xl) 0 0;
+/* El navegador esconde los diálogos cerrados con `dialog:not([open])`, pero esa
+   regla PIERDE contra el `display: flex` de arriba, que pesa más por llevar el
+   atributo de encapsulación de Angular. Sin esta línea, la hoja asomaría un
+   instante —ya dibujada, todavía sin abrir— cada vez que se monta. */
+.hoja:not([open]) {
+  display: none;
+}
+
+/* La animación de entrada arranca en `translateY(100%)`: en el primer fotograma
+   la hoja está una pantalla entera por debajo del borde. Si el navegador congela
+   la animación —pestaña en segundo plano, memoria baja— se queda ahí, invisible.
+   Con el movimiento reducido no hay primer fotograma que congelar: la hoja
+   aparece directamente en su sitio. */
+@media (prefers-reduced-motion: reduce) {
+  .hoja {
+    animation: none;
   }
+}
+
+/* El velo lo dibuja el navegador con ::backdrop, no un <div> nuestro. Un velo
+   propio volvería a depender del z-index y de los contextos de apilamiento de
+   quien contenga la hoja, que es justo el problema del que salimos.
+
+   Color literal y no un token: ::backdrop no hereda las variables del documento
+   en todas las versiones de Safari, y un velo sin color es un velo invisible.
+   Es un cristal oscuro, el mismo en tema claro y en tema oscuro. */
+.hoja::backdrop {
+  background: rgba(6, 14, 26, 0.55);
 }
 
 .encabezado {
@@ -91,8 +106,8 @@
     min-width: 0;
   }
 
-  /* Sin titulo la cabecera es solo la X: va a la derecha por si sola y no
-     tiene nada de que separarse. */
+  /* Sin título la cabecera es solo la X: va a la derecha por sí sola y no
+     tiene nada de qué separarse. */
   &.sin-titulo {
     justify-content: flex-end;
     margin-bottom: var(--e-2);
@@ -115,12 +130,12 @@
   white-space: nowrap;
 }
 
-/* Visible SIEMPRE, tambien en el telefono. Antes se escondia en movil porque
+/* Visible SIEMPRE, también en el teléfono. Antes se escondía en móvil porque
    una hoja a media altura se cerraba tocando fuera; una pantalla completa no
-   tiene "fuera", asi que sin esta X no habria salida.
+   tiene "fuera", así que sin esta X no habría salida.
 
    Con fondo y borde desde el reposo, no transparente hasta el hover: en una
-   pantalla con poco contenido una X sin ningun borde se lee como un caracter
+   pantalla con poco contenido una X sin ningún borde se lee como un carácter
    suelto, no como un control. */
 .cerrar {
   display: grid;
@@ -144,13 +159,13 @@
   }
 }
 
-/* El cuerpo se estira hasta el borde de la pantalla y devuelve el relleno por
-   dentro. Asi la barra de desplazamiento se dibuja en esa franja y NO le quita
-   ancho al contenido: sin esto, la barra empujaba los campos unos pixeles y el
+/* El cuerpo se estira hasta el borde de la hoja y devuelve el relleno por
+   dentro. Así la barra de desplazamiento se dibuja en esa franja y NO le quita
+   ancho al contenido: sin esto, la barra empujaba los campos unos píxeles y el
    pie se quedaba quieto — dos bordes derechos en un formulario que tiene uno. */
 .cuerpo {
   /* Cuando iOS desplaza hasta el campo enfocado lo deja pegado al borde de
-     abajo. Con este relleno queda holgura debajo, asi que el campo se ve
+     abajo. Con este relleno queda holgura debajo, así que el campo se ve
      completo y no aparece medio tapado por el pie. */
   scroll-padding-bottom: 6rem;
   flex: 1 1 auto;
@@ -175,14 +190,14 @@
   }
 }
 
-/* El pie es HERMANO del cuerpo y ocupa su propio sitio en la columna: el boton
-   de guardar esta SIEMPRE a la vista, sin desplazar y sin buscarlo. La linea de
-   arriba lo separa del ultimo campo cuando el cuerpo va desplazado. */
+/* El pie es HERMANO del cuerpo y ocupa su propio sitio en la columna: el botón
+   de guardar está SIEMPRE a la vista, sin desplazar y sin buscarlo. La línea de
+   arriba lo separa del último campo cuando el cuerpo va desplazado. */
 .pie {
   display: flex;
   /* Envuelve en vez de desbordarse. "Cancelar" y "Enviar solicitud" no caben
      lado a lado en una pantalla de 320px, y sin esto el segundo se sale por la
-     derecha — invisible e intocable. Envolviendo pasa a la linea de abajo. */
+     derecha — invisible e intocable. Envolviendo pasa a la línea de abajo. */
   flex-wrap: wrap;
   gap: var(--e-2);
   justify-content: flex-end;
@@ -197,20 +212,37 @@
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────────────
-   Escritorio: dialogo centrado, no pantalla completa.
+/* La excepción, y solo para preguntas de sí-o-no: la hoja se queda a la altura
+   de su contenido. Abrir una pantalla completa para decir "Cancelar / Eliminar"
+   desorienta más de lo que ayuda. Va dentro de un @media de máximo ancho para
+   que en escritorio no tenga nada que anular: allí el diálogo centrado ya es lo
+   mismo para las dos variantes. */
+@media (max-width: 820px) {
+  .hoja.compacta {
+    top: auto;
+    bottom: var(--teclado-alto, 0px);
+    height: auto;
+    max-height: calc(90vh - var(--teclado-alto, 0px));
+    max-height: calc(90dvh - var(--teclado-alto, 0px));
+    padding-top: var(--e-4);
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+  }
+}
 
-   Este @media es del CASCARON, no de un layout interno — la misma excepcion
+/* ─────────────────────────────────────────────────────────────────────────
+   Escritorio: diálogo centrado, no pantalla completa.
+
+   Este @media es del CASCARÓN, no de un layout interno — la misma excepción
    que ya hace admin-layout. Ocupar un monitor de 27 pulgadas entero para pedir
-   ocho campos es tan malo como no caber en un telefono.
+   ocho campos es tan malo como no caber en un teléfono.
    ───────────────────────────────────────────────────────────────────────── */
 @media (min-width: 821px) {
   .hoja {
-    /* Centrado por margin auto entre los CUATRO insets: si `bottom` se queda en
-       `auto` los margenes automaticos valen cero y el dialogo se pega arriba en
-       vez de quedar en el medio. Por eso `bottom: 0` explicito, que ademas
-       anula la resta del teclado — en escritorio no hay teclado virtual. */
-    inset: 0;
+    /* Centrado por `margin: auto` entre los CUATRO bordes. Si `bottom` se queda
+       en `auto` los márgenes automáticos valen cero y el diálogo se pega
+       arriba; por eso `bottom: 0` explícito, que además anula la resta del
+       teclado — en escritorio no hay teclado virtual. */
+    top: 0;
     bottom: 0;
     margin: auto;
     height: fit-content;
@@ -228,8 +260,8 @@
   }
 }
 
-/* Escala apenas perceptible: da la sensacion de que el dialogo "aparece
-   encima" sin el rebote de un modal animado de mas. */
+/* Escala apenas perceptible: da la sensación de que el diálogo "aparece
+   encima" sin el rebote de un modal animado de más. */
 @keyframes gd-entrada-modal {
   from {
     opacity: 0;
