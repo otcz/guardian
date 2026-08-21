@@ -63,41 +63,42 @@ export class HojaComponent implements OnChanges, OnDestroy {
   /** A dónde devolver el foco al cerrar: al control que abrió la hoja. */
   private focoPrevio: HTMLElement | null = null;
 
-  // ── El teclado de iOS ────────────────────────────────────────────────────
+  // ── El área visible de verdad ────────────────────────────────────────────
   //
   // En Safari de iOS la ventana NO se encoge cuando sube el teclado: se dibuja
-  // ENCIMA. Sin medirlo, el pie con Guardar queda detrás — y no hay forma de
-  // alcanzarlo, porque la hoja tampoco se desplaza: se desplaza su cuerpo.
+  // ENCIMA. Y cuando el campo enfocado queda bajo, iOS ademas DESPLAZA la vista
+  // — el borde visible ya no arranca en el 0 del marco de los elementos fijos.
+  // Cualquier formula que "deduzca" el teclado a partir de un alto capturado al
+  // abrir se desactualiza al rotar, al esconderse las barras del navegador o si
+  // la hoja se abre con el teclado ya arriba. Todas esas variantes ya mordieron.
   //
-  // visualViewport es la única API que sabe cuánto ocupa. Se mide y se publica
-  // en una variable CSS que la hoja usa para encogerse por abajo.
-  //
-  // No es exclusivo de iOS: Android tiene el mismo problema cuando el navegador
-  // no redimensiona. Medir sirve en los dos.
+  // Asi que no se deduce nada: se publica el visual viewport TAL CUAL lo
+  // reporta el navegador — tope, alto y fondo — y la hoja se ancla a esa area.
+  // Si el navegador mueve el area visible, la hoja la sigue; no hay estado
+  // propio que pueda quedarse viejo.
 
-  /** Cuánto del alto se lleva el teclado ahora mismo, en píxeles. */
-  private alturaTeclado = 0;
+  /** Ultimo valor publicado, para no tocar el DOM si nada cambio. */
+  private vistaPublicada = '';
 
-  /** Alto visible en el momento de abrir, con el teclado todavía cerrado. */
-  private alturaBase = 0;
-
-  private readonly medirTeclado = (): void => {
+  private readonly publicarVista = (): void => {
     const vv = window.visualViewport;
-    if (!vv) {
-      return;
-    }
-    // Contra el alto que había AL ABRIR, no contra window.innerHeight: en
-    // Safari de iOS innerHeight es el viewport grande —el que habría si las
-    // barras del navegador se escondieran—, así que restarle vv.height daba
-    // ~90px de "teclado" con el teclado cerrado y la hoja vivía encogida por
-    // abajo. La diferencia contra la apertura sí es el teclado.
-    const alto = Math.max(0, Math.round(this.alturaBase - vv.height));
+    // Sin la API, el area visible es la ventana entera: top 0, fondo 0.
+    const top = vv ? Math.max(0, Math.round(vv.offsetTop)) : 0;
+    const alto = vv ? Math.round(vv.height) : window.innerHeight;
+    const abajo = vv
+        ? Math.max(0, Math.round(window.innerHeight - vv.offsetTop - vv.height))
+        : 0;
 
-    if (alto === this.alturaTeclado) {
+    const firma = top + '/' + alto + '/' + abajo;
+    if (firma === this.vistaPublicada) {
       return;
     }
-    this.alturaTeclado = alto;
-    document.documentElement.style.setProperty('--teclado-alto', alto + 'px');
+    this.vistaPublicada = firma;
+
+    const raiz = document.documentElement.style;
+    raiz.setProperty('--vv-top', top + 'px');
+    raiz.setProperty('--vv-alto', alto + 'px');
+    raiz.setProperty('--vv-abajo', abajo + 'px');
   };
 
   constructor(private readonly host: ElementRef<HTMLElement>) {}
@@ -149,10 +150,12 @@ export class HojaComponent implements OnChanges, OnDestroy {
     HojaComponent.abiertas++;
     this.contabilizada = true;
 
-    this.alturaBase = window.visualViewport?.height ?? 0;
-    window.visualViewport?.addEventListener('resize', this.medirTeclado);
-    window.visualViewport?.addEventListener('scroll', this.medirTeclado);
-    this.medirTeclado();
+    window.visualViewport?.addEventListener('resize', this.publicarVista);
+    window.visualViewport?.addEventListener('scroll', this.publicarVista);
+    // Sincrono, ANTES de que el *ngIf pinte el dialogo: las variables ya estan
+    // en su sitio en el primer fotograma y la hoja nunca mide con un valor
+    // viejo de otra apertura.
+    this.publicarVista();
 
     this.focoPrevio = document.activeElement as HTMLElement | null;
 
@@ -203,15 +206,18 @@ export class HojaComponent implements OnChanges, OnDestroy {
       dlg.close();
     }
 
-    window.visualViewport?.removeEventListener('resize', this.medirTeclado);
-    window.visualViewport?.removeEventListener('scroll', this.medirTeclado);
+    window.visualViewport?.removeEventListener('resize', this.publicarVista);
+    window.visualViewport?.removeEventListener('scroll', this.publicarVista);
 
     if (HojaComponent.abiertas === 0) {
       document.body.style.overflow = HojaComponent.overflowPrevio;
       // Se limpia solo cuando NO queda ninguna hoja: con dos superpuestas, la
       // que se cierra no puede borrarle la medida a la que sigue abierta.
-      document.documentElement.style.removeProperty('--teclado-alto');
-      this.alturaTeclado = 0;
+      const raiz = document.documentElement.style;
+      raiz.removeProperty('--vv-top');
+      raiz.removeProperty('--vv-alto');
+      raiz.removeProperty('--vv-abajo');
+      this.vistaPublicada = '';
     }
 
     this.focoPrevio?.focus();

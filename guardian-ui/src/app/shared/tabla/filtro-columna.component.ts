@@ -17,6 +17,11 @@ import { FiltroTabla } from './filtro-tabla';
  * moto, "Moto" no aparece. Un menú con opciones que no filtran nada obliga a
  * probarlas para descubrir que están vacías.</p>
  */
+/** El ancho del menu en el SCSS; el TS lo necesita para saber si cabe. */
+const ANCHO_MENU = 230;
+/** Aire minimo contra el borde de la ventana. */
+const MARGEN_BORDE = 8;
+
 @Component({
   selector: 'gd-filtro-columna',
   templateUrl: './filtro-columna.component.html',
@@ -54,6 +59,15 @@ export class FiltroColumnaComponent {
   @Output() cambio = new EventEmitter<void>();
 
   abierto = false;
+
+  /**
+   * true cuando el menu debe crecer hacia la IZQUIERDA. El menu mide 230px
+   * desde el borde izquierdo de la cabecera; en la ultima columna de una
+   * ventana justa eso se sale por la derecha, y como la pagina recorta el
+   * desborde lateral, las opciones quedarian cortadas e inalcanzables. Se mide
+   * al abrir, cuando ya se sabe donde quedo la cabecera.
+   */
+  volteado = false;
   busqueda = '';
 
   constructor(private readonly host: ElementRef<HTMLElement>) {}
@@ -82,6 +96,10 @@ export class FiltroColumnaComponent {
 
   alternarMenu(): void {
     this.abierto = !this.abierto;
+    if (this.abierto) {
+      const caja = this.host.nativeElement.getBoundingClientRect();
+      this.volteado = caja.left + ANCHO_MENU > window.innerWidth - MARGEN_BORDE;
+    }
     this.busqueda = '';
   }
 

@@ -237,6 +237,15 @@
    LA PÁGINA ENTERA — no solo los botones.
    --------------------------------------------------------------------------- */
 @media (max-width: 820px) {
+  /* La tabla de rechazos de la carga masiva no tiene modo tarjetas: sus filas
+     son pares fila→motivo y apiladas perderian la correspondencia. En angosto
+     se desliza de lado dentro de su propia caja, nunca corta la pagina. */
+  .rechazos {
+    display: block;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+
   .encabezado {
     .masiva {
       flex-wrap: wrap;

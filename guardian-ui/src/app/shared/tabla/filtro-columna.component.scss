@@ -40,7 +40,11 @@
   top: calc(100% + 4px);
   left: 0;
   z-index: var(--z-menu, 40);
+  /* Si cambia, cambiar tambien ANCHO_MENU en el componente. */
   width: 230px;
+  /* Nunca mas ancho que la ventana: en una pantalla muy angosta el ancho fijo
+     ganaria y el borde derecho quedaria cortado. */
+  max-width: calc(100vw - 16px);
   padding: var(--e-2);
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
@@ -50,6 +54,12 @@
   font-weight: 400;
   letter-spacing: normal;
   text-transform: none;
+
+  /* Crece hacia la izquierda cuando a la derecha no hay sitio. */
+  &.volteado {
+    left: auto;
+    right: 0;
+  }
 }
 
 .buscar {

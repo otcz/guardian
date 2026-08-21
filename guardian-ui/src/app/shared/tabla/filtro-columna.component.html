@@ -10,7 +10,7 @@
   <span class="cuantos" *ngIf="cuantos">{{ cuantos }}</span>
 </button>
 
-<div class="menu" *ngIf="abierto">
+<div class="menu" [class.volteado]="volteado" *ngIf="abierto">
   <!-- Buscador dentro del menú: una columna "Casa" de un conjunto real trae
        cientos de valores, y sin él hay que rodarlos todos. -->
   <div class="buscar">
